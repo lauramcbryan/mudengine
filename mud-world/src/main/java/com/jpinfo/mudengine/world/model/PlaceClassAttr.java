@@ -5,14 +5,14 @@ import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
-import com.jpinfo.mudengine.world.model.pk.TerrainCategoryAttrPK;
+import com.jpinfo.mudengine.world.model.pk.PlaceClassAttrPK;
 
 @Entity
-@Table(name="MUD_TERRAIN_CATG_ATTR")
-public class TerrainCategoryAttr {
+@Table(name="MUD_PLACE_CLASS_ATTR")
+public class PlaceClassAttr {
 
 	@EmbeddedId
-	private TerrainCategoryAttrPK pk;
+	private PlaceClassAttrPK id;
 	
 	@Column(name="ATTR_OFFSET")
 	private Float offset;
@@ -24,4 +24,13 @@ public class TerrainCategoryAttr {
 	public void setOffset(Float offset) {
 		this.offset = offset;
 	}
+
+	public PlaceClassAttrPK getId() {
+		return id;
+	}
+
+	public void setId(PlaceClassAttrPK id) {
+		this.id = id;
+	}
+	
 }

@@ -6,29 +6,29 @@ import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
 @Embeddable
-public class TerrainCategoryAttrPK implements Serializable {
+public class PlaceClassAttrPK implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	@Column(name="CATEGORY_CODE")
-	private Integer categoryCode;
+	@Column(name="PLACE_CLASS_CODE")
+	private String placeClassCode;
 
 	@Column(name="ATTR_CODE")
-	private Integer attrCode;
+	private String attrCode;
 
-	public Integer getCategoryCode() {
-		return categoryCode;
+	public String getPlaceClassCode() {
+		return placeClassCode;
 	}
 
-	public void setCategory(Integer categoryCode) {
-		this.categoryCode = categoryCode;
+	public void setPlaceClassCode(String placeClassCode) {
+		this.placeClassCode = placeClassCode;
 	}
 
-	public Integer getAttrCode() {
+	public String getAttrCode() {
 		return attrCode;
 	}
 
-	public void setAttrCode(Integer attrCode) {
+	public void setAttrCode(String attrCode) {
 		this.attrCode = attrCode;
 	}
 
@@ -37,7 +37,7 @@ public class TerrainCategoryAttrPK implements Serializable {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((attrCode == null) ? 0 : attrCode.hashCode());
-		result = prime * result + ((categoryCode == null) ? 0 : categoryCode.hashCode());
+		result = prime * result + ((placeClassCode == null) ? 0 : placeClassCode.hashCode());
 		return result;
 	}
 
@@ -49,16 +49,16 @@ public class TerrainCategoryAttrPK implements Serializable {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		TerrainCategoryAttrPK other = (TerrainCategoryAttrPK) obj;
+		PlaceClassAttrPK other = (PlaceClassAttrPK) obj;
 		if (attrCode == null) {
 			if (other.attrCode != null)
 				return false;
 		} else if (!attrCode.equals(other.attrCode))
 			return false;
-		if (categoryCode == null) {
-			if (other.categoryCode != null)
+		if (placeClassCode == null) {
+			if (other.placeClassCode != null)
 				return false;
-		} else if (!categoryCode.equals(other.categoryCode))
+		} else if (!placeClassCode.equals(other.placeClassCode))
 			return false;
 		return true;
 	}

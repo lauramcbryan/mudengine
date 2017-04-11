@@ -12,16 +12,9 @@ public class Place {
 	@Column(name="PLACE_CODE")
 	private Integer placeCode;
 
-	@Column
-	private String name;
-	
-
-	@Column
-	private String description;
-	
 	@ManyToOne
-	@JoinColumn(name="TERRAIN_CODE", referencedColumnName="TERRAIN_CODE", insertable=false, updatable=false)
-	private Terrain terrain;
+	@JoinColumn(name="PLACE_CLASS_CODE", referencedColumnName="PLACE_CLASS_CODE", insertable=false, updatable=false)
+	private PlaceClass placeClass;
 	
 	@OneToMany(mappedBy="pk.placeCode", fetch=FetchType.EAGER)
 	private Set<PlaceBeings> beings;
@@ -32,29 +25,12 @@ public class Place {
 	@OneToMany(mappedBy="pk.placeCode", fetch=FetchType.EAGER)
 	private Set<PlaceExits> exits;
 
-	
-	public String getName() {
-		return name;
+	public PlaceClass getPlaceClass() {
+		return placeClass;
 	}
 
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-	public Terrain getTerrain() {
-		return terrain;
-	}
-
-	public void setTerrain(Terrain terrain) {
-		this.terrain = terrain;
+	public void setPlaceClass(PlaceClass placeClass) {
+		this.placeClass = placeClass;
 	}
 
 	public Set<PlaceBeings> getBeings() {

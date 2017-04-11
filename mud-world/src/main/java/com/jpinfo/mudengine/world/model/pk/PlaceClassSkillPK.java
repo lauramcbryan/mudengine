@@ -6,29 +6,29 @@ import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
 @Embeddable
-public class TerrainCategorySkillPK implements Serializable {
+public class PlaceClassSkillPK implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	@Column(name="CATEGORY_CODE")
-	private Integer categoryCode;
+	@Column(name="PLACE_CLASS_CODE")
+	private String placeClassCode;
 
 	@Column(name="SKILL_CODE")
-	private Integer skillCode;
+	private String skillCode;
 
-	public Integer getCategoryCode() {
-		return categoryCode;
+	public String getPlaceClassCode() {
+		return placeClassCode;
 	}
 
-	public void setCategory(Integer categoryCode) {
-		this.categoryCode = categoryCode;
+	public void setPlaceClassCode(String placeClassCode) {
+		this.placeClassCode = placeClassCode;
 	}
 
-	public Integer getSkillCode() {
+	public String getSkillCode() {
 		return skillCode;
 	}
 
-	public void setSkillCode(Integer skillCode) {
+	public void setSkillCode(String skillCode) {
 		this.skillCode = skillCode;
 	}
 
@@ -36,7 +36,7 @@ public class TerrainCategorySkillPK implements Serializable {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((categoryCode == null) ? 0 : categoryCode.hashCode());
+		result = prime * result + ((placeClassCode == null) ? 0 : placeClassCode.hashCode());
 		result = prime * result + ((skillCode == null) ? 0 : skillCode.hashCode());
 		return result;
 	}
@@ -49,11 +49,11 @@ public class TerrainCategorySkillPK implements Serializable {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		TerrainCategorySkillPK other = (TerrainCategorySkillPK) obj;
-		if (categoryCode == null) {
-			if (other.categoryCode != null)
+		PlaceClassSkillPK other = (PlaceClassSkillPK) obj;
+		if (placeClassCode == null) {
+			if (other.placeClassCode != null)
 				return false;
-		} else if (!categoryCode.equals(other.categoryCode))
+		} else if (!placeClassCode.equals(other.placeClassCode))
 			return false;
 		if (skillCode == null) {
 			if (other.skillCode != null)
@@ -62,7 +62,6 @@ public class TerrainCategorySkillPK implements Serializable {
 			return false;
 		return true;
 	}
-	
 	
 	
 }

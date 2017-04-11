@@ -19,6 +19,12 @@ public class PlaceExits {
 	
 	@Column
 	private boolean visible;
+	
+	@Column
+	private boolean locked;
+	
+	@Column	
+	private boolean lockable;
 
 	@Column
 	private Integer targetPlaceCode;
@@ -63,7 +69,20 @@ public class PlaceExits {
 	public void setTargetPlaceCode(Integer targetPlaceCode) {
 		this.targetPlaceCode = targetPlaceCode;
 	}
-	
-	
 
+	public boolean isLocked() {
+		return locked;
+	}
+
+	public void setLocked(boolean locked) {
+		this.locked = locked;
+	}
+
+	public boolean isLockable() {
+		return lockable;
+	}
+
+	public void setLockable(boolean lockable) {
+		this.lockable = lockable;
+	}
 }

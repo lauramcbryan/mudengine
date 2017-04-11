@@ -11,7 +11,7 @@ import com.jpinfo.mudengine.world.model.pk.BeingClassSkillPK;
  * 
  */
 @Entity
-@Table(name="mud_being_class_skills")
+@Table(name="mud_being_class_skill")
 public class BeingClassSkill implements Serializable {
 	private static final long serialVersionUID = 1L;
 
