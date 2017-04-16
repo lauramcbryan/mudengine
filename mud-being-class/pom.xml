@@ -4,12 +4,12 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.jpinfo.mudengine</groupId>
-	<artifactId>mud-world</artifactId>
+	<artifactId>mud-being-class</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>war</packaging>
 
-	<name>mud-world</name>
-	<description>Project for World Service on MUD engine</description>
+	<name>mud-being-class</name>
+	<description>Being Metadata service for MUD Engine</description>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
@@ -55,28 +55,17 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>com.jpinfo.mudengine</groupId>
+			<artifactId>mud-common</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-core</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-entitymanager</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.jvnet.ws.wadl</groupId>
-			<artifactId>wadl-core</artifactId>
-			<version>1.1.6</version>
-		</dependency>
-		<dependency>
-			<groupId>org.jvnet.ws.wadl</groupId>
-			<artifactId>wadl-client-plugin</artifactId>
-			<version>1.1.6</version>
-			<type>maven-plugin</type>
-		</dependency>
-		<dependency>
-			<groupId>com.jpinfo.mudengine</groupId>
-			<artifactId>mud-common</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 

@@ -8,7 +8,3 @@ DROP TABLE mudengine_world.MUD_PLACE;
 DROP TABLE mudengine_world.MUD_PLACE_CLASS_SKILL;
 DROP TABLE mudengine_world.MUD_PLACE_CLASS_ATTR;
 DROP TABLE mudengine_world.MUD_PLACE_CLASS;
-
-DROP TABLE mudengine_world.MUD_BEING_CLASS_SKILL;
-DROP TABLE mudengine_world.MUD_BEING_CLASS_ATTR;
-DROP TABLE mudengine_world.MUD_BEING_CLASS;

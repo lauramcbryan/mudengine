@@ -6,8 +6,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.jpinfo.mudengine.world.model.PlaceClass;
+import com.jpinfo.mudengine.common.placeClass.PlaceClass;
+import com.jpinfo.mudengine.world.model.MudPlaceClass;
 import com.jpinfo.mudengine.world.repository.PlaceClassRepository;
+import com.jpinfo.mudengine.world.util.WorldHelper;
 
 @RestController
 @RequestMapping("/place/class")
@@ -19,8 +21,11 @@ public class PlaceClassController {
 	@RequestMapping(method=RequestMethod.GET, value="/{placeClass}")
 	public PlaceClass getPlaceClass(@PathVariable String placeClass) {
 		
-		PlaceClass found = repository.findOne(placeClass);
+		MudPlaceClass found = repository.findOne(placeClass);
 		
-		return found;
+		PlaceClass result = WorldHelper.buildPlaceClass(found);
+		
+		
+		return result;
 	}
 }

@@ -7,8 +7,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.jpinfo.mudengine.world.model.Place;
+import com.jpinfo.mudengine.common.place.Place;
+import com.jpinfo.mudengine.world.model.MudPlace;
 import com.jpinfo.mudengine.world.repository.PlaceRepository;
+import com.jpinfo.mudengine.world.util.WorldHelper;
 
 @RestController
 @RequestMapping("/place")
@@ -20,26 +22,28 @@ public class PlaceController {
 	@RequestMapping(method=RequestMethod.GET, value="/{id}")
 	public Place getPlace(@PathVariable Integer id) {
 		
-		Place found = placeRepository.findOne(id);
+		MudPlace found = placeRepository.findOne(id);
 		
-		return found;
+		Place result = WorldHelper.buildPlace(found);
+		
+		return result;
 	}
 	
 	@RequestMapping(method=RequestMethod.POST, value="/{id}")
 	public void updatePlace(@PathVariable Integer id, @RequestBody Place place) {
 		
-		Place found = placeRepository.findOne(id);
+		MudPlace found = placeRepository.findOne(id);
 
 		// O que se permite atualizar:
 
 		// beings		
-		found.setBeings(place.getBeings());
+		//found.setBeings(place.getBeings());
 		
 		// items		
-		found.setItems(place.getItems());
+		//found.setItems(place.getItems());
 		
 		// exits		
-		found.setExits(place.getExits());
+		//found.setExits(place.getExits());
 		
 		placeRepository.save(found);
 		
