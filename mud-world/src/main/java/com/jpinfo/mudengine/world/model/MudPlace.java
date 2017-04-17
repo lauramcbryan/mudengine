@@ -24,6 +24,20 @@ public class MudPlace {
 	
 	@OneToMany(mappedBy="pk.placeCode", fetch=FetchType.EAGER)
 	private Set<MudPlaceExits> exits;
+	
+	public MudPlace() {
+		this.beings = new HashSet<MudPlaceBeings>();
+		this.items = new HashSet<MudPlaceItems>();
+		this.exits = new HashSet<MudPlaceExits>();
+	}
+
+	public Integer getPlaceCode() {
+		return placeCode;
+	}
+
+	public void setPlaceCode(Integer placeCode) {
+		this.placeCode = placeCode;
+	}
 
 	public MudPlaceClass getPlaceClass() {
 		return placeClass;

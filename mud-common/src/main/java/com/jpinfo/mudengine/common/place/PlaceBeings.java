@@ -4,6 +4,12 @@ package com.jpinfo.mudengine.common.place;
 
 public class PlaceBeings {
 
+	private Integer beingCode;
+	
+	private String name;
+	
+	private Integer qtty;
+
 	public Integer getBeingCode() {
 		return beingCode;
 	}
@@ -26,12 +32,5 @@ public class PlaceBeings {
 
 	public void setQtty(Integer qtty) {
 		this.qtty = qtty;
-	}
-
-	private Integer beingCode;
-	
-	private String name;
-	
-	private Integer qtty;
-	
+	}	
 }

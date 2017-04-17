@@ -10,15 +10,15 @@ public class Place {
 
 	private PlaceClass placeClass;
 	
-	private Map<Integer, PlaceBeings> beings;
+	private Set<PlaceBeings> beings;
 	
-	private Map<Integer, PlaceItems> items;
+	private Set<PlaceItems> items;
 	
 	private Map<String, PlaceExits> exits;
 	
 	public Place() {
-		this.beings = new HashMap<Integer, PlaceBeings>();
-		this.items = new HashMap<Integer, PlaceItems>();
+		this.beings = new HashSet<PlaceBeings>();
+		this.items = new HashSet<PlaceItems>();
 		this.exits = new HashMap<String, PlaceExits>();
 	}
 	
@@ -39,27 +39,33 @@ public class Place {
 		this.placeClass = placeClass;
 	}
 
-	public Map<Integer, PlaceBeings> getBeings() {
-		return beings;
-	}
-
-	public void setBeings(Map<Integer, PlaceBeings> beings) {
-		this.beings = beings;
-	}
-
-	public Map<Integer, PlaceItems> getItems() {
-		return items;
-	}
-
-	public void setItems(Map<Integer, PlaceItems> items) {
-		this.items = items;
-	}
-
 	public Map<String, PlaceExits> getExits() {
 		return exits;
 	}
 
 	public void setExits(Map<String, PlaceExits> exits) {
 		this.exits = exits;
-	}	
+	}
+
+
+	public Set<PlaceBeings> getBeings() {
+		return beings;
+	}
+
+
+	public void setBeings(Set<PlaceBeings> beings) {
+		this.beings = beings;
+	}
+
+
+	public Set<PlaceItems> getItems() {
+		return items;
+	}
+
+
+	public void setItems(Set<PlaceItems> items) {
+		this.items = items;
+	}
+	
+	
 }
