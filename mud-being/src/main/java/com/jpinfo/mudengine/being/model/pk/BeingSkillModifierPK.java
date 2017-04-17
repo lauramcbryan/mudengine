@@ -3,8 +3,6 @@ package com.jpinfo.mudengine.being.model.pk;
 import java.io.Serializable;
 import javax.persistence.*;
 
-import com.jpinfo.mudengine.being.model.Skill;
-
 /**
  * The primary key class for the mud_being_skills database table.
  * 
