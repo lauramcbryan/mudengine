@@ -11,7 +11,7 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name="mud_skill_category")
-public class SkillCategory implements Serializable {
+public class MudSkillCategory implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
@@ -25,7 +25,7 @@ public class SkillCategory implements Serializable {
 	@Column(name="attr_code_based")
 	private String attrBasedOn;
 
-	public SkillCategory() {
+	public MudSkillCategory() {
 	}
 
 	public String getCategoryCode() {

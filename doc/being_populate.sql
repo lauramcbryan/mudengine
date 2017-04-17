@@ -21,7 +21,7 @@ INSERT INTO mudengine_being.mud_skill(skill_code, category_code, name, descripti
 
 INSERT INTO mudengine_being.mud_player(player_id, login, password, name) VALUES (1, 'silverheart', 'password', 'James McBryan');
 
-INSERT INTO mudengine_being.mud_being(being_code, being_class, player_id, last_world) VALUES (1, 'HUMAN', 1, 'aforgotten');
+INSERT INTO mudengine_being.mud_being(being_code, being_class, name, player_id, current_place, current_world) VALUES (1, 'HUMAN', 'James McBryan', 1, 1, 'aforgotten');
 
 INSERT INTO mudengine_being.mud_being_attr(being_code, attr_code, attr_value) VALUES (1, 'STR', 15);
 INSERT INTO mudengine_being.mud_being_attr(being_code, attr_code, attr_value) VALUES (1, 'DEX', 6);

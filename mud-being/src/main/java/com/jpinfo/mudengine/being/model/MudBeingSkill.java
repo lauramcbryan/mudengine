@@ -12,7 +12,7 @@ import com.jpinfo.mudengine.being.model.pk.MudBeingSkillPK;
  */
 @Entity
 @Table(name="mud_being_skill")
-public class BeingSkill implements Serializable {
+public class MudBeingSkill implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@EmbeddedId
@@ -21,7 +21,7 @@ public class BeingSkill implements Serializable {
 	@Column(name="skill_value")
 	private float skillValue;
 
-	public BeingSkill() {
+	public MudBeingSkill() {
 	}
 
 	public MudBeingSkillPK getId() {

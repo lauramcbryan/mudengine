@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.jpinfo.mudengine.being.model.Player;
+import com.jpinfo.mudengine.being.model.MudPlayer;
 import com.jpinfo.mudengine.being.repository.PlayerRepository;
 
 @RestController
@@ -17,9 +17,9 @@ public class PlayerController {
 	private PlayerRepository repository;
 
 	@RequestMapping(method=RequestMethod.GET, value="{id}")
-	public Player getPlayer(@PathVariable Integer id) {
+	public MudPlayer getPlayer(@PathVariable Integer id) {
 		
-		Player found = repository.findOne(id);
+		MudPlayer found = repository.findOne(id);
 		
 		return found;
 		

@@ -2,9 +2,10 @@ package com.jpinfo.mudengine.common.place;
 
 import java.util.*;
 
+import com.jpinfo.mudengine.common.interfaces.ActionTarget;
 import com.jpinfo.mudengine.common.placeClass.PlaceClass;
 
-public class Place {
+public class Place implements ActionTarget {
 
 	private Integer placeCode;
 

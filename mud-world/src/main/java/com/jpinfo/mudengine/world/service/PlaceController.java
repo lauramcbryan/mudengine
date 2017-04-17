@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.jpinfo.mudengine.common.place.Place;
 import com.jpinfo.mudengine.world.model.MudPlace;
+import com.jpinfo.mudengine.world.model.MudPlaceClass;
+import com.jpinfo.mudengine.world.repository.PlaceClassRepository;
 import com.jpinfo.mudengine.world.repository.PlaceRepository;
 import com.jpinfo.mudengine.world.util.WorldHelper;
 
@@ -18,6 +20,9 @@ public class PlaceController {
 	
 	@Autowired
 	private PlaceRepository placeRepository;
+	
+	@Autowired
+	private PlaceClassRepository placeClassRepository;
 
 	@RequestMapping(method=RequestMethod.GET, value="/{id}")
 	public Place getPlace(@PathVariable Integer id) {
@@ -30,22 +35,35 @@ public class PlaceController {
 	}
 	
 	@RequestMapping(method=RequestMethod.POST, value="/{id}")
-	public void updatePlace(@PathVariable Integer id, @RequestBody Place place) {
+	public void updatePlace(@PathVariable Integer id, @RequestBody Place requestPlace) {
 		
-		MudPlace found = placeRepository.findOne(id);
+		MudPlace dbPlace = placeRepository.findOne(id);
 
-		// O que se permite atualizar:
+		// What can be updated:
+		
+		// 1. placeClass
+		if (requestPlace.getPlaceClass()!=null) {
+			
+			String requestPlaceClassCode = requestPlace.getPlaceClass().getPlaceClassCode();
+			
+			if (!dbPlace.getPlaceClass().getPlaceClassCode().equals(requestPlaceClassCode)) {
 
-		// beings		
-		//found.setBeings(place.getBeings());
+				MudPlaceClass foundPlaceClass = placeClassRepository.findOne(requestPlaceClassCode);
+				
+				dbPlace.setPlaceClass(foundPlaceClass);
+			}
+		}
 		
-		// items		
-		//found.setItems(place.getItems());
+		// 2. Beings
+		dbPlace = WorldHelper.updatePlaceBeings(dbPlace, requestPlace);
 		
-		// exits		
-		//found.setExits(place.getExits());
+		// 3. items
+		dbPlace = WorldHelper.updatePlaceItems(dbPlace, requestPlace);
 		
-		placeRepository.save(found);
+		// 4. exits
+		dbPlace = WorldHelper.updatePlaceExits(dbPlace, requestPlace);
+
 		
+		placeRepository.save(dbPlace);
 	}
 }

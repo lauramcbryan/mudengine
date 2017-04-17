@@ -11,7 +11,7 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name="mud_skill")
-public class Skill implements Serializable {
+public class MudSkill implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Override
@@ -30,7 +30,7 @@ public class Skill implements Serializable {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Skill other = (Skill) obj;
+		MudSkill other = (MudSkill) obj;
 		if (skillCode == null) {
 			if (other.skillCode != null)
 				return false;
@@ -50,9 +50,9 @@ public class Skill implements Serializable {
 	//bi-directional many-to-one association to MudSkillCategory
 	@ManyToOne
 	@JoinColumn(name="category_code")
-	private SkillCategory category;
+	private MudSkillCategory category;
 
-	public Skill() {
+	public MudSkill() {
 	}
 
 	public String getSkillCode() {
@@ -79,11 +79,11 @@ public class Skill implements Serializable {
 		this.name = name;
 	}
 
-	public SkillCategory getCategory() {
+	public MudSkillCategory getCategory() {
 		return this.category;
 	}
 
-	public void setCategory(SkillCategory category) {
+	public void setCategory(MudSkillCategory category) {
 		this.category = category;
 	}
 

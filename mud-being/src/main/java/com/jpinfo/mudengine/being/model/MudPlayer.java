@@ -10,7 +10,7 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name="MUD_PLAYER")
-public class Player implements Serializable {
+public class MudPlayer implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
@@ -23,7 +23,7 @@ public class Player implements Serializable {
 
 	private String password;
 
-	public Player() {
+	public MudPlayer() {
 	}
 
 	public Integer getPlayerId() {

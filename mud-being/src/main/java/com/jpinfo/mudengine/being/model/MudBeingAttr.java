@@ -12,7 +12,7 @@ import com.jpinfo.mudengine.being.model.pk.MudBeingAttrPK;
  */
 @Entity
 @Table(name="mud_being_attr")
-public class BeingAttr implements Serializable {
+public class MudBeingAttr implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@EmbeddedId
@@ -21,7 +21,7 @@ public class BeingAttr implements Serializable {
 	@Column(name="attr_value")
 	private float attrValue;
 
-	public BeingAttr() {
+	public MudBeingAttr() {
 	}
 
 	public MudBeingAttrPK getId() {

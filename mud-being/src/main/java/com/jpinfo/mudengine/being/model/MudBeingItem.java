@@ -12,7 +12,7 @@ import com.jpinfo.mudengine.being.model.pk.MudBeingItemPK;
  */
 @Entity
 @Table(name="mud_being_item")
-public class BeingItem implements Serializable {
+public class MudBeingItem implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@EmbeddedId
@@ -23,7 +23,7 @@ public class BeingItem implements Serializable {
 	@Column(name="usage_count")
 	private Integer usageCount;
 
-	public BeingItem() {
+	public MudBeingItem() {
 	}
 
 	public MudBeingItemPK getId() {

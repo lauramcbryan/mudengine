@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.jpinfo.mudengine.item.model.ItemClass;
+import com.jpinfo.mudengine.item.model.MudItemClass;
 import com.jpinfo.mudengine.item.repository.ItemClassRepository;
 
 @RestController
@@ -17,9 +17,9 @@ public class ItemClassController {
 	private ItemClassRepository repository;
 	
 	@RequestMapping(method=RequestMethod.GET, value="{id}")
-	public ItemClass getItemClass(@PathVariable String id) {
+	public MudItemClass getItemClass(@PathVariable String id) {
 		
-		ItemClass found = repository.findOne(id);
+		MudItemClass found = repository.findOne(id);
 		
 		return found;
 	}

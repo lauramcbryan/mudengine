@@ -3,7 +3,7 @@ package com.jpinfo.mudengine.item.model;
 import java.io.Serializable;
 import javax.persistence.*;
 
-import com.jpinfo.mudengine.item.model.pk.ItemSkillPK;
+import com.jpinfo.mudengine.item.model.pk.MudItemSkillPK;
 
 
 /**
@@ -12,23 +12,23 @@ import com.jpinfo.mudengine.item.model.pk.ItemSkillPK;
  */
 @Entity
 @Table(name="mud_item_skill")
-public class ItemSkill implements Serializable {
+public class MudItemSkill implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@EmbeddedId
-	private ItemSkillPK id;
+	private MudItemSkillPK id;
 
 	@Column(name="skill_offset")
 	private float skillOffset;
 
-	public ItemSkill() {
+	public MudItemSkill() {
 	}
 
-	public ItemSkillPK getId() {
+	public MudItemSkillPK getId() {
 		return this.id;
 	}
 
-	public void setId(ItemSkillPK id) {
+	public void setId(MudItemSkillPK id) {
 		this.id = id;
 	}
 

@@ -11,7 +11,7 @@ import java.util.List;
  */
 @Entity
 @Table(name="mud_item_class")
-public class ItemClass implements Serializable {
+public class MudItemClass implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
@@ -26,13 +26,13 @@ public class ItemClass implements Serializable {
 
 	//bi-directional many-to-one association to ItemClassAttr
 	@OneToMany(mappedBy="id.itemClass")
-	private List<ItemClassAttr> attrs;
+	private List<MudItemClassAttr> attrs;
 
 	//bi-directional many-to-one association to ItemClassSkill
 	@OneToMany(mappedBy="id.itemClass")
 	private List<ItemClassSkill> skills;
 
-	public ItemClass() {
+	public MudItemClass() {
 	}
 
 	public String getItemClass() {
@@ -67,7 +67,7 @@ public class ItemClass implements Serializable {
 		this.weight = weight;
 	}
 
-	public List<ItemClassAttr> getAttrs() {
+	public List<MudItemClassAttr> getAttrs() {
 		return this.attrs;
 	}
 

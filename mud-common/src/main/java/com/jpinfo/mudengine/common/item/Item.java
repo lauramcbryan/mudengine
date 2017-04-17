@@ -4,12 +4,14 @@ import java.io.Serializable;
 
 import java.util.Map;
 
+import com.jpinfo.mudengine.common.interfaces.ActionTarget;
+
 
 /**
  * The persistent class for the mud_item database table.
  * 
  */
-public class Item implements Serializable {
+public class Item implements Serializable, ActionTarget {
 	private static final long serialVersionUID = 1L;
 
 	private Integer itemCode;
@@ -22,9 +24,9 @@ public class Item implements Serializable {
 
 	private String itemClass;
 
-	private Map<String, Double> attrModifiers;
+	private Map<String, Float> attrModifiers;
 
-	private Map<String, Double> skillModifiers;
+	private Map<String, Float> skillModifiers;
 
 	public Item() {
 	}
@@ -69,19 +71,19 @@ public class Item implements Serializable {
 		this.itemClass = itemClass;
 	}
 
-	public Map<String, Double> getAttrModifiers() {
+	public Map<String, Float> getAttrModifiers() {
 		return attrModifiers;
 	}
 
-	public void setAttrModifiers(Map<String, Double> attrModifiers) {
+	public void setAttrModifiers(Map<String, Float> attrModifiers) {
 		this.attrModifiers = attrModifiers;
 	}
 
-	public Map<String, Double> getSkillModifiers() {
+	public Map<String, Float> getSkillModifiers() {
 		return skillModifiers;
 	}
 
-	public void setSkillModifiers(Map<String, Double> skillModifiers) {
+	public void setSkillModifiers(Map<String, Float> skillModifiers) {
 		this.skillModifiers = skillModifiers;
 	}
 	

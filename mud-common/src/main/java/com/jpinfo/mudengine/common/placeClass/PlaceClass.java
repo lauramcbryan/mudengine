@@ -3,7 +3,9 @@ package com.jpinfo.mudengine.common.placeClass;
 import java.util.HashMap;
 import java.util.Map;
 
-public class PlaceClass {
+import com.jpinfo.mudengine.common.interfaces.ActionTarget;
+
+public class PlaceClass implements ActionTarget {
 
 	private String placeClassCode;
 

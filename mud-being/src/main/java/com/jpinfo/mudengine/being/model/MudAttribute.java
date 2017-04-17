@@ -11,7 +11,7 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name="mud_attribute")
-public class Attribute implements Serializable {
+public class MudAttribute implements Serializable {
 	
 	@Override
 	public int hashCode() {
@@ -29,7 +29,7 @@ public class Attribute implements Serializable {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Attribute other = (Attribute) obj;
+		MudAttribute other = (MudAttribute) obj;
 		if (attrCode == null) {
 			if (other.attrCode != null)
 				return false;
@@ -48,7 +48,7 @@ public class Attribute implements Serializable {
 
 	private String name;
 
-	public Attribute() {
+	public MudAttribute() {
 	}
 
 	public String getAttrCode() {

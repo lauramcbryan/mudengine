@@ -3,7 +3,7 @@ package com.jpinfo.mudengine.item.model;
 import java.io.Serializable;
 import javax.persistence.*;
 
-import com.jpinfo.mudengine.item.model.pk.ItemClassAttrPK;
+import com.jpinfo.mudengine.item.model.pk.MudItemClassAttrPK;
 
 
 /**
@@ -12,23 +12,23 @@ import com.jpinfo.mudengine.item.model.pk.ItemClassAttrPK;
  */
 @Entity
 @Table(name="mud_item_class_attr")
-public class ItemClassAttr implements Serializable {
+public class MudItemClassAttr implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@EmbeddedId
-	private ItemClassAttrPK id;
+	private MudItemClassAttrPK id;
 
 	@Column(name="attr_offset")
 	private float attrOffset;
 
-	public ItemClassAttr() {
+	public MudItemClassAttr() {
 	}
 
-	public ItemClassAttrPK getId() {
+	public MudItemClassAttrPK getId() {
 		return this.id;
 	}
 
-	public void setId(ItemClassAttrPK id) {
+	public void setId(MudItemClassAttrPK id) {
 		this.id = id;
 	}
 

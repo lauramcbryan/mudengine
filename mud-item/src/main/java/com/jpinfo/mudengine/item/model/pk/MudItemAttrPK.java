@@ -4,21 +4,21 @@ import java.io.Serializable;
 import javax.persistence.*;
 
 /**
- * The primary key class for the mud_item_skill database table.
+ * The primary key class for the mud_item_attr database table.
  * 
  */
 @Embeddable
-public class ItemSkillPK implements Serializable {
+public class MudItemAttrPK implements Serializable {
 	//default serial version id, required for serializable classes.
 	private static final long serialVersionUID = 1L;
 
 	@Column(name="item_code", insertable=false, updatable=false)
 	private Integer itemCode;
 
-	@Column(name="skill_code")
-	private String skillCode;
+	@Column(name="attr_code")
+	private String attrCode;
 
-	public ItemSkillPK() {
+	public MudItemAttrPK() {
 	}
 	public Integer getItemCode() {
 		return this.itemCode;
@@ -26,31 +26,31 @@ public class ItemSkillPK implements Serializable {
 	public void setItemCode(Integer itemCode) {
 		this.itemCode = itemCode;
 	}
-	public String getSkillCode() {
-		return this.skillCode;
+	public String getAttrCode() {
+		return this.attrCode;
 	}
-	public void setSkillCode(String skillCode) {
-		this.skillCode = skillCode;
+	public void setAttrCode(String attrCode) {
+		this.attrCode = attrCode;
 	}
 
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof ItemSkillPK)) {
+		if (!(other instanceof MudItemAttrPK)) {
 			return false;
 		}
-		ItemSkillPK castOther = (ItemSkillPK)other;
+		MudItemAttrPK castOther = (MudItemAttrPK)other;
 		return 
 			this.itemCode.equals(castOther.itemCode)
-			&& this.skillCode.equals(castOther.skillCode);
+			&& this.attrCode.equals(castOther.attrCode);
 	}
 
 	public int hashCode() {
 		final int prime = 31;
 		int hash = 17;
 		hash = hash * prime + this.itemCode.hashCode();
-		hash = hash * prime + this.skillCode.hashCode();
+		hash = hash * prime + this.attrCode.hashCode();
 		
 		return hash;
 	}

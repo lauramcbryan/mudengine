@@ -62,6 +62,11 @@
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-entitymanager</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>com.jpinfo.mudengine</groupId>
+			<artifactId>mud-common</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 
 	<build>

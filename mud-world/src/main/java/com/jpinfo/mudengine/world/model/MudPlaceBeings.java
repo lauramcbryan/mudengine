@@ -10,6 +10,9 @@ public class MudPlaceBeings {
 
 	@EmbeddedId
 	private PlaceBeingsPK pk;
+
+	@Column
+	private String name;
 	
 	@Column
 	private Integer qtty;
@@ -30,4 +33,14 @@ public class MudPlaceBeings {
 	public void setQtty(Integer qtty) {
 		this.qtty = qtty;
 	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+	
+	
 }
