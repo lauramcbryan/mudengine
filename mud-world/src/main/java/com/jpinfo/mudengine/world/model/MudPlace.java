@@ -13,16 +13,16 @@ public class MudPlace {
 	private Integer placeCode;
 
 	@ManyToOne
-	@JoinColumn(name="PLACE_CLASS_CODE", referencedColumnName="PLACE_CLASS_CODE", insertable=false, updatable=false)
+	@JoinColumn(name="PLACE_CLASS_CODE", referencedColumnName="PLACE_CLASS_CODE")
 	private MudPlaceClass placeClass;
 	
-	@OneToMany(mappedBy="pk.placeCode", fetch=FetchType.EAGER)
+	@OneToMany(mappedBy="pk.placeCode", fetch=FetchType.EAGER, cascade=CascadeType.ALL, orphanRemoval=true)
 	private Set<MudPlaceBeings> beings;
 	
-	@OneToMany(mappedBy="pk.placeCode", fetch=FetchType.EAGER)
+	@OneToMany(mappedBy="pk.placeCode", fetch=FetchType.EAGER, cascade=CascadeType.ALL, orphanRemoval=true)
 	private Set<MudPlaceItems> items;
 	
-	@OneToMany(mappedBy="pk.placeCode", fetch=FetchType.EAGER)
+	@OneToMany(mappedBy="pk.placeCode", fetch=FetchType.EAGER, cascade=CascadeType.ALL, orphanRemoval=true)
 	private Set<MudPlaceExits> exits;
 	
 	public MudPlace() {
@@ -51,23 +51,11 @@ public class MudPlace {
 		return beings;
 	}
 
-	public void setBeings(Set<MudPlaceBeings> beings) {
-		this.beings = beings;
-	}
-
 	public Set<MudPlaceItems> getItems() {
 		return items;
 	}
 
-	public void setItems(Set<MudPlaceItems> items) {
-		this.items = items;
-	}
-
 	public Set<MudPlaceExits> getExits() {
 		return exits;
-	}
-
-	public void setExits(Set<MudPlaceExits> exits) {
-		this.exits = exits;
 	}
 }

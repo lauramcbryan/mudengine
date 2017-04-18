@@ -25,7 +25,7 @@ public class WorldHelper {
 		
 		result.setPlaceCode(a.getPlaceCode());
 		
-		result.setPlaceClass(WorldHelper.buildPlaceClass(a.getPlaceClass()));
+		result.setPlaceClassCode(a.getPlaceClass().getPlaceClassCode());
 		
 		for(MudPlaceBeings curBeing: a.getBeings()) {
 			result.getBeings().add(WorldHelper.buildPlaceBeing(curBeing));
@@ -39,7 +39,7 @@ public class WorldHelper {
 			result.getItems().add(WorldHelper.buildPlaceItems(curItem));
 		}
 		
-		return new Place();
+		return result;
 	}
 	
 	public static PlaceClass buildPlaceClass(MudPlaceClass a) {
@@ -59,7 +59,7 @@ public class WorldHelper {
 				PlaceBeingsPK newBeingPK = new PlaceBeingsPK();
 				
 				newBeingPK.setBeingCode(curBeing.getBeingCode());
-				newBeingPK.setPlace(requestPlace.getPlaceCode());
+				newBeingPK.setPlace(dbPlace.getPlaceCode());
 				
 				newBeing.setPk(newBeingPK);
 				newBeing.setName(curBeing.getName());
@@ -67,7 +67,10 @@ public class WorldHelper {
 				
 				newBeings.add(newBeing);
 			}
-			dbPlace.setBeings(newBeings);
+			
+			dbPlace.getBeings().clear();
+			dbPlace.getBeings().addAll(newBeings);
+			
 		} // endif beings
 		
 		return dbPlace;
@@ -86,14 +89,17 @@ public class WorldHelper {
 				PlaceItemsPK newItemPK = new PlaceItemsPK();
 				
 				newItemPK.setItemCode(curItem.getItemCode());
-				newItemPK.setPlaceCode(requestPlace.getPlaceCode());
+				newItemPK.setPlaceCode(dbPlace.getPlaceCode());
 				
 				newItem.setPk(newItemPK);
 				newItem.setName(curItem.getName());
 				newItem.setQtty(curItem.getQtty());
+				
+				newItems.add(newItem);
 			}
-			
-			dbPlace.setItems(newItems);
+
+			dbPlace.getItems().clear();
+			dbPlace.getItems().addAll(newItems);
 		}
 		
 		return dbPlace;
@@ -114,7 +120,7 @@ public class WorldHelper {
 				PlaceExitsPK newExitPK = new PlaceExitsPK();
 				
 				newExitPK.setDirection(curDirection);
-				newExitPK.setPlaceCode(requestPlace.getPlaceCode());
+				newExitPK.setPlaceCode(dbPlace.getPlaceCode());
 				
 				newExit.setPk(newExitPK);
 				newExit.setTargetPlaceCode(curExit.getTargetPlaceCode());
@@ -123,9 +129,14 @@ public class WorldHelper {
 				newExit.setVisible(curExit.isVisible());
 				newExit.setLocked(curExit.isLocked());
 				newExit.setLockable(curExit.isLockable());
+				
+				newExits.add(newExit);
 			}
 			
-			dbPlace.setExits(newExits);
+			// As hibernate manages the child list returned by him, we must not to create
+			// a new list, but to clear the existing one to force DELETE/UPDATE of changed entries
+			dbPlace.getExits().clear();
+			dbPlace.getExits().addAll(newExits);
 			
 		}
 		
@@ -151,7 +162,6 @@ public class WorldHelper {
 		
 		PlaceExits result = new PlaceExits();
 		
-		result.setDirection(a.getPk().getDirection());
 		result.setName(a.getName());
 		
 		result.setTargetPlaceCode(a.getTargetPlaceCode());

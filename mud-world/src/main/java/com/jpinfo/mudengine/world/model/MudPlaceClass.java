@@ -24,10 +24,10 @@ public class MudPlaceClass {
 	@Column(name="WEIGHT_CAPACITY")
 	private Integer weightCapacity;
 
-	@OneToMany(mappedBy="id.placeClassCode", fetch=FetchType.EAGER)
+	@OneToMany(mappedBy="id.placeClassCode", fetch=FetchType.EAGER, cascade=CascadeType.ALL, orphanRemoval=true)
 	private Set<MudPlaceClassAttr> attrModifiers;
 	
-	@OneToMany(mappedBy="id.placeClassCode", fetch=FetchType.EAGER)
+	@OneToMany(mappedBy="id.placeClassCode", fetch=FetchType.EAGER, cascade=CascadeType.ALL, orphanRemoval=true)
 	private Set<MudPlaceClassSkill> skillModifiers;
 	
 	@Column(name="PARENT_CLASS_CODE")
@@ -113,5 +113,12 @@ public class MudPlaceClass {
 	public void setBuildEffort(Integer buildEffort) {
 		this.buildEffort = buildEffort;
 	}
-	
+
+	public Set<MudPlaceClassAttr> getAttrModifiers() {
+		return attrModifiers;
+	}
+
+	public Set<MudPlaceClassSkill> getSkillModifiers() {
+		return skillModifiers;
+	}
 }

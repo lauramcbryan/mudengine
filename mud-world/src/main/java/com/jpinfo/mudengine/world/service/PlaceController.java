@@ -42,9 +42,9 @@ public class PlaceController {
 		// What can be updated:
 		
 		// 1. placeClass
-		if (requestPlace.getPlaceClass()!=null) {
+		if (requestPlace.getPlaceClassCode()!=null) {
 			
-			String requestPlaceClassCode = requestPlace.getPlaceClass().getPlaceClassCode();
+			String requestPlaceClassCode = requestPlace.getPlaceClassCode();
 			
 			if (!dbPlace.getPlaceClass().getPlaceClassCode().equals(requestPlaceClassCode)) {
 
