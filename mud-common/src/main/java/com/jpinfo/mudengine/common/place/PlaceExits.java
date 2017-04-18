@@ -3,14 +3,18 @@ package com.jpinfo.mudengine.common.place;
 
 public class PlaceExits {
 
-	public String getDirection() {
-		return direction;
-	}
+	private String name;
+	
+	private boolean opened;
+	
+	private boolean visible;
+	
+	private boolean locked;
+	
+	private boolean lockable;
 
-	public void setDirection(String direction) {
-		this.direction = direction;
-	}
-
+	private Integer targetPlaceCode;
+	
 	public String getName() {
 		return name;
 	}
@@ -58,18 +62,5 @@ public class PlaceExits {
 	public void setTargetPlaceCode(Integer targetPlaceCode) {
 		this.targetPlaceCode = targetPlaceCode;
 	}
-
-	private String direction;
 	
-	private String name;
-	
-	private boolean opened;
-	
-	private boolean visible;
-	
-	private boolean locked;
-	
-	private boolean lockable;
-
-	private Integer targetPlaceCode;
 }

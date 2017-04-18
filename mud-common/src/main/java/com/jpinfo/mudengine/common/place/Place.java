@@ -2,14 +2,14 @@ package com.jpinfo.mudengine.common.place;
 
 import java.util.*;
 
+
 import com.jpinfo.mudengine.common.interfaces.ActionTarget;
-import com.jpinfo.mudengine.common.placeClass.PlaceClass;
 
 public class Place implements ActionTarget {
 
 	private Integer placeCode;
 
-	private PlaceClass placeClass;
+	private String placeClassCode;
 	
 	private Set<PlaceBeings> beings;
 	
@@ -32,12 +32,12 @@ public class Place implements ActionTarget {
 		this.placeCode = placeCode;
 	}
 
-	public PlaceClass getPlaceClass() {
-		return placeClass;
+	public String getPlaceClassCode() {
+		return placeClassCode;
 	}
 
-	public void setPlaceClass(PlaceClass placeClass) {
-		this.placeClass = placeClass;
+	public void setPlaceClassCode(String placeClass) {
+		this.placeClassCode = placeClass;
 	}
 
 	public Map<String, PlaceExits> getExits() {
