@@ -29,11 +29,11 @@ public class MudItem implements Serializable {
 	private String itemClass;
 
 	//bi-directional many-to-one association to ItemAttr
-	@OneToMany(mappedBy="id.itemCode")
+	@OneToMany(mappedBy="id.itemCode", cascade=CascadeType.ALL, orphanRemoval=true)
 	private List<MudItemAttr> attrs;
 
 	//bi-directional many-to-one association to ItemSkill
-	@OneToMany(mappedBy="id.itemCode")
+	@OneToMany(mappedBy="id.itemCode", cascade=CascadeType.ALL, orphanRemoval=true)
 	private List<MudItemSkill> skills;
 
 	public MudItem() {
@@ -86,15 +86,4 @@ public class MudItem implements Serializable {
 	public List<MudItemSkill> getSkills() {
 		return this.skills;
 	}
-
-	public void setAttrs(List<MudItemAttr> attrs) {
-		this.attrs = attrs;
-	}
-
-	public void setSkills(List<MudItemSkill> skills) {
-		this.skills = skills;
-	}
-	
-	
-
 }

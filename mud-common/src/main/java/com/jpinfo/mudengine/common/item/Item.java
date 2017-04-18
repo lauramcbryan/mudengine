@@ -2,6 +2,7 @@ package com.jpinfo.mudengine.common.item;
 
 import java.io.Serializable;
 
+
 import java.util.Map;
 
 import com.jpinfo.mudengine.common.interfaces.ActionTarget;
@@ -86,5 +87,5 @@ public class Item implements Serializable, ActionTarget {
 	public void setSkillModifiers(Map<String, Float> skillModifiers) {
 		this.skillModifiers = skillModifiers;
 	}
-	
+
 }

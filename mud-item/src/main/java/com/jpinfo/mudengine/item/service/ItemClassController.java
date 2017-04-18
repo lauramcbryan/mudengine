@@ -10,7 +10,7 @@ import com.jpinfo.mudengine.item.model.MudItemClass;
 import com.jpinfo.mudengine.item.repository.ItemClassRepository;
 
 @RestController
-@RequestMapping("/class")
+@RequestMapping("/item/class")
 public class ItemClassController {
 	
 	@Autowired

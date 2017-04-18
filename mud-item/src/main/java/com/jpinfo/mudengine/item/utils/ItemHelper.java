@@ -52,8 +52,9 @@ public class ItemHelper {
 				
 				skillList.add(newSkill);
 			}
-			
-			dbItem.setSkills(skillList);
+
+			dbItem.getSkills().clear();
+			dbItem.getSkills().addAll(skillList);
 		}
 		
 		return dbItem;
@@ -79,7 +80,8 @@ public class ItemHelper {
 				attrList.add(newAttr);
 			}
 			
-			dbItem.setAttrs(attrList);
+			dbItem.getAttrs().clear();
+			dbItem.getAttrs().addAll(attrList);
 		}
 		
 		return dbItem;

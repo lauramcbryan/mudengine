@@ -25,11 +25,11 @@ public class MudItemClass implements Serializable {
 	private float weight;
 
 	//bi-directional many-to-one association to ItemClassAttr
-	@OneToMany(mappedBy="id.itemClass")
+	@OneToMany(mappedBy="id.itemClass", cascade=CascadeType.ALL, orphanRemoval=true)
 	private List<MudItemClassAttr> attrs;
 
 	//bi-directional many-to-one association to ItemClassSkill
-	@OneToMany(mappedBy="id.itemClass")
+	@OneToMany(mappedBy="id.itemClass", cascade=CascadeType.ALL, orphanRemoval=true)
 	private List<ItemClassSkill> skills;
 
 	public MudItemClass() {
