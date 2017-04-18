@@ -30,9 +30,9 @@ public class BeingController {
 	}
 	
 	@RequestMapping(method=RequestMethod.POST, value="/{id}")
-	public void updateBeing(@PathVariable Integer beingId, @RequestBody Being updatedBeing) {
+	public void updateBeing(@PathVariable Integer id, @RequestBody Being updatedBeing) {
 		
-		MudBeing dbBeing = repository.findOne(beingId);
+		MudBeing dbBeing = repository.findOne(id);
 		
 		// Basic data
 		dbBeing.setName(updatedBeing.getName());

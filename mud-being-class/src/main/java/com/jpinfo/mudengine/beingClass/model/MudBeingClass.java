@@ -28,11 +28,11 @@ public class MudBeingClass implements Serializable {
 	private Integer weightCapacity;
 
 	//bi-directional many-to-one association to MudBeingClassAttr
-	@OneToMany(mappedBy="id.beingClass")
+	@OneToMany(mappedBy="id.beingClass", cascade=CascadeType.ALL, orphanRemoval=true)
 	private List<MudBeingClassAttr> attributes;
 
 	//bi-directional many-to-one association to MudBeingClassSkill
-	@OneToMany(mappedBy="id.beingClass")
+	@OneToMany(mappedBy="id.beingClass", cascade=CascadeType.ALL, orphanRemoval=true)
 	private List<MudBeingClassSkill> skills;
 
 	public MudBeingClass() {

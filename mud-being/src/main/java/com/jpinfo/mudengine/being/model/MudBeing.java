@@ -21,16 +21,16 @@ public class MudBeing implements Serializable {
 	@Column(name="being_class")
 	private String beingClass;
 
-	@OneToMany(mappedBy="id.beingCode")
+	@OneToMany(mappedBy="id.beingCode", cascade=CascadeType.ALL, orphanRemoval=true)
 	private List<MudBeingAttr> attributes;
 
-	@OneToMany(mappedBy="id.beingCode")
+	@OneToMany(mappedBy="id.beingCode", cascade=CascadeType.ALL, orphanRemoval=true)
 	private List<MudBeingItem> items;
 
-	@OneToMany(mappedBy="id.beingCode")
+	@OneToMany(mappedBy="id.beingCode", cascade=CascadeType.ALL, orphanRemoval=true)
 	private List<MudBeingSkill> skills;
 	
-	@OneToMany(mappedBy="id.beingCode")
+	@OneToMany(mappedBy="id.beingCode", cascade=CascadeType.ALL, orphanRemoval=true)
 	private List<MudBeingAttrModifier> attrModifiers;
 
 
@@ -103,33 +103,12 @@ public class MudBeing implements Serializable {
 	public void setBeingClass(String beingClass) {
 		this.beingClass = beingClass;
 	}
-
-	public void setAttributes(List<MudBeingAttr> attributes) {
-		this.attributes = attributes;
-	}
-
-	public void setItems(List<MudBeingItem> items) {
-		this.items = items;
-	}
-
-	public void setSkills(List<MudBeingSkill> skills) {
-		this.skills = skills;
-	}
-
 	public List<MudBeingAttrModifier> getAttrModifiers() {
 		return attrModifiers;
 	}
 
-	public void setAttrModifiers(List<MudBeingAttrModifier> attrModifiers) {
-		this.attrModifiers = attrModifiers;
-	}
-
 	public List<MudBeingSkillModifier> getSkillModifiers() {
 		return skillModifiers;
-	}
-
-	public void setSkillModifiers(List<MudBeingSkillModifier> skillModifiers) {
-		this.skillModifiers = skillModifiers;
 	}
 
 	public String getName() {

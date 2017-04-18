@@ -90,7 +90,8 @@ public class BeingHelper {
 				attrList.add(dbAttr);
 			}
 			
-			dbBeing.setAttributes(attrList);
+			dbBeing.getAttributes().clear();
+			dbBeing.getAttributes().addAll(attrList);
 		}
 		
 		return dbBeing;
@@ -115,8 +116,9 @@ public class BeingHelper {
 				
 				skillsList.add(newSkill);
 			}
-			
-			dbBeing.setSkills(skillsList);
+
+			dbBeing.getSkills().clear();
+			dbBeing.getSkills().addAll(skillsList);
 		}
 		
 		return dbBeing;
@@ -144,8 +146,9 @@ public class BeingHelper {
 				
 				attrList.add(newDbAttrModifier);
 			}
-			
-			dbBeing.setAttrModifiers(attrList);
+
+			dbBeing.getAttrModifiers().clear();
+			dbBeing.getAttrModifiers().addAll(attrList);
 		}
 				
 		return dbBeing;
@@ -174,8 +177,9 @@ public class BeingHelper {
 				
 				skillList.add(newDbSkillModifier);
 			}
-			
-			dbBeing.setSkillModifiers(skillList);
+
+			dbBeing.getSkillModifiers().clear();
+			dbBeing.getSkillModifiers().addAll(skillList);
 		}
 		
 		return dbBeing;
@@ -203,8 +207,9 @@ public class BeingHelper {
 				
 				itemList.add(newDbItem);
 			}
-			
-			dbBeing.setItems(itemList);
+
+			dbBeing.getItems().clear();
+			dbBeing.getItems().addAll(itemList);
 		}
 
 		return dbBeing;
