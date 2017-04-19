@@ -16,7 +16,7 @@ import com.jpinfo.mudengine.common.interfaces.ActionTarget;
 public class Being implements Serializable, ActionTarget {
 	private static final long serialVersionUID = 1L;
 
-	private Integer beingCode;
+	private Long beingCode;
 
 	private String beingClass;
 
@@ -36,7 +36,7 @@ public class Being implements Serializable, ActionTarget {
 	
 	private String curWorld;
 	
-	private Integer playerId;
+	private Long playerId;
 
 	public Being() {
 		this.attrs = new HashMap<String, Float>();
@@ -47,11 +47,11 @@ public class Being implements Serializable, ActionTarget {
 		this.skillModifiers = new ArrayList<BeingSkillModifier>();
 	}
 
-	public Integer getBeingCode() {
+	public Long getBeingCode() {
 		return beingCode;
 	}
 
-	public void setBeingCode(Integer beingCode) {
+	public void setBeingCode(Long beingCode) {
 		this.beingCode = beingCode;
 	}
 
@@ -103,11 +103,11 @@ public class Being implements Serializable, ActionTarget {
 		this.curPlaceCode = curPlaceCode;
 	}
 
-	public Integer getPlayerId() {
+	public Long getPlayerId() {
 		return playerId;
 	}
 
-	public void setPlayerId(Integer playerId) {
+	public void setPlayerId(Long playerId) {
 		this.playerId = playerId;
 	}
 

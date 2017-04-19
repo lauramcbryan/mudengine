@@ -15,7 +15,7 @@ public class MudPlayer implements Serializable {
 
 	@Id
 	@Column(name="player_id")
-	private Integer playerId;
+	private Long playerId;
 
 	private String login;
 
@@ -26,11 +26,11 @@ public class MudPlayer implements Serializable {
 	public MudPlayer() {
 	}
 
-	public Integer getPlayerId() {
+	public Long getPlayerId() {
 		return this.playerId;
 	}
 
-	public void setPlayerId(Integer playerId) {
+	public void setPlayerId(Long playerId) {
 		this.playerId = playerId;
 	}
 

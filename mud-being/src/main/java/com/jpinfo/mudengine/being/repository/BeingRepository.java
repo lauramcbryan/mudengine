@@ -4,6 +4,6 @@ import org.springframework.data.repository.CrudRepository;
 
 import com.jpinfo.mudengine.being.model.MudBeing;
 
-public interface BeingRepository extends CrudRepository<MudBeing, Integer> {
+public interface BeingRepository extends CrudRepository<MudBeing, Long> {
 
 }

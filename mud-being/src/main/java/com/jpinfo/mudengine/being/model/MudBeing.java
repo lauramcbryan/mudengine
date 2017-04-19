@@ -2,6 +2,8 @@ package com.jpinfo.mudengine.being.model;
 
 import java.io.Serializable;
 import javax.persistence.*;
+
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -11,12 +13,14 @@ import java.util.List;
  */
 @Entity
 @Table(name="mud_being")
+@SequenceGenerator(name = "mud_being_seq", sequenceName="mud_being_seq", allocationSize=1)
 public class MudBeing implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
+	@GeneratedValue(generator="mud_being_seq", strategy=GenerationType.SEQUENCE)
 	@Column(name="being_code")
-	private Integer beingCode;
+	private Long beingCode;
 
 	@Column(name="being_class")
 	private String beingClass;
@@ -47,24 +51,29 @@ public class MudBeing implements Serializable {
 	private Integer curPlaceCode;
 	
 	@Column(name="player_id")
-	private Integer playerId;
+	private Long playerId;
 
 	public MudBeing() {
+		this.attributes = new ArrayList<MudBeingAttr>();
+		this.items = new ArrayList<MudBeingItem>();
+		this.skills = new ArrayList<MudBeingSkill>();
+		this.attrModifiers = new ArrayList<MudBeingAttrModifier>();
+		this.skillModifiers = new ArrayList<MudBeingSkillModifier>();
 	}
 
-	public Integer getBeingCode() {
+	public Long getBeingCode() {
 		return this.beingCode;
 	}
 
-	public void setBeingCode(Integer beingCode) {
+	public void setBeingCode(Long beingCode) {
 		this.beingCode = beingCode;
 	}
 
-	public Integer getPlayerId() {
+	public Long getPlayerId() {
 		return playerId;
 	}
 
-	public void setPlayerId(Integer playerId) {
+	public void setPlayerId(Long playerId) {
 		this.playerId = playerId;
 	}
 

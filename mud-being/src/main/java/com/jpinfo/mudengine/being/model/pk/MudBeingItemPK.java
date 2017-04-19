@@ -13,17 +13,17 @@ public class MudBeingItemPK implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Column(name="being_code", insertable=false, updatable=false)
-	private Integer beingCode;
+	private Long beingCode;
 
 	@Column(name="item_code")
 	private Integer itemCode;
 
 	public MudBeingItemPK() {
 	}
-	public Integer getBeingCode() {
+	public Long getBeingCode() {
 		return this.beingCode;
 	}
-	public void setBeingCode(Integer beingCode) {
+	public void setBeingCode(Long beingCode) {
 		this.beingCode = beingCode;
 	}
 	public Integer getItemCode() {

@@ -20,7 +20,7 @@ public class BeingController {
 	private BeingRepository repository;
 
 	@RequestMapping(method=RequestMethod.GET, value="{id}")
-	public Being getBeing(@PathVariable Integer id) {
+	public Being getBeing(@PathVariable Long id) {
 		
 		MudBeing dbBeing = repository.findOne(id);
 		
@@ -30,7 +30,7 @@ public class BeingController {
 	}
 	
 	@RequestMapping(method=RequestMethod.POST, value="/{id}")
-	public void updateBeing(@PathVariable Integer id, @RequestBody Being updatedBeing) {
+	public void updateBeing(@PathVariable Long id, @RequestBody Being updatedBeing) {
 		
 		MudBeing dbBeing = repository.findOne(id);
 		
