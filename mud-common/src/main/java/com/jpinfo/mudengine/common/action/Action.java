@@ -1,16 +1,14 @@
-package com.jpinfo.mudengine.common.command;
+package com.jpinfo.mudengine.common.action;
 
-public class Command {
+public class Action {
 
-	private Long actionId;
-	
-	private Integer actorCode;	
-	
 	private Integer issuerCode;
 	
-	private String worldName;
-	
+	private Integer actorCode;
+
 	private String actionCode;
+	
+	private String worldName;
 	
 	private Integer mediatorCode;
 	
@@ -19,26 +17,9 @@ public class Command {
 	private String targetCode;
 
 	private String targetType;  // {BEING, ITEM, PLACE, PLACE_CLASS}
-		
 	
-	public Command() {
+	public Action() {
 		
-	}
-
-	public Long getActionId() {
-		return actionId;
-	}
-
-	public void setActionId(Long actionId) {
-		this.actionId = actionId;
-	}
-
-	public String getActionCode() {
-		return actionCode;
-	}
-
-	public void setActionCode(String actionCode) {
-		this.actionCode = actionCode;
 	}
 
 	public Integer getIssuerCode() {
@@ -49,20 +30,28 @@ public class Command {
 		this.issuerCode = issuerCode;
 	}
 
-	public String getWorldName() {
-		return worldName;
-	}
-
-	public void setWorldName(String worldName) {
-		this.worldName = worldName;
-	}
-
 	public Integer getActorCode() {
 		return actorCode;
 	}
 
 	public void setActorCode(Integer actorCode) {
 		this.actorCode = actorCode;
+	}
+
+	public String getActionCode() {
+		return actionCode;
+	}
+
+	public void setActionCode(String actionCode) {
+		this.actionCode = actionCode;
+	}
+
+	public String getWorldName() {
+		return worldName;
+	}
+
+	public void setWorldName(String worldName) {
+		this.worldName = worldName;
 	}
 
 	public Integer getMediatorCode() {
@@ -96,5 +85,4 @@ public class Command {
 	public void setTargetType(String targetType) {
 		this.targetType = targetType;
 	}
-
 }

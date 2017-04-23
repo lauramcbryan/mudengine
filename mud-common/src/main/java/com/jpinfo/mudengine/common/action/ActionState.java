@@ -1,13 +1,11 @@
-package com.jpinfo.mudengine.common.command;
+package com.jpinfo.mudengine.common.action;
 
 import com.jpinfo.mudengine.common.being.Being;
 import com.jpinfo.mudengine.common.interfaces.ActionTarget;
 import com.jpinfo.mudengine.common.item.Item;
 import com.jpinfo.mudengine.common.place.Place;
 
-public class Action {
-	
-	private Long actionId;
+public class ActionState extends ActionSimpleState {
 	
 	private String actionCode;
 	
@@ -20,18 +18,11 @@ public class Action {
 	// {BEING, ITEM, PLACE, PLACE_CLASS}
 	private ActionTarget target;
 	
-	public Action() {
+	
+	
+	public ActionState() {
 		
 	}
-	
-	public Long getActionId() {
-		return actionId;
-	}
-
-	public void setActionId(Long actionId) {
-		this.actionId = actionId;
-	}
-
 	public String getActionCode() {
 		return actionCode;
 	}
