@@ -19,7 +19,7 @@ public class MudAction {
 	private Integer actorCode;
 	
 
-	@Column(name="ACTION_CODE")
+	@Column(name="ACTION_CLASS_CODE")
 	private String actionCode;
 	
 	@Column(name="WORLD_NAME")
@@ -36,6 +36,18 @@ public class MudAction {
 
 	@Column(name="TARGET_TYPE")
 	private String targetType;  // {BEING, ITEM, PLACE, PLACE_CLASS}
+	
+	@Column(name="START_TURN")
+	private Long startTurn;
+	
+	@Column(name="END_TURN")
+	private Long endTurn;
+	
+	@Column(name="CUR_STATE")
+	private Integer currState;
+	
+	@Column(name="SUCCESS_RATE")
+	private Float successRate;
 	
 	public MudAction() {
 		
@@ -112,7 +124,36 @@ public class MudAction {
 	public void setActorCode(Integer actorCode) {
 		this.actorCode = actorCode;
 	}
-	
-	
 
+	public Long getStartTurn() {
+		return startTurn;
+	}
+
+	public void setStartTurn(Long startTurn) {
+		this.startTurn = startTurn;
+	}
+
+	public Long getEndTurn() {
+		return endTurn;
+	}
+
+	public void setEndTurn(Long endTurn) {
+		this.endTurn = endTurn;
+	}
+
+	public Integer getCurrState() {
+		return currState;
+	}
+
+	public void setCurrState(Integer currState) {
+		this.currState = currState;
+	}
+
+	public Float getSuccessRate() {
+		return successRate;
+	}
+
+	public void setSuccessRate(Float successRate) {
+		this.successRate = successRate;
+	}
 }

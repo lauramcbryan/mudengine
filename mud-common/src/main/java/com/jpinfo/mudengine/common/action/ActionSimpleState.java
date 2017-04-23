@@ -2,12 +2,18 @@ package com.jpinfo.mudengine.common.action;
 
 
 public class ActionSimpleState {
+	
+	public static final int NOT_STARTED = 0;
+	public static final int STARTED = 1;
+	public static final int COMPLETED = 2;
+	public static final int CANCELLED = 3;
+	public static final int REFUSED = 4;
 
 	private Long actionId;
 	
-	private Integer startTurn;
+	private Long startTurn;
 	
-	private Integer endTurn;
+	private Long endTurn;
 	
 	private Integer curState;
 	
@@ -15,19 +21,21 @@ public class ActionSimpleState {
 		
 	}
 
-	public Integer getStartTurn() {
+	public Long getStartTurn() {
 		return startTurn;
 	}
 
-	public void setStartTurn(Integer startTurn) {
+	public void setStartTurn(Long startTurn) {
 		this.startTurn = startTurn;
 	}
 
-	public Integer getEndTurn() {
+	public Long getEndTurn() {
 		return endTurn;
 	}
 
-	public void setEndTurn(Integer endTurn) {
+
+
+	public void setEndTurn(Long endTurn) {
 		this.endTurn = endTurn;
 	}
 

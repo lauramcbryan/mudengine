@@ -3,8 +3,8 @@ package com.jpinfo.mudengine.action.utils;
 import org.springframework.web.client.RestTemplate;
 
 
+
 import com.jpinfo.mudengine.action.model.MudAction;
-import com.jpinfo.mudengine.action.model.MudActionState;
 import com.jpinfo.mudengine.common.action.ActionState;
 import com.jpinfo.mudengine.common.action.Action;
 import com.jpinfo.mudengine.common.action.ActionSimpleState;
@@ -16,7 +16,7 @@ import com.jpinfo.mudengine.common.placeClass.PlaceClass;
 
 public class ActionHelper {
 	
-	public static ActionSimpleState buildSimpleState(MudActionState a) {
+	public static ActionSimpleState buildSimpleState(MudAction a) {
 		
 		ActionSimpleState state = new ActionSimpleState();
 		
