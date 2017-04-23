@@ -1,5 +1,8 @@
 package com.jpinfo.mudengine.being.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -98,5 +101,19 @@ public class BeingController {
 		Iterable<MudBeing> result = repository.findAll();
 		
 		return result;
+	}
+	
+	@RequestMapping(method=RequestMethod.GET,  value="/player/{playerId}")
+	public Iterable<Being> getBeingsForPlayer(@PathVariable Long playerId) {
+		
+		List<MudBeing> lstFound = repository.findByPlayerId(playerId);
+		
+		List<Being> response = new ArrayList<Being>();
+		
+		for(MudBeing curDbBeing: lstFound) {
+			response.add(BeingHelper.buildBeing(curDbBeing));
+		}
+		
+		return response;
 	}
 }

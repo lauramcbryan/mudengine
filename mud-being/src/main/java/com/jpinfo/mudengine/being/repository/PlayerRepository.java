@@ -4,6 +4,8 @@ import org.springframework.data.repository.CrudRepository;
 
 import com.jpinfo.mudengine.being.model.MudPlayer;
 
-public interface PlayerRepository extends CrudRepository<MudPlayer, Integer> {
+public interface PlayerRepository extends CrudRepository<MudPlayer, Long> {
+	
+	MudPlayer findByLogin(String login);
 
 }

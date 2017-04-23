@@ -9,7 +9,7 @@ import java.io.Serializable;
 public class Player implements Serializable {
 	private static final long serialVersionUID = 1L;
 
-	private Integer playerId;
+	private Long playerId;
 
 	private String login;
 
@@ -18,11 +18,11 @@ public class Player implements Serializable {
 	public Player() {
 	}
 
-	public Integer getPlayerId() {
+	public Long getPlayerId() {
 		return this.playerId;
 	}
 
-	public void setPlayerId(Integer playerId) {
+	public void setPlayerId(Long playerId) {
 		this.playerId = playerId;
 	}
 
