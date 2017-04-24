@@ -1,6 +1,8 @@
 set role MUDENGINE_BEING;
 
 create sequence MUDENGINE_BEING.MUD_BEING_SEQ;
+create sequence MUDENGINE_BEING.MUD_SESSION_SEQ;
+create sequence MUDENGINE_BEING.MUD_PLAYER_SEQ;
 
 CREATE TABLE MUDENGINE_BEING.MUD_ATTRIBUTE (
 		ATTR_CODE		varchar(5) not null,
@@ -32,8 +34,23 @@ CREATE TABLE MUDENGINE_BEING.MUD_PLAYER (
 		LOGIN			varchar(30) not null,
 		PASSWORD		varchar(64) not null,
 		NAME			varchar(30) not null,
+		LANGUAGE		varchar(30) not null,
+		COUNTRY			varchar(5) not null,
 		CONSTRAINT MUD_PLAYER_PK PRIMARY KEY (PLAYER_ID)
 );	
+
+CREATE TABLE MUDENGINE_BEING.MUD_PLAYER_SESSION (
+	SESSION_ID			bigint not null,
+	PLAYER_ID			bigint not null,
+	SESSION_START		timestamp not null default current_timestamp,
+	SESSION_END			timestamp,
+	COUNTRY				varchar(5) not null,
+	NOTIFICATION_ABLE	boolean,
+	CONSTRAINT MUD_PLAYER_SESSION_PK PRIMARY KEY (SESSION_ID),
+	FOREIGN KEY (PLAYER_ID) REFERENCES MUDENGINE_BEING.MUD_PLAYER(PLAYER_ID)
+);
+
+
 
 CREATE TABLE MUDENGINE_BEING.MUD_BEING (
 		BEING_CODE		bigint not null,

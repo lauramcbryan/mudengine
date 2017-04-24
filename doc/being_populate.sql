@@ -23,7 +23,7 @@ INSERT INTO mudengine_being.mud_skill(skill_code, category_code, name, descripti
 INSERT INTO mudengine_being.mud_skill(skill_code, category_code, name, description) VALUES ('BUILDER', 'ENG', 'Builder', 'Constructs buildings');
 INSERT INTO mudengine_being.mud_skill(skill_code, category_code, name, description) VALUES ('SCHOLAR', 'MIND', 'Scholar', 'Studies');
 
-INSERT INTO mudengine_being.mud_player(player_id, login, password, name) VALUES (1, 'silverheart', 'password', 'James McBryan');
+INSERT INTO mudengine_being.mud_player(player_id, login, password, name, language, country) VALUES (1, 'silverheart', 'password', 'James McBryan', 'pt-BR', 'BR');
 
 INSERT INTO mudengine_being.mud_being(being_code, being_class, name, player_id, current_place, current_world) VALUES (1, 'HUMAN', 'Slash Calliber', 1, 1, 'aforgotten');
 
