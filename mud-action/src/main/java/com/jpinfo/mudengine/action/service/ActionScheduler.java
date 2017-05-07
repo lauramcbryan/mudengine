@@ -22,7 +22,6 @@ import com.jpinfo.mudengine.action.model.MudActionClassEffect;
 import com.jpinfo.mudengine.action.model.MudActionClassPrereq;
 import com.jpinfo.mudengine.action.repository.MudActionClassRepository;
 import com.jpinfo.mudengine.action.repository.MudActionRepository;
-import com.jpinfo.mudengine.action.utils.ActionHelper;
 import com.jpinfo.mudengine.common.action.ActionSimpleState;
 import com.jpinfo.mudengine.common.action.ActionState;
 import com.jpinfo.mudengine.common.being.Being;
@@ -30,7 +29,6 @@ import com.jpinfo.mudengine.common.interfaces.ActionTarget;
 import com.jpinfo.mudengine.common.item.Item;
 import com.jpinfo.mudengine.common.place.Place;
 import com.jpinfo.mudengine.common.placeClass.PlaceClass;
-import com.jpinfo.mudengine.common.utils.ServiceCatalog;
 
 @Service
 public class ActionScheduler {
@@ -46,9 +44,6 @@ public class ActionScheduler {
 	@Autowired
 	private MudActionClassRepository classRepository;
 	
-	@Autowired
-	private RestTemplate restTemplate;
-
 	@Scheduled(fixedRate=60000)
 	public void updateActions() {
 		
@@ -58,8 +53,8 @@ public class ActionScheduler {
 		
 		updatePendingActions();
 		
-		//updateActiveActions();
-		//updatePendingMessages();
+		updateActiveActions();
+		updatePendingMessages();
 	
 		
 		ActionScheduler.currentTurn++;
@@ -83,10 +78,10 @@ public class ActionScheduler {
 			
 			if (dummy==null) {
 				
-				// Check the prerequisites
-				ActionState fullActionState = buildAction(curPendingAction);
-				
 				try {
+					// Check the prerequisites
+					ActionState fullActionState = buildAction(curPendingAction);
+					
 					checkPrerequisites(fullActionState);
 					
 					// Update the action to Started
@@ -121,16 +116,25 @@ public class ActionScheduler {
 		
 		for(MudAction curAction: actionList) {
 			
-			// Apply the effects
-			ActionState fullActionState = buildAction(curAction);
+			try {
 			
-			//fullActionState = calculateEffect(fullActionState);
-			
-			// TODO: Update changed entities
-			
-			
-			// Update the action to COMPLETED
-			curAction.setCurrState(ActionSimpleState.COMPLETED);
+				// Apply the effects
+				ActionState fullActionState = buildAction(curAction);
+				
+				fullActionState = calculateEffect(fullActionState);
+				
+				// TODO: Update changed entities
+				
+				
+				// Update the action to COMPLETED
+				curAction.setCurrState(ActionSimpleState.COMPLETED);
+				
+			} catch(ActionRefusedException e) {
+				
+				// Update the action to Cancelled
+				curAction.setCurrState(ActionSimpleState.CANCELLED);
+				curAction.setEndTurn(ActionScheduler.currentTurn);
+			}
 			
 			repository.save(curAction);
 		}
@@ -205,9 +209,7 @@ public class ActionScheduler {
 		return e;
 	}
 	
-	private ActionState buildAction(MudAction a) {
-		
-		RestTemplate restTemplate = new RestTemplate();
+	private ActionState buildAction(MudAction a) throws ActionRefusedException {
 		
 		ActionState result = new ActionState();
 
@@ -215,30 +217,23 @@ public class ActionScheduler {
 		result.setActionCode(a.getActionCode());
 		
 		//Actor
-
 		if (a.getActorCode()!=null) {
 			
-			List<ServiceInstance> instanceList = discoveryClient.getInstances(ServiceCatalog.MUD_BEING_SERVICE);
-			
-			System.out.println(instanceList);
-			
-			
-			//Being actor = restTemplate.getForObject(getBeingServiceUrl(), Being.class, a.getActorCode());
-			//result.setActor(actor);
+			Being actor = (Being)getActionTarget(Being.class, Being.SERVICE_NAME, Being.SERVICE_GET_URL, a.getActorCode());
+			result.setActor(actor);
 		}
 		
-/*
 		// Mediator
 		if (a.getMediatorCode()!=null) {
 			
-			Item item = restTemplate.getForObject(getItemServiceUrl(), Item.class, a.getMediatorCode());
-			result.setMediator(item);
+			Item mediator = (Item)getActionTarget(Item.class, Item.SERVICE_NAME, Item.SERVICE_GET_URL, a.getMediatorCode());
+			result.setMediator(mediator);
 		}
 		
 		// Place
 		if (a.getPlaceCode()!=null) {
 			
-			Place place = restTemplate.getForObject(getPlaceServiceUrl(), Place.class, a.getPlaceCode());
+			Place place = (Place)getActionTarget(Place.class, Place.SERVICE_NAME, Place.SERVICE_GET_URL, a.getPlaceCode());
 			result.setPlace(place);
 		}
 		
@@ -248,24 +243,52 @@ public class ActionScheduler {
 			
 			switch(a.getTargetType()) {
 			case "ITEM":
-				target = restTemplate.getForObject(getItemServiceUrl(), Item.class, a.getTargetCode());
+				target = getActionTarget(Item.class, Item.SERVICE_NAME, Item.SERVICE_GET_URL, a.getTargetCode());
 				break;
 			case "PLACE":
-				target = restTemplate.getForObject(getPlaceServiceUrl(), Place.class, a.getTargetCode());
+				target = getActionTarget(Place.class, Place.SERVICE_NAME, Place.SERVICE_GET_URL, a.getTargetCode());
 				break;
 			case "BEING":
-				target = restTemplate.getForObject(getBeingServiceUrl(), Being.class, a.getTargetCode());
+				target = getActionTarget(Being.class, Being.SERVICE_NAME, Being.SERVICE_GET_URL, a.getTargetCode());
 				break;
 			case "PLACE_CLASS":
-				target = restTemplate.getForObject(getPlaceClassServiceUrl(), PlaceClass.class, a.getTargetCode());
+				target = getActionTarget(PlaceClass.class, PlaceClass.SERVICE_NAME, PlaceClass.SERVICE_GET_URL, a.getTargetCode());
 				break;
 			}
 			
 			result.setTarget(target);
 		}
-		*/
 		
 		return result;
+	}
+	
+	private ActionTarget getActionTarget(Class<?> actionTargetClass, String serviceName, String serviceUrl, Object Id) throws ActionRefusedException {
+		
+		RestTemplate restTemplate = new RestTemplate();
+		
+		ActionTarget result = null;
+		
+		List<ServiceInstance> instanceList = discoveryClient.getInstances(serviceName);
+		
+		if (!instanceList.isEmpty()) {
+			
+			ServiceInstance chosenInstance = instanceList.get(0);
+			
+			result = (ActionTarget)restTemplate.getForObject(
+					chosenInstance.getUri().toString() + serviceUrl, actionTargetClass, Id);
+			
+			if (result==null) {
+				
+				//throw new ActionRefusedException(actionTargetClass.getName() +"  " + Id + " not found");
+				throw new ActionRefusedException(ActionRefusedException.GENERIC_ERROR);
+			}
+			
+		} else {
+			System.out.println("No instances available to resolve " + serviceName + " service");
+		}
+		
+		return result;
+		
 	}
 
 

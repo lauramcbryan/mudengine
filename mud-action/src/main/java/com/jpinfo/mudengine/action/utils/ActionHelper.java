@@ -35,22 +35,4 @@ public class ActionHelper {
 		
 		return mudAction;
 	}
-	
-	
-	private static String getPlaceServiceUrl() {
-		return "http://localhost:8080/place/{id}";
-	}
-
-	private static String getPlaceClassServiceUrl() {
-		return "http://localhost:8080/place/class/{id}";
-	}
-	
-	private static String getItemServiceUrl() {
-		return "http://localhost:8084/item/{id}";
-	}
-
-	private static String getBeingServiceUrl() {
-		return "http://localhost:8088/being/{id}";
-	}
-	
 }

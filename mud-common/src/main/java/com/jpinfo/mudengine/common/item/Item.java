@@ -7,13 +7,15 @@ import java.util.Map;
 
 import com.jpinfo.mudengine.common.interfaces.ActionTarget;
 
-
-/**
- * The persistent class for the mud_item database table.
- * 
- */
 public class Item implements Serializable, ActionTarget {
 	private static final long serialVersionUID = 1L;
+	
+	public static final String SERVICE_NAME="mud-item";
+	
+	public static final String SERVICE_GET_URL="/item/{id}";
+	public static final String SERVICE_CREATE_URL="/item";
+	public static final String SERVICE_UPDATE_URL="/item/{id}";
+	
 
 	private Integer itemCode;
 
@@ -87,5 +89,4 @@ public class Item implements Serializable, ActionTarget {
 	public void setSkillModifiers(Map<String, Float> skillModifiers) {
 		this.skillModifiers = skillModifiers;
 	}
-
 }

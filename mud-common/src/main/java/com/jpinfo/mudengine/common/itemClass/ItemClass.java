@@ -11,6 +11,10 @@ import java.util.Map;
  */
 public class ItemClass implements Serializable {
 	private static final long serialVersionUID = 1L;
+	
+	public static final String SERVICE_NAME="mud-item";
+	public static final String SERVICE_GET_URL="/item/class/{id}";
+	
 
 	private String itemClass;
 

@@ -11,6 +11,9 @@ import java.util.Map;
  */
 public class BeingClass implements Serializable {
 	private static final long serialVersionUID = 1L;
+	
+	public static final String SERVICE_NAME="mud-being-class";
+	public static final String SERVICE_GET_URL="/being/class/{id}";
 
 	private String beingClass;
 

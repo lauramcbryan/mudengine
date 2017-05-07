@@ -15,6 +15,13 @@ import com.jpinfo.mudengine.common.interfaces.ActionTarget;
  */
 public class Being implements Serializable, ActionTarget {
 	private static final long serialVersionUID = 1L;
+	
+	public static final String SERVICE_NAME="mud-being";
+	
+	public static final String SERVICE_GET_URL="/being/{id}";
+	public static final String SERVICE_CREATE_URL="/being";
+	public static final String SERVICE_UPDATE_URL="/being/{id}";
+	
 
 	private Long beingCode;
 
@@ -46,6 +53,8 @@ public class Being implements Serializable, ActionTarget {
 		this.attrModifiers = new ArrayList<BeingAttrModifier>();
 		this.skillModifiers = new ArrayList<BeingSkillModifier>();
 	}
+	
+	
 
 	public Long getBeingCode() {
 		return beingCode;
@@ -134,7 +143,4 @@ public class Being implements Serializable, ActionTarget {
 	public void setName(String name) {
 		this.name = name;
 	}
-	
-	
-	
 }

@@ -6,6 +6,9 @@ import java.util.Map;
 import com.jpinfo.mudengine.common.interfaces.ActionTarget;
 
 public class PlaceClass implements ActionTarget {
+	
+	public static final String SERVICE_NAME="mud-world";
+	public static final String SERVICE_GET_URL="/place/class/{id}";
 
 	private String placeClassCode;
 
@@ -123,5 +126,4 @@ public class PlaceClass implements ActionTarget {
 	public void setMaterial(String material) {
 		this.material = material;
 	}
-	
 }

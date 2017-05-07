@@ -6,6 +6,12 @@ import java.util.*;
 import com.jpinfo.mudengine.common.interfaces.ActionTarget;
 
 public class Place implements ActionTarget {
+	
+	public static final String SERVICE_NAME="mud-world";
+	
+	public static final String SERVICE_GET_URL="/place/{id}";
+	public static final String SERVICE_CREATE_URL="/place";
+	public static final String SERVICE_UPDATE_URL="/place/{id}";
 
 	private Integer placeCode;
 
@@ -67,6 +73,5 @@ public class Place implements ActionTarget {
 	public void setItems(Set<PlaceItems> items) {
 		this.items = items;
 	}
-	
 	
 }
