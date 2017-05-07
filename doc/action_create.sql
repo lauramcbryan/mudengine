@@ -46,10 +46,10 @@ CREATE TABLE MUDENGINE_ACTION.MUD_ACTION (
 		TARGET_CODE			varchar(20) not null,
 		TARGET_TYPE			varchar(20) not null,
 		
-		START_TURN			integer not null,
-		END_TURN			integer not null,
+		START_TURN			bigint,
+		END_TURN			bigint,
 		CUR_STATE			integer not null default 0,  -- 0=NotStarted, 1=Started, 2=Completed, 3=Cancelled, 4=Refused
-		SUCCESS_RATE	real not null,
+		SUCCESS_RATE		real,
 		
 		CONSTRAINT MUD_ACTION_PK PRIMARY KEY (ACTION_UID),
 		FOREIGN KEY (ACTION_CLASS_CODE) REFERENCES MUDENGINE_ACTION.MUD_ACTION_CLASS(ACTION_CLASS_CODE)

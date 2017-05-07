@@ -59,20 +59,13 @@ public class ActionController {
 		
 		ActionSimpleState response = new ActionSimpleState();
 		
-		// Verify if the same actor has another action running
-		MudAction runningAction = repository.findFirstOneByActorCode(newAction.getActorCode()); 
+		MudAction dbAction = ActionHelper.buildMudAction(newAction);
 		
-		if (runningAction==null) {
-			MudAction dbAction = ActionHelper.buildMudAction(newAction);
-			
-			// Save the new command; obtain an actionId
-			dbAction = repository.save(dbAction);
+		// Save the new command; obtain an actionId
+		dbAction = repository.save(dbAction);
 
-			// set the actionId back
-			response.setActionId(dbAction.getActionId());
-		} else {
-			response.setCurState(ActionSimpleState.REFUSED);
-		}
+		// set the actionId back
+		response.setActionId(dbAction.getActionId());
 		
 		return response;
 	}

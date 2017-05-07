@@ -4,8 +4,11 @@ import javax.persistence.*;
 
 @Entity
 @Table(name="MUD_ACTION_CLASS_EFFECT")
-public class MudActionClassEffect {
+public class MudActionClassEffect implements java.io.Serializable {
 	
+	private static final long serialVersionUID = 1L;
+	
+
 	@Id
 	@Column(name="ACTION_CLASS_CODE")
 	private String actionClassCode;
@@ -51,7 +54,39 @@ public class MudActionClassEffect {
 	public void setMessageCode(Integer messageCode) {
 		this.messageCode = messageCode;
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((actionClassCode == null) ? 0 : actionClassCode.hashCode());
+		result = prime * result + ((evalOrder == null) ? 0 : evalOrder.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		MudActionClassEffect other = (MudActionClassEffect) obj;
+		if (actionClassCode == null) {
+			if (other.actionClassCode != null)
+				return false;
+		} else if (!actionClassCode.equals(other.actionClassCode))
+			return false;
+		if (evalOrder == null) {
+			if (other.evalOrder != null)
+				return false;
+		} else if (!evalOrder.equals(other.evalOrder))
+			return false;
+		return true;
+	}
 	
+
 	
 
 }

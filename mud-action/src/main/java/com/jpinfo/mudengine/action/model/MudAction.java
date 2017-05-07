@@ -50,6 +50,7 @@ public class MudAction {
 	private Float successRate;
 	
 	public MudAction() {
+		this.currState = 0;
 		
 	}
 
