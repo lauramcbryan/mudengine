@@ -2,9 +2,9 @@ package com.jpinfo.mudengine.common.action;
 
 public class Action {
 
-	private Integer issuerCode;
+	private Long issuerCode;
 	
-	private Integer actorCode;
+	private Long actorCode;
 
 	private String actionCode;
 	
@@ -22,21 +22,31 @@ public class Action {
 		
 	}
 
-	public Integer getIssuerCode() {
+	
+
+	public Long getIssuerCode() {
 		return issuerCode;
 	}
 
-	public void setIssuerCode(Integer issuerCode) {
+
+
+	public void setIssuerCode(Long issuerCode) {
 		this.issuerCode = issuerCode;
 	}
 
-	public Integer getActorCode() {
+
+
+	public Long getActorCode() {
 		return actorCode;
 	}
 
-	public void setActorCode(Integer actorCode) {
+
+
+	public void setActorCode(Long actorCode) {
 		this.actorCode = actorCode;
 	}
+
+
 
 	public String getActionCode() {
 		return actionCode;

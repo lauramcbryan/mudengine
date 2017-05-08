@@ -3,8 +3,6 @@ package com.jpinfo.mudengine.action.service;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
@@ -12,8 +10,11 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
+import com.jpinfo.mudengine.action.client.BeingServiceClient;
+import com.jpinfo.mudengine.action.client.ItemServiceClient;
+import com.jpinfo.mudengine.action.client.PlaceClassServiceClient;
+import com.jpinfo.mudengine.action.client.PlaceServiceClient;
 import com.jpinfo.mudengine.action.exception.ActionRefusedException;
 import com.jpinfo.mudengine.action.model.MudAction;
 import com.jpinfo.mudengine.action.model.MudActionClass;
@@ -28,7 +29,6 @@ import com.jpinfo.mudengine.common.being.Being;
 import com.jpinfo.mudengine.common.interfaces.ActionTarget;
 import com.jpinfo.mudengine.common.item.Item;
 import com.jpinfo.mudengine.common.place.Place;
-import com.jpinfo.mudengine.common.placeClass.PlaceClass;
 
 @Service
 public class ActionScheduler {
@@ -36,15 +36,24 @@ public class ActionScheduler {
 	private static Long currentTurn = 0L;
 	
 	@Autowired
-	private DiscoveryClient discoveryClient;
-	
-	@Autowired
 	private MudActionRepository repository;
 	
 	@Autowired
 	private MudActionClassRepository classRepository;
 	
-	@Scheduled(fixedRate=60000)
+	@Autowired
+	private BeingServiceClient beingService;
+	
+	@Autowired
+	private PlaceServiceClient placeService;
+	
+	@Autowired
+	private PlaceClassServiceClient placeClassService;
+	
+	@Autowired
+	private ItemServiceClient itemService;
+	
+	@Scheduled(fixedRate=10000)
 	public void updateActions() {
 		
 		System.out.println("ActionScheduler.  Turn=" + ActionScheduler.currentTurn);
@@ -204,6 +213,8 @@ public class ActionScheduler {
 			
 			// TODO: Update the message queue
 			
+			// TODO: Mark the changed entities for update
+			
 		}
 		
 		return e;
@@ -219,22 +230,40 @@ public class ActionScheduler {
 		//Actor
 		if (a.getActorCode()!=null) {
 			
-			Being actor = (Being)getActionTarget(Being.class, Being.SERVICE_NAME, Being.SERVICE_GET_URL, a.getActorCode());
-			result.setActor(actor);
+			Being actor = beingService.getBeing(a.getActorCode());
+			
+			if (actor!=null) {
+				result.setActor(actor);
+			} else {
+				//throw new ActionRefusedException(actionTargetClass.getName() +"  " + Id + " not found");
+				throw new ActionRefusedException(ActionRefusedException.GENERIC_ERROR);
+			}
 		}
 		
 		// Mediator
 		if (a.getMediatorCode()!=null) {
 			
-			Item mediator = (Item)getActionTarget(Item.class, Item.SERVICE_NAME, Item.SERVICE_GET_URL, a.getMediatorCode());
-			result.setMediator(mediator);
+			Item mediator = itemService.getItem(a.getMediatorCode());
+			
+			if (mediator!=null) {
+				result.setMediator(mediator);
+			} else {
+				//throw new ActionRefusedException(actionTargetClass.getName() +"  " + Id + " not found");
+				throw new ActionRefusedException(ActionRefusedException.GENERIC_ERROR);
+			}
 		}
 		
 		// Place
 		if (a.getPlaceCode()!=null) {
 			
-			Place place = (Place)getActionTarget(Place.class, Place.SERVICE_NAME, Place.SERVICE_GET_URL, a.getPlaceCode());
-			result.setPlace(place);
+			Place place = placeService.getPlace(a.getPlaceCode());
+			
+			if (place!=null) {
+				result.setPlace(place);
+			} else {
+				//throw new ActionRefusedException(actionTargetClass.getName() +"  " + Id + " not found");
+				throw new ActionRefusedException(ActionRefusedException.GENERIC_ERROR);
+			}
 		}
 		
 		if (a.getTargetCode()!=null) {
@@ -243,53 +272,25 @@ public class ActionScheduler {
 			
 			switch(a.getTargetType()) {
 			case "ITEM":
-				target = getActionTarget(Item.class, Item.SERVICE_NAME, Item.SERVICE_GET_URL, a.getTargetCode());
+				target = itemService.getItem(Integer.valueOf(a.getTargetCode()));
 				break;
 			case "PLACE":
-				target = getActionTarget(Place.class, Place.SERVICE_NAME, Place.SERVICE_GET_URL, a.getTargetCode());
+				target = placeService.getPlace(Integer.valueOf(a.getTargetCode()));
 				break;
 			case "BEING":
-				target = getActionTarget(Being.class, Being.SERVICE_NAME, Being.SERVICE_GET_URL, a.getTargetCode());
+				target = beingService.getBeing(Long.valueOf(a.getTargetCode()));
 				break;
 			case "PLACE_CLASS":
-				target = getActionTarget(PlaceClass.class, PlaceClass.SERVICE_NAME, PlaceClass.SERVICE_GET_URL, a.getTargetCode());
+				target = placeClassService.getPlaceClass(a.getTargetCode());
 				break;
 			}
 			
-			result.setTarget(target);
-		}
-		
-		return result;
-	}
-	
-	private ActionTarget getActionTarget(Class<?> actionTargetClass, String serviceName, String serviceUrl, Object Id) throws ActionRefusedException {
-		
-		RestTemplate restTemplate = new RestTemplate();
-		
-		ActionTarget result = null;
-		
-		List<ServiceInstance> instanceList = discoveryClient.getInstances(serviceName);
-		
-		if (!instanceList.isEmpty()) {
-			
-			ServiceInstance chosenInstance = instanceList.get(0);
-			
-			result = (ActionTarget)restTemplate.getForObject(
-					chosenInstance.getUri().toString() + serviceUrl, actionTargetClass, Id);
-			
-			if (result==null) {
-				
-				//throw new ActionRefusedException(actionTargetClass.getName() +"  " + Id + " not found");
-				throw new ActionRefusedException(ActionRefusedException.GENERIC_ERROR);
+			if (target!=null) {
+				result.setTarget(target);
 			}
-			
-		} else {
-			System.out.println("No instances available to resolve " + serviceName + " service");
 		}
 		
 		return result;
-		
 	}
-
 
 }

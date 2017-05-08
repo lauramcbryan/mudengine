@@ -16,13 +16,6 @@ import com.jpinfo.mudengine.common.interfaces.ActionTarget;
 public class Being implements Serializable, ActionTarget {
 	private static final long serialVersionUID = 1L;
 	
-	public static final String SERVICE_NAME="mud-being";
-	
-	public static final String SERVICE_GET_URL="/being/{id}";
-	public static final String SERVICE_CREATE_URL="/being";
-	public static final String SERVICE_UPDATE_URL="/being/{id}";
-	
-
 	private Long beingCode;
 
 	private String beingClass;

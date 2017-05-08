@@ -3,10 +3,9 @@ package com.jpinfo.mudengine.world.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.jpinfo.mudengine.common.interfaces.PlaceService;
 import com.jpinfo.mudengine.common.place.Place;
 import com.jpinfo.mudengine.world.model.MudPlace;
 import com.jpinfo.mudengine.world.model.MudPlaceClass;
@@ -15,8 +14,7 @@ import com.jpinfo.mudengine.world.repository.PlaceRepository;
 import com.jpinfo.mudengine.world.util.WorldHelper;
 
 @RestController
-@RequestMapping("/place")
-public class PlaceController {
+public class PlaceController implements PlaceService {
 	
 	@Autowired
 	private PlaceRepository placeRepository;
@@ -24,7 +22,7 @@ public class PlaceController {
 	@Autowired
 	private PlaceClassRepository placeClassRepository;
 
-	@RequestMapping(method=RequestMethod.GET, value="/{id}")
+	@Override
 	public Place getPlace(@PathVariable Integer id) {
 		
 		MudPlace found = placeRepository.findOne(id);
@@ -34,7 +32,7 @@ public class PlaceController {
 		return result;
 	}
 	
-	@RequestMapping(method=RequestMethod.POST, value="/{id}")
+	@Override
 	public void updatePlace(@PathVariable Integer id, @RequestBody Place requestPlace) {
 		
 		MudPlace dbPlace = placeRepository.findOne(id);

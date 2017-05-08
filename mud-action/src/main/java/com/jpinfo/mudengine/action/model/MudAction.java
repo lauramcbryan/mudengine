@@ -13,10 +13,10 @@ public class MudAction {
 	private Long actionId;
 	
 	@Column(name="ISSUER_CODE")
-	private Integer issuerCode;
+	private Long issuerCode;
 	
 	@Column(name="ACTOR_CODE")
-	private Integer actorCode;
+	private Long actorCode;
 	
 
 	@Column(name="ACTION_CLASS_CODE")
@@ -110,19 +110,21 @@ public class MudAction {
 		this.actionId = actionId;
 	}
 
-	public Integer getIssuerCode() {
+	
+
+	public Long getIssuerCode() {
 		return issuerCode;
 	}
 
-	public void setIssuerCode(Integer issuerCode) {
+	public void setIssuerCode(Long issuerCode) {
 		this.issuerCode = issuerCode;
 	}
 
-	public Integer getActorCode() {
+	public Long getActorCode() {
 		return actorCode;
 	}
 
-	public void setActorCode(Integer actorCode) {
+	public void setActorCode(Long actorCode) {
 		this.actorCode = actorCode;
 	}
 

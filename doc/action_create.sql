@@ -37,8 +37,8 @@ CREATE TABLE MUDENGINE_ACTION.MUD_ACTION_CLASS_EFFECT (
 		
 CREATE TABLE MUDENGINE_ACTION.MUD_ACTION (
 		ACTION_UID			bigint not null,
-		ISSUER_CODE			integer not null,
-		ACTOR_CODE			integer not null,		
+		ISSUER_CODE			bigint not null,
+		ACTOR_CODE			bigint not null,		
 		ACTION_CLASS_CODE	varchar(15) not null,
 		MEDIATOR_CODE		integer,
 		WORLD_NAME			varchar(30) not null,

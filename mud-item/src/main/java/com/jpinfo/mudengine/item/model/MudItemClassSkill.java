@@ -12,7 +12,7 @@ import com.jpinfo.mudengine.item.model.pk.MudItemClassSkillPK;
  */
 @Entity
 @Table(name="mud_item_class_skill")
-public class ItemClassSkill implements Serializable {
+public class MudItemClassSkill implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@EmbeddedId
@@ -21,7 +21,7 @@ public class ItemClassSkill implements Serializable {
 	@Column(name="skill_offset")
 	private float skillOffset;
 
-	public ItemClassSkill() {
+	public MudItemClassSkill() {
 	}
 
 	public MudItemClassSkillPK getId() {

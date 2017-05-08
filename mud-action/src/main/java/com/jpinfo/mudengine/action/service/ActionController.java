@@ -25,7 +25,7 @@ public class ActionController {
 	private MudActionRepository repository;
 	
 	@RequestMapping(method=RequestMethod.GET, value="/actor/{actorCode}")
-	public Iterable<ActionSimpleState> getActiveActions(@PathVariable Integer actorCode) {
+	public Iterable<ActionSimpleState> getActiveActions(@PathVariable Long actorCode) {
 		
 		List<ActionSimpleState> responseList = new ArrayList<ActionSimpleState>();
 		

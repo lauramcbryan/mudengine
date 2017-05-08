@@ -4,8 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.jpinfo.mudengine.common.item.Item;
+import com.jpinfo.mudengine.common.itemClass.ItemClass;
+import com.jpinfo.mudengine.item.model.MudItemClassSkill;
 import com.jpinfo.mudengine.item.model.MudItem;
 import com.jpinfo.mudengine.item.model.MudItemAttr;
+import com.jpinfo.mudengine.item.model.MudItemClass;
+import com.jpinfo.mudengine.item.model.MudItemClassAttr;
 import com.jpinfo.mudengine.item.model.MudItemSkill;
 import com.jpinfo.mudengine.item.model.pk.MudItemAttrPK;
 import com.jpinfo.mudengine.item.model.pk.MudItemSkillPK;
@@ -87,5 +91,25 @@ public class ItemHelper {
 		return dbItem;
 	}
 	
+	
+	public static ItemClass buildItemClass(MudItemClass a) {
+		
+		ItemClass result = new ItemClass();
+		
+		result.setItemClass(a.getItemClass());
+		result.setDurability(a.getDurability());
+		result.setSize(a.getSize());
+		result.setWeight(a.getWeight());
+		
+		for(MudItemClassAttr curAttr: a.getAttrs()) {
+			result.getAttrModifiers().put(curAttr.getId().getAttrCode(), curAttr.getOffset());
+		}
+		
+		for(MudItemClassSkill curSkill: a.getSkills()) {
+			result.getSkillModifiers().put(curSkill.getId().getSkillCode(), curSkill.getOffset());
+		}
+		
+		return result;
+	}
 
 }

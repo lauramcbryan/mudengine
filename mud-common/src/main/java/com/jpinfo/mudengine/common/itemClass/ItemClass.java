@@ -1,7 +1,7 @@
 package com.jpinfo.mudengine.common.itemClass;
 
 import java.io.Serializable;
-
+import java.util.HashMap;
 import java.util.Map;
 
 
@@ -11,10 +11,6 @@ import java.util.Map;
  */
 public class ItemClass implements Serializable {
 	private static final long serialVersionUID = 1L;
-	
-	public static final String SERVICE_NAME="mud-item";
-	public static final String SERVICE_GET_URL="/item/class/{id}";
-	
 
 	private String itemClass;
 
@@ -24,11 +20,14 @@ public class ItemClass implements Serializable {
 
 	private float weight;
 
-	private Map<String, Double> attrModifiers;
+	private Map<String, Float> attrModifiers;
 
-	private Map<String, Double> skillModifiers;
+	private Map<String, Float> skillModifiers;
 
 	public ItemClass() {
+		
+		this.attrModifiers = new HashMap<String, Float>();
+		this.skillModifiers = new HashMap<String, Float>();
 	}
 
 	public String getItemClass() {
@@ -63,19 +62,19 @@ public class ItemClass implements Serializable {
 		this.weight = weight;
 	}
 
-	public Map<String, Double> getAttrModifiers() {
+	public Map<String, Float> getAttrModifiers() {
 		return attrModifiers;
 	}
 
-	public void setAttrModifiers(Map<String, Double> attrModifiers) {
+	public void setAttrModifiers(Map<String, Float> attrModifiers) {
 		this.attrModifiers = attrModifiers;
 	}
 
-	public Map<String, Double> getSkillModifiers() {
+	public Map<String, Float> getSkillModifiers() {
 		return skillModifiers;
 	}
 
-	public void setSkillModifiers(Map<String, Double> skillModifiers) {
+	public void setSkillModifiers(Map<String, Float> skillModifiers) {
 		this.skillModifiers = skillModifiers;
 	}
 	

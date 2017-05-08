@@ -64,17 +64,6 @@
 			<artifactId>hibernate-entitymanager</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.jvnet.ws.wadl</groupId>
-			<artifactId>wadl-core</artifactId>
-			<version>1.1.6</version>
-		</dependency>
-		<dependency>
-			<groupId>org.jvnet.ws.wadl</groupId>
-			<artifactId>wadl-client-plugin</artifactId>
-			<version>1.1.6</version>
-			<type>maven-plugin</type>
-		</dependency>
-		<dependency>
 			<groupId>com.jpinfo.mudengine</groupId>
 			<artifactId>mud-common</artifactId>
 			<version>0.0.1-SNAPSHOT</version>

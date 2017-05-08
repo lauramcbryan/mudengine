@@ -5,4 +5,11 @@
   <version>0.0.1-SNAPSHOT</version>
   <name>Shared project between mudengine services</name>
   <description>Shared project between mudengine services</description>
+  <dependencies>
+  	<dependency>
+  		<groupId>org.springframework</groupId>
+  		<artifactId>spring-web</artifactId>
+  		<version>4.3.8.RELEASE</version>
+  	</dependency>
+  </dependencies>
 </project>

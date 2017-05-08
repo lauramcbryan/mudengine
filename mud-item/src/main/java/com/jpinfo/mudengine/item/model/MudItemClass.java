@@ -30,7 +30,7 @@ public class MudItemClass implements Serializable {
 
 	//bi-directional many-to-one association to ItemClassSkill
 	@OneToMany(mappedBy="id.itemClass", cascade=CascadeType.ALL, orphanRemoval=true)
-	private List<ItemClassSkill> skills;
+	private List<MudItemClassSkill> skills;
 
 	public MudItemClass() {
 	}
@@ -71,7 +71,7 @@ public class MudItemClass implements Serializable {
 		return this.attrs;
 	}
 
-	public List<ItemClassSkill> getSkills() {
+	public List<MudItemClassSkill> getSkills() {
 		return this.skills;
 	}
 }

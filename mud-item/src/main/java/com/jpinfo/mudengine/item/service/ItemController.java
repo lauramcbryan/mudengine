@@ -1,25 +1,24 @@
 package com.jpinfo.mudengine.item.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.jpinfo.mudengine.common.interfaces.ItemService;
 import com.jpinfo.mudengine.common.item.Item;
 import com.jpinfo.mudengine.item.model.MudItem;
 import com.jpinfo.mudengine.item.repository.ItemRepository;
 import com.jpinfo.mudengine.item.utils.ItemHelper;
 
 @RestController
-@RequestMapping("/item")
-public class ItemController {
+public class ItemController implements ItemService {
 	
 	@Autowired
 	ItemRepository repository;
 
-	@RequestMapping(method=RequestMethod.GET, value="{id}")
+	@Override
 	public Item getItem(@PathVariable Integer id) {
 		
 		MudItem found = repository.findOne(id);
@@ -29,7 +28,7 @@ public class ItemController {
 		return response;
 	}
 	
-	@RequestMapping(method=RequestMethod.POST, value="{id}")
+	@Override
 	public void updateItem(@PathVariable Integer id, @RequestBody Item item) {
 		
 		// Retrieving the database record
@@ -41,7 +40,7 @@ public class ItemController {
 		repository.save(found);
 	}
 	
-	@RequestMapping(method=RequestMethod.PUT)
+	@Override
 	public Item insertItem(@RequestBody Item newItem) {
 		
 		MudItem newDbItem = new MudItem();
