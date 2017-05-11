@@ -58,7 +58,7 @@
 		<dependency>
 			<groupId>com.jpinfo.mudengine</groupId>
 			<artifactId>mud-common</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>1.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.hibernate</groupId>

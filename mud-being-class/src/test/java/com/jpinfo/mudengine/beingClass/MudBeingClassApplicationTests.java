@@ -1,4 +1,4 @@
-package com.jpinfo.mudengine.being;
+package com.jpinfo.mudengine.beingClass;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
