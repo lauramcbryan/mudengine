@@ -1,4 +1,4 @@
-package com.jpinfo.mudengine.command;
+package com.jpinfo.mudengine.action;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

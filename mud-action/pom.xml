@@ -6,7 +6,6 @@
 	<groupId>com.jpinfo.mudengine</groupId>
 	<artifactId>mud-action</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<packaging>war</packaging>
 
 	<name>mud-action</name>
 	<description>Action service for MUD Engine</description>
