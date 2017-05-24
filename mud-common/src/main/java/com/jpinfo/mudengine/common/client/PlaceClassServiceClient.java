@@ -1,4 +1,4 @@
-package com.jpinfo.mudengine.action.client;
+package com.jpinfo.mudengine.common.client;
 
 import org.springframework.cloud.netflix.feign.FeignClient;
 
