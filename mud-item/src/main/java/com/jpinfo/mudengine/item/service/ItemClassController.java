@@ -5,8 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.jpinfo.mudengine.common.interfaces.ItemClassService;
 import com.jpinfo.mudengine.common.itemClass.ItemClass;
+import com.jpinfo.mudengine.common.service.ItemClassService;
 import com.jpinfo.mudengine.item.model.MudItemClass;
 import com.jpinfo.mudengine.item.repository.ItemClassRepository;
 import com.jpinfo.mudengine.item.utils.ItemHelper;

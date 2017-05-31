@@ -8,7 +8,7 @@ import com.jpinfo.mudengine.being.model.MudPlayer;
 import com.jpinfo.mudengine.being.repository.PlayerRepository;
 import com.jpinfo.mudengine.being.utils.PlayerHelper;
 import com.jpinfo.mudengine.common.being.Player;
-import com.jpinfo.mudengine.common.interfaces.PlayerService;
+import com.jpinfo.mudengine.common.service.PlayerService;
 
 @RestController
 public class PlayerController implements PlayerService {

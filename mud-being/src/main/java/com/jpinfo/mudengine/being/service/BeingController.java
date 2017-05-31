@@ -13,7 +13,7 @@ import com.jpinfo.mudengine.being.model.MudBeing;
 import com.jpinfo.mudengine.being.repository.BeingRepository;
 import com.jpinfo.mudengine.being.utils.BeingHelper;
 import com.jpinfo.mudengine.common.being.Being;
-import com.jpinfo.mudengine.common.interfaces.BeingService;
+import com.jpinfo.mudengine.common.service.BeingService;
 
 @RestController
 

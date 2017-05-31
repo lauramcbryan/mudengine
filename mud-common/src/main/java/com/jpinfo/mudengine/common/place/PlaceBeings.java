@@ -4,17 +4,17 @@ package com.jpinfo.mudengine.common.place;
 
 public class PlaceBeings {
 
-	private Integer beingCode;
+	private Long beingCode;
 	
 	private String name;
 	
 	private Integer qtty;
 
-	public Integer getBeingCode() {
+	public Long getBeingCode() {
 		return beingCode;
 	}
 
-	public void setBeingCode(Integer beingCode) {
+	public void setBeingCode(Long beingCode) {
 		this.beingCode = beingCode;
 	}
 

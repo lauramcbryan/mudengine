@@ -5,8 +5,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.jpinfo.mudengine.common.interfaces.PlaceService;
 import com.jpinfo.mudengine.common.place.Place;
+import com.jpinfo.mudengine.common.place.PlaceExits;
+import com.jpinfo.mudengine.common.service.PlaceService;
 import com.jpinfo.mudengine.world.model.MudPlace;
 import com.jpinfo.mudengine.world.model.MudPlaceClass;
 import com.jpinfo.mudengine.world.repository.PlaceClassRepository;
@@ -31,9 +32,10 @@ public class PlaceController implements PlaceService {
 		
 		return result;
 	}
+
 	
 	@Override
-	public void updatePlace(@PathVariable Integer id, @RequestBody Place requestPlace) {
+	public Place updatePlace(@PathVariable Integer id, @RequestBody Place requestPlace) {
 		
 		MudPlace dbPlace = placeRepository.findOne(id);
 
@@ -62,6 +64,64 @@ public class PlaceController implements PlaceService {
 		dbPlace = WorldHelper.updatePlaceExits(dbPlace, requestPlace);
 
 		
-		placeRepository.save(dbPlace);
+		MudPlace updatedPlace = placeRepository.save(dbPlace);
+		
+		return WorldHelper.buildPlace(updatedPlace);
+	}
+
+
+	@Override
+	public Place destroyPlace(Integer placeId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	public Place createExit(Integer placeId, String direction, PlaceExits newExit) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	public Place updateExit(Integer placeId, String direction, PlaceExits newExit) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	public Place destroyExit(Integer placeId, String direction) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	public Place updateItems(Integer placeId, Integer itemCode, Integer qtty, String qttyMode) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	public Place removeItems(Integer placeId, Integer itemCode) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	public Place updateBeings(Integer placeId, Long beingId, Integer qtty, String qttyMode) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	public Place removeBeings(Integer placeId, Long beingId) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

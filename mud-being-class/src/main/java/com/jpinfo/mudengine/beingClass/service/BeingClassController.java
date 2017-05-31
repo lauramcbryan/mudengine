@@ -9,7 +9,7 @@ import com.jpinfo.mudengine.beingClass.model.MudBeingClass;
 import com.jpinfo.mudengine.beingClass.repository.BeingClassRepository;
 import com.jpinfo.mudengine.beingClass.util.BeingClassHelper;
 import com.jpinfo.mudengine.common.beingClass.BeingClass;
-import com.jpinfo.mudengine.common.interfaces.BeingClassService;
+import com.jpinfo.mudengine.common.service.BeingClassService;
 
 @RestController
 public class BeingClassController implements BeingClassService {

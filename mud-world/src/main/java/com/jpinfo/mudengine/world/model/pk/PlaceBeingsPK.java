@@ -15,7 +15,7 @@ public class PlaceBeingsPK implements Serializable {
 	private Integer placeCode;
 
 	@Column(name="BEING_CODE")
-	private Integer beingCode;
+	private Long beingCode;
 
 	public Integer getPlaceCode() {
 		return placeCode;
@@ -25,11 +25,11 @@ public class PlaceBeingsPK implements Serializable {
 		this.placeCode = placeCode;
 	}
 
-	public Integer getBeingCode() {
+	public Long getBeingCode() {
 		return beingCode;
 	}
 
-	public void setBeingCode(Integer beingCode) {
+	public void setBeingCode(Long beingCode) {
 		this.beingCode = beingCode;
 	}
 
