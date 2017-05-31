@@ -1,9 +1,9 @@
-package com.jpinfo.mudengine.beingClass.model;
+package com.jpinfo.mudengine.being.model;
 
 import java.io.Serializable;
 import javax.persistence.*;
 
-import com.jpinfo.mudengine.beingClass.model.pk.BeingClassSkillPK;
+import com.jpinfo.mudengine.being.model.pk.BeingClassSkillPK;
 
 
 /**

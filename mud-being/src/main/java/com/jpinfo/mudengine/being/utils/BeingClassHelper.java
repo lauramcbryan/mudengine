@@ -1,9 +1,9 @@
-package com.jpinfo.mudengine.beingClass.util;
+package com.jpinfo.mudengine.being.utils;
 
-import com.jpinfo.mudengine.beingClass.model.MudBeingClass;
-import com.jpinfo.mudengine.beingClass.model.MudBeingClassAttr;
-import com.jpinfo.mudengine.beingClass.model.MudBeingClassSkill;
-import com.jpinfo.mudengine.common.beingClass.BeingClass;
+import com.jpinfo.mudengine.being.model.MudBeingClass;
+import com.jpinfo.mudengine.being.model.MudBeingClassAttr;
+import com.jpinfo.mudengine.being.model.MudBeingClassSkill;
+import com.jpinfo.mudengine.common.being.BeingClass;
 
 public class BeingClassHelper {
 

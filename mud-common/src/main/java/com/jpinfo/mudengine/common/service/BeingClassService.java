@@ -4,7 +4,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import com.jpinfo.mudengine.common.beingClass.BeingClass;
+import com.jpinfo.mudengine.common.being.BeingClass;
 
 @RequestMapping("/being/class")
 public interface BeingClassService {

@@ -1,14 +1,14 @@
-package com.jpinfo.mudengine.beingClass.service;
+package com.jpinfo.mudengine.being.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.jpinfo.mudengine.beingClass.model.MudBeingClass;
-import com.jpinfo.mudengine.beingClass.repository.BeingClassRepository;
-import com.jpinfo.mudengine.beingClass.util.BeingClassHelper;
-import com.jpinfo.mudengine.common.beingClass.BeingClass;
+import com.jpinfo.mudengine.being.model.MudBeingClass;
+import com.jpinfo.mudengine.being.repository.BeingClassRepository;
+import com.jpinfo.mudengine.being.utils.BeingClassHelper;
+import com.jpinfo.mudengine.common.being.BeingClass;
 import com.jpinfo.mudengine.common.service.BeingClassService;
 
 @RestController

@@ -1,4 +1,4 @@
-package com.jpinfo.mudengine.common.beingClass;
+package com.jpinfo.mudengine.common.being;
 
 import java.io.Serializable;
 import java.util.HashMap;

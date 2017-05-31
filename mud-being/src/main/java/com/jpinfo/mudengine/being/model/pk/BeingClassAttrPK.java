@@ -1,24 +1,24 @@
-package com.jpinfo.mudengine.beingClass.model.pk;
+package com.jpinfo.mudengine.being.model.pk;
 
 import java.io.Serializable;
 import javax.persistence.*;
 
 /**
- * The primary key class for the mud_being_class_skills database table.
+ * The primary key class for the mud_being_class_attr database table.
  * 
  */
 @Embeddable
-public class BeingClassSkillPK implements Serializable {
+public class BeingClassAttrPK implements Serializable {
 	//default serial version id, required for serializable classes.
 	private static final long serialVersionUID = 1L;
 
 	@Column(name="being_class", insertable=false, updatable=false)
 	private String beingClass;
 
-	@Column(name="skill_code", insertable=false, updatable=false)
-	private String skillCode;
+	@Column(name="attr_code", insertable=false, updatable=false)
+	private String attrCode;
 
-	public BeingClassSkillPK() {
+	public BeingClassAttrPK() {
 	}
 	public String getBeingClass() {
 		return this.beingClass;
@@ -26,31 +26,31 @@ public class BeingClassSkillPK implements Serializable {
 	public void setBeingClass(String beingClass) {
 		this.beingClass = beingClass;
 	}
-	public String getSkillCode() {
-		return this.skillCode;
+	public String getAttrCode() {
+		return this.attrCode;
 	}
-	public void setSkillCode(String skillCode) {
-		this.skillCode = skillCode;
+	public void setAttrCode(String attrCode) {
+		this.attrCode = attrCode;
 	}
 
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof BeingClassSkillPK)) {
+		if (!(other instanceof BeingClassAttrPK)) {
 			return false;
 		}
-		BeingClassSkillPK castOther = (BeingClassSkillPK)other;
+		BeingClassAttrPK castOther = (BeingClassAttrPK)other;
 		return 
 			this.beingClass.equals(castOther.beingClass)
-			&& this.skillCode.equals(castOther.skillCode);
+			&& this.attrCode.equals(castOther.attrCode);
 	}
 
 	public int hashCode() {
 		final int prime = 31;
 		int hash = 17;
 		hash = hash * prime + this.beingClass.hashCode();
-		hash = hash * prime + this.skillCode.hashCode();
+		hash = hash * prime + this.attrCode.hashCode();
 		
 		return hash;
 	}
