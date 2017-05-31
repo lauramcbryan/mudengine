@@ -41,33 +41,4 @@ public class ConsoleHelper {
 		
 		return result;
 	}
-	
-	public static String getPlaceServiceUrl() {
-		return "http://localhost:8080/place/{id}";
-	}
-
-	public static String getPlaceClassServiceUrl() {
-		return "http://localhost:8080/place/class/{id}";
-	}
-	
-	public static String getItemServiceUrl() {
-		return "http://localhost:8084/item/{id}";
-	}
-
-	public static String getBeingServiceUrl() {
-		return "http://localhost:8088/being/{id}";
-	}
-	
-	public static String getBeingByPlayerServiceUrl() {
-		return "http://localhost:8088/being/player/{playerId}";
-	}
-	
-	public static String getPlayerServiceUrl() {
-		return "http://localhost:8088/player/{id}";
-	}
-	
-	public static String getPlayerByLoginServiceUrl() {
-		return "http://localhost:8088/player/login/{login}";
-	}
-	
 }

@@ -1,26 +1,21 @@
 package com.jpinfo.mudengine.client.service;
 
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.discovery.DiscoveryClient;
-import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import com.jpinfo.mudengine.client.utils.ConsoleHelper;
 import com.jpinfo.mudengine.common.being.Being;
 import com.jpinfo.mudengine.common.being.Player;
+import com.jpinfo.mudengine.common.client.BeingServiceClient;
+import com.jpinfo.mudengine.common.client.PlaceServiceClient;
+import com.jpinfo.mudengine.common.client.PlayerServiceClient;
 import com.jpinfo.mudengine.common.place.Place;
 import com.jpinfo.mudengine.common.place.PlaceBeings;
 import com.jpinfo.mudengine.common.place.PlaceExits;
 import com.jpinfo.mudengine.common.place.PlaceItems;
-import com.jpinfo.mudengine.common.util.ServiceCatalog;
 
 @Service
-@EnableDiscoveryClient
 public class ConsoleAppService implements Runnable {
 		
 	private Place currentPlace;
@@ -30,16 +25,18 @@ public class ConsoleAppService implements Runnable {
 	private Being currentBeing;
 	
 	@Autowired
-	private DiscoveryClient discovery;
+	private BeingServiceClient beingService;
+	
+	@Autowired
+	private PlayerServiceClient playerService;
+	
+	@Autowired
+	private PlaceServiceClient placeService;
 	
 	
 	public void login(String login, String password) {
 		
-		List<ServiceInstance> instances = discovery.getInstances(ServiceCatalog.SESSION_SERVICE);
-		
-		
-		RestTemplate restTemplate = new RestTemplate();
-		currentPlayer = restTemplate.getForObject(ConsoleHelper.getPlayerByLoginServiceUrl(), Player.class, login);
+		currentPlayer = playerService.getPlayerByLogin(login);
 	}
 	
 	public void logoff() {
@@ -53,21 +50,25 @@ public class ConsoleAppService implements Runnable {
 		int choose = 0;
 		int k=0;
 		
-		RestTemplate restTemplate = new RestTemplate();
-		ResponseEntity<Being[]> beingList = restTemplate.getForEntity(ConsoleHelper.getBeingByPlayerServiceUrl(), Being[].class, currentPlayer.getPlayerId());
+		Iterable<Being> beingList = beingService.getBeingsForPlayer(currentPlayer.getPlayerId());
 		
+		/*
+		 * 
+		 * beingList.forEach(arg0);
+		 * 
 		for(;k<beingList.getBody().length;k++) {
 			
 			Being curBeing = beingList.getBody()[k];
 
 			System.out.println("\t" + (k+1) + ": " + curBeing.getName() + "[class: " + curBeing.getBeingClass() + "]");
 		}
+		*/
 		
 		System.out.print("\n\nPick one[1-" + k + "]: ");
 		
 		choose = ConsoleHelper.readIntInput();
 		
-		currentBeing = beingList.getBody()[choose-1];
+		//currentBeing = beingList.getBody()[choose-1];
 	}
 	
 	public void showBeingStatus() {
@@ -100,9 +101,8 @@ public class ConsoleAppService implements Runnable {
 		
 		if (currentBeing!=null) { 
 			if ((currentPlace==null) || (!currentPlace.getPlaceCode().equals(currentBeing.getCurPlaceCode()))) {
-			
-				RestTemplate restTemplate = new RestTemplate();
-				currentPlace = restTemplate.getForObject(ConsoleHelper.getPlaceServiceUrl(), Place.class, currentBeing.getCurPlaceCode());
+				
+				currentPlace = placeService.getPlace(currentBeing.getCurPlaceCode());
 			}
 		
 			System.out.println("Items:");
