@@ -54,12 +54,6 @@ public class PlaceController implements PlaceService {
 			}
 		}
 		
-		// 2. Beings
-		dbPlace = WorldHelper.updatePlaceBeings(dbPlace, requestPlace);
-		
-		// 3. items
-		dbPlace = WorldHelper.updatePlaceItems(dbPlace, requestPlace);
-		
 		// 4. exits
 		dbPlace = WorldHelper.updatePlaceExits(dbPlace, requestPlace);
 
@@ -93,34 +87,6 @@ public class PlaceController implements PlaceService {
 
 	@Override
 	public Place destroyExit(Integer placeId, String direction) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-
-	@Override
-	public Place updateItems(Integer placeId, Integer itemCode, Integer qtty, String qttyMode) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-
-	@Override
-	public Place removeItems(Integer placeId, Integer itemCode) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-
-	@Override
-	public Place updateBeings(Integer placeId, Long beingId, Integer qtty, String qttyMode) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-
-	@Override
-	public Place removeBeings(Integer placeId, Long beingId) {
 		// TODO Auto-generated method stub
 		return null;
 	}

@@ -4,18 +4,12 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.jpinfo.mudengine.common.place.Place;
-import com.jpinfo.mudengine.common.place.PlaceBeings;
 import com.jpinfo.mudengine.common.place.PlaceExits;
-import com.jpinfo.mudengine.common.place.PlaceItems;
 import com.jpinfo.mudengine.common.placeClass.PlaceClass;
 import com.jpinfo.mudengine.world.model.MudPlace;
-import com.jpinfo.mudengine.world.model.MudPlaceBeings;
 import com.jpinfo.mudengine.world.model.MudPlaceClass;
 import com.jpinfo.mudengine.world.model.MudPlaceExits;
-import com.jpinfo.mudengine.world.model.MudPlaceItems;
-import com.jpinfo.mudengine.world.model.pk.PlaceBeingsPK;
 import com.jpinfo.mudengine.world.model.pk.PlaceExitsPK;
-import com.jpinfo.mudengine.world.model.pk.PlaceItemsPK;
 
 public class WorldHelper {
 
@@ -27,16 +21,8 @@ public class WorldHelper {
 		
 		result.setPlaceClassCode(a.getPlaceClass().getPlaceClassCode());
 		
-		for(MudPlaceBeings curBeing: a.getBeings()) {
-			result.getBeings().add(WorldHelper.buildPlaceBeing(curBeing));
-		}
-		
 		for(MudPlaceExits curExit: a.getExits()) {
 			result.getExits().put(curExit.getPk().getDirection(), WorldHelper.buildPlaceExits(curExit));
-		}
-		
-		for(MudPlaceItems curItem: a.getItems()) {
-			result.getItems().add(WorldHelper.buildPlaceItems(curItem));
 		}
 		
 		return result;
@@ -47,63 +33,6 @@ public class WorldHelper {
 		return new PlaceClass();
 	}
 	
-	public static MudPlace updatePlaceBeings(MudPlace dbPlace, Place requestPlace) {
-		
-		if (requestPlace.getBeings()!=null) {
-			
-			Set<MudPlaceBeings> newBeings = new HashSet<MudPlaceBeings>();
-			
-			for(PlaceBeings curBeing: requestPlace.getBeings()) {
-				
-				MudPlaceBeings newBeing = new MudPlaceBeings();
-				PlaceBeingsPK newBeingPK = new PlaceBeingsPK();
-				
-				newBeingPK.setBeingCode(curBeing.getBeingCode());
-				newBeingPK.setPlace(dbPlace.getPlaceCode());
-				
-				newBeing.setPk(newBeingPK);
-				newBeing.setName(curBeing.getName());
-				newBeing.setQtty(curBeing.getQtty());
-				
-				newBeings.add(newBeing);
-			}
-			
-			dbPlace.getBeings().clear();
-			dbPlace.getBeings().addAll(newBeings);
-			
-		} // endif beings
-		
-		return dbPlace;
-	}
-	
-	public static MudPlace updatePlaceItems(MudPlace dbPlace, Place requestPlace) {
-		
-		// 3. items
-		if (requestPlace.getItems()!=null) {
-			
-			Set<MudPlaceItems> newItems = new HashSet<MudPlaceItems>();
-			
-			for(PlaceItems curItem: requestPlace.getItems()) {
-				
-				MudPlaceItems newItem = new MudPlaceItems();
-				PlaceItemsPK newItemPK = new PlaceItemsPK();
-				
-				newItemPK.setItemCode(curItem.getItemCode());
-				newItemPK.setPlaceCode(dbPlace.getPlaceCode());
-				
-				newItem.setPk(newItemPK);
-				newItem.setName(curItem.getName());
-				newItem.setQtty(curItem.getQtty());
-				
-				newItems.add(newItem);
-			}
-
-			dbPlace.getItems().clear();
-			dbPlace.getItems().addAll(newItems);
-		}
-		
-		return dbPlace;
-	}
 	
 	public static MudPlace updatePlaceExits(MudPlace dbPlace, Place requestPlace) {
 		
@@ -144,20 +73,6 @@ public class WorldHelper {
 		
 	}
 	
-	private static PlaceBeings buildPlaceBeing(MudPlaceBeings a) {
-		
-		PlaceBeings result = new PlaceBeings();
-		
-		result.setBeingCode(a.getPk().getBeingCode());
-		
-		// @TODO: MudPlaceBeings name
-		//result.setName(a.);
-		result.setQtty(a.getQtty());
-		
-		
-		return result;
-	}
-	
 	private static PlaceExits buildPlaceExits(MudPlaceExits a) {
 		
 		PlaceExits result = new PlaceExits();
@@ -170,19 +85,6 @@ public class WorldHelper {
 		result.setLocked(a.isLocked());
 		result.setOpened(a.isOpened());
 		result.setVisible(a.isVisible());
-		
-		return result;
-	}
-	
-	private static PlaceItems buildPlaceItems(MudPlaceItems a) {
-		
-		PlaceItems result = new PlaceItems();
-		
-		result.setItemCode(a.getPk().getItemCode());
-		
-		// @TODO: MudPlaceItems name
-		//result.setName(name);
-		result.setQtty(a.getQtty());
 		
 		return result;
 	}
