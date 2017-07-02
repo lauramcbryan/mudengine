@@ -31,15 +31,7 @@ public interface PlaceService {
 	 * This operation can change these sections of a place:
 	 * 
 	 * - exits;
-	 * - beings;
-	 * - items;
-	 * - placeData;
-	 * 
-	 * For the first three options, the specific services are internally called.
-	 * Same rules apply for the other calls.
-	 * 
-	 * For placeData changes, if a placeClass is changed (due to a building construction finished)
-	 * all exits referring to this place will be renamed according to new placeClass name.
+	 * - placeClass;
 	 * 
 	 * @param id
 	 * @param requestPlace
@@ -51,7 +43,7 @@ public interface PlaceService {
 	 * Destroys a place.
 	 * 
 	 * This service is called in case an existing place is destroyed.
-	 * In that case, the placeClass of the location is changed to another tagged as 'demise class' in the current place´s class.
+	 * In that case, the placeClass of the location is changed to another tagged as 'demise class' in the current place class.
 	 * Size and weightCapacity remains the same, but all beings and items inside the place are lost. 
 	 * 
 	 * @param placeId
