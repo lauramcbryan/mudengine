@@ -4,7 +4,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import com.jpinfo.mudengine.common.place.Place;
 import com.jpinfo.mudengine.common.place.PlaceExits;
@@ -89,75 +88,5 @@ public interface PlaceService {
 	 */
 	@RequestMapping(method=RequestMethod.DELETE, value="/{placeId}/exit/{direction}")
 	Place destroyExit(@PathVariable("placeId") Integer placeId, @PathVariable("direction") String direction);
-	
-	/**
-	 * Update the items in a location.
-	 * 
-	 * This call performs a straightforward update in specified location increasing (or including if it doesn't
-	 * exist) the selected quantity of items
-	 * 
-	 * The qtty parameter accepts relative values.  The resulting item quantity in the place will be computed by
-	 * Place.Item[itemCode].qtty+=service.qtty
-	 * 
-	 * If this isn't the expected behavior the service can be called with qttyMode parameter as ABSOLUTE.  In that way,
-	 * the resulting qtty of the item will be the one provided in service´s request.
-	 * 
-	 * The sizeLeft and capacityLeft of the place will be updated according to new item qtty.
-	 * If the added items size or weight exceeds the location capacity an error will be throw.
-	 * 
-	 * @param placeId - code of the place
-	 * @param itemCode - code of the item
-	 * @param qtty - new qtty of the item in the place
-	 * @param qttyMode - either ABSOLUTE or RELATIVE
-	 */
-	@RequestMapping(method=RequestMethod.POST, value="/{placeId}/item/{itemCode}")
-	Place updateItems(@PathVariable("placeId") Integer placeId, @PathVariable("itemCode") Integer itemCode, @RequestParam(name="qtty", defaultValue="1") Integer qtty, @RequestParam(name="qttyMode", defaultValue="RELATIVE") String qttyMode);
-	
-	/**
-	 * Remove specified item from a location.
-	 * 
-	 * This call is the same as calling POST verb with zero qtty for specified item. 
-	 * 
-	 * @param placeId
-	 * @param itemCode
-	 */
-	@RequestMapping(method=RequestMethod.DELETE, value="/{placeId}/item/{itemCode}")
-	Place removeItems(@PathVariable("placeId") Integer placeId, @PathVariable("itemCode") Integer itemCode);
-	
-
-	/**
-	 * Updates the quantity of specified beings in the location.
-	 * 
-	 * If the being is a TEAM class, it will have only its quantity updated.
-	 * If isn't a TEAM the original location of the being will be searched (only in current world) and removed from there.
-	 * 
-	 * The qtty parameter accepts relative values.  The resulting being quantity in the place will be computed by
-	 * Place.Beings[beingCode].qtty+=service.qtty
-	 * 
-	 * If this isn´t the expected behavior the service can be called with qttyMode parameter as ABSOLUTE.  In that way,
-	 * the resulting qtty of the item will be the one provided in service´s request.
-	 * 
-	 * The sizeLeft and capacityLeft of the place will be updated according to new being qtty.
-	 * If the added beings size or weight exceeds the location capacity an error will be throw.
-	 * 
-	 * @param placeId
-	 * @param beingId
-	 * @param qtty
-	 * @param qttyMode
-	 */
-	@RequestMapping(method=RequestMethod.POST, value="/{placeId}/being/{beingId}")
-	Place updateBeings(@PathVariable("placeId") Integer placeId, @PathVariable("beingId") Long beingId, @RequestParam(name="qtty", defaultValue="1") Integer qtty, @RequestParam(name="qttyMode", defaultValue="RELATIVE") String qttyMode);
-	
-	/**
-	 * Remove specified being from a location.
-	 * 
-	 * This call is the same as calling POST verb with zero qtty for specified being.
-	 * 
-	 * @param placeId
-	 * @param beingId
-	 */
-	@RequestMapping(method=RequestMethod.DELETE, value="/{placeId}/being/{beingId}")
-	Place removeBeings(@PathVariable("placeId") Integer placeId, @PathVariable("beingId") Long beingId);
-	
 
 }

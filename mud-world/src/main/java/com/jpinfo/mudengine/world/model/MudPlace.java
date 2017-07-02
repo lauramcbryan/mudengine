@@ -17,17 +17,9 @@ public class MudPlace {
 	private MudPlaceClass placeClass;
 	
 	@OneToMany(mappedBy="pk.placeCode", fetch=FetchType.EAGER, cascade=CascadeType.ALL, orphanRemoval=true)
-	private Set<MudPlaceBeings> beings;
-	
-	@OneToMany(mappedBy="pk.placeCode", fetch=FetchType.EAGER, cascade=CascadeType.ALL, orphanRemoval=true)
-	private Set<MudPlaceItems> items;
-	
-	@OneToMany(mappedBy="pk.placeCode", fetch=FetchType.EAGER, cascade=CascadeType.ALL, orphanRemoval=true)
 	private Set<MudPlaceExits> exits;
 	
 	public MudPlace() {
-		this.beings = new HashSet<MudPlaceBeings>();
-		this.items = new HashSet<MudPlaceItems>();
 		this.exits = new HashSet<MudPlaceExits>();
 	}
 
@@ -45,14 +37,6 @@ public class MudPlace {
 
 	public void setPlaceClass(MudPlaceClass placeClass) {
 		this.placeClass = placeClass;
-	}
-
-	public Set<MudPlaceBeings> getBeings() {
-		return beings;
-	}
-
-	public Set<MudPlaceItems> getItems() {
-		return items;
 	}
 
 	public Set<MudPlaceExits> getExits() {

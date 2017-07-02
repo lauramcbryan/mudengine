@@ -11,9 +11,7 @@ import com.jpinfo.mudengine.common.client.BeingServiceClient;
 import com.jpinfo.mudengine.common.client.PlaceServiceClient;
 import com.jpinfo.mudengine.common.client.PlayerServiceClient;
 import com.jpinfo.mudengine.common.place.Place;
-import com.jpinfo.mudengine.common.place.PlaceBeings;
 import com.jpinfo.mudengine.common.place.PlaceExits;
-import com.jpinfo.mudengine.common.place.PlaceItems;
 
 @Service
 public class ConsoleAppService implements Runnable {
@@ -106,7 +104,8 @@ public class ConsoleAppService implements Runnable {
 			}
 		
 			System.out.println("Items:");
-			
+
+			/*
 			if (currentPlace.getItems().isEmpty()) {
 				System.out.println("\tNone");
 			} else {
@@ -114,6 +113,7 @@ public class ConsoleAppService implements Runnable {
 					System.out.println("\t" + curItem.getName() + (curItem.getQtty() > 1 ? "[" + curItem.getQtty() + "]":""));
 				}
 			}
+			*/
 		
 			System.out.println("Exits:");
 			
@@ -127,6 +127,8 @@ public class ConsoleAppService implements Runnable {
 			}
 		
 			System.out.println("Beings:");
+			
+			/*
 			if (currentPlace.getBeings().isEmpty()) {
 				System.out.println("\tNone");
 			} else {
@@ -135,6 +137,7 @@ public class ConsoleAppService implements Runnable {
 					System.out.println("\t" + curBeing.getName() + (curBeing.getQtty() > 1 ? "[" + curBeing.getQtty() + "]":""));
 				}
 			}
+			*/
 		} else {
 			System.out.println("Unknown");
 		}
