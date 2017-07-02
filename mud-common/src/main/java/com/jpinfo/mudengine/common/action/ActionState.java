@@ -2,6 +2,7 @@ package com.jpinfo.mudengine.common.action;
 
 import com.jpinfo.mudengine.common.being.Being;
 import com.jpinfo.mudengine.common.interfaces.ActionTarget;
+import com.jpinfo.mudengine.common.interfaces.Reaction;
 import com.jpinfo.mudengine.common.item.Item;
 import com.jpinfo.mudengine.common.place.Place;
 
@@ -18,7 +19,7 @@ public class ActionState extends ActionSimpleState {
 	// {BEING, ITEM, PLACE, PLACE_CLASS}
 	private ActionTarget target;
 	
-	
+	private Reaction effect;
 	
 	public ActionState() {
 		
@@ -62,5 +63,13 @@ public class ActionState extends ActionSimpleState {
 	public void setTarget(ActionTarget target) {
 		this.target = target;
 	}
+	public Reaction getEffect() {
+		return effect;
+	}
+	public void setEffect(Reaction effect) {
+		this.effect = effect;
+	}
+	
+	
 
 }

@@ -4,6 +4,7 @@ import java.util.*;
 
 
 import com.jpinfo.mudengine.common.interfaces.ActionTarget;
+import com.jpinfo.mudengine.common.interfaces.Reaction;
 
 public class Place implements ActionTarget {
 	
@@ -16,6 +17,11 @@ public class Place implements ActionTarget {
 	private Set<PlaceItems> items;
 	
 	private Map<String, PlaceExits> exits;
+	
+	private Map<String, Collection<Reaction>> beforeReactions;
+	
+	private Map<String, Collection<Reaction>> afterReactions;
+	
 	
 	public Place() {
 		this.beings = new HashSet<PlaceBeings>();
@@ -67,5 +73,15 @@ public class Place implements ActionTarget {
 	public void setItems(Set<PlaceItems> items) {
 		this.items = items;
 	}
+	
+	public Collection<Reaction> getReactions(String actionCode, boolean isBefore) {
+		
+		if (isBefore) {
+			return this.beforeReactions.get(actionCode);
+		} else {
+			return this.afterReactions.get(actionCode);
+		}
+	}
+
 	
 }

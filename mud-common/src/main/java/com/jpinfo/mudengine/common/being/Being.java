@@ -2,11 +2,13 @@ package com.jpinfo.mudengine.common.being;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.jpinfo.mudengine.common.interfaces.ActionTarget;
+import com.jpinfo.mudengine.common.interfaces.Reaction;
 
 
 /**
@@ -37,6 +39,11 @@ public class Being implements Serializable, ActionTarget {
 	private String curWorld;
 	
 	private Long playerId;
+	
+	private Map<String, Collection<Reaction>> beforeReactions;
+	
+	private Map<String, Collection<Reaction>> afterReactions;
+	
 
 	public Being() {
 		this.attrs = new HashMap<String, Float>();
@@ -136,4 +143,14 @@ public class Being implements Serializable, ActionTarget {
 	public void setName(String name) {
 		this.name = name;
 	}
+	
+	public Collection<Reaction> getReactions(String actionCode, boolean isBefore) {
+		
+		if (isBefore) {
+			return this.beforeReactions.get(actionCode);
+		} else {
+			return this.afterReactions.get(actionCode);
+		}
+	}
+
 }

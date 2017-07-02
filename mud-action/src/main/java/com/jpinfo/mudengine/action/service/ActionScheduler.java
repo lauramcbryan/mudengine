@@ -24,9 +24,9 @@ import com.jpinfo.mudengine.common.action.ActionState;
 import com.jpinfo.mudengine.common.being.Being;
 import com.jpinfo.mudengine.common.client.BeingServiceClient;
 import com.jpinfo.mudengine.common.client.ItemServiceClient;
-import com.jpinfo.mudengine.common.client.PlaceClassServiceClient;
 import com.jpinfo.mudengine.common.client.PlaceServiceClient;
 import com.jpinfo.mudengine.common.interfaces.ActionTarget;
+import com.jpinfo.mudengine.common.interfaces.Reaction;
 import com.jpinfo.mudengine.common.item.Item;
 import com.jpinfo.mudengine.common.place.Place;
 
@@ -46,9 +46,6 @@ public class ActionScheduler {
 	
 	@Autowired
 	private PlaceServiceClient placeService;
-	
-	@Autowired
-	private PlaceClassServiceClient placeClassService;
 	
 	@Autowired
 	private ItemServiceClient itemService;
@@ -103,6 +100,9 @@ public class ActionScheduler {
 					// After this, the endTurn is set in action object
 					curPendingAction.setEndTurn(fullActionState.getEndTurn());
 					
+					// Calculate previous reactions to the action
+					calculateReactions(fullActionState, true);
+					
 				} catch (ActionRefusedException e) {
 					
 					// Update the action to Refused
@@ -134,9 +134,12 @@ public class ActionScheduler {
 				
 				// TODO: Update changed entities
 				
-				
 				// Update the action to COMPLETED
 				curAction.setCurrState(ActionSimpleState.COMPLETED);
+				
+				// Calculate reactions to the action
+				calculateReactions(fullActionState, false);
+				
 				
 			} catch(ActionRefusedException e) {
 				
@@ -220,6 +223,69 @@ public class ActionScheduler {
 		return e;
 	}
 	
+	private ActionState calculateReactions(ActionState e, boolean isBefore) {
+		
+		EvaluationContext context = new StandardEvaluationContext(e);
+		
+		// TODO: Apply effects caused by actor
+		for (Reaction curReaction: e.getActor().getReactions(e.getActionCode(), isBefore)) {
+			applyReaction(context, curReaction);
+		}
+		
+		/**
+		 * Items of being:
+		 * It´s disabled by now because I should have all being items retrieved at this time to retrieve their reactions
+		 * and that could be expensive.
+		 */
+		/*
+		for(BeingItem curItem: e.getActor().getItems().values()) {
+			
+			for(Reaction curReaction: curItem.getReactions(e.getActionCode(), isBefore)) {
+				
+				applyReaction(context, curReaction);
+			}
+		}
+		*/
+		
+		// TODO: Apply effects caused by target
+		for (Reaction curReaction: e.getTarget().getReactions(e.getActionCode(), isBefore)) {
+			applyReaction(context, curReaction);
+		}
+		
+		
+		// TODO: Apply effects caused by mediator (if present)
+		if (e.getMediator()!=null) {
+			
+			for (Reaction curReaction: e.getMediator().getReactions(e.getActionCode(), isBefore)) {
+				applyReaction(context, curReaction);
+			}
+		}
+		
+		
+		return e;
+	}
+	
+	private EvaluationContext applyReaction(EvaluationContext context, Reaction reaction) {
+
+		ExpressionParser parser = new SpelExpressionParser();
+		
+		// Running prereq expressions
+		Expression prereqExpression = parser.parseExpression(reaction.getPrereq());
+		
+		boolean accepted = prereqExpression.getValue(context, Boolean.class);
+			
+		if (accepted) {
+			// apply the effect
+			
+			Expression effectExpression = parser.parseExpression(reaction.getExpression());
+			
+			effectExpression.getValue(context, ActionState.class);
+		}
+		
+		return context;
+		
+	}
+	
 	private ActionState buildAction(MudAction a) throws ActionRefusedException {
 		
 		ActionState result = new ActionState();
@@ -279,9 +345,6 @@ public class ActionScheduler {
 				break;
 			case "BEING":
 				target = beingService.getBeing(Long.valueOf(a.getTargetCode()));
-				break;
-			case "PLACE_CLASS":
-				target = placeClassService.getPlaceClass(a.getTargetCode());
 				break;
 			}
 			
