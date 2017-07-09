@@ -5,14 +5,14 @@ import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
-import com.jpinfo.mudengine.world.model.pk.PlaceClassAttrPK;
+import com.jpinfo.mudengine.world.model.pk.PlaceAttrPK;
 
 @Entity
-@Table(name="MUD_PLACE_CLASS_ATTR")
-public class MudPlaceClassAttr {
+@Table(name="MUD_PLACE_ATTR")
+public class MudPlaceAttr {
 
 	@EmbeddedId
-	private PlaceClassAttrPK id;
+	private PlaceAttrPK id;
 	
 	@Column(name="ATTR_VALUE")
 	private Integer attrValue;
@@ -27,11 +27,11 @@ public class MudPlaceClassAttr {
 		this.attrValue = attrValue;
 	}
 
-	public PlaceClassAttrPK getId() {
+	public PlaceAttrPK getId() {
 		return id;
 	}
 
-	public void setId(PlaceClassAttrPK id) {
+	public void setId(PlaceAttrPK id) {
 		this.id = id;
 	}
 	

@@ -1,43 +1,24 @@
-package com.jpinfo.mudengine.world.model;
+package com.jpinfo.mudengine.common.place;
 
-import javax.persistence.*;
+import java.util.Arrays;
+import java.util.List;
 
-import com.jpinfo.mudengine.world.model.pk.PlaceExitsPK;
-
-@Entity
-@Table(name="MUD_PLACE_EXITS")
-public class MudPlaceExits {
-
-	@EmbeddedId
-	private PlaceExitsPK pk;
+public class PlaceExit {
 	
-	@Column
+	public static final List<String> DIRECTIONS = Arrays.asList("EAST", "NORTH", "UP", "DOWN", "SOUTH", "WEST");
+
 	private String name;
 	
-	@Column
 	private boolean opened;
 	
-	@Column
 	private boolean visible;
 	
-	@Column
 	private boolean locked;
 	
-	@Column	
 	private boolean lockable;
 
-	@Column
 	private Integer targetPlaceCode;
 	
-
-	public PlaceExitsPK getPk() {
-		return pk;
-	}
-
-	public void setPk(PlaceExitsPK pk) {
-		this.pk = pk;
-	}
-
 	public String getName() {
 		return name;
 	}
@@ -62,14 +43,6 @@ public class MudPlaceExits {
 		this.visible = visible;
 	}
 
-	public Integer getTargetPlaceCode() {
-		return targetPlaceCode;
-	}
-
-	public void setTargetPlaceCode(Integer targetPlaceCode) {
-		this.targetPlaceCode = targetPlaceCode;
-	}
-
 	public boolean isLocked() {
 		return locked;
 	}
@@ -85,4 +58,13 @@ public class MudPlaceExits {
 	public void setLockable(boolean lockable) {
 		this.lockable = lockable;
 	}
+
+	public Integer getTargetPlaceCode() {
+		return targetPlaceCode;
+	}
+
+	public void setTargetPlaceCode(Integer targetPlaceCode) {
+		this.targetPlaceCode = targetPlaceCode;
+	}
+	
 }

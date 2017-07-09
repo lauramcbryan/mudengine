@@ -6,7 +6,7 @@ import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
 @Embeddable
-public class PlaceExitsPK implements Serializable {
+public class PlaceExitPK implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -48,7 +48,7 @@ public class PlaceExitsPK implements Serializable {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		PlaceExitsPK other = (PlaceExitsPK) obj;
+		PlaceExitPK other = (PlaceExitPK) obj;
 		if (direction == null) {
 			if (other.direction != null)
 				return false;

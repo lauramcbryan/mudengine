@@ -16,22 +16,18 @@ public class PlaceClass {
 	
 	private Integer weightCapacity;
 
-	private Map<String, Double> attrModifiers;
-	
-	private Map<String, Double> skillModifiers;
+	private Map<String, Integer> attrs;
 	
 	private String parentClassCode;
+	
+	private String demisePlaceClassCode;
 
 	private Integer buildCost;
 	
 	private Integer buildEffort;
 	
-	private String material;
-	
-	
 	public PlaceClass() {
-		this.attrModifiers = new HashMap<String, Double>();
-		this.skillModifiers = new HashMap<String, Double>();
+		this.attrs = new HashMap<String, Integer>();
 	}
 
 	
@@ -75,21 +71,15 @@ public class PlaceClass {
 		this.weightCapacity = weightCapacity;
 	}
 
-	public Map<String, Double> getAttrModifiers() {
-		return attrModifiers;
+	public Map<String, Integer> getAttrs() {
+		return attrs;
 	}
 
-	public void setAttrModifiers(Map<String, Double> attrModifiers) {
-		this.attrModifiers = attrModifiers;
+
+	public void setAttrs(Map<String, Integer> attrs) {
+		this.attrs = attrs;
 	}
 
-	public Map<String, Double> getSkillModifiers() {
-		return skillModifiers;
-	}
-
-	public void setSkillModifiers(Map<String, Double> skillModifiers) {
-		this.skillModifiers = skillModifiers;
-	}
 
 	public String getParentClassCode() {
 		return parentClassCode;
@@ -115,11 +105,14 @@ public class PlaceClass {
 		this.buildEffort = buildEffort;
 	}
 
-	public String getMaterial() {
-		return material;
+	public String getDemisePlaceClassCode() {
+		return demisePlaceClassCode;
 	}
 
-	public void setMaterial(String material) {
-		this.material = material;
+
+	public void setDemisePlaceClassCode(String demisePlaceClassCode) {
+		this.demisePlaceClassCode = demisePlaceClassCode;
 	}
+	
+	
 }

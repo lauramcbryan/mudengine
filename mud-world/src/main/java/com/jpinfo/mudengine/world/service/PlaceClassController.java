@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.jpinfo.mudengine.common.exception.EntityNotFoundException;
 import com.jpinfo.mudengine.common.placeClass.PlaceClass;
 import com.jpinfo.mudengine.common.service.PlaceClassService;
 import com.jpinfo.mudengine.world.model.MudPlaceClass;
@@ -20,10 +21,15 @@ public class PlaceClassController implements PlaceClassService {
 	@Override
 	public PlaceClass getPlaceClass(@PathVariable String placeClass) {
 		
+		PlaceClass result = null;
+		
 		MudPlaceClass found = repository.findOne(placeClass);
 		
-		PlaceClass result = WorldHelper.buildPlaceClass(found);
-		
+		if (found!=null) {
+			result = WorldHelper.buildPlaceClass(found);
+		} else {
+			throw new EntityNotFoundException("Place class not found");
+		}
 		
 		return result;
 	}

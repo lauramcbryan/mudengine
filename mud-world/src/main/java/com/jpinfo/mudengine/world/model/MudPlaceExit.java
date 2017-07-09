@@ -1,26 +1,41 @@
-package com.jpinfo.mudengine.common.place;
+package com.jpinfo.mudengine.world.model;
 
+import javax.persistence.*;
 
-public class PlaceExits {
+import com.jpinfo.mudengine.world.model.pk.PlaceExitPK;
 
+@Entity
+@Table(name="MUD_PLACE_EXIT")
+public class MudPlaceExit {
+
+	@EmbeddedId
+	private PlaceExitPK pk;
+
+	@Column
 	private String name;
 	
+	@Column
 	private boolean opened;
 	
+	@Column
 	private boolean visible;
 	
+	@Column
 	private boolean locked;
 	
+	@Column	
 	private boolean lockable;
 
+	@Column
 	private Integer targetPlaceCode;
 	
-	public String getName() {
-		return name;
+
+	public PlaceExitPK getPk() {
+		return pk;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setPk(PlaceExitPK pk) {
+		this.pk = pk;
 	}
 
 	public boolean isOpened() {
@@ -39,6 +54,14 @@ public class PlaceExits {
 		this.visible = visible;
 	}
 
+	public Integer getTargetPlaceCode() {
+		return targetPlaceCode;
+	}
+
+	public void setTargetPlaceCode(Integer targetPlaceCode) {
+		this.targetPlaceCode = targetPlaceCode;
+	}
+
 	public boolean isLocked() {
 		return locked;
 	}
@@ -55,12 +78,13 @@ public class PlaceExits {
 		this.lockable = lockable;
 	}
 
-	public Integer getTargetPlaceCode() {
-		return targetPlaceCode;
+	public String getName() {
+		return name;
 	}
 
-	public void setTargetPlaceCode(Integer targetPlaceCode) {
-		this.targetPlaceCode = targetPlaceCode;
+	public void setName(String name) {
+		this.name = name;
 	}
+	
 	
 }

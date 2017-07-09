@@ -4,14 +4,20 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.jpinfo.mudengine.common.place.Place;
-import com.jpinfo.mudengine.common.place.PlaceExits;
+import com.jpinfo.mudengine.common.place.PlaceExit;
 import com.jpinfo.mudengine.common.placeClass.PlaceClass;
 import com.jpinfo.mudengine.world.model.MudPlace;
+import com.jpinfo.mudengine.world.model.MudPlaceAttr;
 import com.jpinfo.mudengine.world.model.MudPlaceClass;
-import com.jpinfo.mudengine.world.model.MudPlaceExits;
-import com.jpinfo.mudengine.world.model.pk.PlaceExitsPK;
+import com.jpinfo.mudengine.world.model.MudPlaceClassAttr;
+import com.jpinfo.mudengine.world.model.MudPlaceExit;
+import com.jpinfo.mudengine.world.model.pk.PlaceAttrPK;
+import com.jpinfo.mudengine.world.model.pk.PlaceExitPK;
 
 public class WorldHelper {
+	
+	public static final String PLACE_HP_ATTR = "HP";
+	public static final String PLACE_MAX_HP_ATTR = "MAX_HP";
 
 	public static Place buildPlace(MudPlace a) {
 		
@@ -21,16 +27,55 @@ public class WorldHelper {
 		
 		result.setPlaceClassCode(a.getPlaceClass().getPlaceClassCode());
 		
-		for(MudPlaceExits curExit: a.getExits()) {
+		for(MudPlaceExit curExit: a.getExits()) {
 			result.getExits().put(curExit.getPk().getDirection(), WorldHelper.buildPlaceExits(curExit));
 		}
+		
+		for(MudPlaceAttr curAttr: a.getAttrs()) {
+			
+			result.getAttrs().put(curAttr.getId().getAttrCode(), curAttr.getAttrValue());
+			
+		}
+		
 		
 		return result;
 	}
 	
 	public static PlaceClass buildPlaceClass(MudPlaceClass a) {
 		
-		return new PlaceClass();
+		PlaceClass response = new PlaceClass();
+		
+		response.setPlaceClassCode(a.getPlaceClassCode());
+		response.setName(a.getName());
+		response.setDescription(a.getDescription());
+		response.setSizeCapacity(a.getSizeCapacity());
+		response.setWeightCapacity(a.getWeightCapacity());
+		response.setParentClassCode(a.getParentClassCode());
+		response.setDemisePlaceClassCode(a.getDemisePlaceClassCode());
+		response.setBuildEffort(a.getBuildEffort());
+		response.setBuildCost(a.getBuildCost());
+		
+		for(MudPlaceClassAttr curAttr: a.getAttrs()) {
+			
+			response.getAttrs().put(curAttr.getId().getAttrCode(), curAttr.getAttrValue());
+			
+		}
+		
+		return response;
+	}
+	
+	public static MudPlaceAttr buildPlaceAttr(Integer placeCode, MudPlaceClassAttr classAttr) {
+		
+		MudPlaceAttr response = new MudPlaceAttr();
+		PlaceAttrPK pk = new PlaceAttrPK();
+		
+		pk.setAttrCode(classAttr.getId().getAttrCode());
+		pk.setPlaceCode(placeCode);
+		
+		response.setId(pk);
+		response.setAttrValue(classAttr.getAttrValue());
+		
+		return response;
 	}
 	
 	
@@ -39,20 +84,14 @@ public class WorldHelper {
 		// 4. exits		
 		if (requestPlace.getExits()!=null) {
 			
-			Set<MudPlaceExits> newExits = new HashSet<MudPlaceExits>();
+			Set<MudPlaceExit> newExits = new HashSet<MudPlaceExit>();
 			
 			for(String curDirection: requestPlace.getExits().keySet()) {
 				
-				PlaceExits curExit = requestPlace.getExits().get(curDirection);
+				PlaceExit curExit = requestPlace.getExits().get(curDirection);
 				
-				MudPlaceExits newExit = new MudPlaceExits();
-				PlaceExitsPK newExitPK = new PlaceExitsPK();
-				
-				newExitPK.setDirection(curDirection);
-				newExitPK.setPlaceCode(dbPlace.getPlaceCode());
-				
-				newExit.setPk(newExitPK);
-				newExit.setTargetPlaceCode(curExit.getTargetPlaceCode());
+				MudPlaceExit newExit = buildMudPlaceExit(dbPlace.getPlaceCode(), curDirection, curExit.getTargetPlaceCode());
+
 				newExit.setName(curExit.getName());
 				newExit.setOpened(curExit.isOpened());
 				newExit.setVisible(curExit.isVisible());
@@ -73,19 +112,42 @@ public class WorldHelper {
 		
 	}
 	
-	private static PlaceExits buildPlaceExits(MudPlaceExits a) {
+	public static MudPlaceExit buildMudPlaceExit(Integer placeCode, String direction, Integer targetPlaceCode) {
 		
-		PlaceExits result = new PlaceExits();
+		MudPlaceExit newExit = new MudPlaceExit();
+		PlaceExitPK newExitPK = new PlaceExitPK();
 		
-		result.setName(a.getName());
+		newExitPK.setDirection(direction);
+		newExitPK.setPlaceCode(placeCode);
+		
+		newExit.setPk(newExitPK);
+		newExit.setTargetPlaceCode(targetPlaceCode);
+		
+		return newExit;
+	}
+	
+	private static PlaceExit buildPlaceExits(MudPlaceExit a) {
+		
+		PlaceExit result = new PlaceExit();
 		
 		result.setTargetPlaceCode(a.getTargetPlaceCode());
 		
+		result.setName(a.getName());
 		result.setLockable(a.isLockable());
 		result.setLocked(a.isLocked());
 		result.setOpened(a.isOpened());
 		result.setVisible(a.isVisible());
 		
 		return result;
+	}
+	
+	public static String getOpposedDirection(String direction) {
+		
+		int size = PlaceExit.DIRECTIONS.size(); 
+		int originalPos = PlaceExit.DIRECTIONS.indexOf(direction);
+		
+		int newpos = size - originalPos - 1;
+		
+		return PlaceExit.DIRECTIONS.get(newpos);
 	}
 }

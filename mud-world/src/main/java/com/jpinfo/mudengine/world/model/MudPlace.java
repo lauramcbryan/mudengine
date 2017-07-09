@@ -17,10 +17,15 @@ public class MudPlace {
 	private MudPlaceClass placeClass;
 	
 	@OneToMany(mappedBy="pk.placeCode", fetch=FetchType.EAGER, cascade=CascadeType.ALL, orphanRemoval=true)
-	private Set<MudPlaceExits> exits;
+	private Set<MudPlaceExit> exits;
+	
+	@OneToMany(mappedBy="id.placeCode", fetch=FetchType.EAGER, cascade=CascadeType.ALL, orphanRemoval=true)
+	private Set<MudPlaceAttr> attrs;
+	
 	
 	public MudPlace() {
-		this.exits = new HashSet<MudPlaceExits>();
+		this.exits = new HashSet<MudPlaceExit>();
+		this.attrs = new HashSet<MudPlaceAttr>();
 	}
 
 	public Integer getPlaceCode() {
@@ -39,7 +44,17 @@ public class MudPlace {
 		this.placeClass = placeClass;
 	}
 
-	public Set<MudPlaceExits> getExits() {
+	public Set<MudPlaceExit> getExits() {
 		return exits;
 	}
+
+	public Set<MudPlaceAttr> getAttrs() {
+		return attrs;
+	}
+
+	public void setAttrs(Set<MudPlaceAttr> attrs) {
+		this.attrs = attrs;
+	}
+	
+	
 }

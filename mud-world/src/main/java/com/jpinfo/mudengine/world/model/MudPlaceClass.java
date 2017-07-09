@@ -25,10 +25,7 @@ public class MudPlaceClass {
 	private Integer weightCapacity;
 
 	@OneToMany(mappedBy="id.placeClassCode", fetch=FetchType.EAGER, cascade=CascadeType.ALL, orphanRemoval=true)
-	private Set<MudPlaceClassAttr> attrModifiers;
-	
-	@OneToMany(mappedBy="id.placeClassCode", fetch=FetchType.EAGER, cascade=CascadeType.ALL, orphanRemoval=true)
-	private Set<MudPlaceClassSkill> skillModifiers;
+	private Set<MudPlaceClassAttr> attrs;
 	
 	@Column(name="PARENT_CLASS_CODE")
 	private String parentClassCode;
@@ -39,8 +36,8 @@ public class MudPlaceClass {
 	@Column(name="BUILD_EFFORT")
 	private Integer buildEffort;
 	
-	@Column(name="MATERIAL_CODE")
-	private String material;
+	@Column(name="DEMISE_CLASS_CODE")
+	private String demisePlaceClassCode;
 
 	public String getName() {
 		return name;
@@ -98,14 +95,6 @@ public class MudPlaceClass {
 		this.buildCost = buildCost;
 	}
 
-	public String getMaterial() {
-		return material;
-	}
-
-	public void setMaterial(String material) {
-		this.material = material;
-	}
-
 	public Integer getBuildEffort() {
 		return buildEffort;
 	}
@@ -114,11 +103,20 @@ public class MudPlaceClass {
 		this.buildEffort = buildEffort;
 	}
 
-	public Set<MudPlaceClassAttr> getAttrModifiers() {
-		return attrModifiers;
+	public String getDemisePlaceClassCode() {
+		return demisePlaceClassCode;
 	}
 
-	public Set<MudPlaceClassSkill> getSkillModifiers() {
-		return skillModifiers;
+	public void setDemisePlaceClassCode(String demisePlaceClassCode) {
+		this.demisePlaceClassCode = demisePlaceClassCode;
 	}
+
+	public Set<MudPlaceClassAttr> getAttrs() {
+		return attrs;
+	}
+
+	public void setAttrs(Set<MudPlaceClassAttr> attrs) {
+		this.attrs = attrs;
+	}
+	
 }

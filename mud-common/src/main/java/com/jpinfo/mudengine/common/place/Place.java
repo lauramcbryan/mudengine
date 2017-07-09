@@ -12,7 +12,9 @@ public class Place implements ActionTarget {
 
 	private String placeClassCode;
 	
-	private Map<String, PlaceExits> exits;
+	private Map<String, PlaceExit> exits;
+	
+	private Map<String, Integer> attrs;
 	
 	private Map<String, Collection<Reaction>> beforeReactions;
 	
@@ -20,7 +22,10 @@ public class Place implements ActionTarget {
 	
 	
 	public Place() {
-		this.exits = new HashMap<String, PlaceExits>();
+		this.attrs = new HashMap<String, Integer>();
+		this.exits = new HashMap<String, PlaceExit>();
+		this.beforeReactions = new HashMap<String, Collection<Reaction>>();
+		this.afterReactions = new HashMap<String, Collection<Reaction>>();
 	}
 	
 
@@ -40,11 +45,11 @@ public class Place implements ActionTarget {
 		this.placeClassCode = placeClass;
 	}
 
-	public Map<String, PlaceExits> getExits() {
+	public Map<String, PlaceExit> getExits() {
 		return exits;
 	}
 
-	public void setExits(Map<String, PlaceExits> exits) {
+	public void setExits(Map<String, PlaceExit> exits) {
 		this.exits = exits;
 	}
 	
@@ -57,5 +62,16 @@ public class Place implements ActionTarget {
 		}
 	}
 
+
+	public Map<String, Integer> getAttrs() {
+		return attrs;
+	}
+
+
+	public void setAttrs(Map<String, Integer> attrs) {
+		this.attrs = attrs;
+	}
+
+	
 	
 }
