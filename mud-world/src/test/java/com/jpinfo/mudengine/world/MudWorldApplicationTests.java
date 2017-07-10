@@ -42,7 +42,7 @@ public class MudWorldApplicationTests {
 	public void createPlaceTest() {
 		
 		String placeClass="TUNNEL";
-		String direction = "DOWN";
+		String direction = "UP";
 		Integer targetPlaceId = 1;
 		
 		Map<String, Object>  urlVariables = new HashMap<String, Object>();

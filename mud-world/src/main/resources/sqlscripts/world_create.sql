@@ -1,5 +1,7 @@
 set role mudengine_world;
 
+create sequence mudengine_world.MUD_PLACE_SEQ;
+
 CREATE TABLE mudengine_world.MUD_PLACE_CLASS (
 	PLACE_CLASS_CODE	varchar(20) NOT NULL,
 	NAME				varchar(30) NOT NULL,

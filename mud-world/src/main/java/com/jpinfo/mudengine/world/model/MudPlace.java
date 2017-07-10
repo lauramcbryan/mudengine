@@ -6,9 +6,11 @@ import java.util.*;
 
 @Entity
 @Table(name="MUD_PLACE")
+@SequenceGenerator(name = "mud_place_seq", sequenceName="mud_place_seq", allocationSize=1)
 public class MudPlace {
 	
 	@Id
+	@GeneratedValue(generator="mud_place_seq", strategy=GenerationType.SEQUENCE)
 	@Column(name="PLACE_CODE")
 	private Integer placeCode;
 
