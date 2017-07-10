@@ -23,7 +23,7 @@ public interface PlaceService {
 	 * @param requestPlace
 	 */
 	@RequestMapping(method=RequestMethod.PUT, value="/")
-	Place createPlace(@RequestParam("placeClass") String placeClass, @RequestParam("direction") String direction, @RequestParam("targetPlaceCode") Integer targetPlaceCode );
+	Place createPlace(@RequestParam("placeClassCode") String placeClassCode, @RequestParam("direction") String direction, @RequestParam("targetPlaceCode") Integer targetPlaceCode );
 	
 	/**
 	 * Returns the place description and all related information about it.
