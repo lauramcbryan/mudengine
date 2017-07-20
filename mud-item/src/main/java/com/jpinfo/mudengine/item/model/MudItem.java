@@ -30,6 +30,9 @@ public class MudItem implements Serializable {
 	@Column(name="current_place")
 	private Integer curPlaceCode;
 	
+	@Column(name="current_owner")
+	private Long curOwner;
+	
 	private Integer quantity;
 	
 
@@ -84,7 +87,13 @@ public class MudItem implements Serializable {
 	public void setQuantity(Integer quantity) {
 		this.quantity = quantity;
 	}
-	
-	
+
+	public Long getCurOwner() {
+		return curOwner;
+	}
+
+	public void setCurOwner(Long currentOwner) {
+		this.curOwner = currentOwner;
+	}
 
 }

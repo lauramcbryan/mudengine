@@ -19,6 +19,7 @@ public class ItemHelper {
 		response.setCurPlaceCode(dbItem.getCurPlaceCode());
 		response.setCurWorld(dbItem.getCurWorld());
 		response.setQuantity(dbItem.getQuantity());
+		response.setCurOwner(dbItem.getCurOwner());
 		
 		for(MudItemAttr curAttr: dbItem.getAttrs()) {
 			response.getAttrs().put(curAttr.getId().getAttrCode(), curAttr.getAttrValue());

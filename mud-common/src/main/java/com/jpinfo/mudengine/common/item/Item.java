@@ -20,6 +20,8 @@ public class Item implements Serializable, ActionTarget {
 	private Integer curPlaceCode;
 	
 	private String curWorld;
+	
+	private Long curOwner;
 
 	private Map<String, Integer> attrs;
 	
@@ -83,6 +85,13 @@ public class Item implements Serializable, ActionTarget {
 	public void setQuantity(Integer quantity) {
 		this.quantity = quantity;
 	}
-	
+
+	public Long getCurOwner() {
+		return curOwner;
+	}
+
+	public void setCurOwner(Long curOwner) {
+		this.curOwner = curOwner;
+	}
 	
 }

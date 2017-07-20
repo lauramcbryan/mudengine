@@ -1,5 +1,7 @@
 package com.jpinfo.mudengine.item.service;
 
+import java.util.*;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.web.bind.annotation.PathVariable;
@@ -8,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.jpinfo.mudengine.common.exception.EntityNotFoundException;
+import com.jpinfo.mudengine.common.exception.IllegalParameterException;
 import com.jpinfo.mudengine.common.item.Item;
 import com.jpinfo.mudengine.common.service.ItemService;
 import com.jpinfo.mudengine.item.model.MudItem;
@@ -55,6 +58,7 @@ public class ItemController implements ItemService {
 			dbItem.setCurWorld(requestItem.getCurWorld());
 			dbItem.setCurPlaceCode(requestItem.getCurPlaceCode());
 			dbItem.setQuantity(requestItem.getQuantity());
+			dbItem.setCurOwner(requestItem.getCurOwner());
 			
 			// Looking for attributes to remove
 			for(MudItemAttr curItemAttr: dbItem.getAttrs()) {
@@ -112,33 +116,47 @@ public class ItemController implements ItemService {
 	}
 	
 	@Override
-	public Item createItem(@RequestParam String itemClassCode, @RequestParam String currentWorld, @RequestParam Integer currentPlace, @RequestParam Integer quantity) {
+	public Item createItem(@RequestParam String itemClassCode, @RequestParam Optional<String> currentWorld, @RequestParam Optional<Integer> currentPlace, @RequestParam Integer quantity, @RequestParam Optional<Long> currentOwner) {
 		
 		Item response = null;
 		
-		MudItemClass dbClassItem = itemClassRepository.findOne(itemClassCode);
+		// Check if a minimum parameters are present
+		if (currentOwner.isPresent() || (currentPlace.isPresent() && currentWorld.isPresent())) {
 		
-		if (dbClassItem!=null) {
-		
-			MudItem newDbItem = new MudItem();
-			newDbItem.setItemClass(dbClassItem);
-			newDbItem.setCurWorld(currentWorld);
-			newDbItem.setCurPlaceCode(currentPlace);
-			newDbItem.setQuantity(quantity);
-		
-			// Saving the entity (to get the itemCode)
-			newDbItem = itemRepository.save(newDbItem);
-		
-			// Populating the attrs
-			newDbItem = ItemHelper.changeItemAttrs(newDbItem, null, dbClassItem);
-		
-			// Saving again
-			itemRepository.save(newDbItem);
-		
-			// Building the response
-			response = ItemHelper.buildItem(newDbItem);
+			MudItemClass dbClassItem = itemClassRepository.findOne(itemClassCode);
+			
+			if (dbClassItem!=null) {
+				
+				MudItem newDbItem = new MudItem();
+				newDbItem.setItemClass(dbClassItem);
+				
+				if (currentWorld.isPresent())
+					newDbItem.setCurWorld(currentWorld.get());
+				
+				if (currentPlace.isPresent())
+					newDbItem.setCurPlaceCode(currentPlace.get());
+				
+				if (currentOwner.isPresent())
+					newDbItem.setCurOwner(currentOwner.get());
+				
+				newDbItem.setQuantity(quantity);
+			
+				// Saving the entity (to get the itemCode)
+				newDbItem = itemRepository.save(newDbItem);
+			
+				// Populating the attrs
+				newDbItem = ItemHelper.changeItemAttrs(newDbItem, null, dbClassItem);
+			
+				// Saving again
+				itemRepository.save(newDbItem);
+			
+				// Building the response
+				response = ItemHelper.buildItem(newDbItem);
+			} else {
+				throw new EntityNotFoundException("Item Class entity not found");
+			}
 		} else {
-			throw new EntityNotFoundException("Item Class entity not found");
+			throw new IllegalParameterException("At least owner or place must be set in request");
 		}
 		
 		return response;
@@ -163,6 +181,36 @@ public class ItemController implements ItemService {
 		}
 		
 		return response;
+	}
+
+	@Override
+	public List<Item> getAllFromPlace(@PathVariable String worldName, @PathVariable Integer placeCode) {
+		
+		List<Item> responseList = new ArrayList<Item>();
+		
+		List<MudItem> dbResponse = itemRepository.findByCurWorldAndCurPlaceCode(worldName, placeCode);
+		
+		for(MudItem curdbItem: dbResponse) {
+			
+			responseList.add(ItemHelper.buildItem(curdbItem));
+		}
+		
+		return responseList;
+	}
+
+	@Override
+	public List<Item> getAllFromBeing(@PathVariable Long beingCode) {
+		
+		List<Item> responseList = new ArrayList<Item>();
+		
+		List<MudItem> dbResponse = itemRepository.findByCurOwner(beingCode);
+		
+		for(MudItem curdbItem: dbResponse) {
+			
+			responseList.add(ItemHelper.buildItem(curdbItem));
+		}
+		
+		return responseList;
 	}
 	
 }
