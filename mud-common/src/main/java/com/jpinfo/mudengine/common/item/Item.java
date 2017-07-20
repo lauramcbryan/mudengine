@@ -2,6 +2,7 @@ package com.jpinfo.mudengine.common.item;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 import com.jpinfo.mudengine.common.interfaces.ActionTarget;
@@ -12,23 +13,22 @@ public class Item implements Serializable, ActionTarget {
 	
 	private Integer itemCode;
 
-	private String description;
-
-	private String name;
-
-	private Integer usageCount;
-
 	private String itemClass;
+	
+	private Integer quantity;
 
-	private Map<String, Float> attrModifiers;
+	private Integer curPlaceCode;
+	
+	private String curWorld;
 
-	private Map<String, Float> skillModifiers;
+	private Map<String, Integer> attrs;
 	
 	private Map<String, Collection<Reaction>> beforeReactions;
 	
 	private Map<String, Collection<Reaction>> afterReactions;
 
 	public Item() {
+		this.attrs = new HashMap<String, Integer>();
 	}
 
 	public Integer getItemCode() {
@@ -39,52 +39,12 @@ public class Item implements Serializable, ActionTarget {
 		this.itemCode = itemCode;
 	}
 
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public Integer getUsageCount() {
-		return usageCount;
-	}
-
-	public void setUsageCount(Integer usageCount) {
-		this.usageCount = usageCount;
-	}
-
 	public String getItemClass() {
 		return itemClass;
 	}
 
 	public void setItemClass(String itemClass) {
 		this.itemClass = itemClass;
-	}
-
-	public Map<String, Float> getAttrModifiers() {
-		return attrModifiers;
-	}
-
-	public void setAttrModifiers(Map<String, Float> attrModifiers) {
-		this.attrModifiers = attrModifiers;
-	}
-
-	public Map<String, Float> getSkillModifiers() {
-		return skillModifiers;
-	}
-
-	public void setSkillModifiers(Map<String, Float> skillModifiers) {
-		this.skillModifiers = skillModifiers;
 	}
 
 	public Collection<Reaction> getReactions(String actionCode, boolean isBefore) {
@@ -95,4 +55,34 @@ public class Item implements Serializable, ActionTarget {
 			return this.afterReactions.get(actionCode);
 		}
 	}
+
+	public Integer getCurPlaceCode() {
+		return curPlaceCode;
+	}
+
+	public void setCurPlaceCode(Integer curPlaceCode) {
+		this.curPlaceCode = curPlaceCode;
+	}
+
+	public String getCurWorld() {
+		return curWorld;
+	}
+
+	public void setCurWorld(String curWorld) {
+		this.curWorld = curWorld;
+	}
+
+	public Map<String, Integer> getAttrs() {
+		return attrs;
+	}
+
+	public Integer getQuantity() {
+		return quantity;
+	}
+
+	public void setQuantity(Integer quantity) {
+		this.quantity = quantity;
+	}
+	
+	
 }

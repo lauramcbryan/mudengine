@@ -14,20 +14,17 @@ public class ItemClass implements Serializable {
 
 	private String itemClass;
 
-	private Integer durability;
-
 	private float size;
 
 	private float weight;
+	
+	private String description;
 
-	private Map<String, Float> attrModifiers;
-
-	private Map<String, Float> skillModifiers;
+	private Map<String, Integer> attrs;
 
 	public ItemClass() {
 		
-		this.attrModifiers = new HashMap<String, Float>();
-		this.skillModifiers = new HashMap<String, Float>();
+		this.attrs = new HashMap<String, Integer>();
 	}
 
 	public String getItemClass() {
@@ -36,14 +33,6 @@ public class ItemClass implements Serializable {
 
 	public void setItemClass(String itemClass) {
 		this.itemClass = itemClass;
-	}
-
-	public Integer getDurability() {
-		return durability;
-	}
-
-	public void setDurability(Integer durability) {
-		this.durability = durability;
 	}
 
 	public float getSize() {
@@ -62,23 +51,17 @@ public class ItemClass implements Serializable {
 		this.weight = weight;
 	}
 
-	public Map<String, Float> getAttrModifiers() {
-		return attrModifiers;
+	public Map<String, Integer> getAttrs() {
+		return attrs;
 	}
 
-	public void setAttrModifiers(Map<String, Float> attrModifiers) {
-		this.attrModifiers = attrModifiers;
+	public String getDescription() {
+		return description;
 	}
 
-	public Map<String, Float> getSkillModifiers() {
-		return skillModifiers;
-	}
-
-	public void setSkillModifiers(Map<String, Float> skillModifiers) {
-		this.skillModifiers = skillModifiers;
+	public void setDescription(String description) {
+		this.description = description;
 	}
 	
 	
-	
-
 }

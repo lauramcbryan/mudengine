@@ -2,6 +2,8 @@ package com.jpinfo.mudengine.item.model;
 
 import java.io.Serializable;
 import javax.persistence.*;
+
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -18,21 +20,18 @@ public class MudItemClass implements Serializable {
 	@Column(name="item_class")
 	private String itemClass;
 
-	private Integer durability;
-
 	private float size;
 
 	private float weight;
+	
+	private String description;
 
 	//bi-directional many-to-one association to ItemClassAttr
 	@OneToMany(mappedBy="id.itemClass", cascade=CascadeType.ALL, orphanRemoval=true)
 	private List<MudItemClassAttr> attrs;
 
-	//bi-directional many-to-one association to ItemClassSkill
-	@OneToMany(mappedBy="id.itemClass", cascade=CascadeType.ALL, orphanRemoval=true)
-	private List<MudItemClassSkill> skills;
-
 	public MudItemClass() {
+		this.attrs = new ArrayList<MudItemClassAttr>();
 	}
 
 	public String getItemClass() {
@@ -41,14 +40,6 @@ public class MudItemClass implements Serializable {
 
 	public void setItemClass(String itemClass) {
 		this.itemClass = itemClass;
-	}
-
-	public Integer getDurability() {
-		return this.durability;
-	}
-
-	public void setDurability(Integer durability) {
-		this.durability = durability;
 	}
 
 	public float getSize() {
@@ -71,7 +62,11 @@ public class MudItemClass implements Serializable {
 		return this.attrs;
 	}
 
-	public List<MudItemClassSkill> getSkills() {
-		return this.skills;
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 }

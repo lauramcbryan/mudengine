@@ -2,7 +2,7 @@ package com.jpinfo.mudengine.item.model;
 
 import java.io.Serializable;
 import javax.persistence.*;
-import java.util.List;
+import java.util.*;
 
 
 /**
@@ -11,32 +11,34 @@ import java.util.List;
  */
 @Entity
 @Table(name="mud_item")
+@SequenceGenerator(name = "mud_item_seq", sequenceName="mud_item_seq", allocationSize=1)
 public class MudItem implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
+	@GeneratedValue(generator="mud_item_seq", strategy=GenerationType.SEQUENCE)
 	@Column(name="item_code")
 	private Integer itemCode;
 
-	private String description;
-
-	private String name;
-
-	@Column(name="usage_count")
-	private Integer usageCount;
-
-	@Column(name="item_class")
-	private String itemClass;
+	@ManyToOne
+	@JoinColumn(name="item_class", referencedColumnName="item_class")
+	private MudItemClass itemClass;
+	
+	@Column(name="current_world")
+	private String curWorld;
+	
+	@Column(name="current_place")
+	private Integer curPlaceCode;
+	
+	private Integer quantity;
+	
 
 	//bi-directional many-to-one association to ItemAttr
 	@OneToMany(mappedBy="id.itemCode", cascade=CascadeType.ALL, orphanRemoval=true)
 	private List<MudItemAttr> attrs;
 
-	//bi-directional many-to-one association to ItemSkill
-	@OneToMany(mappedBy="id.itemCode", cascade=CascadeType.ALL, orphanRemoval=true)
-	private List<MudItemSkill> skills;
-
 	public MudItem() {
+		this.attrs = new ArrayList<MudItemAttr>();
 	}
 
 	public Integer getItemCode() {
@@ -47,35 +49,11 @@ public class MudItem implements Serializable {
 		this.itemCode = itemCode;
 	}
 
-	public String getDescription() {
-		return this.description;
+	public MudItemClass getItemClass() {
+		return itemClass;
 	}
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-	public String getName() {
-		return this.name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public Integer getUsageCount() {
-		return this.usageCount;
-	}
-
-	public void setUsageCount(Integer usageCount) {
-		this.usageCount = usageCount;
-	}
-
-	public String getItemClass() {
-		return this.itemClass;
-	}
-
-	public void setItemClass(String itemClass) {
+	public void setItemClass(MudItemClass itemClass) {
 		this.itemClass = itemClass;
 	}
 
@@ -83,7 +61,30 @@ public class MudItem implements Serializable {
 		return this.attrs;
 	}
 
-	public List<MudItemSkill> getSkills() {
-		return this.skills;
+	public String getCurWorld() {
+		return curWorld;
 	}
+
+	public void setCurWorld(String curWorld) {
+		this.curWorld = curWorld;
+	}
+
+	public Integer getCurPlaceCode() {
+		return curPlaceCode;
+	}
+
+	public void setCurPlaceCode(Integer curPlaceCode) {
+		this.curPlaceCode = curPlaceCode;
+	}
+
+	public Integer getQuantity() {
+		return quantity;
+	}
+
+	public void setQuantity(Integer quantity) {
+		this.quantity = quantity;
+	}
+	
+	
+
 }

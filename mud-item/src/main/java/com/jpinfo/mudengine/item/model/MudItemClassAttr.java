@@ -18,8 +18,8 @@ public class MudItemClassAttr implements Serializable {
 	@EmbeddedId
 	private MudItemClassAttrPK id;
 
-	@Column(name="attr_offset")
-	private float attrOffset;
+	@Column(name="attr_value")
+	private Integer attrValue;
 
 	public MudItemClassAttr() {
 	}
@@ -32,11 +32,11 @@ public class MudItemClassAttr implements Serializable {
 		this.id = id;
 	}
 
-	public float getOffset() {
-		return this.attrOffset;
+	public Integer getAttrValue() {
+		return attrValue;
 	}
 
-	public void setOffset(float attrOffset) {
-		this.attrOffset = attrOffset;
+	public void setAttrValue(Integer attrValue) {
+		this.attrValue = attrValue;
 	}
 }
