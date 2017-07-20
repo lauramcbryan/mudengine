@@ -41,11 +41,14 @@ public class PlaceTests {
 	private static final String changedPlaceAttr2="MAXH2";
 	private static final Integer changedPlaceAttrValue2=8;
 	
+	private static final String extraPlaceAttr="HP3";
+	
 	
 	@Test
 	public void testCrudPlace() {
 		
-		// ***** CreatePlace *****
+		// *********** CREATE **********
+		// =============================
 		
 		Map<String, Object>  urlVariables = new HashMap<String, Object>();
 		
@@ -63,7 +66,8 @@ public class PlaceTests {
 		
 		urlVariables.put("placeId", responseCreate.getBody().getPlaceCode());
 
-		// ***** GetPlace *****
+		// ************ READ ***********
+		// =============================		
 		
 		ResponseEntity<Place> responseGet = restTemplate.exchange("/place/{placeId}", 
 				HttpMethod.GET, null, Place.class, urlVariables);
@@ -77,6 +81,7 @@ public class PlaceTests {
 		// ***** UpdatePlace *****
 		
 		dummyPlace.setPlaceClassCode(PlaceTests.changedPlaceClass);
+		dummyPlace.getAttrs().put(PlaceTests.extraPlaceAttr, new Integer(1));
 		
 		HttpEntity<Place> request = new HttpEntity<Place>(dummyPlace);
 			
@@ -85,6 +90,7 @@ public class PlaceTests {
 		
 		assertThat(responseUpdate.getStatusCode().is2xxSuccessful());
 		assertValues(responseUpdate, PlaceTests.changedPlaceClass);
+		assertThat(responseUpdate.getBody().getAttrs().get(PlaceTests.extraPlaceAttr)).isNotNull();
 		assertChangedPlaceClassValues(responseUpdate.getBody());
 
 		// ***** deletePlace *****

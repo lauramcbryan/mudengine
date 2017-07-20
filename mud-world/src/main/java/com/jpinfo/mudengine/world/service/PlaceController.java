@@ -11,7 +11,6 @@ import com.jpinfo.mudengine.common.service.PlaceService;
 import com.jpinfo.mudengine.world.model.MudPlace;
 import com.jpinfo.mudengine.world.model.MudPlaceAttr;
 import com.jpinfo.mudengine.world.model.MudPlaceClass;
-import com.jpinfo.mudengine.world.model.MudPlaceClassAttr;
 import com.jpinfo.mudengine.world.model.MudPlaceExit;
 import com.jpinfo.mudengine.world.repository.PlaceClassRepository;
 import com.jpinfo.mudengine.world.repository.PlaceRepository;
@@ -52,16 +51,6 @@ public class PlaceController implements PlaceService {
 		
 		if (dbPlace!=null) {
 		
-			// if placeClass is changed, update the attributes of changed place
-			if (!dbPlace.getPlaceClass().getPlaceClassCode().equals(requestPlace.getPlaceClassCode())) {
-				
-				// change placeClass
-				MudPlaceClass placeClass = placeClassRepository.findOne(requestPlace.getPlaceClassCode());
-				
-				dbPlace.setPlaceClass(placeClass);
-				dbPlace = resetPlaceAttrs(dbPlace, placeClass);
-			}
-	
 			// Check if the current HP of the place is lower than zero
 			Integer currentHP = requestPlace.getAttrs().get(WorldHelper.PLACE_HP_ATTR);
 			Integer maxHP = requestPlace.getAttrs().get(WorldHelper.PLACE_MAX_HP_ATTR);
@@ -71,11 +60,7 @@ public class PlaceController implements PlaceService {
 				if (currentHP < 0) {
 		
 					// destroy the place
-					// Update the placeClass to demised placeClass
-					MudPlaceClass placeClass = placeClassRepository.findOne(dbPlace.getPlaceClass().getDemisePlaceClassCode());
-					
-					dbPlace.setPlaceClass(placeClass);
-					dbPlace = resetPlaceAttrs(dbPlace, placeClass);
+					return destroyPlace(placeId);
 					
 				} else {
 					// If HP is greater than MAX_HP, adjust it
@@ -90,6 +75,47 @@ public class PlaceController implements PlaceService {
 					}
 				}
 			}
+			
+			// Looking for attributes to remove
+			for(MudPlaceAttr curAttr: dbPlace.getAttrs()) {
+				
+				// if doesn't exist in request entity, remove it
+				if (requestPlace.getAttrs().get(curAttr.getId().getAttrCode())==null) {
+					dbPlace.getAttrs().remove(curAttr);
+				}
+			}
+			
+			// Looking for attributes to add
+			for(String curAttr: requestPlace.getAttrs().keySet()) {
+				
+				boolean found = false;
+				for(MudPlaceAttr curDbAttr: dbPlace.getAttrs()) {
+					
+					if (curDbAttr.getId().getAttrCode().equals(curAttr)) {
+						curDbAttr.setAttrValue(requestPlace.getAttrs().get(curAttr));
+						found = true;
+					}
+				}
+				
+				if (!found) {
+					
+					dbPlace.getAttrs().add(
+							WorldHelper.buildPlaceAttr(dbPlace.getPlaceCode(), curAttr, requestPlace.getAttrs().get(curAttr))
+							);
+				}
+				
+			}
+			
+			// if placeClass is changed, update the attributes of changed place
+			if (!dbPlace.getPlaceClass().getPlaceClassCode().equals(requestPlace.getPlaceClassCode())) {
+				
+				// change placeClass
+				MudPlaceClass placeClass = placeClassRepository.findOne(requestPlace.getPlaceClassCode());
+				
+				dbPlace = WorldHelper.changePlaceAttrs(dbPlace, dbPlace.getPlaceClass(), placeClass);
+				dbPlace.setPlaceClass(placeClass);
+			}
+			
 			
 			// 4. exits
 			dbPlace = WorldHelper.updatePlaceExits(dbPlace, requestPlace);
@@ -122,8 +148,8 @@ public class PlaceController implements PlaceService {
 			if (dbPlace.getPlaceClass().getDemisePlaceClassCode()!=null) {
 				MudPlaceClass placeClass = placeClassRepository.findOne(dbPlace.getPlaceClass().getDemisePlaceClassCode());
 				
+				dbPlace = WorldHelper.changePlaceAttrs(dbPlace, dbPlace.getPlaceClass(), placeClass);
 				dbPlace.setPlaceClass(placeClass);
-				dbPlace = resetPlaceAttrs(dbPlace, placeClass);
 				
 				updatedPlace = placeRepository.save(dbPlace);
 			} else {
@@ -181,7 +207,7 @@ public class PlaceController implements PlaceService {
 					MudPlace dbPlace = placeRepository.save(newPlace);
 					
 					// Updating attributes
-					resetPlaceAttrs(dbPlace, dbPlaceClass);
+					WorldHelper.changePlaceAttrs(dbPlace, null, dbPlaceClass);
 		
 					// Creating the new exit
 					MudPlaceExit newExit = WorldHelper.buildMudPlaceExit(dbPlace.getPlaceCode(), 
@@ -219,20 +245,6 @@ public class PlaceController implements PlaceService {
 		}
 		
 		return response;
-	}
-	
-	private MudPlace resetPlaceAttrs(MudPlace dbPlace, MudPlaceClass placeClass) {
-		
-		dbPlace.getAttrs().clear();
-		for(MudPlaceClassAttr curClassAttr: placeClass.getAttrs()) {
-			
-			MudPlaceAttr newAttr = WorldHelper.buildPlaceAttr(dbPlace.getPlaceCode(), curClassAttr);
-			
-			dbPlace.getAttrs().add(newAttr);
-		}
-
-		return dbPlace;
-	}
-	
+	}	
 	
 }

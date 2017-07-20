@@ -78,6 +78,20 @@ public class WorldHelper {
 		return response;
 	}
 	
+	public static MudPlaceAttr buildPlaceAttr(Integer placeCode, String attrCode, Integer attrValue) {
+		
+		MudPlaceAttr response = new MudPlaceAttr();
+		PlaceAttrPK pk = new PlaceAttrPK();
+		
+		pk.setAttrCode(attrCode);
+		pk.setPlaceCode(placeCode);
+		
+		response.setId(pk);
+		response.setAttrValue(attrValue);
+		
+		return response;
+	}
+	
 	
 	public static MudPlace updatePlaceExits(MudPlace dbPlace, Place requestPlace) {
 		
@@ -150,4 +164,27 @@ public class WorldHelper {
 		
 		return PlaceExit.DIRECTIONS.get(newpos);
 	}
+	
+	public static MudPlace changePlaceAttrs(MudPlace dbPlace, MudPlaceClass previousPlaceClass, MudPlaceClass placeClass) {
+		
+		if (previousPlaceClass!=null) {
+		
+			for(MudPlaceClassAttr curClassAttr: previousPlaceClass.getAttrs()) {
+				
+				MudPlaceAttr oldAttr = WorldHelper.buildPlaceAttr(dbPlace.getPlaceCode(), curClassAttr);
+				
+				dbPlace.getAttrs().remove(oldAttr);
+			}
+		}
+		
+		for(MudPlaceClassAttr curClassAttr: placeClass.getAttrs()) {
+			
+			MudPlaceAttr newAttr = WorldHelper.buildPlaceAttr(dbPlace.getPlaceCode(), curClassAttr);
+			
+			dbPlace.getAttrs().add(newAttr);
+		}
+
+		return dbPlace;
+	}
+	
 }
