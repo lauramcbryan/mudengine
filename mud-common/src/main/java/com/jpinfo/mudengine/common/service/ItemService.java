@@ -27,7 +27,13 @@ public interface ItemService {
 
 	@RequestMapping(method=RequestMethod.GET, value="/place/{worldName}/{placeCode}")
 	List<Item> getAllFromPlace(@PathVariable("worldName") String worldName, @PathVariable("placeCode") Integer placeCode);
+
+	@RequestMapping(method=RequestMethod.DELETE, value="/place/{worldName}/{placeCode}")
+	void deleteAllFromPlace(@PathVariable("worldName") String worldName, @PathVariable("placeCode") Integer placeCode);
 	
 	@RequestMapping(method=RequestMethod.GET, value="/being/{beingCode}")
 	List<Item> getAllFromBeing(@PathVariable("beingCode") Long beingCode);
+	
+	@RequestMapping(method=RequestMethod.POST, value="/being/{beingCode}")
+	void dropAllFromBeing(@PathVariable("beingCode") Long beingCode, @RequestParam("currentWorld") String currentWorld, @RequestParam("currentPlaceCode") Integer currentPlaceCode);	
 }

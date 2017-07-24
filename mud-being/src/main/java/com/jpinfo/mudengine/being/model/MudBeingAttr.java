@@ -19,7 +19,7 @@ public class MudBeingAttr implements Serializable {
 	private MudBeingAttrPK id;
 
 	@Column(name="attr_value")
-	private float attrValue;
+	private Integer attrValue;
 
 	public MudBeingAttr() {
 	}
@@ -32,11 +32,38 @@ public class MudBeingAttr implements Serializable {
 		this.id = id;
 	}
 
-	public float getValue() {
+	public Integer getValue() {
 		return this.attrValue;
 	}
 
-	public void setValue(float attrOffset) {
+	public void setValue(Integer attrOffset) {
 		this.attrValue = attrOffset;
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		MudBeingAttr other = (MudBeingAttr) obj;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		return true;
+	}
+	
+	
 }

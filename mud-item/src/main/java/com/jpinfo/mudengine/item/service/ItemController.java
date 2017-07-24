@@ -212,5 +212,27 @@ public class ItemController implements ItemService {
 		
 		return responseList;
 	}
+
+	@Override
+	public void deleteAllFromPlace(String worldName, Integer placeCode) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void dropAllFromBeing(@PathVariable Long beingCode, @RequestParam String currentWorld, @RequestParam Integer currentPlaceCode) {
+		
+		List<MudItem> dbResponse = itemRepository.findByCurOwner(beingCode);
+		
+		for(MudItem curdbItem: dbResponse) {
+			
+			curdbItem.setCurOwner(null);
+			curdbItem.setCurWorld(currentWorld);
+			curdbItem.setCurPlaceCode(currentPlaceCode);
+			
+			itemRepository.save(curdbItem);
+		}
+		
+	}
 	
 }

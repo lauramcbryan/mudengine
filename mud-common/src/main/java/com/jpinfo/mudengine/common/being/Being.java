@@ -9,6 +9,7 @@ import java.util.Map;
 
 import com.jpinfo.mudengine.common.interfaces.ActionTarget;
 import com.jpinfo.mudengine.common.interfaces.Reaction;
+import com.jpinfo.mudengine.common.item.Item;
 
 
 /**
@@ -22,15 +23,13 @@ public class Being implements Serializable, ActionTarget {
 
 	private String beingClass;
 
-	private Map<String, Float> attrs;
+	private Map<String, Integer> attrs;
 	
-	private Map<String, Float> skills;
+	private Map<String, Integer> skills;
 	
 	private List<BeingAttrModifier> attrModifiers;
 	
 	private List<BeingSkillModifier> skillModifiers;
-
-	private Map<Integer, BeingItem> items;
 	
 	private String name;
 	
@@ -44,11 +43,12 @@ public class Being implements Serializable, ActionTarget {
 	
 	private Map<String, Collection<Reaction>> afterReactions;
 	
+	private Map<String, Item> equipment;
+	
 
 	public Being() {
-		this.attrs = new HashMap<String, Float>();
-		this.skills = new HashMap<String, Float>();
-		this.items = new HashMap<Integer, BeingItem>();
+		this.attrs = new HashMap<String, Integer>();
+		this.skills = new HashMap<String, Integer>();
 		
 		this.attrModifiers = new ArrayList<BeingAttrModifier>();
 		this.skillModifiers = new ArrayList<BeingSkillModifier>();
@@ -70,30 +70,6 @@ public class Being implements Serializable, ActionTarget {
 
 	public void setBeingClass(String beingClass) {
 		this.beingClass = beingClass;
-	}
-
-	public Map<String, Float> getAttrs() {
-		return attrs;
-	}
-
-	public void setAttrs(Map<String, Float> attrs) {
-		this.attrs = attrs;
-	}
-
-	public Map<String, Float> getSkills() {
-		return skills;
-	}
-
-	public void setSkills(Map<String, Float> skills) {
-		this.skills = skills;
-	}
-
-	public Map<Integer, BeingItem> getItems() {
-		return items;
-	}
-
-	public void setItems(Map<Integer, BeingItem> items) {
-		this.items = items;
 	}
 
 	public String getCurWorld() {
@@ -144,6 +120,24 @@ public class Being implements Serializable, ActionTarget {
 		this.name = name;
 	}
 	
+	public Map<String, Integer> getAttrs() {
+		return attrs;
+	}
+
+	public Map<String, Integer> getSkills() {
+		return skills;
+	}
+
+	public Map<String, Item> getEquipment() {
+		return equipment;
+	}
+
+	public void setEquipment(Map<String, Item> equipment) {
+		this.equipment = equipment;
+	}
+
+
+
 	public Collection<Reaction> getReactions(String actionCode, boolean isBefore) {
 		
 		if (isBefore) {

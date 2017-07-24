@@ -19,7 +19,7 @@ public class MudBeingSkill implements Serializable {
 	private MudBeingSkillPK id;
 
 	@Column(name="skill_value")
-	private float skillValue;
+	private Integer skillValue;
 
 	public MudBeingSkill() {
 	}
@@ -32,11 +32,11 @@ public class MudBeingSkill implements Serializable {
 		this.id = id;
 	}
 
-	public float getValue() {
+	public Integer getValue() {
 		return this.skillValue;
 	}
 
-	public void setValue(float skillOffset) {
+	public void setValue(Integer skillOffset) {
 		this.skillValue = skillOffset;
 	}
 }

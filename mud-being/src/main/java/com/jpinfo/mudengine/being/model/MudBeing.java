@@ -22,20 +22,21 @@ public class MudBeing implements Serializable {
 	@Column(name="being_code")
 	private Long beingCode;
 
-	@Column(name="being_class")
-	private String beingClass;
+	@ManyToOne
+	@JoinColumn(columnDefinition="being_class", referencedColumnName="being_class")
+	private MudBeingClass beingClass;
 
 	@OneToMany(mappedBy="id.beingCode", cascade=CascadeType.ALL, orphanRemoval=true)
-	private List<MudBeingAttr> attributes;
-
-	@OneToMany(mappedBy="id.beingCode", cascade=CascadeType.ALL, orphanRemoval=true)
-	private List<MudBeingItem> items;
+	private List<MudBeingAttr> attrs;
 
 	@OneToMany(mappedBy="id.beingCode", cascade=CascadeType.ALL, orphanRemoval=true)
 	private List<MudBeingSkill> skills;
 	
 	@OneToMany(mappedBy="id.beingCode", cascade=CascadeType.ALL, orphanRemoval=true)
 	private List<MudBeingAttrModifier> attrModifiers;
+	
+	@OneToMany(mappedBy="id.beingCoe", cascade=CascadeType.ALL, orphanRemoval=true)
+	private List<MudBeingSlot> equipment;
 
 
 	@OneToMany(mappedBy="id.beingCode")
@@ -54,11 +55,11 @@ public class MudBeing implements Serializable {
 	private Long playerId;
 
 	public MudBeing() {
-		this.attributes = new ArrayList<MudBeingAttr>();
-		this.items = new ArrayList<MudBeingItem>();
+		this.attrs = new ArrayList<MudBeingAttr>();
 		this.skills = new ArrayList<MudBeingSkill>();
 		this.attrModifiers = new ArrayList<MudBeingAttrModifier>();
 		this.skillModifiers = new ArrayList<MudBeingSkillModifier>();
+		this.equipment = new ArrayList<MudBeingSlot>();
 	}
 
 	public Long getBeingCode() {
@@ -77,12 +78,8 @@ public class MudBeing implements Serializable {
 		this.playerId = playerId;
 	}
 
-	public List<MudBeingAttr> getAttributes() {
-		return this.attributes;
-	}
-
-	public List<MudBeingItem> getItems() {
-		return this.items;
+	public List<MudBeingAttr> getAttrs() {
+		return this.attrs;
 	}
 
 	public List<MudBeingSkill> getSkills() {
@@ -105,13 +102,14 @@ public class MudBeing implements Serializable {
 		this.curWorld = curWorld;
 	}
 	
-	public String getBeingClass() {
+	public MudBeingClass getBeingClass() {
 		return beingClass;
 	}
 
-	public void setBeingClass(String beingClass) {
+	public void setBeingClass(MudBeingClass beingClass) {
 		this.beingClass = beingClass;
 	}
+
 	public List<MudBeingAttrModifier> getAttrModifiers() {
 		return attrModifiers;
 	}
@@ -127,4 +125,10 @@ public class MudBeing implements Serializable {
 	public void setName(String name) {
 		this.name = name;
 	}
+
+	public List<MudBeingSlot> getEquipment() {
+		return equipment;
+	}
+	
+	
 }

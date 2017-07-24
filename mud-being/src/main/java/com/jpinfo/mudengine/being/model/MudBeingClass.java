@@ -34,6 +34,9 @@ public class MudBeingClass implements Serializable {
 	//bi-directional many-to-one association to MudBeingClassSkill
 	@OneToMany(mappedBy="id.beingClass", cascade=CascadeType.ALL, orphanRemoval=true)
 	private List<MudBeingClassSkill> skills;
+	
+	@OneToMany(mappedBy="id.beingClassCode", cascade=CascadeType.ALL, orphanRemoval=true)
+	private List<MudBeingClassSlot> slots;
 
 	public MudBeingClass() {
 	}
@@ -85,4 +88,10 @@ public class MudBeingClass implements Serializable {
 	public List<MudBeingClassSkill> getSkills() {
 		return this.skills;
 	}
+
+	public List<MudBeingClassSlot> getSlots() {
+		return slots;
+	}
+	
+	
 }
