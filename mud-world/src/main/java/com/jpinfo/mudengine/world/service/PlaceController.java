@@ -5,6 +5,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.jpinfo.mudengine.common.client.BeingServiceClient;
+import com.jpinfo.mudengine.common.client.ItemServiceClient;
 import com.jpinfo.mudengine.common.exception.EntityNotFoundException;
 import com.jpinfo.mudengine.common.place.Place;
 import com.jpinfo.mudengine.common.service.PlaceService;
@@ -18,6 +20,12 @@ import com.jpinfo.mudengine.world.util.WorldHelper;
 
 @RestController
 public class PlaceController implements PlaceService {
+	
+	@Autowired
+	private ItemServiceClient itemService;
+	
+	@Autowired
+	private BeingServiceClient beingService;
 	
 	@Autowired
 	private PlaceRepository placeRepository;
@@ -154,7 +162,16 @@ public class PlaceController implements PlaceService {
 				updatedPlace = placeRepository.save(dbPlace);
 			} else {
 				
+				// Destroy the place
 				placeRepository.delete(dbPlace);
+				
+				// Remove all beings from the place
+				// @TODO: solve the worldName
+				beingService.destroyAllFromPlace("aforgotten", placeId);
+				
+				// Remove all items from the place
+				// @TODO: solve the worldName
+				itemService.destroyAllFromPlace("aforgotten", placeId);
 				
 				updatedPlace = dbPlace;
 				updatedPlace.setPlaceCode(null);

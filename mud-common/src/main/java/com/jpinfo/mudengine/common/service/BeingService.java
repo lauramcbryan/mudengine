@@ -29,9 +29,12 @@ public interface BeingService {
 	@RequestMapping(method=RequestMethod.GET,  value="/player/{playerId}")
 	List<Being> getAllFromPlayer(@PathVariable("playerId") Long playerId);
 	
-	@RequestMapping(method=RequestMethod.GET,  value="/place/{worldName}/{placeCode}")
-	List<Being> getAllFromPlace(@PathVariable("worldName") String worldName, @PathVariable("placeCode") Integer placeCode);
-
 	@RequestMapping(method=RequestMethod.DELETE, value="/{beingCode}")
 	Being destroyBeing(@PathVariable("beingCode") Long beingCode);
+
+	@RequestMapping(method=RequestMethod.GET,  value="/place/{worldName}/{placeCode}")
+	List<Being> getAllFromPlace(@PathVariable("worldName") String worldName, @PathVariable("placeCode") Integer placeCode);
+	
+	@RequestMapping(method=RequestMethod.DELETE, value="/place/{worldName}/{placeCode}")
+	void destroyAllFromPlace(@PathVariable("worldName") String worldName, @RequestParam("placeCode") Integer placeCode);
 }

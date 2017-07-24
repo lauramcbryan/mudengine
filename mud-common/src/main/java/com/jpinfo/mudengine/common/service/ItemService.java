@@ -29,7 +29,7 @@ public interface ItemService {
 	List<Item> getAllFromPlace(@PathVariable("worldName") String worldName, @PathVariable("placeCode") Integer placeCode);
 
 	@RequestMapping(method=RequestMethod.DELETE, value="/place/{worldName}/{placeCode}")
-	void deleteAllFromPlace(@PathVariable("worldName") String worldName, @PathVariable("placeCode") Integer placeCode);
+	void destroyAllFromPlace(@PathVariable("worldName") String worldName, @PathVariable("placeCode") Integer placeCode);
 	
 	@RequestMapping(method=RequestMethod.GET, value="/being/{beingCode}")
 	List<Item> getAllFromBeing(@PathVariable("beingCode") Long beingCode);

@@ -11,7 +11,7 @@ import com.jpinfo.mudengine.common.client.BeingServiceClient;
 import com.jpinfo.mudengine.common.client.PlaceServiceClient;
 import com.jpinfo.mudengine.common.client.PlayerServiceClient;
 import com.jpinfo.mudengine.common.place.Place;
-import com.jpinfo.mudengine.common.place.PlaceExits;
+import com.jpinfo.mudengine.common.place.PlaceExit;
 
 @Service
 public class ConsoleAppService implements Runnable {
@@ -48,7 +48,7 @@ public class ConsoleAppService implements Runnable {
 		int choose = 0;
 		int k=0;
 		
-		Iterable<Being> beingList = beingService.getBeingsForPlayer(currentPlayer.getPlayerId());
+		Iterable<Being> beingList = beingService.getAllFromPlayer(currentPlayer.getPlayerId());
 		
 		/*
 		 * 
@@ -119,7 +119,7 @@ public class ConsoleAppService implements Runnable {
 			
 			for (String curDirection: currentPlace.getExits().keySet()) {
 				
-				PlaceExits curExit = currentPlace.getExits().get(curDirection);
+				PlaceExit curExit = currentPlace.getExits().get(curDirection);
 				
 				if (curExit.isVisible()) {
 					System.out.println("\t" + curDirection + ": " + curExit.getName());

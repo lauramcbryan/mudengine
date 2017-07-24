@@ -203,4 +203,19 @@ public class BeingController implements BeingService {
 		
 		return responseBeing;
 	}
+
+	@Override
+	public void destroyAllFromPlace(String worldName, Integer placeCode) {
+		
+		List<MudBeing> lstFound = repository.findByCurWorldAndCurPlaceCode(worldName, placeCode);
+		
+		for(MudBeing curDbBeing: lstFound) {
+			
+			itemService.dropAllFromBeing(curDbBeing.getBeingCode(), worldName, placeCode);
+			
+			repository.delete(curDbBeing);
+		}
+
+		
+	}
 }

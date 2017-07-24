@@ -214,8 +214,14 @@ public class ItemController implements ItemService {
 	}
 
 	@Override
-	public void deleteAllFromPlace(String worldName, Integer placeCode) {
-		// TODO Auto-generated method stub
+	public void destroyAllFromPlace(String worldName, Integer placeCode) {
+		
+		List<MudItem> dbResponse = itemRepository.findByCurWorldAndCurPlaceCode(worldName, placeCode);
+		
+		for(MudItem curdbItem: dbResponse) {
+			
+			itemRepository.delete(curdbItem);
+		}
 		
 	}
 
