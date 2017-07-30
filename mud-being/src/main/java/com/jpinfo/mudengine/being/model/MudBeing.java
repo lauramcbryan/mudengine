@@ -23,7 +23,7 @@ public class MudBeing implements Serializable {
 	private Long beingCode;
 
 	@ManyToOne
-	@JoinColumn(columnDefinition="being_class", referencedColumnName="being_class")
+	@JoinColumn(columnDefinition="BEING_CLASS", referencedColumnName="BEING_CLASS")
 	private MudBeingClass beingClass;
 
 	@OneToMany(mappedBy="id.beingCode", cascade=CascadeType.ALL, orphanRemoval=true)
@@ -35,7 +35,7 @@ public class MudBeing implements Serializable {
 	@OneToMany(mappedBy="id.beingCode", cascade=CascadeType.ALL, orphanRemoval=true)
 	private List<MudBeingAttrModifier> attrModifiers;
 	
-	@OneToMany(mappedBy="id.beingCoe", cascade=CascadeType.ALL, orphanRemoval=true)
+	@OneToMany(mappedBy="id.beingCode", cascade=CascadeType.ALL, orphanRemoval=true)
 	private List<MudBeingSlot> equipment;
 
 
@@ -53,6 +53,9 @@ public class MudBeing implements Serializable {
 	
 	@Column(name="player_id")
 	private Long playerId;
+	
+	@Column(name="being_type")
+	private Integer beingType;
 
 	public MudBeing() {
 		this.attrs = new ArrayList<MudBeingAttr>();

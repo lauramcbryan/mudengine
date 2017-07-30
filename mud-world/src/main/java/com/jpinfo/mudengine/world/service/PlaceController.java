@@ -166,10 +166,13 @@ public class PlaceController implements PlaceService {
 				placeRepository.delete(dbPlace);
 				
 				// Remove all beings from the place
+				// THAT MUST GOES FIRST!!!
+				// This call will drop all items belonging to beings into the place
 				// @TODO: solve the worldName
 				beingService.destroyAllFromPlace("aforgotten", placeId);
 				
 				// Remove all items from the place
+				// (That will include items dropped from beings above)
 				// @TODO: solve the worldName
 				itemService.destroyAllFromPlace("aforgotten", placeId);
 				

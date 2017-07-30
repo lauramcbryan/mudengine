@@ -72,12 +72,13 @@ CREATE TABLE MUDENGINE_BEING.MUD_BEING_CLASS_SLOT (
 CREATE TABLE MUDENGINE_BEING.MUD_BEING (
 		BEING_CODE		bigint not null,
 		BEING_CLASS		varchar(20) not null,
-		BEING_TYPE		integer not null
+		BEING_TYPE		integer not null,
 		NAME			varchar(50),
 		PLAYER_ID		bigint,		
 		CURRENT_WORLD	varchar(30) not null,
 		CURRENT_PLACE	integer not null,
 		QUANTITY		integer not null default 1,
+		FOREIGN KEY (BEING_CLASS) REFERENCES MUDENGINE_BEING.MUD_BEING_CLASS(BEING_CLASS),
 		CONSTRAINT MUD_BEING_PK PRIMARY KEY (BEING_CODE)
 );
 
