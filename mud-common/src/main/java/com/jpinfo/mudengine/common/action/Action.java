@@ -10,7 +10,7 @@ public class Action {
 	
 	private String worldName;
 	
-	private Integer mediatorCode;
+	private Long mediatorCode;
 	
 	private Integer placeCode;
 	
@@ -64,11 +64,11 @@ public class Action {
 		this.worldName = worldName;
 	}
 
-	public Integer getMediatorCode() {
+	public Long getMediatorCode() {
 		return mediatorCode;
 	}
 
-	public void setMediatorCode(Integer mediatorCode) {
+	public void setMediatorCode(Long mediatorCode) {
 		this.mediatorCode = mediatorCode;
 	}
 

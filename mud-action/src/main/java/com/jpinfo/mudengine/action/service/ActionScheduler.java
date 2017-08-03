@@ -11,6 +11,9 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import com.jpinfo.mudengine.action.client.BeingServiceClient;
+import com.jpinfo.mudengine.action.client.ItemServiceClient;
+import com.jpinfo.mudengine.action.client.PlaceServiceClient;
 import com.jpinfo.mudengine.action.exception.ActionRefusedException;
 import com.jpinfo.mudengine.action.model.MudAction;
 import com.jpinfo.mudengine.action.model.MudActionClass;
@@ -22,9 +25,6 @@ import com.jpinfo.mudengine.action.repository.MudActionRepository;
 import com.jpinfo.mudengine.common.action.ActionSimpleState;
 import com.jpinfo.mudengine.common.action.ActionState;
 import com.jpinfo.mudengine.common.being.Being;
-import com.jpinfo.mudengine.common.client.BeingServiceClient;
-import com.jpinfo.mudengine.common.client.ItemServiceClient;
-import com.jpinfo.mudengine.common.client.PlaceServiceClient;
 import com.jpinfo.mudengine.common.interfaces.ActionTarget;
 import com.jpinfo.mudengine.common.interfaces.Reaction;
 import com.jpinfo.mudengine.common.item.Item;
@@ -338,7 +338,7 @@ public class ActionScheduler {
 			
 			switch(a.getTargetType()) {
 			case "ITEM":
-				target = itemService.getItem(Integer.valueOf(a.getTargetCode()));
+				target = itemService.getItem(Long.valueOf(a.getTargetCode()));
 				break;
 			case "PLACE":
 				target = placeService.getPlace(Integer.valueOf(a.getTargetCode()));

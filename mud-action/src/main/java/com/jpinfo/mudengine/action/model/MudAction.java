@@ -26,7 +26,7 @@ public class MudAction {
 	private String worldName;
 	
 	@Column(name="MEDIATOR_CODE")
-	private Integer mediatorCode;
+	private Long mediatorCode;
 	
 	@Column(name="PLACE_CODE")
 	private Integer placeCode;
@@ -70,11 +70,11 @@ public class MudAction {
 		this.worldName = worldName;
 	}
 
-	public Integer getMediatorCode() {
+	public Long getMediatorCode() {
 		return mediatorCode;
 	}
 
-	public void setMediatorCode(Integer mediatorCode) {
+	public void setMediatorCode(Long mediatorCode) {
 		this.mediatorCode = mediatorCode;
 	}
 

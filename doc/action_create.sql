@@ -40,7 +40,7 @@ CREATE TABLE MUDENGINE_ACTION.MUD_ACTION (
 		ISSUER_CODE			bigint not null,
 		ACTOR_CODE			bigint not null,		
 		ACTION_CLASS_CODE	varchar(15) not null,
-		MEDIATOR_CODE		integer,
+		MEDIATOR_CODE		bigint,
 		WORLD_NAME			varchar(30) not null,
 		PLACE_CODE			integer not null,
 		TARGET_CODE			varchar(20) not null,
