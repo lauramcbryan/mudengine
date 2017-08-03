@@ -44,7 +44,7 @@ public class ItemHelper {
 		return result;
 	}
 	
-	public static MudItemAttr buildMudItemAttr(Integer itemCode, MudItemClassAttr classAttr) {
+	public static MudItemAttr buildMudItemAttr(Long itemCode, MudItemClassAttr classAttr) {
 		
 		MudItemAttr response = new MudItemAttr();
 		MudItemAttrPK pk = new MudItemAttrPK();
@@ -58,7 +58,7 @@ public class ItemHelper {
 		return response;
 	}
 	
-	public static MudItemAttr buildMudItemAttr(Integer itemCode, String attrCode, Integer attrValue) {
+	public static MudItemAttr buildMudItemAttr(Long itemCode, String attrCode, Integer attrValue) {
 		
 		
 		MudItemAttr response = new MudItemAttr();

@@ -18,7 +18,7 @@ public class MudItem implements Serializable {
 	@Id
 	@GeneratedValue(generator="mud_item_seq", strategy=GenerationType.SEQUENCE)
 	@Column(name="item_code")
-	private Integer itemCode;
+	private Long itemCode;
 
 	@ManyToOne
 	@JoinColumn(name="item_class", referencedColumnName="item_class")
@@ -44,11 +44,11 @@ public class MudItem implements Serializable {
 		this.attrs = new ArrayList<MudItemAttr>();
 	}
 
-	public Integer getItemCode() {
+	public Long getItemCode() {
 		return this.itemCode;
 	}
 
-	public void setItemCode(Integer itemCode) {
+	public void setItemCode(Long itemCode) {
 		this.itemCode = itemCode;
 	}
 

@@ -14,16 +14,16 @@ import com.jpinfo.mudengine.common.item.Item;
 public interface ItemService {
 
 	@RequestMapping(method=RequestMethod.GET, value="{itemId}")
-	Item getItem(@PathVariable("itemId") Integer itemId);
+	Item getItem(@PathVariable("itemId") Long itemId);
 
 	@RequestMapping(method=RequestMethod.POST, value="{itemId}")
-	Item updateItem(@PathVariable("itemId") Integer itemId, @RequestBody Item item);
+	Item updateItem(@PathVariable("itemId") Long itemId, @RequestBody Item item);
 
 	@RequestMapping(method=RequestMethod.PUT, value="/")
 	Item createItem(@RequestParam("itemClassCode") String itemClassCode, @RequestParam("currentWorld") Optional<String> currentWorld, @RequestParam("currentPlace") Optional<Integer> currentPlace, @RequestParam("quantity") Integer quantity, @RequestParam("currentOwner") Optional<Long> currentOwner);
 	
 	@RequestMapping(method=RequestMethod.DELETE, value="{itemId}")
-	Item destroyItem(@PathVariable("itemId") Integer itemId);
+	Item destroyItem(@PathVariable("itemId") Long itemId);
 
 	@RequestMapping(method=RequestMethod.GET, value="/place/{worldName}/{placeCode}")
 	List<Item> getAllFromPlace(@PathVariable("worldName") String worldName, @PathVariable("placeCode") Integer placeCode);

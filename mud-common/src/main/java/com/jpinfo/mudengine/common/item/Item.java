@@ -11,7 +11,7 @@ import com.jpinfo.mudengine.common.interfaces.Reaction;
 public class Item implements Serializable, ActionTarget {
 	private static final long serialVersionUID = 1L;
 	
-	private Integer itemCode;
+	private Long itemCode;
 
 	private String itemClass;
 	
@@ -33,11 +33,11 @@ public class Item implements Serializable, ActionTarget {
 		this.attrs = new HashMap<String, Integer>();
 	}
 
-	public Integer getItemCode() {
+	public Long getItemCode() {
 		return itemCode;
 	}
 
-	public void setItemCode(Integer itemCode) {
+	public void setItemCode(Long itemCode) {
 		this.itemCode = itemCode;
 	}
 

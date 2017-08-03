@@ -30,7 +30,7 @@ public class ItemController implements ItemService {
 	ItemClassRepository itemClassRepository;
 
 	@Override
-	public Item getItem(@PathVariable Integer itemId) {
+	public Item getItem(@PathVariable Long itemId) {
 		
 		Item response = null;
 		
@@ -46,7 +46,7 @@ public class ItemController implements ItemService {
 	}
 	
 	@Override
-	public Item updateItem(@PathVariable Integer itemId, @RequestBody Item requestItem) {
+	public Item updateItem(@PathVariable Long itemId, @RequestBody Item requestItem) {
 		
 		Item response = null;
 		
@@ -162,7 +162,7 @@ public class ItemController implements ItemService {
 		return response;
 	}
 	
-	public Item destroyItem(@PathVariable Integer itemId) {
+	public Item destroyItem(@PathVariable Long itemId) {
 
 		Item response = null;
 		

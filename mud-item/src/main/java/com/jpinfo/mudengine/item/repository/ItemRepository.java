@@ -6,7 +6,7 @@ import org.springframework.data.repository.CrudRepository;
 
 import com.jpinfo.mudengine.item.model.MudItem;
 
-public interface ItemRepository extends CrudRepository<MudItem, Integer> {
+public interface ItemRepository extends CrudRepository<MudItem, Long> {
 	
 	List<MudItem> findByCurOwner(Long curOwner);
 	

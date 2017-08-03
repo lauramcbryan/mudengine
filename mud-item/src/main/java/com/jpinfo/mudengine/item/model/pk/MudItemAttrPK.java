@@ -13,17 +13,17 @@ public class MudItemAttrPK implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Column(name="item_code", insertable=false, updatable=false)
-	private Integer itemCode;
+	private Long itemCode;
 
 	@Column(name="attr_code")
 	private String attrCode;
 
 	public MudItemAttrPK() {
 	}
-	public Integer getItemCode() {
+	public Long getItemCode() {
 		return this.itemCode;
 	}
-	public void setItemCode(Integer itemCode) {
+	public void setItemCode(Long itemCode) {
 		this.itemCode = itemCode;
 	}
 	public String getAttrCode() {

@@ -19,7 +19,7 @@ CREATE TABLE MUDENGINE_ITEM.MUD_ITEM_CLASS_ATTR (
 );
 
 CREATE TABLE MUDENGINE_ITEM.MUD_ITEM (
-		ITEM_CODE		integer not null,
+		ITEM_CODE		bigint not null,
 		ITEM_CLASS     	varchar(30) not null,
 		CURRENT_WORLD	varchar(30),
 		CURRENT_PLACE	integer,
@@ -29,7 +29,7 @@ CREATE TABLE MUDENGINE_ITEM.MUD_ITEM (
 );
 
 CREATE TABLE MUDENGINE_ITEM.MUD_ITEM_ATTR (
-		ITEM_CODE		integer not null,
+		ITEM_CODE		bigint not null,
 		ATTR_CODE		varchar(5) not null,
 		ATTR_VALUE		integer not null default 0,
 		CONSTRAINT MUD_ITEM_ATTR_PK PRIMARY KEY (ITEM_CODE, ATTR_CODE),
