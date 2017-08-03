@@ -5,11 +5,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.jpinfo.mudengine.common.client.BeingServiceClient;
-import com.jpinfo.mudengine.common.client.ItemServiceClient;
 import com.jpinfo.mudengine.common.exception.EntityNotFoundException;
 import com.jpinfo.mudengine.common.place.Place;
 import com.jpinfo.mudengine.common.service.PlaceService;
+import com.jpinfo.mudengine.world.client.BeingServiceClient;
+import com.jpinfo.mudengine.world.client.ItemServiceClient;
 import com.jpinfo.mudengine.world.model.MudPlace;
 import com.jpinfo.mudengine.world.model.MudPlaceAttr;
 import com.jpinfo.mudengine.world.model.MudPlaceClass;
