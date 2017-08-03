@@ -11,7 +11,7 @@ public class MudBeingSlot {
 	@EmbeddedId
 	private MudBeingSlotPK id;
 
-	private Integer itemCode;
+	private Long itemCode;
 	
 	public MudBeingSlot() {
 		
@@ -25,11 +25,11 @@ public class MudBeingSlot {
 		this.id = id;
 	}
 
-	public Integer getItemCode() {
+	public Long getItemCode() {
 		return itemCode;
 	}
 
-	public void setItemCode(Integer itemCode) {
+	public void setItemCode(Long itemCode) {
 		this.itemCode = itemCode;
 	}
 

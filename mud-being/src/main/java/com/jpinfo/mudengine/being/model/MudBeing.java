@@ -21,11 +21,11 @@ public class MudBeing implements Serializable {
 	@GeneratedValue(generator="mud_being_seq", strategy=GenerationType.SEQUENCE)
 	@Column(name="being_code")
 	private Long beingCode;
-
+	
 	@ManyToOne
-	@JoinColumn(columnDefinition="BEING_CLASS", referencedColumnName="BEING_CLASS")
+	@JoinColumn(columnDefinition="being_class_code", referencedColumnName="being_class_code")
 	private MudBeingClass beingClass;
-
+	
 	@OneToMany(mappedBy="id.beingCode", cascade=CascadeType.ALL, orphanRemoval=true)
 	private List<MudBeingAttr> attrs;
 
@@ -37,8 +37,8 @@ public class MudBeing implements Serializable {
 	
 	@OneToMany(mappedBy="id.beingCode", cascade=CascadeType.ALL, orphanRemoval=true)
 	private List<MudBeingSlot> equipment;
-
-
+	
+	
 	@OneToMany(mappedBy="id.beingCode")
 	private List<MudBeingSkillModifier> skillModifiers;
 

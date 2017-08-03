@@ -30,7 +30,7 @@ public class BeingHelper {
 		Being response = new Being();
 		
 		response.setBeingCode(dbBeing.getBeingCode());
-		response.setBeingClass(dbBeing.getBeingClass().getBeingClass());
+		response.setBeingClass(dbBeing.getBeingClass().getBeingClassCode());
 		response.setName(dbBeing.getName());
 		response.setPlayerId(dbBeing.getPlayerId());
 		response.setCurPlaceCode(dbBeing.getCurPlaceCode());

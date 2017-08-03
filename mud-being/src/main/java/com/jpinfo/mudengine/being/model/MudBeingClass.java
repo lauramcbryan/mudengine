@@ -15,8 +15,8 @@ public class MudBeingClass implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@Column(name="being_class")
-	private String beingClass;
+	@Column(name="being_class_code")
+	private String beingClassCode;
 
 	private String description;
 
@@ -41,12 +41,12 @@ public class MudBeingClass implements Serializable {
 	public MudBeingClass() {
 	}
 
-	public String getBeingClass() {
-		return this.beingClass;
+	public String getBeingClassCode() {
+		return this.beingClassCode;
 	}
 
-	public void setBeingClass(String beingClass) {
-		this.beingClass = beingClass;
+	public void setBeingClass(String beingClassCode) {
+		this.beingClassCode = beingClassCode;
 	}
 
 	public String getDescription() {

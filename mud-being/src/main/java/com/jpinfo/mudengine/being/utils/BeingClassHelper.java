@@ -11,7 +11,7 @@ public class BeingClassHelper {
 		
 		BeingClass result = new BeingClass();
 		
-		result.setBeingClass(a.getBeingClass());
+		result.setBeingClass(a.getBeingClassCode());
 		result.setName(a.getName());
 		result.setDescription(a.getDescription());
 		result.setSize(a.getSize());
