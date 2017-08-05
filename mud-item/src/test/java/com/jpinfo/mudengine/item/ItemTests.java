@@ -213,4 +213,51 @@ public class ItemTests {
 		
 		restTemplate.exchange("/item/{itemId}", HttpMethod.DELETE, null, Item.class, urlVariables);
 	}	
+	
+	public void testRemoveAllFromPlace() {
+
+		Map<String, Object> urlVariables = new HashMap<String, Object>();
+		
+		// ********** CREATING FIRST ITEM ***************
+		// ==============================================
+		
+		urlVariables.put("itemClassCode", ItemTests.testItemClass);
+		urlVariables.put("currentWorld", ItemTests.testCurrentWorld);
+		urlVariables.put("currentPlace", ItemTests.testCurrentPlace);
+		
+		ResponseEntity<Item> createResponse = restTemplate.exchange(
+				"/item/?itemClassCode={itemClassCode}&currentWorld={currentWorld}&currentPlace={currentPlace}", 
+				HttpMethod.PUT, null, Item.class, urlVariables);
+		
+		assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(createResponse.getBody()).isNotNull();
+		
+		Item firstCreateItem = createResponse.getBody();
+		
+
+		// ********** CREATING SECOND ITEM **************
+		// ==============================================
+		
+		urlVariables.put("itemClassCode", ItemTests.test2ItemClass);
+		urlVariables.put("currentWorld", ItemTests.testCurrentWorld);
+		urlVariables.put("currentPlace", ItemTests.testCurrentPlace);
+
+		createResponse = restTemplate.exchange(
+				"/item/?itemClassCode={itemClassCode}&currentWorld={currentWorld}&currentPlace={currentPlace}", 
+				HttpMethod.PUT, null, Item.class, urlVariables);
+		
+		assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(createResponse.getBody()).isNotNull();
+		
+		Item secondCreateItem = createResponse.getBody();
+		
+		// ******** DESTROYING ALL FROM PLACE ***********
+		// ==============================================
+		
+	}
+	
+	
+	public void testDropAllFromBeing() {
+		
+	}
 }

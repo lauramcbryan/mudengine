@@ -20,7 +20,7 @@ public interface ItemService {
 	Item updateItem(@PathVariable("itemId") Long itemId, @RequestBody Item item);
 
 	@RequestMapping(method=RequestMethod.PUT, value="/")
-	Item createItem(@RequestParam("itemClassCode") String itemClassCode, @RequestParam("currentWorld") Optional<String> currentWorld, @RequestParam("currentPlace") Optional<Integer> currentPlace, @RequestParam("quantity") Integer quantity, @RequestParam("currentOwner") Optional<Long> currentOwner);
+	Item createItem(@RequestParam("itemClassCode") String itemClassCode, @RequestParam("worldName") Optional<String> worldName, @RequestParam("placeCode") Optional<Integer> placeCode, @RequestParam("quantity") Integer quantity, @RequestParam("currentOwner") Optional<Long> currentOwner);
 	
 	@RequestMapping(method=RequestMethod.DELETE, value="{itemId}")
 	Item destroyItem(@PathVariable("itemId") Long itemId);
