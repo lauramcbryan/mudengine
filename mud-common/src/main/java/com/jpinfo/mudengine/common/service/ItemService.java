@@ -20,7 +20,7 @@ public interface ItemService {
 	Item updateItem(@PathVariable("itemId") Long itemId, @RequestBody Item item);
 
 	@RequestMapping(method=RequestMethod.PUT, value="/")
-	Item createItem(@RequestParam("itemClassCode") String itemClassCode, @RequestParam("worldName") Optional<String> worldName, @RequestParam("placeCode") Optional<Integer> placeCode, @RequestParam("quantity") Integer quantity, @RequestParam("currentOwner") Optional<Long> currentOwner);
+	Item createItem(@RequestParam("itemClassCode") String itemClassCode, @RequestParam("worldName") Optional<String> worldName, @RequestParam("placeCode") Optional<Integer> placeCode, @RequestParam("quantity") Optional<Integer> quantity, @RequestParam("owner") Optional<Long> owner);
 	
 	@RequestMapping(method=RequestMethod.DELETE, value="{itemId}")
 	Item destroyItem(@PathVariable("itemId") Long itemId);
@@ -31,9 +31,9 @@ public interface ItemService {
 	@RequestMapping(method=RequestMethod.DELETE, value="/place/{worldName}/{placeCode}")
 	void destroyAllFromPlace(@PathVariable("worldName") String worldName, @PathVariable("placeCode") Integer placeCode);
 	
-	@RequestMapping(method=RequestMethod.GET, value="/being/{beingCode}")
-	List<Item> getAllFromBeing(@PathVariable("beingCode") Long beingCode);
+	@RequestMapping(method=RequestMethod.GET, value="/being/{owner}")
+	List<Item> getAllFromBeing(@PathVariable("owner") Long owner);
 	
-	@RequestMapping(method=RequestMethod.POST, value="/being/{beingCode}")
-	void dropAllFromBeing(@PathVariable("beingCode") Long beingCode, @RequestParam("currentWorld") String currentWorld, @RequestParam("currentPlaceCode") Integer currentPlaceCode);	
+	@RequestMapping(method=RequestMethod.DELETE, value="/being/{owner}")
+	void dropAllFromBeing(@PathVariable("owner") Long owner, @RequestParam("worldName") String worldName, @RequestParam("placeCode") Integer placeCode);	
 }

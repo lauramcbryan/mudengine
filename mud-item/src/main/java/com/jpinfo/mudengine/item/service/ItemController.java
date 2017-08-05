@@ -116,12 +116,12 @@ public class ItemController implements ItemService {
 	}
 	
 	@Override
-	public Item createItem(@RequestParam String itemClassCode, @RequestParam Optional<String> currentWorld, @RequestParam Optional<Integer> currentPlace, @RequestParam Integer quantity, @RequestParam Optional<Long> currentOwner) {
+	public Item createItem(@RequestParam String itemClassCode, @RequestParam Optional<String> worldName, @RequestParam Optional<Integer> placeCode, @RequestParam Optional<Integer> quantity, @RequestParam Optional<Long> owner) {
 		
 		Item response = null;
 		
 		// Check if a minimum parameters are present
-		if (currentOwner.isPresent() || (currentPlace.isPresent() && currentWorld.isPresent())) {
+		if (owner.isPresent() || (placeCode.isPresent() && worldName.isPresent())) {
 		
 			MudItemClass dbClassItem = itemClassRepository.findOne(itemClassCode);
 			
@@ -130,16 +130,19 @@ public class ItemController implements ItemService {
 				MudItem newDbItem = new MudItem();
 				newDbItem.setItemClass(dbClassItem);
 				
-				if (currentWorld.isPresent())
-					newDbItem.setCurWorld(currentWorld.get());
+				if (worldName.isPresent())
+					newDbItem.setCurWorld(worldName.get());
 				
-				if (currentPlace.isPresent())
-					newDbItem.setCurPlaceCode(currentPlace.get());
+				if (placeCode.isPresent())
+					newDbItem.setCurPlaceCode(placeCode.get());
 				
-				if (currentOwner.isPresent())
-					newDbItem.setCurOwner(currentOwner.get());
-				
-				newDbItem.setQuantity(quantity);
+				if (owner.isPresent())
+					newDbItem.setCurOwner(owner.get());
+
+				if (quantity.isPresent())
+					newDbItem.setQuantity(quantity.get());
+				else
+					newDbItem.setQuantity(1);
 			
 				// Saving the entity (to get the itemCode)
 				newDbItem = itemRepository.save(newDbItem);
@@ -199,11 +202,11 @@ public class ItemController implements ItemService {
 	}
 
 	@Override
-	public List<Item> getAllFromBeing(@PathVariable Long beingCode) {
+	public List<Item> getAllFromBeing(@PathVariable Long owner) {
 		
 		List<Item> responseList = new ArrayList<Item>();
 		
-		List<MudItem> dbResponse = itemRepository.findByCurOwner(beingCode);
+		List<MudItem> dbResponse = itemRepository.findByCurOwner(owner);
 		
 		for(MudItem curdbItem: dbResponse) {
 			
@@ -214,7 +217,7 @@ public class ItemController implements ItemService {
 	}
 
 	@Override
-	public void destroyAllFromPlace(String worldName, Integer placeCode) {
+	public void destroyAllFromPlace(@PathVariable String worldName, @PathVariable Integer placeCode) {
 		
 		List<MudItem> dbResponse = itemRepository.findByCurWorldAndCurPlaceCode(worldName, placeCode);
 		
@@ -226,15 +229,15 @@ public class ItemController implements ItemService {
 	}
 
 	@Override
-	public void dropAllFromBeing(@PathVariable Long beingCode, @RequestParam String currentWorld, @RequestParam Integer currentPlaceCode) {
+	public void dropAllFromBeing(@PathVariable Long owner, @RequestParam String worldName, @RequestParam Integer placeCode) {
 		
-		List<MudItem> dbResponse = itemRepository.findByCurOwner(beingCode);
+		List<MudItem> dbResponse = itemRepository.findByCurOwner(owner);
 		
 		for(MudItem curdbItem: dbResponse) {
 			
 			curdbItem.setCurOwner(null);
-			curdbItem.setCurWorld(currentWorld);
-			curdbItem.setCurPlaceCode(currentPlaceCode);
+			curdbItem.setCurWorld(worldName);
+			curdbItem.setCurPlaceCode(placeCode);
 			
 			itemRepository.save(curdbItem);
 		}

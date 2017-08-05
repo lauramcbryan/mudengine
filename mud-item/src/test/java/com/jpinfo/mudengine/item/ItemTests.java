@@ -55,12 +55,12 @@ public class ItemTests {
 		Map<String, Object> urlVariables = new HashMap<String, Object>();
 		
 		urlVariables.put("itemClassCode", ItemTests.testItemClass);
-		urlVariables.put("currentWorld", ItemTests.testCurrentWorld);
-		urlVariables.put("currentPlace", ItemTests.testCurrentPlace);
+		urlVariables.put("worldName", ItemTests.testCurrentWorld);
+		urlVariables.put("placeCode", ItemTests.testCurrentPlace);
 		urlVariables.put("quantity", ItemTests.testQtty);
 		
 		ResponseEntity<Item> createResponse = restTemplate.exchange(
-				"/item/?itemClassCode={itemClassCode}&currentWorld={currentWorld}&currentPlace={currentPlace}&quantity={quantity}", 
+				"/item/?itemClassCode={itemClassCode}&worldName={worldName}&placeCode={placeCode}&quantity={quantity}", 
 				HttpMethod.PUT, null, Item.class, urlVariables);
 		
 		assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -96,19 +96,6 @@ public class ItemTests {
 		
 		assertThat(readItem.getAttrs().get(ItemTests.testItemClassAttr1)).isNotNull();
 		assertThat(readItem.getAttrs().get(ItemTests.testItemClassAttr2)).isNotNull();
-		
-		// ************ READ FROM PLACE ***************
-		// ============================================
-		
-		urlVariables.clear();
-		urlVariables.put("worldName", ItemTests.testCurrentWorld);
-		urlVariables.put("placeCode", ItemTests.testCurrentPlace);
-		
-		ResponseEntity<Item[]> readPlaceResponse = restTemplate.exchange("/item/place/{worldName}/{placeCode}", HttpMethod.GET, null, Item[].class, urlVariables);
-		
-		assertThat(readPlaceResponse.getStatusCode().is2xxSuccessful());
-		assertThat(readPlaceResponse.getBody()).isNotNull();
-		assertThat(readPlaceResponse.getBody()[0].getItemCode()).isEqualTo(readItem.getItemCode());
 		
 
 		// *********** UPDATE **************
@@ -164,57 +151,7 @@ public class ItemTests {
 	}
 
 	@Test
-	public void testCreateItemWithOwner() {
-		
-		// ********** CREATE ***************
-		// =================================
-		Map<String, Object> urlVariables = new HashMap<String, Object>();
-		
-		urlVariables.put("itemClassCode", ItemTests.testItemClass);
-		urlVariables.put("currentOwner", ItemTests.testCurOwner);
-		urlVariables.put("quantity", ItemTests.testQtty);
-		
-		ResponseEntity<Item> createResponse = restTemplate.exchange(
-				"/item/?itemClassCode={itemClassCode}&currentOwner={currentOwner}&quantity={quantity}", 
-				HttpMethod.PUT, null, Item.class, urlVariables);
-		
-		assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(createResponse.getBody()).isNotNull();
-		
-		Item createItem = createResponse.getBody();
-		
-		assertThat(createItem.getItemClass()).isEqualTo(ItemTests.testItemClass);
-		assertThat(createItem.getCurWorld()).isNull();
-		assertThat(createItem.getCurPlaceCode()).isNull();
-		assertThat(createItem.getCurOwner()).isEqualTo(ItemTests.testCurOwner);
-		assertThat(createItem.getQuantity()).isEqualTo(ItemTests.testQtty);
-		
-
-		assertThat(createItem.getAttrs().get(ItemTests.testItemClassAttr1)).isNotNull();
-		assertThat(createItem.getAttrs().get(ItemTests.testItemClassAttr2)).isNotNull();
-		
-		// ************ READ FROM OWNER ***************
-		// ============================================
-		
-		urlVariables.clear();
-		urlVariables.put("beingCode", ItemTests.testCurOwner);
-		
-		ResponseEntity<Item[]> readPlaceResponse = restTemplate.exchange("/item/being/{beingCode}", HttpMethod.GET, null, Item[].class, urlVariables);
-		
-		assertThat(readPlaceResponse.getStatusCode().is2xxSuccessful());
-		assertThat(readPlaceResponse.getBody()).isNotNull();
-		assertThat(readPlaceResponse.getBody()[0].getItemCode()).isEqualTo(createItem.getItemCode());
-		
-		
-		
-		// *********** CLEANUP **************
-		// =================================
-		urlVariables.put("itemId", createItem.getItemCode());
-		
-		restTemplate.exchange("/item/{itemId}", HttpMethod.DELETE, null, Item.class, urlVariables);
-	}	
-	
-	public void testRemoveAllFromPlace() {
+	public void testCrudWithPlace() {
 
 		Map<String, Object> urlVariables = new HashMap<String, Object>();
 		
@@ -222,42 +159,175 @@ public class ItemTests {
 		// ==============================================
 		
 		urlVariables.put("itemClassCode", ItemTests.testItemClass);
-		urlVariables.put("currentWorld", ItemTests.testCurrentWorld);
-		urlVariables.put("currentPlace", ItemTests.testCurrentPlace);
+		urlVariables.put("worldName", ItemTests.testCurrentWorld);
+		urlVariables.put("placeCode", ItemTests.testCurrentPlace);
 		
 		ResponseEntity<Item> createResponse = restTemplate.exchange(
-				"/item/?itemClassCode={itemClassCode}&currentWorld={currentWorld}&currentPlace={currentPlace}", 
+				"/item/?itemClassCode={itemClassCode}&worldName={worldName}&placeCode={placeCode}", 
 				HttpMethod.PUT, null, Item.class, urlVariables);
 		
 		assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(createResponse.getBody()).isNotNull();
 		
-		Item firstCreateItem = createResponse.getBody();
-		
-
 		// ********** CREATING SECOND ITEM **************
 		// ==============================================
 		
 		urlVariables.put("itemClassCode", ItemTests.test2ItemClass);
-		urlVariables.put("currentWorld", ItemTests.testCurrentWorld);
-		urlVariables.put("currentPlace", ItemTests.testCurrentPlace);
+		urlVariables.put("worldName", ItemTests.testCurrentWorld);
+		urlVariables.put("placeCode", ItemTests.testCurrentPlace);
 
 		createResponse = restTemplate.exchange(
-				"/item/?itemClassCode={itemClassCode}&currentWorld={currentWorld}&currentPlace={currentPlace}", 
+				"/item/?itemClassCode={itemClassCode}&worldName={worldName}&placeCode={placeCode}", 
 				HttpMethod.PUT, null, Item.class, urlVariables);
 		
 		assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(createResponse.getBody()).isNotNull();
 		
-		Item secondCreateItem = createResponse.getBody();
+		
+		// ******** READ ITEMS FROM PLACE ***********
+		// ==============================================
+		urlVariables.clear();
+		urlVariables.put("worldName", ItemTests.testCurrentWorld);
+		urlVariables.put("placeCode", ItemTests.testCurrentPlace);
+		
+		ResponseEntity<Item[]> findResponse = restTemplate.exchange("/item/place/{worldName}/{placeCode}", HttpMethod.GET, null, Item[].class, urlVariables);
+		
+		assertThat(findResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(findResponse.getBody().length).isEqualTo(2);
+		
 		
 		// ******** DESTROYING ALL FROM PLACE ***********
 		// ==============================================
+		ResponseEntity<String> destroyResponse = restTemplate.exchange("/item/place/{worldName}/{placeCode}", HttpMethod.DELETE, null, String.class, urlVariables);
+		
+		assertThat(destroyResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+		
+		
+		// Looking after both items again
+		findResponse = restTemplate.exchange("/item/place/{worldName}/{placeCode}", HttpMethod.GET, null, Item[].class, urlVariables);
+		
+		assertThat(findResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(findResponse.getBody().length).isEqualTo(0);
 		
 	}
 	
-	
-	public void testDropAllFromBeing() {
+	@Test
+	public void testCrudWithOwner() {
+
+		Map<String, Object> urlVariables = new HashMap<String, Object>();
+		
+		// ********** CREATING FIRST ITEM ***************
+		// ==============================================
+		
+		urlVariables.put("itemClassCode", ItemTests.testItemClass);
+		urlVariables.put("owner", ItemTests.testCurOwner);
+		
+		ResponseEntity<Item> createResponse = restTemplate.exchange(
+				"/item/?itemClassCode={itemClassCode}&owner={owner}", 
+				HttpMethod.PUT, null, Item.class, urlVariables);
+		
+		assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(createResponse.getBody()).isNotNull();
+		
+		Item firstItem = createResponse.getBody();
+		
+		// ********** CREATING SECOND ITEM **************
+		// ==============================================
+		
+		urlVariables.put("itemClassCode", ItemTests.test2ItemClass);
+
+		createResponse = restTemplate.exchange(
+				"/item/?itemClassCode={itemClassCode}&owner={owner}", 
+				HttpMethod.PUT, null, Item.class, urlVariables);
+		
+		assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(createResponse.getBody()).isNotNull();
+		
+		Item secondItem = createResponse.getBody();
+		
+		// ************ READ FROM OWNER ***************
+		// ============================================
+		
+		urlVariables.clear();
+		urlVariables.put("owner", ItemTests.testCurOwner);
+		
+		ResponseEntity<Item[]> readPlaceResponse = restTemplate.exchange("/item/being/{owner}", HttpMethod.GET, null, Item[].class, urlVariables);
+		
+		assertThat(readPlaceResponse.getStatusCode().is2xxSuccessful());
+		assertThat(readPlaceResponse.getBody()).isNotNull();
+		assertThat(readPlaceResponse.getBody().length).isEqualTo(2);
+		
+		
+		// ******** DROPPING ALL FROM OWNER ***********
+		// ==============================================
+		
+		urlVariables.put("owner", ItemTests.testCurOwner);
+		urlVariables.put("worldName", ItemTests.test2CurrentWorld);
+		urlVariables.put("placeCode", ItemTests.test2CurrentPlace);
+		
+		ResponseEntity<String> dropResponse = restTemplate.exchange("/item/being/{owner}?worldName={worldName}&placeCode={placeCode}", HttpMethod.DELETE, null, String.class, urlVariables);
+		
+		assertThat(dropResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+		
+		
+		// ********* READ ALL OWNER AGAIN *************
+		// ============================================
+		ResponseEntity<Item[]> findResponse = restTemplate.exchange("/item/being/{owner}", HttpMethod.GET, null, Item[].class, urlVariables);
+		
+		assertThat(findResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(findResponse.getBody().length).isEqualTo(0);
+
+		
+		// ************ READ FIRST ITEM ***************
+		// ============================================
+		
+		// Looking after the items created; they must be in place, no longer in being
+		urlVariables.clear();
+		urlVariables.put("itemId", firstItem.getItemCode());
+		ResponseEntity<Item> firstItemResponse = restTemplate.exchange("/item/{itemId}", HttpMethod.GET, null, Item.class, urlVariables);
+		
+		assertThat(firstItemResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(firstItemResponse.getBody()).isNotNull();
+		
+		Item updatedFirstItem = firstItemResponse.getBody();
+		
+		assertThat(updatedFirstItem.getCurWorld()).isEqualTo(ItemTests.test2CurrentWorld);
+		assertThat(updatedFirstItem.getCurPlaceCode()).isEqualTo(ItemTests.test2CurrentPlace);
+		assertThat(updatedFirstItem.getCurOwner()).isNull();
+		
+		// Deleting it
+		urlVariables.clear();
+		urlVariables.put("itemId", firstItem.getItemCode());
+		ResponseEntity<Item> cleanupFirstItem = restTemplate.exchange("/item/{itemId}", HttpMethod.DELETE, null, Item.class, urlVariables);
+		
+		assertThat(cleanupFirstItem.getStatusCode()).isEqualTo(HttpStatus.OK)		;
+
+		// ************ READ SECOND ITEM **************
+		// ============================================
+		
+		// Looking after the second item
+		
+		urlVariables.clear();
+		urlVariables.put("itemId", secondItem.getItemCode());
+		ResponseEntity<Item> secondItemResponse = restTemplate.exchange("/item/{itemId}", HttpMethod.GET, null, Item.class, urlVariables);
+		
+		assertThat(secondItemResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(secondItemResponse.getBody()).isNotNull();
+		
+		Item updatedSecondItem = secondItemResponse.getBody();
+		
+		assertThat(updatedSecondItem.getCurWorld()).isEqualTo(ItemTests.test2CurrentWorld);
+		assertThat(updatedSecondItem.getCurPlaceCode()).isEqualTo(ItemTests.test2CurrentPlace);
+		assertThat(updatedSecondItem.getCurOwner()).isNull();
+		
+
+		// Deleting this second item as well
+		urlVariables.clear();
+		urlVariables.put("itemId", secondItem.getItemCode());
+		ResponseEntity<Item> cleanupSecondItem = restTemplate.exchange("/item/{itemId}", HttpMethod.DELETE, null, Item.class, urlVariables);
+		
+		assertThat(cleanupSecondItem.getStatusCode()).isEqualTo(HttpStatus.OK)		;
 		
 	}
 }
