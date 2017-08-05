@@ -68,6 +68,7 @@ public class BeingController implements BeingService {
 			dbBeing.setPlayerId(requestBeing.getPlayerId());
 			dbBeing.setCurPlaceCode(requestBeing.getCurPlaceCode());
 			dbBeing.setCurWorld(requestBeing.getCurWorld());
+			dbBeing.setQuantity(requestBeing.getQuantity());
 			
 		
 			// if the beingClass is changing, reset the attributes
@@ -107,16 +108,25 @@ public class BeingController implements BeingService {
 	
 	@Override
 	public Being createBeing(
-			@RequestParam Integer beingType, @RequestParam String beingClass, @RequestParam String currentWorld, 
-			@RequestParam Integer currentPlace, @RequestParam Optional<Integer> quantity) {
+			@RequestParam Integer beingType, @RequestParam String beingClass, @RequestParam String worldName, 
+			@RequestParam Integer placeCode, @RequestParam Optional<Integer> quantity, @RequestParam Optional<Long> playerId) {
 
 		MudBeing dbBeing = new MudBeing();
 		
 		MudBeingClass dbBeingClass = classRepository.findOne(beingClass);
 
+		dbBeing.setBeingType(beingType);
 		dbBeing.setBeingClass(dbBeingClass);
-		dbBeing.setCurPlaceCode(currentPlace);
-		dbBeing.setCurWorld(currentWorld);
+		dbBeing.setCurPlaceCode(placeCode);
+		dbBeing.setCurWorld(worldName);
+		
+		if (quantity.isPresent())
+			dbBeing.setQuantity(quantity.get());
+		else
+			dbBeing.setQuantity(1);
+
+		if (playerId.isPresent())
+			dbBeing.setPlayerId(playerId.get());
 		
 		// Saving the entity (to have the beingCode)
 		dbBeing = repository.save(dbBeing);
@@ -149,7 +159,7 @@ public class BeingController implements BeingService {
 	}
 
 	@Override
-	public List<Being> getAllFromPlace(String worldName, Integer placeCode) {
+	public List<Being> getAllFromPlace(@PathVariable String worldName, @PathVariable Integer placeCode) {
 
 		List<MudBeing> lstFound = repository.findByCurWorldAndCurPlaceCode(worldName, placeCode);
 		
@@ -163,7 +173,7 @@ public class BeingController implements BeingService {
 	}
 
 	@Override
-	public Being destroyBeing(Long beingCode) {
+	public Being destroyBeing(@PathVariable Long beingCode) {
 		
 		Being response = null;
 		
@@ -205,7 +215,7 @@ public class BeingController implements BeingService {
 	}
 
 	@Override
-	public void destroyAllFromPlace(String worldName, Integer placeCode) {
+	public void destroyAllFromPlace(@PathVariable String worldName, @PathVariable Integer placeCode) {
 		
 		List<MudBeing> lstFound = repository.findByCurWorldAndCurPlaceCode(worldName, placeCode);
 		
@@ -215,7 +225,18 @@ public class BeingController implements BeingService {
 			
 			repository.delete(curDbBeing);
 		}
-
+	}
+	
+	@Override
+	public void destroyAllFromPlayer(@PathVariable Long playerId) {
 		
+		List<MudBeing> lstFound = repository.findByPlayerId(playerId);
+		
+		for(MudBeing curDbBeing: lstFound) {
+			
+			itemService.dropAllFromBeing(curDbBeing.getBeingCode(), curDbBeing.getCurWorld(), curDbBeing.getCurPlaceCode());
+			
+			repository.delete(curDbBeing);
+		}
 	}
 }

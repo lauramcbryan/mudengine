@@ -20,6 +20,8 @@ public class Being implements Serializable, ActionTarget {
 	private static final long serialVersionUID = 1L;
 	
 	private Long beingCode;
+	
+	private Integer beingType;
 
 	private String beingClass;
 
@@ -44,6 +46,8 @@ public class Being implements Serializable, ActionTarget {
 	private Map<String, Collection<Reaction>> afterReactions;
 	
 	private Map<String, Item> equipment;
+	
+	private Integer quantity;
 	
 
 	public Being() {
@@ -146,5 +150,32 @@ public class Being implements Serializable, ActionTarget {
 			return this.afterReactions.get(actionCode);
 		}
 	}
+
+
+
+	public Integer getBeingType() {
+		return beingType;
+	}
+
+
+
+	public void setBeingType(Integer beingType) {
+		this.beingType = beingType;
+	}
+
+
+
+	public Integer getQuantity() {
+		return quantity;
+	}
+
+
+
+	public void setQuantity(Integer quantity) {
+		this.quantity = quantity;
+	}
+
+	
+	
 
 }

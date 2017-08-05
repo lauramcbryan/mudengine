@@ -56,6 +56,8 @@ public class MudBeing implements Serializable {
 	
 	@Column(name="being_type")
 	private Integer beingType;
+	
+	private Integer quantity;
 
 	public MudBeing() {
 		this.attrs = new ArrayList<MudBeingAttr>();
@@ -132,6 +134,24 @@ public class MudBeing implements Serializable {
 	public List<MudBeingSlot> getEquipment() {
 		return equipment;
 	}
+
+	public Integer getBeingType() {
+		return beingType;
+	}
+
+	public void setBeingType(Integer beingType) {
+		this.beingType = beingType;
+	}
+
+	public Integer getQuantity() {
+		return quantity;
+	}
+
+	public void setQuantity(Integer quantity) {
+		this.quantity = quantity;
+	}
+	
+	
 	
 	
 }
