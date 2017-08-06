@@ -3,7 +3,8 @@ package com.jpinfo.mudengine.item.service;
 import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
-
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -116,7 +117,7 @@ public class ItemController implements ItemService {
 	}
 	
 	@Override
-	public Item createItem(@RequestParam String itemClassCode, @RequestParam Optional<String> worldName, @RequestParam Optional<Integer> placeCode, @RequestParam Optional<Integer> quantity, @RequestParam Optional<Long> owner) {
+	public ResponseEntity<Item> createItem(@RequestParam String itemClassCode, @RequestParam Optional<String> worldName, @RequestParam Optional<Integer> placeCode, @RequestParam Optional<Integer> quantity, @RequestParam Optional<Long> owner) {
 		
 		Item response = null;
 		
@@ -162,13 +163,11 @@ public class ItemController implements ItemService {
 			throw new IllegalParameterException("At least owner or place must be set in request");
 		}
 		
-		return response;
+		return new ResponseEntity<Item>(response, HttpStatus.CREATED);
 	}
 	
-	public Item destroyItem(@PathVariable Long itemId) {
+	public void destroyItem(@PathVariable Long itemId) {
 
-		Item response = null;
-		
 		// Retrieving the database record
 		MudItem dbItem = itemRepository.findOne(itemId);
 		
@@ -176,14 +175,9 @@ public class ItemController implements ItemService {
 			
 			itemRepository.delete(dbItem);
 			
-			response = ItemHelper.buildItem(dbItem);
-			response.setItemCode(null);
-			
 		} else {
 			throw new EntityNotFoundException("Item entity not found"); 
 		}
-		
-		return response;
 	}
 
 	@Override

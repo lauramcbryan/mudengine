@@ -63,7 +63,7 @@ public class ItemTests {
 				"/item/?itemClassCode={itemClassCode}&worldName={worldName}&placeCode={placeCode}&quantity={quantity}", 
 				HttpMethod.PUT, null, Item.class, urlVariables);
 		
-		assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 		assertThat(createResponse.getBody()).isNotNull();
 		
 		Item createItem = createResponse.getBody();
@@ -140,8 +140,6 @@ public class ItemTests {
 		
 
 		assertThat(deleteResponse.getStatusCode().is2xxSuccessful());
-		assertThat(deleteResponse.getBody()).isNotNull();
-		assertThat(deleteResponse.getBody().getItemCode()).isNull();
 		
 		
 		// Read after delete
@@ -166,7 +164,7 @@ public class ItemTests {
 				"/item/?itemClassCode={itemClassCode}&worldName={worldName}&placeCode={placeCode}", 
 				HttpMethod.PUT, null, Item.class, urlVariables);
 		
-		assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 		assertThat(createResponse.getBody()).isNotNull();
 		
 		// ********** CREATING SECOND ITEM **************
@@ -180,7 +178,7 @@ public class ItemTests {
 				"/item/?itemClassCode={itemClassCode}&worldName={worldName}&placeCode={placeCode}", 
 				HttpMethod.PUT, null, Item.class, urlVariables);
 		
-		assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 		assertThat(createResponse.getBody()).isNotNull();
 		
 		
@@ -226,7 +224,7 @@ public class ItemTests {
 				"/item/?itemClassCode={itemClassCode}&owner={owner}", 
 				HttpMethod.PUT, null, Item.class, urlVariables);
 		
-		assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 		assertThat(createResponse.getBody()).isNotNull();
 		
 		Item firstItem = createResponse.getBody();
@@ -240,7 +238,7 @@ public class ItemTests {
 				"/item/?itemClassCode={itemClassCode}&owner={owner}", 
 				HttpMethod.PUT, null, Item.class, urlVariables);
 		
-		assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 		assertThat(createResponse.getBody()).isNotNull();
 		
 		Item secondItem = createResponse.getBody();
