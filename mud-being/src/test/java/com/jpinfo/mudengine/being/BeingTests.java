@@ -9,6 +9,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -16,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import com.jpinfo.mudengine.being.client.ItemServiceClient;
 import com.jpinfo.mudengine.common.being.Being;
 
 @RunWith(SpringRunner.class)
@@ -48,9 +50,12 @@ public class BeingTests {
 	private static final Long testPlayerId = 1L;
 	private static final Long test2PlayerId = 2L;
 	
+	@MockBean
+	private ItemServiceClient mockItem;
 	
 	@Autowired
 	private TestRestTemplate restTemplate;
+	
 
 	@Test
 	public void contextLoads() {
@@ -143,31 +148,33 @@ public class BeingTests {
 		assertThat(updatedBeing.getQuantity()).isEqualTo(BeingTests.test2Quantity);
 
 		// Check attributes
-		assertThat(createdBeing.getAttrs().get(BeingTests.testAttrA)).isNull();
-		assertThat(createdBeing.getAttrs().get(BeingTests.testAttrB)).isNull();
-		assertThat(createdBeing.getAttrs().get(BeingTests.testAttrC)).isNotNull();
-		assertThat(createdBeing.getAttrs().get(BeingTests.testAttrD)).isNotNull();
+		assertThat(updatedBeing.getAttrs().get(BeingTests.testAttrA)).isNull();
+		assertThat(updatedBeing.getAttrs().get(BeingTests.testAttrB)).isNull();
+		assertThat(updatedBeing.getAttrs().get(BeingTests.testAttrC)).isNotNull();
+		assertThat(updatedBeing.getAttrs().get(BeingTests.testAttrD)).isNotNull();
 		
 		// Check skills
-		assertThat(createdBeing.getSkills().get(BeingTests.testSkillA)).isNull();
-		assertThat(createdBeing.getSkills().get(BeingTests.testSkillB)).isNull();
-		assertThat(createdBeing.getSkills().get(BeingTests.testSkillC)).isNotNull();
-		assertThat(createdBeing.getSkills().get(BeingTests.testSkillD)).isNotNull();
+		assertThat(updatedBeing.getSkills().get(BeingTests.testSkillA)).isNull();
+		assertThat(updatedBeing.getSkills().get(BeingTests.testSkillB)).isNull();
+		assertThat(updatedBeing.getSkills().get(BeingTests.testSkillC)).isNotNull();
+		assertThat(updatedBeing.getSkills().get(BeingTests.testSkillD)).isNotNull();
 		
 		
 		// *********** DELETE **********
 		// =============================
+		
+		
+		
+		
 		urlVariables.clear();
 		urlVariables.put("beingCode", readBeing.getBeingCode());
 		
 		ResponseEntity<Being> responseDelete = restTemplate.exchange("/being/{beingCode}", HttpMethod.DELETE, null, Being.class, urlVariables);
 		
 		assertThat(responseDelete.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(responseDelete.getBody()).isNotNull();
-		assertThat(responseDelete.getBody().getBeingCode()).isNull();
-
 	}
 	
+	@Test
 	public void testCrudWithPlayer() {
 		
 		Map<String, Object> urlVariables = new HashMap<String, Object>();
@@ -277,8 +284,11 @@ public class BeingTests {
 		
 		assertThat(responseCleanup.getStatusCode()).isEqualTo(HttpStatus.OK);
 	}
-	
+
+	@Test
 	public void testDestroyFromPlace() {
+		
+		//server.expect(requestTo("/item/being")).andRespond(withSuccess());
 
 		Map<String, Object> urlVariables = new HashMap<String, Object>();
 		

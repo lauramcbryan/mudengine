@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -69,6 +71,7 @@ public class BeingController implements BeingService {
 			dbBeing.setCurPlaceCode(requestBeing.getCurPlaceCode());
 			dbBeing.setCurWorld(requestBeing.getCurWorld());
 			dbBeing.setQuantity(requestBeing.getQuantity());
+			dbBeing.setBeingType(requestBeing.getBeingType());
 			
 		
 			// if the beingClass is changing, reset the attributes
@@ -107,7 +110,7 @@ public class BeingController implements BeingService {
 	}
 	
 	@Override
-	public Being createBeing(
+	public ResponseEntity<Being> createBeing(
 			@RequestParam Integer beingType, @RequestParam String beingClass, @RequestParam String worldName, 
 			@RequestParam Integer placeCode, @RequestParam Optional<Integer> quantity, @RequestParam Optional<Long> playerId) {
 
@@ -141,7 +144,7 @@ public class BeingController implements BeingService {
 		// Convert to the response
 		Being response = BeingHelper.buildBeing(dbBeing);
 		
-		return response;
+		return new ResponseEntity<Being>(response, HttpStatus.CREATED);
 	}
 	
 	@Override
@@ -173,9 +176,7 @@ public class BeingController implements BeingService {
 	}
 
 	@Override
-	public Being destroyBeing(@PathVariable Long beingCode) {
-		
-		Being response = null;
+	public void destroyBeing(@PathVariable Long beingCode) {
 		
 		MudBeing dbBeing = repository.findOne(beingCode);
 		
@@ -186,13 +187,9 @@ public class BeingController implements BeingService {
 			
 			repository.delete(beingCode);
 			
-			dbBeing.setBeingCode(null);
-			
 		} else {
 			throw new EntityNotFoundException("Being entity not found");
 		}
-		
-		return response;
 	}
 	
 	private Being expandBeingEquipment(Being responseBeing, MudBeing dbBeing) {

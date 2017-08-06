@@ -3,6 +3,7 @@ package com.jpinfo.mudengine.common.service;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,7 +22,7 @@ public interface BeingService {
 	Being updateBeing(@PathVariable("beingCode") Long beingCode, @RequestBody Being requestBeing);
 
 	@RequestMapping(method=RequestMethod.PUT)
-	Being createBeing(
+	ResponseEntity<Being> createBeing(
 			@RequestParam("beingType") Integer beingType, @RequestParam("beingClass") String beingClass, 
 			@RequestParam("worldName") String worldName, @RequestParam("placeCode") Integer placeCode, 
 			@RequestParam("quantity") Optional<Integer> quantity, @RequestParam("playerId") Optional<Long> playerId);
@@ -30,7 +31,7 @@ public interface BeingService {
 	List<Being> getAllFromPlayer(@PathVariable("playerId") Long playerId);
 	
 	@RequestMapping(method=RequestMethod.DELETE, value="/{beingCode}")
-	Being destroyBeing(@PathVariable("beingCode") Long beingCode);
+	void destroyBeing(@PathVariable("beingCode") Long beingCode);
 
 	@RequestMapping(method=RequestMethod.GET,  value="/place/{worldName}/{placeCode}")
 	List<Being> getAllFromPlace(@PathVariable("worldName") String worldName, @PathVariable("placeCode") Integer placeCode);
