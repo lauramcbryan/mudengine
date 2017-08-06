@@ -1,6 +1,8 @@
 package com.jpinfo.mudengine.world.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -66,9 +68,14 @@ public class PlaceController implements PlaceService {
 			if (currentHP!=null) {
 				
 				if (currentHP < 0) {
+					
+					dbPlace.setPlaceCode(null);
+					response = WorldHelper.buildPlace(dbPlace);
 		
 					// destroy the place
-					return destroyPlace(placeId);
+					destroyPlace(placeId);
+					
+					
 					
 				} else {
 					// If HP is greater than MAX_HP, adjust it
@@ -143,9 +150,7 @@ public class PlaceController implements PlaceService {
 
 
 	@Override
-	public Place destroyPlace(@PathVariable Integer placeId) {
-		
-		Place response = null;
+	public void destroyPlace(@PathVariable Integer placeId) {
 		
 		MudPlace dbPlace = placeRepository.findOne(placeId);
 		
@@ -180,20 +185,15 @@ public class PlaceController implements PlaceService {
 				updatedPlace.setPlaceCode(null);
 			}
 			
-			
-			response = WorldHelper.buildPlace(updatedPlace);
-			
 		} else {
 			// Returns a 404 error
 			throw new EntityNotFoundException("Place entity not found");
 		}
-		
-		return response;
 	}
 
 
 	@Override
-	public Place createPlace(String placeClassCode, String direction, Integer targetPlaceCode) {
+	public ResponseEntity<Place> createPlace(String placeClassCode, String direction, Integer targetPlaceCode) {
 		
 		Place response = null;
 		
@@ -264,7 +264,7 @@ public class PlaceController implements PlaceService {
 			throw new EntityNotFoundException("Target Place entity not found");
 		}
 		
-		return response;
+		return new ResponseEntity<Place>(response, HttpStatus.CREATED);
 	}	
 	
 }

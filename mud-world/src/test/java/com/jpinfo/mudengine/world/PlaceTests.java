@@ -9,6 +9,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -18,6 +19,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import com.jpinfo.mudengine.common.place.Place;
 import com.jpinfo.mudengine.common.place.PlaceExit;
+import com.jpinfo.mudengine.world.client.BeingServiceClient;
+import com.jpinfo.mudengine.world.client.ItemServiceClient;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment=WebEnvironment.RANDOM_PORT)
@@ -25,6 +28,12 @@ public class PlaceTests {
 
 	@Autowired
 	private TestRestTemplate restTemplate;
+	
+	@MockBean
+	private ItemServiceClient mockItem;
+	
+	@MockBean
+	private BeingServiceClient mockBeing;
 	
 	private static final String direction = "UP";
 	private static final Integer targetPlaceId = 1;
@@ -60,7 +69,7 @@ public class PlaceTests {
 				"/place/?placeClassCode={placeClassCode}&direction={direction}&targetPlaceCode={targetPlaceCode}", 
 				HttpMethod.PUT, null, Place.class, urlVariables);
 		
-		assertThat(responseCreate.getStatusCode().is2xxSuccessful());
+		assertThat(responseCreate.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 		assertValues(responseCreate, PlaceTests.testPlaceClass);
 		assertTestPlaceClassValues(responseCreate.getBody());
 		
@@ -99,8 +108,6 @@ public class PlaceTests {
 				"/place/{placeId}", HttpMethod.DELETE, null, Place.class, urlVariables);
 		
 		assertThat(responseFirstDelete.getStatusCode().is2xxSuccessful());
-		assertValues(responseFirstDelete, PlaceTests.testPlaceClass);
-		assertTestPlaceClassValues(responseFirstDelete.getBody());
 		
 		// Querying the deleted object
 		ResponseEntity<Place> responseAfterFirstDelete = restTemplate.exchange(
@@ -116,7 +123,6 @@ public class PlaceTests {
 				"/place/{placeId}", HttpMethod.DELETE, null, Place.class, urlVariables);
 		
 		assertThat(responseSecondDelete.getStatusCode().is2xxSuccessful());
-		assertThat(responseSecondDelete.getBody().getPlaceCode()).isNull();
 		
 		// Querying again
 		ResponseEntity<Place> responseAfterSecondDelete = restTemplate.exchange(

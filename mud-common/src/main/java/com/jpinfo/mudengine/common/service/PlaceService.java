@@ -1,5 +1,6 @@
 package com.jpinfo.mudengine.common.service;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,12 +24,12 @@ public interface PlaceService {
 	 * @param requestPlace
 	 */
 	@RequestMapping(method=RequestMethod.PUT, value="/")
-	Place createPlace(@RequestParam("placeClassCode") String placeClassCode, @RequestParam("direction") String direction, @RequestParam("targetPlaceCode") Integer targetPlaceCode );
+	ResponseEntity<Place> createPlace(@RequestParam("placeClassCode") String placeClassCode, @RequestParam("direction") String direction, @RequestParam("targetPlaceCode") Integer targetPlaceCode );
 	
 	/**
 	 * Returns the place description and all related information about it.
 	 * 
-	 * The information returned by this call is the minimum required for showing a place and it´s exits
+	 * The information returned by this call is the minimum required for showing a place and itï¿½s exits
 	 * in a general manner.  The exits, by example, aren't fully expanded, remaining as a short message
 	 * indicating the direction.  The client are encouraged to ask for further entity details. 
 	 * 
@@ -62,6 +63,6 @@ public interface PlaceService {
 	 * @param placeId
 	 */
 	@RequestMapping(method=RequestMethod.DELETE, value="/{placeId}")
-	Place destroyPlace(@PathVariable("placeId") Integer placeId);
+	void destroyPlace(@PathVariable("placeId") Integer placeId);
 
 }
