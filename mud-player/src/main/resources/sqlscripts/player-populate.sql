@@ -1,0 +1,1 @@
+insert into mud_player(player_id, username, password, email) values (1, 'james', 'pass', 'jamesmcbryan@hotmail.com');
