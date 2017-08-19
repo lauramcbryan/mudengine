@@ -35,7 +35,6 @@ public class PlayerHelper {
 		response.setSessionId(dbSession.getSessionId());
 		response.setSessionStart(dbSession.getSessionStart());
 		response.setSessionEnd(dbSession.getSessionEnd());
-		response.setNotificationAble(dbSession.getNotificationAble());
 		response.setLanguage(dbSession.getPlayer().getLanguage());
 		response.setCountry(dbSession.getPlayer().getCountry());
 		response.setPlayerId(dbSession.getPlayer().getPlayerId());

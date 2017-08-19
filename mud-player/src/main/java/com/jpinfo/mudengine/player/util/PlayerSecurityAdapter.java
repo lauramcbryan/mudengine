@@ -24,7 +24,8 @@ public class PlayerSecurityAdapter extends WebSecurityConfigurerAdapter {
 	protected void configure(HttpSecurity http) throws Exception {
 
 		http.csrf().disable();
-		http.authorizeRequests().antMatchers(HttpMethod.PUT, "/player/{\\x+}/session").permitAll();
+		http.authorizeRequests().antMatchers(HttpMethod.PUT, "/player/{\\x+}/session").permitAll();			
+		http.authorizeRequests().antMatchers(HttpMethod.PUT, "/player/{\\x+}").permitAll();
 		http.authorizeRequests().anyRequest().authenticated();
 		http.addFilterBefore(new CommonSecurityFilter(), UsernamePasswordAuthenticationFilter.class);
 

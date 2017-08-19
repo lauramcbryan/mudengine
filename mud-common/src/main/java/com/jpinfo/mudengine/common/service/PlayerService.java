@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.jpinfo.mudengine.common.player.Player;
+import com.jpinfo.mudengine.common.player.PlayerSimpleData;
 import com.jpinfo.mudengine.common.player.Session;
 
 @RequestMapping("/player")
@@ -20,7 +21,7 @@ public interface PlayerService {
 	ResponseEntity<Player> registerPlayer(@PathVariable("username") String username, @RequestParam("email") String email);
 
 	@RequestMapping(method=RequestMethod.POST, value="/{username}")
-	ResponseEntity<Player> updatePlayerDetails(@PathVariable("username") String username, @RequestBody Player playerData);
+	ResponseEntity<Player> updatePlayerDetails(@PathVariable("username") String username, @RequestBody PlayerSimpleData playerData);
 	
 	@RequestMapping(method=RequestMethod.POST, value="/{username}/password")
 	void setPlayerPassword(@PathVariable("username") String username, @RequestParam("oldPassword") String oldPassword, @RequestParam("newPassword") String newPassword);

@@ -1,9 +1,11 @@
 package com.jpinfo.mudengine.common.security;
 
+import java.util.Collections;
 import java.util.Date;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -44,7 +46,7 @@ public class TokenService {
 				.setSigningKey(TokenService.SECRET)
 				.parseClaimsJws(token).getBody().getSubject();
 			
-			result = new UsernamePasswordAuthenticationToken(username, null);
+			result = new UsernamePasswordAuthenticationToken(username, null, Collections.<GrantedAuthority>emptyList());
 		}
 		
 		return result;

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.jpinfo.mudengine.common.exception.EntityNotFoundException;
 import com.jpinfo.mudengine.common.exception.IllegalParameterException;
 import com.jpinfo.mudengine.common.player.Player;
+import com.jpinfo.mudengine.common.player.PlayerSimpleData;
 import com.jpinfo.mudengine.common.player.Session;
 import com.jpinfo.mudengine.common.security.TokenService;
 import com.jpinfo.mudengine.common.service.PlayerService;
@@ -57,6 +58,7 @@ public class PlayerController implements PlayerService {
 		newPlayer.setUsername(username);
 		newPlayer.setPassword(PlayerHelper.generatePassword());
 		newPlayer.setEmail(email);
+		newPlayer.setStatus(Player.STATUS_PENDING);
 		
 		// Persist to have the playerId
 		MudPlayer createdPlayer = repository.save(newPlayer);
@@ -68,7 +70,7 @@ public class PlayerController implements PlayerService {
 	}
 
 	@Override
-	public ResponseEntity<Player> updatePlayerDetails(@PathVariable String username, @RequestBody Player playerData) {
+	public ResponseEntity<Player> updatePlayerDetails(@PathVariable String username, @RequestBody PlayerSimpleData playerData) {
 		
 		Player response = null;
 		

@@ -13,6 +13,9 @@ public class MudSession {
 	@GeneratedValue(generator="mud_session_seq", strategy=GenerationType.SEQUENCE)
 	private Long sessionId;
 	
+	@Column(name="player_id", insertable=false, updatable=false)
+	private Long playerId;
+	
 	@ManyToOne
 	@JoinColumn(name="player_id", referencedColumnName="player_id")
 	private MudPlayer player;
@@ -22,9 +25,6 @@ public class MudSession {
 	
 	@Column(name="session_end")
 	private Date sessionEnd;
-	
-	@Column(name="notification_able")
-	private Boolean notificationAble;
 	
 	public MudSession() {
 		
@@ -54,14 +54,6 @@ public class MudSession {
 		this.sessionEnd = sessionEnd;
 	}
 
-	public Boolean getNotificationAble() {
-		return notificationAble;
-	}
-
-	public void setNotificationAble(Boolean notificationAble) {
-		this.notificationAble = notificationAble;
-	}
-
 	public MudPlayer getPlayer() {
 		return player;
 	}
@@ -69,7 +61,12 @@ public class MudSession {
 	public void setPlayer(MudPlayer player) {
 		this.player = player;
 	}
-	
-	
-	
+
+	public Long getPlayerId() {
+		return playerId;
+	}
+
+	public void setPlayerId(Long playerId) {
+		this.playerId = playerId;
+	}
 }

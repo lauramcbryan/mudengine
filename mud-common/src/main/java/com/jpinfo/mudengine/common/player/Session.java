@@ -14,8 +14,6 @@ public class Session implements java.io.Serializable {
 	
 	private Date sessionEnd;
 
-	private Boolean notificationAble;
-	
 	private String language;
 	
 	private String country;
@@ -54,14 +52,6 @@ public class Session implements java.io.Serializable {
 
 	public void setSessionEnd(Date sessionEnd) {
 		this.sessionEnd = sessionEnd;
-	}
-
-	public Boolean getNotificationAble() {
-		return notificationAble;
-	}
-
-	public void setNotificationAble(Boolean notificationAble) {
-		this.notificationAble = notificationAble;
 	}
 
 	public String getLanguage() {
