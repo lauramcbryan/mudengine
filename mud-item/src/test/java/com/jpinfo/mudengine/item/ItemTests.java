@@ -12,12 +12,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.jpinfo.mudengine.common.item.Item;
+import com.jpinfo.mudengine.common.security.TokenService;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment=WebEnvironment.RANDOM_PORT)
@@ -47,8 +49,23 @@ public class ItemTests {
 	
 	private static final Long testCurOwner = 1L;
 	
+	/**
+	 * Create the internal authentication token
+	 * and put it in a HttpHeader
+	 * @return
+	 */
+	private HttpHeaders getAuthHeaders() {
+		HttpHeaders authHeaders = new HttpHeaders();
+		authHeaders.add(TokenService.HEADER_TOKEN, TokenService.buildToken("internal", 999L));
+		
+		return authHeaders;
+	}
+	
 	@Test
 	public void testCrudItem() {
+		
+		// Creating the authentication token
+		HttpEntity<Object> authEntity = new HttpEntity<Object>(getAuthHeaders());
 		
 		// ********** CREATE ***************
 		// =================================
@@ -61,7 +78,7 @@ public class ItemTests {
 		
 		ResponseEntity<Item> createResponse = restTemplate.exchange(
 				"/item/?itemClassCode={itemClassCode}&worldName={worldName}&placeCode={placeCode}&quantity={quantity}", 
-				HttpMethod.PUT, null, Item.class, urlVariables);
+				HttpMethod.PUT, authEntity, Item.class, urlVariables);
 		
 		assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 		assertThat(createResponse.getBody()).isNotNull();
@@ -83,7 +100,8 @@ public class ItemTests {
 		urlVariables.put("itemId", createItem.getItemCode());
 		
 		
-		ResponseEntity<Item> readResponse = restTemplate.exchange("/item/{itemId}", HttpMethod.GET, null, Item.class, urlVariables);
+		ResponseEntity<Item> readResponse = restTemplate.exchange(
+				"/item/{itemId}", HttpMethod.GET, authEntity, Item.class, urlVariables);
 		
 		assertThat(readResponse.getStatusCode().is2xxSuccessful());
 		assertThat(readResponse.getBody()).isNotNull();
@@ -109,9 +127,10 @@ public class ItemTests {
 		
 		readItem.getAttrs().put(ItemTests.testNewAttr, new Integer(55));
 		
-		HttpEntity<Item> updateRequest = new HttpEntity<Item>(readItem);
+		HttpEntity<Item> updateRequest = new HttpEntity<Item>(readItem, getAuthHeaders());
 		
-		ResponseEntity<Item> updateResponse = restTemplate.exchange("/item/{itemId}", HttpMethod.POST, updateRequest, Item.class, urlVariables);
+		ResponseEntity<Item> updateResponse = restTemplate.exchange(
+				"/item/{itemId}", HttpMethod.POST, updateRequest, Item.class, urlVariables);
 
 		assertThat(updateResponse.getStatusCode().is2xxSuccessful());
 		assertThat(updateResponse.getBody()).isNotNull();
@@ -136,20 +155,25 @@ public class ItemTests {
 		// *********** DELETE **************
 		// =================================
 
-		ResponseEntity<Item> deleteResponse =  restTemplate.exchange("/item/{itemId}", HttpMethod.DELETE, null, Item.class, urlVariables);
+		ResponseEntity<Item> deleteResponse =  restTemplate.exchange(
+				"/item/{itemId}", HttpMethod.DELETE, authEntity, Item.class, urlVariables);
 		
 
 		assertThat(deleteResponse.getStatusCode().is2xxSuccessful());
 		
 		
 		// Read after delete
-		ResponseEntity<Item> readAfterDeleteResponse = restTemplate.exchange("/item/{itemId}", HttpMethod.GET, null, Item.class, urlVariables);
+		ResponseEntity<Item> readAfterDeleteResponse = restTemplate.exchange(
+				"/item/{itemId}", HttpMethod.GET, authEntity, Item.class, urlVariables);
 		
 		assertThat(readAfterDeleteResponse.getStatusCode().is4xxClientError());
 	}
 
 	@Test
 	public void testCrudWithPlace() {
+		
+		// Creating the authentication token
+		HttpEntity<Object> authEntity = new HttpEntity<Object>(getAuthHeaders());
 
 		Map<String, Object> urlVariables = new HashMap<String, Object>();
 		
@@ -162,7 +186,7 @@ public class ItemTests {
 		
 		ResponseEntity<Item> createResponse = restTemplate.exchange(
 				"/item/?itemClassCode={itemClassCode}&worldName={worldName}&placeCode={placeCode}", 
-				HttpMethod.PUT, null, Item.class, urlVariables);
+				HttpMethod.PUT, authEntity, Item.class, urlVariables);
 		
 		assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 		assertThat(createResponse.getBody()).isNotNull();
@@ -176,7 +200,7 @@ public class ItemTests {
 
 		createResponse = restTemplate.exchange(
 				"/item/?itemClassCode={itemClassCode}&worldName={worldName}&placeCode={placeCode}", 
-				HttpMethod.PUT, null, Item.class, urlVariables);
+				HttpMethod.PUT, authEntity, Item.class, urlVariables);
 		
 		assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 		assertThat(createResponse.getBody()).isNotNull();
@@ -188,7 +212,8 @@ public class ItemTests {
 		urlVariables.put("worldName", ItemTests.testCurrentWorld);
 		urlVariables.put("placeCode", ItemTests.testCurrentPlace);
 		
-		ResponseEntity<Item[]> findResponse = restTemplate.exchange("/item/place/{worldName}/{placeCode}", HttpMethod.GET, null, Item[].class, urlVariables);
+		ResponseEntity<Item[]> findResponse = restTemplate.exchange(
+				"/item/place/{worldName}/{placeCode}", HttpMethod.GET, authEntity, Item[].class, urlVariables);
 		
 		assertThat(findResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(findResponse.getBody().length).isEqualTo(2);
@@ -196,13 +221,15 @@ public class ItemTests {
 		
 		// ******** DESTROYING ALL FROM PLACE ***********
 		// ==============================================
-		ResponseEntity<String> destroyResponse = restTemplate.exchange("/item/place/{worldName}/{placeCode}", HttpMethod.DELETE, null, String.class, urlVariables);
+		ResponseEntity<String> destroyResponse = restTemplate.exchange(
+				"/item/place/{worldName}/{placeCode}", HttpMethod.DELETE, authEntity, String.class, urlVariables);
 		
 		assertThat(destroyResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
 		
 		
 		// Looking after both items again
-		findResponse = restTemplate.exchange("/item/place/{worldName}/{placeCode}", HttpMethod.GET, null, Item[].class, urlVariables);
+		findResponse = restTemplate.exchange(
+				"/item/place/{worldName}/{placeCode}", HttpMethod.GET, authEntity, Item[].class, urlVariables);
 		
 		assertThat(findResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(findResponse.getBody().length).isEqualTo(0);
@@ -211,6 +238,9 @@ public class ItemTests {
 	
 	@Test
 	public void testCrudWithOwner() {
+		
+		// Creating the authentication token
+		HttpEntity<Object> authEntity = new HttpEntity<Object>(getAuthHeaders());
 
 		Map<String, Object> urlVariables = new HashMap<String, Object>();
 		
@@ -222,7 +252,7 @@ public class ItemTests {
 		
 		ResponseEntity<Item> createResponse = restTemplate.exchange(
 				"/item/?itemClassCode={itemClassCode}&owner={owner}", 
-				HttpMethod.PUT, null, Item.class, urlVariables);
+				HttpMethod.PUT, authEntity, Item.class, urlVariables);
 		
 		assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 		assertThat(createResponse.getBody()).isNotNull();
@@ -236,7 +266,7 @@ public class ItemTests {
 
 		createResponse = restTemplate.exchange(
 				"/item/?itemClassCode={itemClassCode}&owner={owner}", 
-				HttpMethod.PUT, null, Item.class, urlVariables);
+				HttpMethod.PUT, authEntity, Item.class, urlVariables);
 		
 		assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 		assertThat(createResponse.getBody()).isNotNull();
@@ -249,7 +279,8 @@ public class ItemTests {
 		urlVariables.clear();
 		urlVariables.put("owner", ItemTests.testCurOwner);
 		
-		ResponseEntity<Item[]> readPlaceResponse = restTemplate.exchange("/item/being/{owner}", HttpMethod.GET, null, Item[].class, urlVariables);
+		ResponseEntity<Item[]> readPlaceResponse = restTemplate.exchange(
+				"/item/being/{owner}", HttpMethod.GET, authEntity, Item[].class, urlVariables);
 		
 		assertThat(readPlaceResponse.getStatusCode().is2xxSuccessful());
 		assertThat(readPlaceResponse.getBody()).isNotNull();
@@ -263,7 +294,9 @@ public class ItemTests {
 		urlVariables.put("worldName", ItemTests.test2CurrentWorld);
 		urlVariables.put("placeCode", ItemTests.test2CurrentPlace);
 		
-		ResponseEntity<String> dropResponse = restTemplate.exchange("/item/being/{owner}?worldName={worldName}&placeCode={placeCode}", HttpMethod.DELETE, null, String.class, urlVariables);
+		ResponseEntity<String> dropResponse = restTemplate.exchange(
+				"/item/being/{owner}?worldName={worldName}&placeCode={placeCode}", 
+				HttpMethod.DELETE, authEntity, String.class, urlVariables);
 		
 		assertThat(dropResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
 
@@ -271,7 +304,9 @@ public class ItemTests {
 		
 		// ********* READ ALL OWNER AGAIN *************
 		// ============================================
-		ResponseEntity<Item[]> findResponse = restTemplate.exchange("/item/being/{owner}", HttpMethod.GET, null, Item[].class, urlVariables);
+		ResponseEntity<Item[]> findResponse = restTemplate.exchange(
+				"/item/being/{owner}", 
+				HttpMethod.GET, authEntity, Item[].class, urlVariables);
 		
 		assertThat(findResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(findResponse.getBody().length).isEqualTo(0);
@@ -283,7 +318,8 @@ public class ItemTests {
 		// Looking after the items created; they must be in place, no longer in being
 		urlVariables.clear();
 		urlVariables.put("itemId", firstItem.getItemCode());
-		ResponseEntity<Item> firstItemResponse = restTemplate.exchange("/item/{itemId}", HttpMethod.GET, null, Item.class, urlVariables);
+		ResponseEntity<Item> firstItemResponse = restTemplate.exchange(
+				"/item/{itemId}", HttpMethod.GET, authEntity, Item.class, urlVariables);
 		
 		assertThat(firstItemResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(firstItemResponse.getBody()).isNotNull();
@@ -297,7 +333,8 @@ public class ItemTests {
 		// Deleting it
 		urlVariables.clear();
 		urlVariables.put("itemId", firstItem.getItemCode());
-		ResponseEntity<Item> cleanupFirstItem = restTemplate.exchange("/item/{itemId}", HttpMethod.DELETE, null, Item.class, urlVariables);
+		ResponseEntity<Item> cleanupFirstItem = restTemplate.exchange(
+				"/item/{itemId}", HttpMethod.DELETE, authEntity, Item.class, urlVariables);
 		
 		assertThat(cleanupFirstItem.getStatusCode()).isEqualTo(HttpStatus.OK)		;
 
@@ -308,7 +345,8 @@ public class ItemTests {
 		
 		urlVariables.clear();
 		urlVariables.put("itemId", secondItem.getItemCode());
-		ResponseEntity<Item> secondItemResponse = restTemplate.exchange("/item/{itemId}", HttpMethod.GET, null, Item.class, urlVariables);
+		ResponseEntity<Item> secondItemResponse = restTemplate.exchange(
+				"/item/{itemId}", HttpMethod.GET, authEntity, Item.class, urlVariables);
 		
 		assertThat(secondItemResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(secondItemResponse.getBody()).isNotNull();
@@ -323,7 +361,9 @@ public class ItemTests {
 		// Deleting this second item as well
 		urlVariables.clear();
 		urlVariables.put("itemId", secondItem.getItemCode());
-		ResponseEntity<Item> cleanupSecondItem = restTemplate.exchange("/item/{itemId}", HttpMethod.DELETE, null, Item.class, urlVariables);
+		ResponseEntity<Item> cleanupSecondItem = restTemplate.exchange(
+				"/item/{itemId}", 
+				HttpMethod.DELETE, authEntity, Item.class, urlVariables);
 		
 		assertThat(cleanupSecondItem.getStatusCode()).isEqualTo(HttpStatus.OK)		;
 		
