@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.jpinfo.mudengine.common.exception.EntityNotFoundException;
 import com.jpinfo.mudengine.common.place.Place;
+import com.jpinfo.mudengine.common.security.TokenService;
 import com.jpinfo.mudengine.common.service.PlaceService;
 import com.jpinfo.mudengine.world.client.BeingServiceClient;
 import com.jpinfo.mudengine.world.client.ItemServiceClient;
@@ -170,11 +171,13 @@ public class PlaceController implements PlaceService {
 				// Destroy the place
 				placeRepository.delete(dbPlace);
 				
+				String internalToken = TokenService.buildInternalToken();
+				
 				// Remove all beings from the place
 				// THAT MUST GOES FIRST!!!
 				// This call will drop all items belonging to beings into the place
 				// @TODO: solve the worldName
-				beingService.destroyAllFromPlace("aforgotten", placeId);
+				beingService.destroyAllFromPlace(internalToken, "aforgotten", placeId);
 				
 				// Remove all items from the place
 				// (That will include items dropped from beings above)

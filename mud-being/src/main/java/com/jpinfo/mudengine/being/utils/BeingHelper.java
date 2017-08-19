@@ -25,7 +25,7 @@ import com.jpinfo.mudengine.common.being.BeingSkillModifier;
 public class BeingHelper {
 
 	
-	public static Being buildBeing(MudBeing dbBeing) {
+	public static Being buildBeing(MudBeing dbBeing, boolean fullResponse) {
 		
 		Being response = new Being();
 		

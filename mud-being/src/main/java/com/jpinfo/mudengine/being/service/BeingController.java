@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -22,7 +23,9 @@ import com.jpinfo.mudengine.being.repository.BeingRepository;
 import com.jpinfo.mudengine.being.utils.BeingHelper;
 import com.jpinfo.mudengine.common.being.Being;
 import com.jpinfo.mudengine.common.exception.EntityNotFoundException;
+import com.jpinfo.mudengine.common.exception.IllegalParameterException;
 import com.jpinfo.mudengine.common.item.Item;
+import com.jpinfo.mudengine.common.security.TokenService;
 import com.jpinfo.mudengine.common.service.BeingService;
 
 @RestController
@@ -38,16 +41,20 @@ public class BeingController implements BeingService {
 	private BeingClassRepository classRepository;
 
 	@Override
-	public Being getBeing(@PathVariable Long beingCode) {
+	public Being getBeing(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable Long beingCode) {
 		
 		Being response = null;
+		
 		
 		MudBeing dbBeing = repository.findOne(beingCode);
 		
 		if (dbBeing!=null) {
-			response = BeingHelper.buildBeing(dbBeing);
 			
-			response = expandBeingEquipment(response, dbBeing);
+			boolean fullResponse = canAccess(authToken, dbBeing.getPlayerId());
+			
+			response = BeingHelper.buildBeing(dbBeing, fullResponse);
+			
+			response = expandBeingEquipment(response, dbBeing, fullResponse);
 			
 		} else {
 			throw new EntityNotFoundException("Being entity not found");
@@ -57,50 +64,54 @@ public class BeingController implements BeingService {
 	}
 	
 	@Override
-	public Being updateBeing(@PathVariable Long beingCode, @RequestBody Being requestBeing) {
+	public Being updateBeing(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable Long beingCode, @RequestBody Being requestBeing) {
 		
 		Being response = null;
 		
 		MudBeing dbBeing = repository.findOne(beingCode);
 		
 		if (dbBeing!=null) {
-		
-			// Basic data
-			dbBeing.setName(requestBeing.getName());
-			dbBeing.setPlayerId(requestBeing.getPlayerId());
-			dbBeing.setCurPlaceCode(requestBeing.getCurPlaceCode());
-			dbBeing.setCurWorld(requestBeing.getCurWorld());
-			dbBeing.setQuantity(requestBeing.getQuantity());
-			dbBeing.setBeingType(requestBeing.getBeingType());
 			
+			if (canAccess(authToken, dbBeing.getPlayerId())) {
 		
-			// if the beingClass is changing, reset the attributes
-			if (!dbBeing.getBeingClass().equals(requestBeing.getBeingClass())) {
+				// Basic data
+				dbBeing.setName(requestBeing.getName());
+				dbBeing.setPlayerId(requestBeing.getPlayerId());
+				dbBeing.setCurPlaceCode(requestBeing.getCurPlaceCode());
+				dbBeing.setCurWorld(requestBeing.getCurWorld());
+				dbBeing.setQuantity(requestBeing.getQuantity());
+				dbBeing.setBeingType(requestBeing.getBeingType());
 				
-				MudBeingClass dbClassBeing = classRepository.findOne(requestBeing.getBeingClass());
-				
-				if (dbClassBeing!=null) {
-
-					dbBeing = BeingHelper.updateBeingClass(dbBeing, dbBeing.getBeingClass(), dbClassBeing);
+			
+				// if the beingClass is changing, reset the attributes
+				if (!dbBeing.getBeingClass().equals(requestBeing.getBeingClass())) {
 					
-				} else {
-					throw new EntityNotFoundException("Being Class entity not found");
+					MudBeingClass dbClassBeing = classRepository.findOne(requestBeing.getBeingClass());
+					
+					if (dbClassBeing!=null) {
+	
+						dbBeing = BeingHelper.updateBeingClass(dbBeing, dbBeing.getBeingClass(), dbClassBeing);
+						
+					} else {
+						throw new EntityNotFoundException("Being Class entity not found");
+					}
+					
+					dbBeing.setBeingClass(dbClassBeing);
 				}
 				
-				dbBeing.setBeingClass(dbClassBeing);
+				// 2. attrModifiers
+				dbBeing = BeingHelper.updateBeingAttrModifiers(dbBeing, requestBeing);
+				
+				// 3. skillModifiers
+				dbBeing = BeingHelper.updateBeingSkillModifiers(dbBeing, requestBeing);
+				
+				// Updating the entity
+				MudBeing changedBeing = repository.save(dbBeing);
+				
+				response = BeingHelper.buildBeing(changedBeing, true);
+			} else {
+				throw new IllegalParameterException("No access to that being");
 			}
-			
-			// 2. attrModifiers
-			dbBeing = BeingHelper.updateBeingAttrModifiers(dbBeing, requestBeing);
-			
-			// 3. skillModifiers
-			dbBeing = BeingHelper.updateBeingSkillModifiers(dbBeing, requestBeing);
-			
-			// Updating the entity
-			MudBeing changedBeing = repository.save(dbBeing);
-			
-			response = BeingHelper.buildBeing(changedBeing);
-			
 			
 		} else {
 			throw new EntityNotFoundException("Being entity not found"); 
@@ -142,20 +153,27 @@ public class BeingController implements BeingService {
 		dbBeing = repository.save(dbBeing);
 		
 		// Convert to the response
-		Being response = BeingHelper.buildBeing(dbBeing);
+		Being response = BeingHelper.buildBeing(dbBeing, true);
 		
 		return new ResponseEntity<Being>(response, HttpStatus.CREATED);
 	}
 	
 	@Override
-	public List<Being> getAllFromPlayer(@PathVariable Long playerId) {
+	public List<Being> getAllFromPlayer(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable Long playerId) {
 		
-		List<MudBeing> lstFound = repository.findByPlayerId(playerId);
+		List<Being> response = null;
 		
-		List<Being> response = new ArrayList<Being>();
+		if (canAccess(authToken, playerId)) {
 		
-		for(MudBeing curDbBeing: lstFound) {
-			response.add(BeingHelper.buildBeing(curDbBeing));
+			List<MudBeing> lstFound = repository.findByPlayerId(playerId);
+			
+			response = new ArrayList<Being>();
+			
+			for(MudBeing curDbBeing: lstFound) {
+				response.add(BeingHelper.buildBeing(curDbBeing, false));
+			}
+		} else {
+			throw new IllegalParameterException("No access to that being");
 		}
 		
 		return response;
@@ -169,30 +187,35 @@ public class BeingController implements BeingService {
 		List<Being> response = new ArrayList<Being>();
 		
 		for(MudBeing curDbBeing: lstFound) {
-			response.add(BeingHelper.buildBeing(curDbBeing));
+			response.add(BeingHelper.buildBeing(curDbBeing, false));
 		}
 		
 		return response;
 	}
 
 	@Override
-	public void destroyBeing(@PathVariable Long beingCode) {
+	public void destroyBeing(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable Long beingCode) {
 		
 		MudBeing dbBeing = repository.findOne(beingCode);
 		
 		if (dbBeing!=null) {
 			
-			// Update Item service to drop all items of this being
-			itemService.dropAllFromBeing(beingCode, dbBeing.getCurWorld(), dbBeing.getCurPlaceCode());
+			if (canAccess(authToken, dbBeing.getPlayerId())) {
 			
-			repository.delete(beingCode);
+				// Update Item service to drop all items of this being
+				itemService.dropAllFromBeing(beingCode, dbBeing.getCurWorld(), dbBeing.getCurPlaceCode());
+				
+				repository.delete(beingCode);
+			} else {
+				throw new IllegalParameterException("No access to that being");
+			}
 			
 		} else {
 			throw new EntityNotFoundException("Being entity not found");
 		}
 	}
 	
-	private Being expandBeingEquipment(Being responseBeing, MudBeing dbBeing) {
+	private Being expandBeingEquipment(Being responseBeing, MudBeing dbBeing, boolean fullResponse) {
 		
 		for(MudBeingSlot curSlot: dbBeing.getEquipment()) {
 			
@@ -212,7 +235,7 @@ public class BeingController implements BeingService {
 	}
 
 	@Override
-	public void destroyAllFromPlace(@PathVariable String worldName, @PathVariable Integer placeCode) {
+	public void destroyAllFromPlace(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable String worldName, @PathVariable Integer placeCode) {
 		
 		List<MudBeing> lstFound = repository.findByCurWorldAndCurPlaceCode(worldName, placeCode);
 		
@@ -225,7 +248,7 @@ public class BeingController implements BeingService {
 	}
 	
 	@Override
-	public void destroyAllFromPlayer(@PathVariable Long playerId) {
+	public void destroyAllFromPlayer(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable Long playerId) {
 		
 		List<MudBeing> lstFound = repository.findByPlayerId(playerId);
 		
@@ -236,4 +259,13 @@ public class BeingController implements BeingService {
 			repository.delete(curDbBeing);
 		}
 	}
+	
+	private boolean canAccess(String authToken, Long playerId) {
+		
+		Long authPlayerId = TokenService.getPlayerIdFromToken(authToken);
+		
+		return ((playerId==null) || (playerId.equals(authPlayerId)) || (TokenService.INTERNAL_PLAYER_ID.equals(authPlayerId)));
+		
+	}
+	
 }
