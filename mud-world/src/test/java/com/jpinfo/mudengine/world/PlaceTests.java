@@ -60,7 +60,7 @@ public class PlaceTests {
 		
 		// Creating the authentication token
 		HttpHeaders authHeaders = new HttpHeaders();
-		authHeaders.add(TokenService.HEADER_TOKEN, TokenService.buildToken("internal", 999L));
+		authHeaders.add(TokenService.HEADER_TOKEN, TokenService.buildInternalToken());
 		
 		HttpEntity<Object> authEntity = new HttpEntity<Object>(authHeaders);
 		

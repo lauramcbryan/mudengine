@@ -56,7 +56,7 @@ public class ItemTests {
 	 */
 	private HttpHeaders getAuthHeaders() {
 		HttpHeaders authHeaders = new HttpHeaders();
-		authHeaders.add(TokenService.HEADER_TOKEN, TokenService.buildToken("internal", 999L));
+		authHeaders.add(TokenService.HEADER_TOKEN, TokenService.buildInternalToken());
 		
 		return authHeaders;
 	}

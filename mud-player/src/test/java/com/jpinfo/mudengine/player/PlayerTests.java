@@ -38,13 +38,14 @@ public class PlayerTests {
 	private static final String testEmail = "email@test.com";
 	
 	
-	private static final String test2Username = "josiel2";
+	private static final String test2Preffix = "josiel2";
 	
 	@Autowired
 	private TestRestTemplate restTemplate;
 	
 	@Autowired
 	private PlayerRepository repository;
+	
 
 	@Test
 	public void contextLoads() {
@@ -107,41 +108,67 @@ public class PlayerTests {
 	@Test
 	public void testPlayer() {
 		
+		String newUserName = PlayerTests.test2Preffix+ "-" + System.currentTimeMillis();
+		
+		HttpHeaders requestHeaders = new HttpHeaders();
+		
 		Map<String, Object> urlVariables = new HashMap<String, Object>();
 		
 		// *********** CREATE PLAYER ******************
 		// ============================================
 		
-		urlVariables.put("username", PlayerTests.test2Username);
+		urlVariables.put("username", newUserName);
 		urlVariables.put("email", PlayerTests.testEmail);
+		urlVariables.put("language" , PlayerTests.testLanguage);
 		
 		ResponseEntity<Player> createResponse = restTemplate.exchange(
-				"/player/{username}?email={email}", HttpMethod.PUT, null, Player.class, urlVariables);
+				"/player/{username}?email={email}&language={language}", HttpMethod.PUT, null, Player.class, urlVariables);
 		
 		assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 		assertThat(createResponse.getBody().getPlayerId()).isNotNull();
 		assertThat(createResponse.getBody().getEmail()).isEqualTo(PlayerTests.testEmail);
+		assertThat(createResponse.getBody().getLanguage()).isEqualTo(PlayerTests.testLanguage);
 		
-
 		// *********** CREATE SESSION ******************
 		// =============================================
-		
 		
 		// First I need to get the password generated in database
 		MudPlayer dbPlayer = repository.findOne(createResponse.getBody().getPlayerId());
 		
-		
 		// Create Session
-		urlVariables.put("username", PlayerTests.test2Username);
+		urlVariables.put("username", newUserName);
 		urlVariables.put("password", dbPlayer.getPassword());
 		
 		ResponseEntity<Session> loginResponse = restTemplate.exchange(
 				"/player/{username}/session?password={password}", HttpMethod.PUT, null, Session.class, urlVariables);
+
+		// "You must change your password" message
+		assertThat(loginResponse.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+		
+		// Change password
+		urlVariables.put("oldPassword", dbPlayer.getPassword());
+		urlVariables.put("newPassword", PlayerTests.testPassword);
+		
+		ResponseEntity<String> changePasswordResponse = restTemplate.exchange(
+				"/player/{username}/password?oldPassword={oldPassword}&newPassword={newPassword}", 
+				HttpMethod.POST, null, String.class, urlVariables);
+		
+		assertThat(changePasswordResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+		
+		
+		// Calling createSession again
+		urlVariables.clear();
+		urlVariables.put("username", newUserName);
+		urlVariables.put("password", PlayerTests.testPassword);
+		
+		loginResponse = restTemplate.exchange(
+				"/player/{username}/session?password={password}", 
+				HttpMethod.PUT, null, Session.class, urlVariables);
+		
 		
 		assertThat(loginResponse.getHeaders().containsKey(TokenService.HEADER_TOKEN));
 		
 		// Creation authenticated HttpEntity
-		HttpHeaders requestHeaders = new HttpHeaders();
 		requestHeaders.add(TokenService.HEADER_TOKEN, loginResponse.getHeaders().getFirst(TokenService.HEADER_TOKEN));
 		HttpEntity<Object> authRequestEntity = new HttpEntity<Object>(requestHeaders); 
 		
@@ -149,7 +176,7 @@ public class PlayerTests {
 		// *********** GET PLAYER ********************
 		// ===========================================
 		urlVariables.clear();
-		urlVariables.put("username", PlayerTests.test2Username);
+		urlVariables.put("username", newUserName);
 		
 		ResponseEntity<Player> getResponse = restTemplate.exchange(
 				"/player/{username}", HttpMethod.GET, authRequestEntity, Player.class, urlVariables);
@@ -158,12 +185,24 @@ public class PlayerTests {
 		assertThat(getResponse.getBody().getPlayerId()).isNotNull();
 		assertThat(getResponse.getBody().getCountry()).isNull();
 		assertThat(getResponse.getBody().getName()).isNull();
-		assertThat(getResponse.getBody().getLanguage()).isNull();
+		assertThat(getResponse.getBody().getLanguage()).isEqualTo(PlayerTests.testLanguage);
+		assertThat(getResponse.getBody().getEmail()).isEqualTo(PlayerTests.testEmail);
+		
+
+		// *********** GET ANOTHER PLAYER (forbidden)********************
+		// ==============================================================
+		urlVariables.clear();
+		urlVariables.put("username", PlayerTests.testUsername);
+		
+		ResponseEntity<Player> getAnotherResponse = restTemplate.exchange(
+				"/player/{username}", HttpMethod.GET, authRequestEntity, Player.class, urlVariables);
+
+		assertThat(getAnotherResponse.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
 
 		// *********** UPDATE PLAYER ******************
 		// ============================================
 		urlVariables.clear();
-		urlVariables.put("username", PlayerTests.test2Username);
+		urlVariables.put("username", newUserName);
 		
 		PlayerSimpleData updatePlayer = new PlayerSimpleData();
 		
@@ -183,26 +222,46 @@ public class PlayerTests {
 		assertThat(updateResponse.getBody().getLanguage()).isEqualTo(PlayerTests.testLanguage);
 		assertThat(updateResponse.getBody().getEmail()).isEqualTo(PlayerTests.testEmail);
 		
-		
 		// ************* DELETE PLAYER ********************
 		// ================================================
+		
 		urlVariables.clear();
-		urlVariables.put("username", PlayerTests.test2Username);
+		urlVariables.put("username", newUserName);
 		
 		ResponseEntity<String> deleteResponse = restTemplate.exchange(
-				"/player/{username}", HttpMethod.DELETE, requestEntity, String.class, urlVariables);
+				"/player/{username}", HttpMethod.DELETE, authRequestEntity, String.class, urlVariables);
 		
 		assertThat(deleteResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-		
-		
+	
+	
 		// **************** GET PLAYER AFTER DELETE ********************
 		// =============================================================
 		urlVariables.clear();
-		urlVariables.put("username", PlayerTests.test2Username);
+		urlVariables.put("username", newUserName);
 		
 		getResponse = restTemplate.exchange(
 				"/player/{username}", HttpMethod.GET, authRequestEntity, Player.class, urlVariables);
 
 		assertThat(getResponse.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+	}
+	
+	@Test
+	public void testInternalAccountAccess() {
+
+		Map<String, Object> urlVariables = new HashMap<String, Object>();
+		
+		HttpHeaders requestHeaders = new HttpHeaders();
+		requestHeaders.add(TokenService.HEADER_TOKEN, TokenService.buildInternalToken());
+		HttpEntity<Object> authRequestEntity = new HttpEntity<Object>(requestHeaders);
+		
+		// *********** GET PLAYER (internal account) ********************
+		// ==============================================================
+		urlVariables.clear();
+		urlVariables.put("username", PlayerTests.testUsername);
+		
+		ResponseEntity<Player> getResponse = restTemplate.exchange(
+				"/player/{username}", HttpMethod.GET, authRequestEntity, Player.class, urlVariables);
+
+		assertThat(getResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
 	}
 }

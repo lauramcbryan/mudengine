@@ -20,6 +20,10 @@ public class TokenService {
 	
 	// 128bits hex key
 	private static final String SECRET = "a7ac498c7bba59e0eb7c647d2f0197f8";
+	
+	
+	public static final String INTERNAL_ACCOUNT = "Internal";
+	public static final Long INTERNAL_PLAYER_ID = 0L;
 
 	
 	public static String buildToken(String userName, Long playerId) {
@@ -52,7 +56,20 @@ public class TokenService {
 		return result;
 	}
 	
-	public static Long getPlayerId(String token) {
+	public static String getUsernameFromToken(String token) {
+		
+		String result = null;
+		
+		if (token!=null) {
+			
+			result = Jwts.parser().setSigningKey(TokenService.SECRET)
+				.parseClaimsJws(token).getBody().getSubject();
+		}
+		
+		return result;
+	}
+	
+	public static Long getPlayerIdFromToken(String token) {
 		
 		Long result = null;
 		
@@ -63,5 +80,9 @@ public class TokenService {
 		}
 		
 		return result;
+	}
+	
+	public static String buildInternalToken() {
+		return buildToken(TokenService.INTERNAL_ACCOUNT, TokenService.INTERNAL_PLAYER_ID);
 	}
 }
