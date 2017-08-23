@@ -1,7 +1,6 @@
 package com.jpinfo.mudengine.common.being;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -24,6 +23,10 @@ public class Being implements Serializable, ActionTarget {
 	private Integer beingType;
 
 	private String beingClass;
+	
+	private Map<String, Integer> baseAttrs;
+	
+	private Map<String, Integer> baseSkills;
 
 	private Map<String, Integer> attrs;
 	
@@ -54,8 +57,8 @@ public class Being implements Serializable, ActionTarget {
 		this.attrs = new HashMap<String, Integer>();
 		this.skills = new HashMap<String, Integer>();
 		
-		this.attrModifiers = new ArrayList<BeingAttrModifier>();
-		this.skillModifiers = new ArrayList<BeingSkillModifier>();
+		//this.attrModifiers = new ArrayList<BeingAttrModifier>();
+		//this.skillModifiers = new ArrayList<BeingSkillModifier>();
 	}
 	
 	
@@ -175,7 +178,28 @@ public class Being implements Serializable, ActionTarget {
 		this.quantity = quantity;
 	}
 
-	
-	
+
+
+	public Map<String, Integer> getBaseAttrs() {
+		return baseAttrs;
+	}
+
+
+
+	public void setBaseAttrs(Map<String, Integer> baseAttrs) {
+		this.baseAttrs = baseAttrs;
+	}
+
+
+
+	public Map<String, Integer> getBaseSkills() {
+		return baseSkills;
+	}
+
+
+
+	public void setBaseSkills(Map<String, Integer> baseSkills) {
+		this.baseSkills = baseSkills;
+	}
 
 }

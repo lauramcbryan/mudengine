@@ -1,12 +1,15 @@
 package com.jpinfo.mudengine.common.security;
 
 import java.util.Collections;
+
 import java.util.Date;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
@@ -23,7 +26,7 @@ public class TokenService {
 	
 	
 	public static final String INTERNAL_ACCOUNT = "Internal";
-	public static final Long INTERNAL_PLAYER_ID = 0L;
+	public static final Long INTERNAL_PLAYER_ID = Long.MAX_VALUE;
 
 	
 	public static String buildToken(String userName, Long playerId) {
@@ -75,8 +78,11 @@ public class TokenService {
 		
 		if (token!=null) {
 			
-			result = (Long) Jwts.parser().setSigningKey(TokenService.SECRET)
-				.parseClaimsJws(token).getBody().get(TokenService.PLAYER_ID_CLAIM);
+			Jws<Claims> parsedToken = Jwts.parser().setSigningKey(TokenService.SECRET).parseClaimsJws(token);
+			
+			if (parsedToken.getBody().containsKey(TokenService.PLAYER_ID_CLAIM)) {
+				result = new Long(parsedToken.getBody().get(TokenService.PLAYER_ID_CLAIM).toString());
+			}
 		}
 		
 		return result;

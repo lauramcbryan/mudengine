@@ -24,7 +24,7 @@ public interface BeingService {
 	Being updateBeing(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable("beingCode") Long beingCode, @RequestBody Being requestBeing);
 
 	@RequestMapping(method=RequestMethod.PUT)
-	ResponseEntity<Being> createBeing(
+	ResponseEntity<Being> createBeing(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, 
 			@RequestParam("beingType") Integer beingType, @RequestParam("beingClass") String beingClass, 
 			@RequestParam("worldName") String worldName, @RequestParam("placeCode") Integer placeCode, 
 			@RequestParam("quantity") Optional<Integer> quantity, @RequestParam("playerId") Optional<Long> playerId);

@@ -1,7 +1,9 @@
 package com.jpinfo.mudengine.being.utils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.jpinfo.mudengine.being.model.MudBeing;
 import com.jpinfo.mudengine.being.model.MudBeingAttr;
@@ -39,37 +41,66 @@ public class BeingHelper {
 		response.setQuantity(dbBeing.getQuantity());
 		
 		for(MudBeingAttr curAttr: dbBeing.getAttrs()) {
-			response.getAttrs().put(curAttr.getId().getAttrCode(), curAttr.getValue());
+			
+			// Calculating the attribute effective value
+			int effectiveAttrValue = BeingHelper.calcEffectiveAttr(curAttr.getId().getAttrCode(), curAttr.getValue(), dbBeing);
+			
+			response.getAttrs().put(curAttr.getId().getAttrCode(), effectiveAttrValue);
 		}
 		
 		for(MudBeingSkill curSkill: dbBeing.getSkills()) {
-			response.getSkills().put(curSkill.getId().getSkillCode(), curSkill.getValue());
+			
+			int effectiveSkillValue = BeingHelper.calcEffectiveSkill(curSkill.getId().getSkillCode(), curSkill.getValue(), dbBeing);
+			
+			response.getSkills().put(curSkill.getId().getSkillCode(), effectiveSkillValue);
 		}
 		
-		for(MudBeingSkillModifier curSkillModifier: dbBeing.getSkillModifiers()) {
-			BeingSkillModifier dummy = new BeingSkillModifier();
+		if (fullResponse) {
 			
-			dummy.setSkillCode(curSkillModifier.getId().getSkillCode());
-			dummy.setOriginCode(curSkillModifier.getId().getOriginCode());
-			dummy.setOriginType(curSkillModifier.getId().getOriginType());
+			Map<String, Integer> baseAttrMap = new HashMap<String, Integer>();
+			Map<String, Integer> baseSkillMap = new HashMap<String, Integer>();
+			List<BeingAttrModifier> attrModifierList = new ArrayList<BeingAttrModifier>();
+			List<BeingSkillModifier> skillModifierList = new ArrayList<BeingSkillModifier>();
 			
-			dummy.setOffset(curSkillModifier.getOffset());
-			dummy.setEndTurn(curSkillModifier.getEndTurn());
+			for(MudBeingAttr curAttr: dbBeing.getAttrs()) {
+				baseAttrMap.put(curAttr.getId().getAttrCode(), curAttr.getValue());
+			}
 			
-			response.getSkillModifiers().add(dummy);
-		}
+			for(MudBeingSkill curSkill: dbBeing.getSkills()) {
+				baseSkillMap.put(curSkill.getId().getSkillCode(), curSkill.getValue());
+			}
+			
 		
-		for(MudBeingAttrModifier curAttrModifier: dbBeing.getAttrModifiers()) {
-			BeingAttrModifier dummy = new BeingAttrModifier();
+			for(MudBeingSkillModifier curSkillModifier: dbBeing.getSkillModifiers()) {
+				BeingSkillModifier dummy = new BeingSkillModifier();
+				
+				dummy.setSkillCode(curSkillModifier.getId().getSkillCode());
+				dummy.setOriginCode(curSkillModifier.getId().getOriginCode());
+				dummy.setOriginType(curSkillModifier.getId().getOriginType());
+				
+				dummy.setOffset(curSkillModifier.getOffset());
+				dummy.setEndTurn(curSkillModifier.getEndTurn());
+				
+				skillModifierList.add(dummy);
+			}
 			
-			dummy.setAttribute(curAttrModifier.getId().getAttrCode());
-			dummy.setOriginCode(curAttrModifier.getId().getOriginCode());
-			dummy.setOriginType(curAttrModifier.getId().getOriginType());
+			for(MudBeingAttrModifier curAttrModifier: dbBeing.getAttrModifiers()) {
+				BeingAttrModifier dummy = new BeingAttrModifier();
+				
+				dummy.setAttribute(curAttrModifier.getId().getAttrCode());
+				dummy.setOriginCode(curAttrModifier.getId().getOriginCode());
+				dummy.setOriginType(curAttrModifier.getId().getOriginType());
+				
+				dummy.setOffset(curAttrModifier.getOffset());
+				dummy.setEndTurn(curAttrModifier.getEndTurn());
+				
+				attrModifierList.add(dummy);
+			}
 			
-			dummy.setOffset(curAttrModifier.getOffset());
-			dummy.setEndTurn(curAttrModifier.getEndTurn());
-			
-			response.getAttrModifiers().add(dummy);
+			response.setBaseAttrs(baseAttrMap);
+			response.setBaseSkills(baseSkillMap);
+			response.setAttrModifiers(attrModifierList);
+			response.setSkillModifiers(skillModifierList);
 		}
 		
 		return response;
@@ -295,4 +326,37 @@ public class BeingHelper {
 		
 		return dbBeing;
 	}
+	
+	private static int calcEffectiveAttr(String attrCode, Integer baseValue, MudBeing dbBeing) {
+		
+		// Base value for attribute
+		float response = baseValue;
+		
+		// Traverse all modifier list
+		for(MudBeingAttrModifier curAttrModifier: dbBeing.getAttrModifiers()) {
+			
+			if (curAttrModifier.getId().getAttrCode().equals(attrCode)) {
+				
+				response+=curAttrModifier.getOffset();
+			}
+		}
+		
+		return Math.round(response);
+	}
+	
+	private static int calcEffectiveSkill(String skillCode, Integer baseValue, MudBeing dbBeing) {
+		
+		float response = baseValue;
+		
+		for(MudBeingSkillModifier curSkillModifier: dbBeing.getSkillModifiers()) {
+			
+			if (curSkillModifier.getId().getSkillCode().equals(skillCode)) {
+				response +=curSkillModifier.getOffset();
+			}
+		}
+		
+		return Math.round(response);
+		
+	}
+	
 }

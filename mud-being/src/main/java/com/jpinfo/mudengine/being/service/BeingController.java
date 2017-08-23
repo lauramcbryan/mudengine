@@ -121,41 +121,52 @@ public class BeingController implements BeingService {
 	}
 	
 	@Override
-	public ResponseEntity<Being> createBeing(
+	public ResponseEntity<Being> createBeing(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, 
 			@RequestParam Integer beingType, @RequestParam String beingClass, @RequestParam String worldName, 
 			@RequestParam Integer placeCode, @RequestParam Optional<Integer> quantity, @RequestParam Optional<Long> playerId) {
+		
+		ResponseEntity<Being> entityResponse = null; 
 
-		MudBeing dbBeing = new MudBeing();
+		// Checking the playerId against the authenticated playerId
+		if ((!playerId.isPresent()) || canAccess(authToken, playerId.get())) {
 		
-		MudBeingClass dbBeingClass = classRepository.findOne(beingClass);
-
-		dbBeing.setBeingType(beingType);
-		dbBeing.setBeingClass(dbBeingClass);
-		dbBeing.setCurPlaceCode(placeCode);
-		dbBeing.setCurWorld(worldName);
+			MudBeing dbBeing = new MudBeing();
+			
+			MudBeingClass dbBeingClass = classRepository.findOne(beingClass);
+	
+			dbBeing.setBeingType(beingType);
+			dbBeing.setBeingClass(dbBeingClass);
+			dbBeing.setCurPlaceCode(placeCode);
+			dbBeing.setCurWorld(worldName);
+			
+			if (quantity.isPresent())
+				dbBeing.setQuantity(quantity.get());
+			else
+				dbBeing.setQuantity(1);
+	
+			if (playerId.isPresent())
+				dbBeing.setPlayerId(playerId.get());
+			
+			// Saving the entity (to have the beingCode)
+			dbBeing = repository.save(dbBeing);
+			
+			
+			// 2. attributes  (from class)
+			// 3. skills  (from class)	
+			dbBeing = BeingHelper.updateBeingClass(dbBeing, null, dbBeingClass);
+			
+			dbBeing = repository.save(dbBeing);
+			
+			// Convert to the response
+			Being response = BeingHelper.buildBeing(dbBeing, true);
+			
+			entityResponse = new ResponseEntity<Being>(response, HttpStatus.CREATED);
+			
+		} else {
+			throw new IllegalParameterException("Cannot create beings for another player");
+		}
 		
-		if (quantity.isPresent())
-			dbBeing.setQuantity(quantity.get());
-		else
-			dbBeing.setQuantity(1);
-
-		if (playerId.isPresent())
-			dbBeing.setPlayerId(playerId.get());
-		
-		// Saving the entity (to have the beingCode)
-		dbBeing = repository.save(dbBeing);
-		
-		
-		// 2. attributes  (from class)
-		// 3. skills  (from class)	
-		dbBeing = BeingHelper.updateBeingClass(dbBeing, null, dbBeingClass);
-		
-		dbBeing = repository.save(dbBeing);
-		
-		// Convert to the response
-		Being response = BeingHelper.buildBeing(dbBeing, true);
-		
-		return new ResponseEntity<Being>(response, HttpStatus.CREATED);
+		return entityResponse;
 	}
 	
 	@Override
