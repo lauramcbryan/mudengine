@@ -1,7 +1,8 @@
 package com.jpinfo.mudengine.being.service;
 
 import java.util.ArrayList;
-
+import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,11 +18,15 @@ import org.springframework.web.bind.annotation.RestController;
 import com.jpinfo.mudengine.being.client.ItemServiceClient;
 import com.jpinfo.mudengine.being.model.MudBeing;
 import com.jpinfo.mudengine.being.model.MudBeingClass;
+import com.jpinfo.mudengine.being.model.MudBeingMessage;
 import com.jpinfo.mudengine.being.model.MudBeingSlot;
+import com.jpinfo.mudengine.being.model.pk.MudBeingMessagePK;
 import com.jpinfo.mudengine.being.repository.BeingClassRepository;
+import com.jpinfo.mudengine.being.repository.BeingMessageRepository;
 import com.jpinfo.mudengine.being.repository.BeingRepository;
 import com.jpinfo.mudengine.being.utils.BeingHelper;
 import com.jpinfo.mudengine.common.being.Being;
+import com.jpinfo.mudengine.common.being.BeingMessage;
 import com.jpinfo.mudengine.common.exception.EntityNotFoundException;
 import com.jpinfo.mudengine.common.exception.IllegalParameterException;
 import com.jpinfo.mudengine.common.item.Item;
@@ -39,6 +44,9 @@ public class BeingController implements BeingService {
 	
 	@Autowired
 	private BeingClassRepository classRepository;
+	
+	@Autowired
+	private BeingMessageRepository messageRepository;
 
 	@Override
 	public Being getBeing(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable Long beingCode) {
@@ -50,7 +58,7 @@ public class BeingController implements BeingService {
 		
 		if (dbBeing!=null) {
 			
-			boolean fullResponse = canAccess(authToken, dbBeing.getPlayerId());
+			boolean fullResponse = BeingHelper.canAccess(authToken, dbBeing.getPlayerId());
 			
 			response = BeingHelper.buildBeing(dbBeing, fullResponse);
 			
@@ -72,7 +80,7 @@ public class BeingController implements BeingService {
 		
 		if (dbBeing!=null) {
 			
-			if (canAccess(authToken, dbBeing.getPlayerId())) {
+			if (BeingHelper.canAccess(authToken, dbBeing.getPlayerId())) {
 		
 				// Basic data
 				dbBeing.setName(requestBeing.getName());
@@ -128,7 +136,7 @@ public class BeingController implements BeingService {
 		ResponseEntity<Being> entityResponse = null; 
 
 		// Checking the playerId against the authenticated playerId
-		if ((!playerId.isPresent()) || canAccess(authToken, playerId.get())) {
+		if ((!playerId.isPresent()) || BeingHelper.canAccess(authToken, playerId.get())) {
 		
 			MudBeing dbBeing = new MudBeing();
 			
@@ -174,7 +182,7 @@ public class BeingController implements BeingService {
 		
 		List<Being> response = null;
 		
-		if (canAccess(authToken, playerId)) {
+		if (BeingHelper.canAccess(authToken, playerId)) {
 		
 			List<MudBeing> lstFound = repository.findByPlayerId(playerId);
 			
@@ -211,7 +219,7 @@ public class BeingController implements BeingService {
 		
 		if (dbBeing!=null) {
 			
-			if (canAccess(authToken, dbBeing.getPlayerId())) {
+			if (BeingHelper.canAccess(authToken, dbBeing.getPlayerId())) {
 			
 				// Update Item service to drop all items of this being
 				itemService.dropAllFromBeing(beingCode, dbBeing.getCurWorld(), dbBeing.getCurPlaceCode());
@@ -270,13 +278,114 @@ public class BeingController implements BeingService {
 			repository.delete(curDbBeing);
 		}
 	}
-	
-	private boolean canAccess(String authToken, Long playerId) {
+
+	@Override
+	public void sendMessage(@RequestHeader String authToken, @PathVariable Long beingCode, @RequestParam Optional<Long> senderCode, @RequestParam String message) {
 		
-		Long authPlayerId = TokenService.getPlayerIdFromToken(authToken);
+		// If the target is non-player being, suppress the message
+		MudBeing dbBeing = repository.findOne(beingCode);
 		
-		return ((playerId==null) || (playerId.equals(authPlayerId)) || (TokenService.INTERNAL_PLAYER_ID.equals(authPlayerId)));
-		
+		if (dbBeing!=null) {
+			
+			if (dbBeing.getPlayerId()!=null) {
+				
+				MudBeingMessage dbMessage = new MudBeingMessage();
+				MudBeingMessagePK dbMessagePK = new MudBeingMessagePK();
+				
+				dbMessagePK.setBeingCode(beingCode);
+				dbMessagePK.setCreateDate(new Date());
+				dbMessage.setId(dbMessagePK);
+				
+				dbMessage.setMessage(message);
+				dbMessage.setReadFlag(false);
+				
+
+				// Handling the sender, if present
+				if (senderCode.isPresent()) {
+					
+					MudBeing dbSenderBeing = repository.findOne(senderCode.get());
+					
+					if (dbSenderBeing!=null) {
+						
+						if (BeingHelper.canAccess(authToken, dbSenderBeing.getPlayerId())) {
+							
+							dbMessage.setSenderCode(dbSenderBeing.getBeingCode());
+							
+						} else {
+							throw new IllegalParameterException("Cannot send messages from this being");
+						}
+					} else {
+						throw new EntityNotFoundException("Sender being entity not found");
+					}
+				}
+				
+				messageRepository.save(dbMessage);
+				
+			} else {
+				// Do nothing
+			}
+			
+		} else {
+			throw new EntityNotFoundException("Target being entity not found");
+		}
 	}
-	
+
+	@Override
+	public List<BeingMessage> getMessages(@RequestHeader String authToken, @PathVariable Long beingCode, 
+			@RequestParam Optional<Date> sinceDate, @RequestParam Optional<Date> untilDate) {
+		
+		List<BeingMessage> responseList = new ArrayList<BeingMessage>();
+		
+		Collection<MudBeingMessage> dbList = null;
+		
+		if (sinceDate.isPresent() || untilDate.isPresent()) {
+			
+			// Timed search
+			Date startDate = (sinceDate.isPresent() ? sinceDate.get(): BeingHelper.calculateOneWeekAgo() );
+			Date endDate =   (untilDate.isPresent() ? untilDate.get() : new Date());
+			
+			dbList = messageRepository.findRangedMessages(beingCode, startDate, endDate);
+		} else {
+			
+			// Only unread messages
+			dbList = messageRepository.findUnreadMessages(beingCode);
+		}
+		
+		
+		// Translating the database message list in service ones
+		for(MudBeingMessage curMessage: dbList) {
+			
+			MudBeing dbSender = null;
+			
+			if (curMessage.getSenderCode()!=null) {
+				dbSender = repository.findOne(beingCode);
+			}
+			
+			responseList.add(BeingHelper.buildMessage(curMessage, dbSender));
+			
+			curMessage.setReadFlag(true);
+		}
+		
+		// Updating the read flags
+		messageRepository.save(dbList);
+		
+		return responseList;
+	}
+
+	@Override
+	public void clearReadMessages(@RequestHeader String authToken, @PathVariable Long beingCode) {
+		
+		MudBeing dbBeing = repository.findOne(beingCode);
+		
+		if (dbBeing!=null) {
+			
+			if (BeingHelper.canAccess(authToken, dbBeing.getPlayerId())) {
+				messageRepository.deleteReadMessages(beingCode);
+			}
+			
+		} else {
+			throw new EntityNotFoundException("Being entity not found");
+		}
+	}
+
 }

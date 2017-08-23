@@ -10,6 +10,7 @@ import org.springframework.security.core.GrantedAuthority;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
@@ -33,12 +34,15 @@ public class TokenService {
 		
 		String token = null;
 		
-		token = Jwts.builder()
-			.setSubject(userName)
-			.claim(TokenService.PLAYER_ID_CLAIM, playerId)
-			.setExpiration(new Date(System.currentTimeMillis() + TokenService.TOKEN_TTL))
-			.signWith(SignatureAlgorithm.HS512, TokenService.SECRET)
-			.compact();
+		JwtBuilder builder = Jwts.builder();
+		
+		builder.setSubject(userName);
+		builder.claim(TokenService.PLAYER_ID_CLAIM, playerId);
+		builder.setExpiration(new Date(System.currentTimeMillis() + TokenService.TOKEN_TTL));
+		builder.signWith(SignatureAlgorithm.HS512, TokenService.SECRET);
+		
+		
+		token = builder.compact();
 		
 		return token;
 	}
