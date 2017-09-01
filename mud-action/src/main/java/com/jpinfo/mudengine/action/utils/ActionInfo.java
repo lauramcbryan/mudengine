@@ -1,12 +1,13 @@
-package com.jpinfo.mudengine.common.action;
+package com.jpinfo.mudengine.action.utils;
 
+import com.jpinfo.mudengine.common.action.Action;
 import com.jpinfo.mudengine.common.being.Being;
 import com.jpinfo.mudengine.common.interfaces.ActionTarget;
 import com.jpinfo.mudengine.common.interfaces.Reaction;
 import com.jpinfo.mudengine.common.item.Item;
 import com.jpinfo.mudengine.common.place.Place;
 
-public class ActionState extends ActionSimpleState {
+public class ActionInfo extends Action {
 	
 	private String actionCode;
 	
@@ -21,7 +22,7 @@ public class ActionState extends ActionSimpleState {
 	
 	private Reaction effect;
 	
-	public ActionState() {
+	public ActionInfo() {
 		
 	}
 	public String getActionCode() {

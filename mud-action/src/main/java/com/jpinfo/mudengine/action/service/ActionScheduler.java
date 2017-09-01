@@ -1,5 +1,6 @@
 package com.jpinfo.mudengine.action.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,13 +23,14 @@ import com.jpinfo.mudengine.action.model.MudActionClassEffect;
 import com.jpinfo.mudengine.action.model.MudActionClassPrereq;
 import com.jpinfo.mudengine.action.repository.MudActionClassRepository;
 import com.jpinfo.mudengine.action.repository.MudActionRepository;
-import com.jpinfo.mudengine.common.action.ActionSimpleState;
-import com.jpinfo.mudengine.common.action.ActionState;
+import com.jpinfo.mudengine.action.utils.ActionInfo;
+import com.jpinfo.mudengine.common.action.Action;
 import com.jpinfo.mudengine.common.being.Being;
 import com.jpinfo.mudengine.common.interfaces.ActionTarget;
 import com.jpinfo.mudengine.common.interfaces.Reaction;
 import com.jpinfo.mudengine.common.item.Item;
 import com.jpinfo.mudengine.common.place.Place;
+import com.jpinfo.mudengine.common.security.TokenService;
 
 @Service
 public class ActionScheduler {
@@ -55,13 +57,26 @@ public class ActionScheduler {
 		
 		System.out.println("ActionScheduler.  Turn=" + ActionScheduler.currentTurn);
 		
+		// List of processed actors in this iteraction
+		List<Long> processedActors = new ArrayList<Long>();
+
+		// List of pending and active actions
+		List<MudAction> pendingActions = repository.findPendingActions();
 		
-		
-		updatePendingActions();
-		
-		updateActiveActions();
-		updatePendingMessages();
-	
+		for(MudAction curPendingAction: pendingActions) {
+			
+			// Check if there´s another action running for the same actor
+			// That need to be done in the case we already started an action for the same actor in this iteration
+			if (processedActors.indexOf(curPendingAction.getActorCode())==-1) {
+				
+				curPendingAction = updateAction(curPendingAction);
+				
+				repository.save(curPendingAction);
+
+				processedActors.add(curPendingAction.getActorCode());
+				
+			} // endif
+		} // next pendingAction
 		
 		ActionScheduler.currentTurn++;
 	}
@@ -71,95 +86,69 @@ public class ActionScheduler {
 	 * - Retrieve a list with all actions that are in PENDING state
 	 * - Update them to NotStarted
 	 */
-	private void updatePendingActions() {
+	private MudAction updateAction(MudAction curAction) {
 		
-		// Obter uma lista dos actions que não foram iniciadas ainda
-		List<MudAction> pendingActions = repository.findStartableActions();
+		switch(curAction.getCurrStateEnum()) {
 		
-		for(MudAction curPendingAction: pendingActions) {
-			
-			// Check if there´s another action running for the same actor
-			// That need to be done in the case we already started an action for the same actor in this iteration
-			MudAction dummy = repository.findFirstOneByCurrStateAndActorCode(ActionSimpleState.STARTED, curPendingAction.getActorCode());
-			
-			if (dummy==null) {
-				
-				try {
-					// Check the prerequisites
-					ActionState fullActionState = buildAction(curPendingAction);
-					
-					checkPrerequisites(fullActionState);
-					
-					// Update the action to Started
-					curPendingAction.setCurrState(ActionSimpleState.STARTED);
-					curPendingAction.setStartTurn(ActionScheduler.currentTurn);
-					
-					// Calculates the endTurn (it´s included in costs)
-					fullActionState = calculateCost(fullActionState);
-					
-					// After this, the endTurn is set in action object
-					curPendingAction.setEndTurn(fullActionState.getEndTurn());
-					
-					// Calculate previous reactions to the action
-					calculateReactions(fullActionState, true);
-					
-				} catch (ActionRefusedException e) {
-					
-					// Update the action to Refused
-					curPendingAction.setCurrState(ActionSimpleState.REFUSED);
-					curPendingAction.setStartTurn(ActionScheduler.currentTurn);
-					curPendingAction.setEndTurn(ActionScheduler.currentTurn);
-				}
-				
-				//repository.save(curPendingAction);
-			} // endif
-		} // next pendingAction
-		
-	}
-	
-	
-	private void updateActiveActions() {
-		
-		// Obter uma lista das actions Ativas e que estão terminando
-		List<MudAction> actionList = repository.findFinishedActions(ActionScheduler.currentTurn);
-		
-		for(MudAction curAction: actionList) {
+		case NOT_STARTED: {
 			
 			try {
-			
-				// Apply the effects
-				ActionState fullActionState = buildAction(curAction);
 				
+				ActionInfo fullActionState = buildAction(curAction);
+			
+				// Check the prerequisites
+				checkPrerequisites(fullActionState);
+				
+				// Update the action to Started
+				curAction.setCurrState(Action.EnumActionState.STARTED);
+				curAction.setStartTurn(ActionScheduler.currentTurn);
+	
+				// Calculates the endTurn (it´s included in costs)
+				fullActionState = calculateCost(fullActionState);
+				
+				// After this, the endTurn is set in action object
+				curAction.setEndTurn(fullActionState.getEndTurn());
+				
+			} catch (ActionRefusedException e) {
+				
+				// Update the action to Refused
+				curAction.setCurrState(Action.EnumActionState.REFUSED);
+				curAction.setStartTurn(ActionScheduler.currentTurn);
+				curAction.setEndTurn(ActionScheduler.currentTurn);
+			}
+			
+			break;
+		}
+		case STARTED: {
+			
+			try {
+				ActionInfo fullActionState = buildAction(curAction);
+	
+				// Calculate effects
 				fullActionState = calculateEffect(fullActionState);
 				
 				// TODO: Update changed entities
 				
 				// Update the action to COMPLETED
-				curAction.setCurrState(ActionSimpleState.COMPLETED);
+				curAction.setCurrState(Action.EnumActionState.COMPLETED);
 				
-				// Calculate reactions to the action
-				calculateReactions(fullActionState, false);
+			} catch (ActionRefusedException e) {
 				
-				
-			} catch(ActionRefusedException e) {
-				
-				// Update the action to Cancelled
-				curAction.setCurrState(ActionSimpleState.CANCELLED);
+				// Update the action to Refused
+				curAction.setCurrState(Action.EnumActionState.CANCELLED);
+				curAction.setStartTurn(ActionScheduler.currentTurn);
 				curAction.setEndTurn(ActionScheduler.currentTurn);
 			}
 			
-			repository.save(curAction);
+			break;
 		}
+		default:
+		}
+
+		return curAction;
 	}
 	
-	private void updatePendingMessages() {
-		
-		// Obter uma lista das mensagens pendentes para envio cujos clientes suportam SSE
-		
-		// Enviar a mensagem
-	}
-	
-	private void checkPrerequisites(ActionState e) throws ActionRefusedException {
+	public void checkPrerequisites(ActionInfo e) throws ActionRefusedException {
 		
 		MudActionClass action = classRepository.findOne(e.getActionCode());
 		ExpressionParser parser = new SpelExpressionParser();
@@ -182,7 +171,7 @@ public class ActionScheduler {
 		
 	}
 	
-	private ActionState calculateCost(ActionState e) {
+	private ActionInfo calculateCost(ActionInfo e) {
 		
 		MudActionClass action = classRepository.findOne(e.getActionCode());
 		ExpressionParser parser = new SpelExpressionParser();
@@ -193,7 +182,7 @@ public class ActionScheduler {
 			// Running cost expressions
 			Expression curExpression = parser.parseExpression(curCost.getExpression());
 			
-			e = curExpression.getValue(context, ActionState.class);
+			e = curExpression.getValue(context, ActionInfo.class);
 			
 			// TODO: Update the message queue
 		}
@@ -201,7 +190,7 @@ public class ActionScheduler {
 		return e;
 	}
 	
-	private ActionState calculateEffect(ActionState e) {
+	private ActionInfo calculateEffect(ActionInfo e) {
 		
 		MudActionClass action = classRepository.findOne(e.getActionCode());
 		ExpressionParser parser = new SpelExpressionParser();
@@ -212,7 +201,7 @@ public class ActionScheduler {
 			// Running effect expressions
 			Expression curExpression = parser.parseExpression(curEffect.getExpression());
 			
-			e = curExpression.getValue(context, ActionState.class);
+			e = curExpression.getValue(context, ActionInfo.class);
 			
 			// TODO: Update the message queue
 			
@@ -223,7 +212,7 @@ public class ActionScheduler {
 		return e;
 	}
 	
-	private ActionState calculateReactions(ActionState e, boolean isBefore) {
+	private ActionInfo calculateReactions(ActionInfo e, boolean isBefore) {
 		
 		EvaluationContext context = new StandardEvaluationContext(e);
 		
@@ -279,16 +268,18 @@ public class ActionScheduler {
 			
 			Expression effectExpression = parser.parseExpression(reaction.getExpression());
 			
-			effectExpression.getValue(context, ActionState.class);
+			effectExpression.getValue(context, ActionInfo.class);
 		}
 		
 		return context;
 		
 	}
 	
-	private ActionState buildAction(MudAction a) throws ActionRefusedException {
+	private ActionInfo buildAction(MudAction a) throws ActionRefusedException {
 		
-		ActionState result = new ActionState();
+		ActionInfo result = new ActionInfo();
+		
+		String token = TokenService.buildInternalToken();
 
 		result.setActionId(a.getActionId());
 		result.setActionCode(a.getActionCode());
@@ -296,7 +287,7 @@ public class ActionScheduler {
 		//Actor
 		if (a.getActorCode()!=null) {
 			
-			Being actor = beingService.getBeing(a.getActorCode());
+			Being actor = beingService.getBeing(token, a.getActorCode());
 			
 			if (actor!=null) {
 				result.setActor(actor);
@@ -336,15 +327,15 @@ public class ActionScheduler {
 			
 			ActionTarget target = null;
 			
-			switch(a.getTargetType()) {
-			case "ITEM":
+			switch(a.getTargetTypeEnum()) {
+			case ITEM:
 				target = itemService.getItem(Long.valueOf(a.getTargetCode()));
 				break;
-			case "PLACE":
+			case PLACE:
 				target = placeService.getPlace(Integer.valueOf(a.getTargetCode()));
 				break;
-			case "BEING":
-				target = beingService.getBeing(Long.valueOf(a.getTargetCode()));
+			case BEING:
+				target = beingService.getBeing(token, Long.valueOf(a.getTargetCode()));
 				break;
 			}
 			

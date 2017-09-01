@@ -2,6 +2,8 @@ package com.jpinfo.mudengine.action.model;
 
 import javax.persistence.*;
 
+import com.jpinfo.mudengine.common.action.Action;
+
 @Entity
 @Table(name="MUD_ACTION")
 @SequenceGenerator(name="MUD_ACTION_SEQ", sequenceName="MUD_ACTION_SEQ", allocationSize=1)
@@ -35,7 +37,7 @@ public class MudAction {
 	private String targetCode;
 
 	@Column(name="TARGET_TYPE")
-	private String targetType;  // {BEING, ITEM, PLACE, PLACE_CLASS}
+	private Integer targetType;  // {BEING, ITEM, PLACE, PLACE_CLASS}
 	
 	@Column(name="START_TURN")
 	private Long startTurn;
@@ -48,6 +50,9 @@ public class MudAction {
 	
 	@Column(name="SUCCESS_RATE")
 	private Float successRate;
+	
+	@Column(name="ACTION_TYPE")
+	private Integer actionType;
 	
 	public MudAction() {
 		this.currState = 0;
@@ -94,12 +99,20 @@ public class MudAction {
 		this.targetCode = targetCode;
 	}
 
-	public String getTargetType() {
+	public Integer getTargetType() {
 		return targetType;
 	}
-
-	public void setTargetType(String targetType) {
+	
+	public void setTargetType(Integer targetType) {
 		this.targetType = targetType;
+	}
+	
+	public Action.EnumTargetType getTargetTypeEnum() {
+		return Action.EnumTargetType.values()[this.targetType];
+	}
+	
+	public void setTargetType(Action.EnumTargetType enumTargetType) {
+		this.targetType = enumTargetType.ordinal();
 	}
 
 	public Long getActionId() {
@@ -151,6 +164,14 @@ public class MudAction {
 	public void setCurrState(Integer currState) {
 		this.currState = currState;
 	}
+	
+	public void setCurrState(Action.EnumActionState enumState) {
+		this.currState = enumState.ordinal();
+	}
+	
+	public Action.EnumActionState getCurrStateEnum() {
+		return Action.EnumActionState.values()[this.currState];
+	}
 
 	public Float getSuccessRate() {
 		return successRate;
@@ -159,4 +180,14 @@ public class MudAction {
 	public void setSuccessRate(Float successRate) {
 		this.successRate = successRate;
 	}
+
+	public Integer getActionType() {
+		return actionType;
+	}
+
+	public void setActionType(Integer actionType) {
+		this.actionType = actionType;
+	}
+	
+	
 }

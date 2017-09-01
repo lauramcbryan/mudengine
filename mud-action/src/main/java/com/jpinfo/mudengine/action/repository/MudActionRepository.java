@@ -10,14 +10,21 @@ import com.jpinfo.mudengine.action.model.MudAction;
 
 public interface MudActionRepository extends CrudRepository<MudAction, Long> {
 
-	@Query("select a from MudAction a where a.currState=0 "
-			+ "and not exists (select 1 from MudAction o where o.actorCode=a.actorCode and o.currState=1)")
-	List<MudAction> findStartableActions();
+	@Query("select a from MudAction a where a.currState in (0,1) order by a.actionId desc, a.currState desc")
+	List<MudAction> findPendingActions();
 	
 	List<MudAction> findByIssuerCode(Long issuerCode);
 	
+	@Query("select a from MudAction a where a.currState in (0,1) and a.actorCode=:beingCode")
+	List<MudAction> findActiveByActorCode(Long actorCode);
+
+	@Query("select a from MudAction a where a.currState in (0,1) and a.worldName=:worldName and a.placeCode=:placeCode")
+	List<MudAction> findActiveByPlace(String worldName, Integer placeCode);
+	
+	@Query("select a from MudAction a where a.currState in (0,1) and a.actionId=:actionId")
+	MudAction findActiveOne(Long actionId);
+	
+	
 	@Query("select a from MudAction a where a.currState=1 and a.endTurn <= ?")
 	List<MudAction> findFinishedActions(Long curTurn);
-	
-	MudAction findFirstOneByCurrStateAndActorCode(Integer currState, Long actorCode);
 }
