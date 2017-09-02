@@ -27,8 +27,8 @@ import com.jpinfo.mudengine.being.repository.BeingRepository;
 import com.jpinfo.mudengine.being.utils.BeingHelper;
 import com.jpinfo.mudengine.common.being.Being;
 import com.jpinfo.mudengine.common.being.BeingMessage;
+import com.jpinfo.mudengine.common.exception.AccessDeniedException;
 import com.jpinfo.mudengine.common.exception.EntityNotFoundException;
-import com.jpinfo.mudengine.common.exception.IllegalParameterException;
 import com.jpinfo.mudengine.common.item.Item;
 import com.jpinfo.mudengine.common.security.TokenService;
 import com.jpinfo.mudengine.common.service.BeingService;
@@ -118,7 +118,7 @@ public class BeingController implements BeingService {
 				
 				response = BeingHelper.buildBeing(changedBeing, true);
 			} else {
-				throw new IllegalParameterException("No access to that being");
+				throw new AccessDeniedException("No access to that being");
 			}
 			
 		} else {
@@ -171,7 +171,7 @@ public class BeingController implements BeingService {
 			entityResponse = new ResponseEntity<Being>(response, HttpStatus.CREATED);
 			
 		} else {
-			throw new IllegalParameterException("Cannot create beings for another player");
+			throw new AccessDeniedException("Cannot create beings for another player");
 		}
 		
 		return entityResponse;
@@ -192,7 +192,7 @@ public class BeingController implements BeingService {
 				response.add(BeingHelper.buildBeing(curDbBeing, false));
 			}
 		} else {
-			throw new IllegalParameterException("No access to that being");
+			throw new AccessDeniedException("No access to that being");
 		}
 		
 		return response;
@@ -226,7 +226,7 @@ public class BeingController implements BeingService {
 				
 				repository.delete(beingCode);
 			} else {
-				throw new IllegalParameterException("No access to that being");
+				throw new AccessDeniedException("No access to that being");
 			}
 			
 		} else {
@@ -278,9 +278,30 @@ public class BeingController implements BeingService {
 			repository.delete(curDbBeing);
 		}
 	}
+	
+	@Override
+	public void sendSystemMessage(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable Long beingCode, @RequestParam String message) {
+		
+		if (TokenService.getUsernameFromToken(authToken).equals(TokenService.INTERNAL_ACCOUNT)) {
+		
+			MudBeingMessage dbMessage = new MudBeingMessage();
+			MudBeingMessagePK dbMessagePK = new MudBeingMessagePK();
+			
+			dbMessagePK.setBeingCode(beingCode);
+			dbMessagePK.setCreateDate(new Date());
+			dbMessage.setId(dbMessagePK);
+			
+			dbMessage.setMessage(message);
+			dbMessage.setReadFlag(false);
+			
+			messageRepository.save(dbMessage);
+		} else {
+			throw new AccessDeniedException("Access denied");
+		}
+	}
 
 	@Override
-	public void sendMessage(@RequestHeader String authToken, @PathVariable Long beingCode, @RequestParam Optional<Long> senderCode, @RequestParam String message) {
+	public void sendMessage(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable Long beingCode, @RequestParam Long senderCode, @RequestParam String message) {
 		
 		// If the target is non-player being, suppress the message
 		MudBeing dbBeing = repository.findOne(beingCode);
@@ -300,23 +321,20 @@ public class BeingController implements BeingService {
 				dbMessage.setReadFlag(false);
 				
 
-				// Handling the sender, if present
-				if (senderCode.isPresent()) {
+				// Handling the sender
+				MudBeing dbSenderBeing = repository.findOne(senderCode);
+				
+				if (dbSenderBeing!=null) {
 					
-					MudBeing dbSenderBeing = repository.findOne(senderCode.get());
-					
-					if (dbSenderBeing!=null) {
+					if (BeingHelper.canAccess(authToken, dbSenderBeing.getPlayerId())) {
 						
-						if (BeingHelper.canAccess(authToken, dbSenderBeing.getPlayerId())) {
-							
-							dbMessage.setSenderCode(dbSenderBeing.getBeingCode());
-							
-						} else {
-							throw new IllegalParameterException("Cannot send messages from this being");
-						}
+						dbMessage.setSenderCode(dbSenderBeing.getBeingCode());
+						
 					} else {
-						throw new EntityNotFoundException("Sender being entity not found");
+						throw new AccessDeniedException("Cannot send messages from this being");
 					}
+				} else {
+					throw new EntityNotFoundException("Sender being entity not found");
 				}
 				
 				messageRepository.save(dbMessage);

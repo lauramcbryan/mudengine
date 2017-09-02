@@ -51,7 +51,11 @@ public interface BeingService {
 	
 	@RequestMapping(method=RequestMethod.PUT, value="/{beingCode}/message")
 	void sendMessage(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable("beingCode") Long beingCode, 
-			@RequestParam("senderCode") Optional<Long> senderCode, @RequestParam("message") String message);
+			@RequestParam("senderCode") Long senderCode, @RequestParam("message") String message);
+
+	@RequestMapping(method=RequestMethod.PUT, value="/{beingCode}/sysmessage")
+	void sendSystemMessage(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable("beingCode") Long beingCode, 
+			@RequestParam("message") String message);
 	
 	@RequestMapping(method=RequestMethod.GET, value="/{beingCode}/message")
 	List<BeingMessage> getMessages(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, 
