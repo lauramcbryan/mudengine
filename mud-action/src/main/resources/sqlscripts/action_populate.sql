@@ -1,6 +1,6 @@
 set role mudengine_action;
 
-insert into mud_action_class(action_class_code, verb) values ('WALK', 'WALK');
+insert into mud_action_class(action_class_code, verb, action_type) values ('WALK', 'WALK', 0);
 
 insert into mud_action_class_prereq(action_class_code, eval_order, expression, message_code) values ('WALK', 1, '$action.place.exit($target)', 10);
 insert into mud_action_class_prereq(action_class_code, eval_order, expression, message_code) values ('WALK', 2, '$action.place.exit($target).opened', 11);

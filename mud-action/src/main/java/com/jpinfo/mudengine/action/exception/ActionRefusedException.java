@@ -8,6 +8,10 @@ public class ActionRefusedException extends Exception {
 	
 	private Integer messageCode;
 	
+	public ActionRefusedException() {
+		super();
+	}
+	
 	public ActionRefusedException(Integer messageCode) {
 		super();
 		this.messageCode = messageCode;

@@ -182,7 +182,7 @@ public class PlaceController implements PlaceService {
 				// Remove all items from the place
 				// (That will include items dropped from beings above)
 				// @TODO: solve the worldName
-				itemService.destroyAllFromPlace("aforgotten", placeId);
+				itemService.destroyAllFromPlace(internalToken, "aforgotten", placeId);
 				
 				updatedPlace = dbPlace;
 				updatedPlace.setPlaceCode(null);

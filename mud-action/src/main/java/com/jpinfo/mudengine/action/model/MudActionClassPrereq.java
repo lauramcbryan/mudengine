@@ -20,7 +20,7 @@ public class MudActionClassPrereq implements java.io.Serializable {
 	private String expression;
 	
 	@Column
-	private Integer messageCode;
+	private String messageCode;
 
 	public String getActionClassCode() {
 		return actionClassCode;
@@ -46,11 +46,11 @@ public class MudActionClassPrereq implements java.io.Serializable {
 		this.expression = expression;
 	}
 
-	public Integer getMessageCode() {
+	public String getMessageCode() {
 		return messageCode;
 	}
 
-	public void setMessageCode(Integer messageCode) {
+	public void setMessageCode(String messageCode) {
 		this.messageCode = messageCode;
 	}
 

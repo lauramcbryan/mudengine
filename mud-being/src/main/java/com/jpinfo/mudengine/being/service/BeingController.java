@@ -62,7 +62,7 @@ public class BeingController implements BeingService {
 			
 			response = BeingHelper.buildBeing(dbBeing, fullResponse);
 			
-			response = expandBeingEquipment(response, dbBeing, fullResponse);
+			response = expandBeingEquipment(authToken, response, dbBeing, fullResponse);
 			
 		} else {
 			throw new EntityNotFoundException("Being entity not found");
@@ -222,7 +222,7 @@ public class BeingController implements BeingService {
 			if (BeingHelper.canAccess(authToken, dbBeing.getPlayerId())) {
 			
 				// Update Item service to drop all items of this being
-				itemService.dropAllFromBeing(beingCode, dbBeing.getCurWorld(), dbBeing.getCurPlaceCode());
+				itemService.dropAllFromBeing(authToken, beingCode, dbBeing.getCurWorld(), dbBeing.getCurPlaceCode());
 				
 				repository.delete(beingCode);
 			} else {
@@ -234,14 +234,14 @@ public class BeingController implements BeingService {
 		}
 	}
 	
-	private Being expandBeingEquipment(Being responseBeing, MudBeing dbBeing, boolean fullResponse) {
+	private Being expandBeingEquipment(String token, Being responseBeing, MudBeing dbBeing, boolean fullResponse) {
 		
 		for(MudBeingSlot curSlot: dbBeing.getEquipment()) {
 			
 			Item responseItem = null;
 			
 			if (curSlot.getItemCode()!=null) {
-				responseItem = itemService.getItem(curSlot.getItemCode());
+				responseItem = itemService.getItem(token, curSlot.getItemCode());
 			} else {
 				responseItem = new Item();
 				responseItem.setItemClass("NOTHING");
@@ -260,7 +260,7 @@ public class BeingController implements BeingService {
 		
 		for(MudBeing curDbBeing: lstFound) {
 			
-			itemService.dropAllFromBeing(curDbBeing.getBeingCode(), worldName, placeCode);
+			itemService.dropAllFromBeing(authToken, curDbBeing.getBeingCode(), worldName, placeCode);
 			
 			repository.delete(curDbBeing);
 		}
@@ -273,7 +273,7 @@ public class BeingController implements BeingService {
 		
 		for(MudBeing curDbBeing: lstFound) {
 			
-			itemService.dropAllFromBeing(curDbBeing.getBeingCode(), curDbBeing.getCurWorld(), curDbBeing.getCurPlaceCode());
+			itemService.dropAllFromBeing(authToken, curDbBeing.getBeingCode(), curDbBeing.getCurWorld(), curDbBeing.getCurPlaceCode());
 			
 			repository.delete(curDbBeing);
 		}

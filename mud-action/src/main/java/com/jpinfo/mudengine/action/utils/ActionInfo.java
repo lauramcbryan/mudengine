@@ -1,5 +1,8 @@
 package com.jpinfo.mudengine.action.utils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.jpinfo.mudengine.common.action.Action;
 import com.jpinfo.mudengine.common.being.Being;
 import com.jpinfo.mudengine.common.interfaces.ActionTarget;
@@ -17,14 +20,35 @@ public class ActionInfo extends Action {
 	
 	private Place place;
 	
-	// {BEING, ITEM, PLACE, PLACE_CLASS}
+	// {BEING, ITEM, PLACE}
 	private ActionTarget target;
 	
 	private Reaction effect;
 	
+	private List<ActionMessages> messages;
+	
 	public ActionInfo() {
+		this.messages = new ArrayList<ActionMessages>();
 		
 	}
+
+	public void sendMessageTo(Long targetCode, EnumTargetType targetType, String messageKey, Object... args) {
+		this.messages.add(new ActionMessages(targetCode, targetType, messageKey, args));
+	}
+	
+	public void sendMessageTo(Long targetCode, String targetType, String messageKey, Object... args) {
+		this.messages.add(new ActionMessages(targetCode, targetType, messageKey, args));
+	}
+	
+	public void talkTo(Long senderCode, Long beingCode, String message) {
+		this.messages.add(new ActionMessages(senderCode, beingCode, message));
+	}
+	
+	
+	public List<ActionMessages> getMessages() {
+		return this.messages;
+	}
+	
 	public String getActionCode() {
 		return actionCode;
 	}
@@ -70,7 +94,5 @@ public class ActionInfo extends Action {
 	public void setEffect(Reaction effect) {
 		this.effect = effect;
 	}
-	
-	
 
 }

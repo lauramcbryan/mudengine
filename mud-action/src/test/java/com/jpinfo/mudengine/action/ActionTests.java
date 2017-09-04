@@ -1,29 +1,31 @@
 package com.jpinfo.mudengine.action;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.Test;
+
 
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.jpinfo.mudengine.action.client.BeingServiceClient;
 import com.jpinfo.mudengine.action.client.ItemServiceClient;
 import com.jpinfo.mudengine.action.client.PlaceServiceClient;
-import com.jpinfo.mudengine.action.service.ActionScheduler;
+import com.jpinfo.mudengine.action.model.MudAction;
+import com.jpinfo.mudengine.action.repository.MudActionRepository;
+import com.jpinfo.mudengine.action.utils.ActionHandler;
+import com.jpinfo.mudengine.action.utils.ActionHelper;
+import com.jpinfo.mudengine.action.utils.ActionInfo;
+import com.jpinfo.mudengine.common.action.Action;
+import com.jpinfo.mudengine.common.action.Action.EnumActionState;
 import com.jpinfo.mudengine.common.being.Being;
 import com.jpinfo.mudengine.common.place.Place;
 import com.jpinfo.mudengine.common.place.PlaceExit;
-
-import static org.mockito.BDDMockito.*;
-import static org.mockito.Mockito.verify;
-
-import java.util.function.Predicate;
-
 
 @RunWith(SpringRunner.class)
 @ActiveProfiles("test")
@@ -31,18 +33,18 @@ import java.util.function.Predicate;
 public class ActionTests {
 	
 	@Autowired
-	private ActionScheduler scheduler;
+	private ActionHandler handler;
+	
+	@Autowired
+	private MudActionRepository repository;
 	
 	@MockBean
-	@SpyBean
 	private BeingServiceClient beingClient;
 	
 	@MockBean
-	@SpyBean	
 	private ItemServiceClient itemClient;
 	
 	@MockBean
-	@SpyBean	
 	private PlaceServiceClient placeClient;
 
 	@Test
@@ -50,6 +52,12 @@ public class ActionTests {
 	}
 	
 	public void testWalk() {
+		
+		MudAction dbAction = repository.findOne(1L);
+		
+		Action walkAction = ActionHelper.buildAction(dbAction);
+		
+		ActionInfo testData = new ActionInfo();
 		
 		// Create the being
 		Being beingOne = new Being();
@@ -63,8 +71,6 @@ public class ActionTests {
 		beingOne.setCurWorld("aforgotten");
 		beingOne.setQuantity(1);
 		
-		given(beingClient.getBeing(anyString(), 1L)).willReturn(beingOne);
-
 		
 		// Create the firstPlace
 		Place placeOne = new Place();
@@ -75,29 +81,29 @@ public class ActionTests {
 		PlaceExit northExit = new PlaceExit();
 		northExit.setTargetPlaceCode(2);
 		placeOne.getExits().put("NORTH", northExit);
-		
-		given(placeClient.getPlace(1)).willReturn(placeOne);
-		
-		// ************ CREATE COMMAND *****************
-		// =============================================
-		
-		// ************ READ COMMAND *****************
-		// =============================================
 
+		testData.setActorCode(beingOne.getBeingCode());
+		testData.setActor(beingOne);		
+		testData.setWorldName("aforgotten");
+		testData.setPlace(placeOne);
+		testData.setPlaceCode(placeOne.getPlaceCode());
 		
-		// ************ CHECK PREREQS  *****************
+		testData.setTargetCode("NORTH");
+		
+		
+		// ************ UPDATE ACTION *****************
 		// =============================================
-
+		handler.updateAction(1L, walkAction, testData);
 		
-		// verify being update
-		verify(beingClient).updateBeing(anyString(), beingOne.getBeingCode(), argThatMatches(
-				(Being b) -> b.getCurPlaceCode().equals(2)) );
+		// Assert testData values
+		assertThat(walkAction.getEndTurn()).isNotNull();
+		assertThat(walkAction.getCurState()).isEqualTo(EnumActionState.STARTED);
 		
-	}
-	
-	
-	private static <T> T argThatMatches(Predicate<T> predicate) {
-		LambdaMatcher<T> matcher = new LambdaMatcher<>(predicate);
-	    return argThat(matcher);
-	}
+		
+		handler.updateAction(2L, walkAction, testData);
+		
+		// Finishing the action
+		handler.updateAction(walkAction.getEndTurn(), walkAction, testData);
+		
+	}	
 }
