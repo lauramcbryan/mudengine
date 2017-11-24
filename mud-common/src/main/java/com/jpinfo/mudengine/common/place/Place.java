@@ -20,7 +20,6 @@ public class Place implements ActionTarget {
 	
 	private Map<String, Collection<Reaction>> afterReactions;
 	
-	
 	public Place() {
 		this.attrs = new HashMap<String, Integer>();
 		this.exits = new HashMap<String, PlaceExit>();
@@ -71,7 +70,9 @@ public class Place implements ActionTarget {
 	public void setAttrs(Map<String, Integer> attrs) {
 		this.attrs = attrs;
 	}
+	
+	public void setAttr(String attrName, Integer attrValue) {
+		this.attrs.put(attrName, attrValue);
+	}
 
-	
-	
 }

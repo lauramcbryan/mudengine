@@ -23,6 +23,7 @@ import com.jpinfo.mudengine.action.utils.ActionHelper;
 import com.jpinfo.mudengine.action.utils.ActionInfo;
 import com.jpinfo.mudengine.common.action.Action;
 import com.jpinfo.mudengine.common.action.Action.EnumActionState;
+import com.jpinfo.mudengine.common.action.Action.EnumActionType;
 import com.jpinfo.mudengine.common.being.Being;
 import com.jpinfo.mudengine.common.place.Place;
 import com.jpinfo.mudengine.common.place.PlaceExit;
@@ -82,11 +83,18 @@ public class ActionTests {
 		northExit.setTargetPlaceCode(2);
 		placeOne.getExits().put("NORTH", northExit);
 
+		testData.setActionId(1L);
+		testData.setIssuerCode(beingOne.getBeingCode());
+		testData.setActionCode("WALK");
+		testData.setActionType(EnumActionType.SIMPLE);
+		testData.setCurState(EnumActionState.NOT_STARTED);
+		
 		testData.setActorCode(beingOne.getBeingCode());
 		testData.setActor(beingOne);		
+		
 		testData.setWorldName("aforgotten");
-		testData.setPlace(placeOne);
 		testData.setPlaceCode(placeOne.getPlaceCode());
+		testData.setPlace(placeOne);
 		
 		testData.setTargetCode("NORTH");
 		
@@ -99,11 +107,17 @@ public class ActionTests {
 		assertThat(walkAction.getEndTurn()).isNotNull();
 		assertThat(walkAction.getCurState()).isEqualTo(EnumActionState.STARTED);
 		
-		
 		handler.updateAction(2L, walkAction, testData);
+		
+		// Assert that nothing has changed
 		
 		// Finishing the action
 		handler.updateAction(walkAction.getEndTurn(), walkAction, testData);
 		
+		//testData.getTarget().
+		
+		
+		assertThat(walkAction.getCurState()).isEqualTo(EnumActionState.COMPLETED);
+		assertThat(testData.getActor().getCurPlaceCode()).isEqualTo(northExit.getTargetPlaceCode());
 	}	
 }
