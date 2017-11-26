@@ -5,7 +5,6 @@ create sequence mudengine_world.MUD_PLACE_SEQ;
 CREATE TABLE mudengine_world.MUD_PLACE_CLASS (
 	PLACE_CLASS_CODE	varchar(20) NOT NULL,
 	NAME				varchar(30) NOT NULL,
-	MOVEMENT_COST		integer not null,
 	DESCRIPTION			varchar(500),
 	SIZE_CAPACITY		integer,
 	WEIGHT_CAPACITY		integer,

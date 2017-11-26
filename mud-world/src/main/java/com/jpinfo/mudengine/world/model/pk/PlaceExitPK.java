@@ -12,7 +12,7 @@ public class PlaceExitPK implements Serializable {
 
 	private Integer placeCode;
 	
-	@Column
+	@Column(length = 10)
 	private String direction;
 
 	public Integer getPlaceCode() {

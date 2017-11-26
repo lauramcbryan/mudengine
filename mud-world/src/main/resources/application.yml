@@ -1,0 +1,34 @@
+spring:
+  application:
+    name: mud-world
+  datasource:
+    platform: h2
+
+server:
+  port: 8080
+  
+eureka:
+  client:
+    enabled: false
+
+---
+
+spring:
+  profiles: test 
+  jpa:
+    hibernate.ddl-auto: validate
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: false
+      
+  datasource:
+    url: jdbc:postgresql://jeremias:5432/mudengine
+    username: mudengine_world_app
+    password: mudengine_world_app 
+  
+server:
+  port: 0
+  
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://jeremias:8761/eureka/

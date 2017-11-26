@@ -10,10 +10,10 @@ public class PlaceClassAttrPK implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	@Column(name="PLACE_CLASS_CODE")
+	@Column(name="PLACE_CLASS_CODE", length = 20)
 	private String placeClassCode;
 
-	@Column(name="ATTR_CODE")
+	@Column(name="ATTR_CODE", length = 5)
 	private String attrCode;
 
 	public String getPlaceClassCode() {

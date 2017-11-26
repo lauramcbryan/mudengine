@@ -15,7 +15,7 @@ public class MudPlace {
 	private Integer placeCode;
 
 	@ManyToOne
-	@JoinColumn(name="PLACE_CLASS_CODE", referencedColumnName="PLACE_CLASS_CODE")
+	@JoinColumn(name="PLACE_CLASS_CODE", referencedColumnName="PLACE_CLASS_CODE", nullable = false)
 	private MudPlaceClass placeClass;
 	
 	@OneToMany(mappedBy="pk.placeCode", fetch=FetchType.EAGER, cascade=CascadeType.ALL, orphanRemoval=true)

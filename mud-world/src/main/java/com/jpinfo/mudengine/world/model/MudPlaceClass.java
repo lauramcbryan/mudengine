@@ -9,13 +9,13 @@ import javax.persistence.*;
 public class MudPlaceClass {
 
 	@Id
-	@Column(name="PLACE_CLASS_CODE")
+	@Column(name="PLACE_CLASS_CODE", length = 20)
 	private String placeClassCode;
 
-	@Column
+	@Column(nullable = false, length = 30)
 	private String name;
 	
-	@Column
+	@Column(length = 500)
 	private String description;
 	
 	@Column(name="SIZE_CAPACITY")
@@ -27,7 +27,7 @@ public class MudPlaceClass {
 	@OneToMany(mappedBy="id.placeClassCode", fetch=FetchType.EAGER, cascade=CascadeType.ALL, orphanRemoval=true)
 	private Set<MudPlaceClassAttr> attrs;
 	
-	@Column(name="PARENT_CLASS_CODE")
+	@Column(name="PARENT_CLASS_CODE", length = 20)
 	private String parentClassCode;
 
 	@Column(name="BUILD_COST")	
@@ -36,7 +36,7 @@ public class MudPlaceClass {
 	@Column(name="BUILD_EFFORT")
 	private Integer buildEffort;
 	
-	@Column(name="DEMISE_CLASS_CODE")
+	@Column(name="DEMISE_CLASS_CODE", length = 20)
 	private String demisePlaceClassCode;
 
 	public String getName() {

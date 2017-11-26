@@ -13,7 +13,7 @@ public class PlaceAttrPK implements Serializable {
 	@Column(name="PLACE_CODE")
 	private Integer placeCode;
 
-	@Column(name="ATTR_CODE")
+	@Column(name="ATTR_CODE", length = 5)
 	private String attrCode;
 	
 
