@@ -6,7 +6,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 
 import com.jpinfo.mudengine.common.security.CommonSecurityAdapter;
 
-@Profile("production")
+@Profile("prod")
 @Configuration
 @EnableWebSecurity
 public class WebSecurityAdapter extends CommonSecurityAdapter {

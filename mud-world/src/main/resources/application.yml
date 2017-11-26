@@ -21,6 +21,7 @@ spring:
     show-sql: false
       
   datasource:
+    platform: postgres
     url: jdbc:postgresql://jeremias:5432/mudengine
     username: mudengine_world_app
     password: mudengine_world_app 
@@ -32,3 +33,30 @@ eureka:
   client:
     serviceUrl:
       defaultZone: http://jeremias:8761/eureka/
+
+---
+      
+spring:
+  profiles: prod 
+  jpa:
+    hibernate.ddl-auto: validate
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: false
+      
+  datasource:
+    platform: postgres
+    url: jdbc:postgresql://baasu.db.elephantsql.com:5432/caxvsgfc
+    username: caxvsgfc
+    password: Su5T8XUr6VPPCU5Fv_03Ba_Mbpyz4V8u
+    tomcat:
+      max-active: 2
+  
+server:
+  port: 0
+  
+eureka:
+  client:
+    enabled: true
+    serviceUrl:
+      defaultZone: https://mud-registry.cfapps.io/eureka/
+          
