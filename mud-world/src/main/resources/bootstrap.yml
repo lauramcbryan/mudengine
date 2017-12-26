@@ -1,0 +1,7 @@
+spring:
+  cloud:
+    config:
+      uri: http://jeremias:8888
+      
+  application:
+    name: mud-world
