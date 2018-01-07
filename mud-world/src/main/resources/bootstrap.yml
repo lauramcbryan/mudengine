@@ -1,7 +1,7 @@
 spring:
   cloud:
     config:
-      uri: http://jeremias:8888
+      uri: ${CONFIG_SERVER_URL:http://jeremias:8888} 
       
   application:
     name: mud-world
