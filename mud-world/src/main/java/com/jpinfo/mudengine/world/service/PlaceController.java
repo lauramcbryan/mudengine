@@ -1,5 +1,7 @@
 package com.jpinfo.mudengine.world.service;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -182,7 +184,7 @@ public class PlaceController implements PlaceService {
 				// Remove all items from the place
 				// (That will include items dropped from beings above)
 				// @TODO: solve the worldName
-				itemService.destroyAllFromPlace(internalToken, "aforgotten", placeId);
+				itemService.destroyAllFromPlace(Optional.of(internalToken), "aforgotten", placeId);
 				
 				updatedPlace = dbPlace;
 				updatedPlace.setPlaceCode(null);

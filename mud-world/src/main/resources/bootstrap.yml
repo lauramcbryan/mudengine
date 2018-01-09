@@ -5,3 +5,15 @@ spring:
       
   application:
     name: mud-world
+
+management:
+  info:
+    build:
+      enabled: true
+      
+endpoints:
+  info:
+    enabled: true
+    sensitive: false
+      
+          
