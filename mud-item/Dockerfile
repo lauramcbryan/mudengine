@@ -2,6 +2,6 @@ FROM openjdk:8-jdk-alpine
 
 VOLUME /tmp
 ARG JAR_FILE
-ADD target/mud-world-*.jar app.jar
+ADD target/mud-item-*.jar app.jar
 ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom","-jar","/app.jar"]
 
