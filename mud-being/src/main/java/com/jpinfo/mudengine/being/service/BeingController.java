@@ -349,7 +349,7 @@ public class BeingController implements BeingService {
 	}
 
 	@Override
-	public List<BeingMessage> getMessages(@RequestHeader String authToken, @PathVariable Long beingCode, 
+	public List<BeingMessage> getMessages(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable Long beingCode, 
 			@RequestParam Optional<Date> sinceDate, @RequestParam Optional<Date> untilDate) {
 		
 		List<BeingMessage> responseList = new ArrayList<BeingMessage>();
@@ -391,7 +391,7 @@ public class BeingController implements BeingService {
 	}
 
 	@Override
-	public void clearReadMessages(@RequestHeader String authToken, @PathVariable Long beingCode) {
+	public void clearReadMessages(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable Long beingCode) {
 		
 		MudBeing dbBeing = repository.findOne(beingCode);
 		

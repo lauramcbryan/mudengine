@@ -550,7 +550,6 @@ public class BeingTests {
 		
 	}
 	
-	@Test
 	public void testMessages() {
 
 		// Creating authentication token for internal account
