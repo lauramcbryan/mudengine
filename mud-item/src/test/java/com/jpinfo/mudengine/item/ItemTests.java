@@ -103,7 +103,7 @@ public class ItemTests {
 		ResponseEntity<Item> readResponse = restTemplate.exchange(
 				"/item/{itemId}", HttpMethod.GET, authEntity, Item.class, urlVariables);
 		
-		assertThat(readResponse.getStatusCode().is2xxSuccessful());
+		assertThat(readResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(readResponse.getBody()).isNotNull();
 
 		Item readItem = readResponse.getBody();
