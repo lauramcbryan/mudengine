@@ -1,4 +1,4 @@
-package com.jpinfo.mudengine.world.util;
+package com.jpinfo.mudengine.item.utils;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;

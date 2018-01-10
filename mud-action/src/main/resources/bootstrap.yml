@@ -1,0 +1,17 @@
+spring:
+  cloud:
+    config:
+      uri: ${CONFIG_SERVER_URL:http://jeremias:8888} 
+      
+  application:
+    name: mud-action
+
+management:
+  info:
+    build:
+      enabled: true
+      
+endpoints:
+  info:
+    enabled: true
+    sensitive: false

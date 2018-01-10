@@ -22,6 +22,7 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>1.8</java.version>
 		<spring-cloud.version>Dalston.RELEASE</spring-cloud.version>
+		<build-version>-1</build-version>
 	</properties>
 
 	<dependencies>
@@ -91,6 +92,14 @@
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-config</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
 	</dependencies>
 	
 	<dependencyManagement>
@@ -111,6 +120,18 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<executions>
+		          <execution>
+		            <goals>
+		              <goal>build-info</goal>
+		            </goals>
+		            <configuration>
+		              <additionalProperties>
+		                <build-version>${build-version}</build-version>
+		              </additionalProperties>
+		            </configuration>
+		          </execution>
+		        </executions>
 			</plugin>
 		</plugins>
 	</build>

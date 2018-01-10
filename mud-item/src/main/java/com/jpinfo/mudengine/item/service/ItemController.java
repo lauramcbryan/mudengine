@@ -33,7 +33,7 @@ public class ItemController implements ItemService {
 	ItemClassRepository itemClassRepository;
 
 	@Override
-	public Item getItem(@RequestHeader String authToken, @PathVariable Long itemId) {
+	public Item getItem(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable Long itemId) {
 		
 		Item response = null;
 		
@@ -49,7 +49,7 @@ public class ItemController implements ItemService {
 	}
 	
 	@Override
-	public Item updateItem(@RequestHeader String authToken, @PathVariable Long itemId, @RequestBody Item requestItem) {
+	public Item updateItem(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable Long itemId, @RequestBody Item requestItem) {
 		
 		Item response = null;
 		
@@ -168,7 +168,8 @@ public class ItemController implements ItemService {
 		return new ResponseEntity<Item>(response, HttpStatus.CREATED);
 	}
 	
-	public void destroyItem(@RequestHeader String authToken, @PathVariable Long itemId) {
+	@Override
+	public void destroyItem(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable Long itemId) {
 
 		// Retrieving the database record
 		MudItem dbItem = itemRepository.findOne(itemId);
@@ -198,7 +199,7 @@ public class ItemController implements ItemService {
 	}
 
 	@Override
-	public List<Item> getAllFromBeing(@RequestHeader String authToken, @PathVariable Long owner) {
+	public List<Item> getAllFromBeing(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable Long owner) {
 		
 		List<Item> responseList = new ArrayList<Item>();
 		
@@ -213,7 +214,7 @@ public class ItemController implements ItemService {
 	}
 
 	@Override
-	public void destroyAllFromPlace(@RequestHeader String authToken, @PathVariable String worldName, @PathVariable Integer placeCode) {
+	public void destroyAllFromPlace(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable String worldName, @PathVariable Integer placeCode) {
 		
 		List<MudItem> dbResponse = itemRepository.findByCurWorldAndCurPlaceCode(worldName, placeCode);
 		
@@ -225,7 +226,7 @@ public class ItemController implements ItemService {
 	}
 
 	@Override
-	public void dropAllFromBeing(@RequestHeader String authToken, @PathVariable Long owner, @RequestParam String worldName, @RequestParam Integer placeCode) {
+	public void dropAllFromBeing(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable Long owner, @RequestParam String worldName, @RequestParam Integer placeCode) {
 		
 		List<MudItem> dbResponse = itemRepository.findByCurOwner(owner);
 		

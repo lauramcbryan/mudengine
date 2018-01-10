@@ -1,8 +1,3 @@
-delete from mud_item_attr;
-delete from mud_item;
-delete from mud_item_class_attr;
-delete from mud_item_class;
-
 INSERT INTO mud_item_class(item_class, size, weight) VALUES ('TEST', 1, 1);
 INSERT INTO mud_item_class(item_class, size, weight) VALUES ('TEST2', 2, 2);
 
