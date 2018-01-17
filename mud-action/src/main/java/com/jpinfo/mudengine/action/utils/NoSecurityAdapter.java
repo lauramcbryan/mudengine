@@ -6,7 +6,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 
 import com.jpinfo.mudengine.common.security.CommonNoSecurityAdapter;
 
-@Profile("default")
+@Profile("itgtest")
 @Configuration
 @EnableWebSecurity
 public class NoSecurityAdapter extends CommonNoSecurityAdapter {

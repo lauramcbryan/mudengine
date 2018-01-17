@@ -1,0 +1,40 @@
+spring:
+  application:
+    name: mud-config
+
+management:
+  info:
+    build:
+      enabled: true
+  security:
+    enabled: true
+      
+endpoints:
+  info:
+    enabled: true
+    sensitive: false
+
+server:
+  port: 8888      
+          
+---
+
+spring:
+  profiles: local
+  cloud:
+    config:
+      server:
+        git:
+          uri: file://${user.home}/Documents/mud-config
+
+---
+
+spring:
+  profiles: itgtest         
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://github.com/JosielOliveira/mud-config
+      username: josieloliveira@hotmail.com
+      password: 123deoliveira4

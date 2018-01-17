@@ -29,7 +29,7 @@ import com.jpinfo.mudengine.common.place.Place;
 import com.jpinfo.mudengine.common.place.PlaceExit;
 
 @RunWith(SpringRunner.class)
-@ActiveProfiles("test")
+@ActiveProfiles("unitTest")
 @SpringBootTest(webEnvironment=WebEnvironment.RANDOM_PORT)
 public class ActionTests {
 	
@@ -52,6 +52,7 @@ public class ActionTests {
 	public void contextLoads() {
 	}
 	
+	@Test
 	public void testWalk() {
 		
 		MudAction dbAction = repository.findOne(1L);

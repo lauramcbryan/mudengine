@@ -9,7 +9,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import com.jpinfo.mudengine.common.security.CommonSecurityFilter;
 
-@Profile("!default")
+@Profile("!itgtest")
 @Configuration
 @EnableWebSecurity
 public class WebSecurityAdapter extends WebSecurityConfigurerAdapter {

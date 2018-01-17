@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 
 import com.jpinfo.mudengine.action.model.MudAction;
 
@@ -16,22 +17,22 @@ public interface MudActionRepository extends CrudRepository<MudAction, Long> {
 	List<MudAction> findPendingActions();
 	
 	@Query("select a from MudAction a where "
-	+ "(a.currState=1 and a.endTurn<=:currentTurn) or "
+	+ "(a.currState=1 and a.endTurn<= :currentTurn) or "
 	+ "(a.currState=1 and a.actionType=1)")
-	List<MudAction> findRunningActions(Long currentTurn);
+	List<MudAction> findRunningActions(@Param("currentTurn") Long currentTurn);
 	
 	List<MudAction> findByIssuerCode(Long issuerCode);
 	
-	@Query("select a from MudAction a where a.currState in (0,1) and a.actorCode=:beingCode")
-	List<MudAction> findActiveByActorCode(Long actorCode);
+	@Query("select a from MudAction a where a.currState in (0,1) and a.actorCode=:actorCode")
+	List<MudAction> findActiveByActorCode(@Param("actorCode") Long actorCode);
 
 	@Query("select a from MudAction a where a.currState in (0,1) and a.worldName=:worldName and a.placeCode=:placeCode")
-	List<MudAction> findActiveByPlace(String worldName, Integer placeCode);
+	List<MudAction> findActiveByPlace(@Param("worldName") String worldName, @Param("placeCode") Integer placeCode);
 	
 	@Query("select a from MudAction a where a.currState in (0,1) and a.actionId=:actionId")
-	MudAction findActiveOne(Long actionId);
+	MudAction findActiveOne(@Param("actionId") Long actionId);
 	
 	
-	@Query("select a from MudAction a where a.currState=1 and a.endTurn <= ?")
-	List<MudAction> findFinishedActions(Long curTurn);
+	@Query("select a from MudAction a where a.currState=1 and a.endTurn <= :curTurn")
+	List<MudAction> findFinishedActions(@Param("curTurn") Long curTurn);
 }

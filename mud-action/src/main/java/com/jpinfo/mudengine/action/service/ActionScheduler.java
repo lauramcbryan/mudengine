@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -45,6 +46,7 @@ public class ActionScheduler {
 	@Autowired
 	private ActionHandler handler;
 	
+	@Profile("!unitTest")
 	@Scheduled(fixedRate=10000)
 	public void updateActions() {
 		
