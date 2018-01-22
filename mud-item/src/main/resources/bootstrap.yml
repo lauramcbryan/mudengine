@@ -1,8 +1,4 @@
 spring:
-  cloud:
-    config:
-      uri: ${CONFIG_SERVER_URL:http://jeremias:8888} 
-      
   application:
     name: mud-item
 
@@ -15,3 +11,23 @@ endpoints:
   info:
     enabled: true
     sensitive: false
+
+---
+
+spring:
+  profiles: itgtest
+
+  cloud:
+    config:
+      uri: http://jeremias:8888
+      
+
+---
+
+spring:
+  profiles: prod 
+
+  cloud:
+    config:
+      uri: ${CONFIG_SERVER_URL} 
+      
