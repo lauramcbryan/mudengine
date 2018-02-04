@@ -16,11 +16,12 @@ import org.springframework.test.context.junit4.SpringRunner;
 import com.jpinfo.mudengine.action.client.BeingServiceClient;
 import com.jpinfo.mudengine.action.client.ItemServiceClient;
 import com.jpinfo.mudengine.action.client.PlaceServiceClient;
+import com.jpinfo.mudengine.action.dto.ActionInfo;
+import com.jpinfo.mudengine.action.dto.BeingComposite;
 import com.jpinfo.mudengine.action.model.MudAction;
 import com.jpinfo.mudengine.action.repository.MudActionRepository;
 import com.jpinfo.mudengine.action.utils.ActionHandler;
 import com.jpinfo.mudengine.action.utils.ActionHelper;
-import com.jpinfo.mudengine.action.utils.ActionInfo;
 import com.jpinfo.mudengine.common.action.Action;
 import com.jpinfo.mudengine.common.action.Action.EnumActionState;
 import com.jpinfo.mudengine.common.action.Action.EnumActionType;
@@ -66,7 +67,7 @@ public class ActionTests {
 		
 		beingOne.setBeingType(1);
 		beingOne.setBeingCode(1L);
-		beingOne.setBeingClass("HUMAN");
+		beingOne.setBeingClassCode("HUMAN");
 		beingOne.setName("Tori");
 		beingOne.setPlayerId(1L);
 		beingOne.setCurPlaceCode(1);
@@ -91,11 +92,11 @@ public class ActionTests {
 		testData.setCurState(EnumActionState.NOT_STARTED);
 		
 		testData.setActorCode(beingOne.getBeingCode());
-		testData.setActor(beingOne);		
+		testData.setActor(new BeingComposite(beingOne));		
 		
 		testData.setWorldName("aforgotten");
 		testData.setPlaceCode(placeOne.getPlaceCode());
-		testData.setPlace(placeOne);
+		testData.getActor().setPlace(placeOne);
 		
 		testData.setTargetCode("NORTH");
 		
@@ -119,6 +120,6 @@ public class ActionTests {
 		
 		
 		assertThat(walkAction.getCurState()).isEqualTo(EnumActionState.COMPLETED);
-		assertThat(testData.getActor().getCurPlaceCode()).isEqualTo(northExit.getTargetPlaceCode());
+		assertThat(testData.getActor().getPlace().getPlaceCode()).isEqualTo(northExit.getTargetPlaceCode());
 	}	
 }

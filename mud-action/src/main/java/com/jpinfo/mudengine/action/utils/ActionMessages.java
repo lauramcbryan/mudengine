@@ -27,6 +27,13 @@ public class ActionMessages {
 		this.targetType = Action.EnumTargetType.valueOf(targetType);
 		this.args = args;
 	}
+
+	public ActionMessages(Long targetCode, String messageKey, Object... args) {
+
+		this.targetCode = targetCode;
+		this.targetType = Action.EnumTargetType.BEING;
+		this.args = args;
+	}
 	
 	public ActionMessages(Long senderCode, Long beingCode, String message) {
 

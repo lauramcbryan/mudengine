@@ -11,11 +11,13 @@ import org.springframework.stereotype.Service;
 import com.jpinfo.mudengine.action.client.BeingServiceClient;
 import com.jpinfo.mudengine.action.client.ItemServiceClient;
 import com.jpinfo.mudengine.action.client.PlaceServiceClient;
+import com.jpinfo.mudengine.action.dto.ActionInfo;
+import com.jpinfo.mudengine.action.dto.BeingComposite;
+import com.jpinfo.mudengine.action.dto.PlaceComposite;
 import com.jpinfo.mudengine.action.model.MudAction;
 import com.jpinfo.mudengine.action.repository.MudActionRepository;
 import com.jpinfo.mudengine.action.utils.ActionHandler;
 import com.jpinfo.mudengine.action.utils.ActionHelper;
-import com.jpinfo.mudengine.action.utils.ActionInfo;
 import com.jpinfo.mudengine.action.utils.ActionMessages;
 import com.jpinfo.mudengine.common.action.Action;
 import com.jpinfo.mudengine.common.action.Action.EnumActionState;
@@ -55,7 +57,7 @@ public class ActionScheduler {
 		// List of processed actors in this iteraction
 		List<Long> processedActors = new ArrayList<Long>();
 		
-		// List of pending actions
+		// Get the list of running actions and update them.
 		List<MudAction> runningActions = repository.findRunningActions(getCurrentTurn());
 		
 		for(MudAction curRunningAction: runningActions) {
@@ -92,7 +94,7 @@ public class ActionScheduler {
 		} // next runningAction
 
 
-		// List of pending actions
+		// Retrieve the list of pending (not started) actions and start them.
 		List<MudAction> pendingActions = repository.findPendingActions();
 		
 		for(MudAction curPendingAction: pendingActions) {
@@ -107,7 +109,8 @@ public class ActionScheduler {
 					ActionInfo fullState = buildAction(curAction);
 					
 					handler.updateAction(getCurrentTurn(), curAction, fullState);
-					
+
+					// TODO: Evaluate successRate
 					//curPendingAction.setSuccessRate(curAction.gets);
 					curPendingAction.setCurrState(curAction.getCurState());
 					curPendingAction.setStartTurn(curAction.getStartTurn());
@@ -135,7 +138,9 @@ public class ActionScheduler {
 		
 		String authToken = TokenService.buildInternalToken();
 		
-		beingService.updateBeing(authToken, fullState.getActor().getBeingCode(), fullState.getActor());
+		beingService.updateBeing(authToken, 
+					fullState.getActor().getBeing().getBeingCode(), 
+					fullState.getActor().getBeing());
 		
 		if (fullState.getMediator()!=null) {
 			itemService.updateItem(authToken, fullState.getMediator().getItemCode(), fullState.getMediator());
@@ -203,10 +208,14 @@ public class ActionScheduler {
 		//Actor
 		if (a.getActorCode()!=null) {
 			
-			Being actor = beingService.getBeing(token, a.getActorCode());
+			BeingComposite actor = new BeingComposite(beingService.getBeing(token, a.getActorCode()));
 			
-			if (actor!=null) {
+			if (actor.getBeing()!=null) {
+				
+				// Assemble the composite
+				
 				result.setActor(actor);
+				
 			} else {
 				throw new EntityNotFoundException("Being " + a.getActorCode() + " not found");
 			}
@@ -221,18 +230,6 @@ public class ActionScheduler {
 				result.setMediator(mediator);
 			} else {
 				throw new EntityNotFoundException("Item " + a.getMediatorCode() + " not found");
-			}
-		}
-		
-		// Place
-		if (a.getPlaceCode()!=null) {
-			
-			Place place = placeService.getPlace(a.getPlaceCode());
-			
-			if (place!=null) {
-				result.setPlace(place);
-			} else {
-				throw new EntityNotFoundException("Place  " + a.getPlaceCode() + " not found");
 			}
 		}
 		
@@ -253,9 +250,9 @@ public class ActionScheduler {
 					break;
 				}
 			case PLACE: {
-					target = placeService.getPlace(Integer.valueOf(a.getTargetCode()));
+					target = new PlaceComposite(placeService.getPlace(Integer.valueOf(a.getTargetCode())));
 					
-					if (target==null) {
+					if (((PlaceComposite)target).getPlace()!=null) {
 						result.setTarget(target);
 					} else {
 						throw new EntityNotFoundException("Place " + a.getTargetCode() + " not found");
@@ -264,9 +261,9 @@ public class ActionScheduler {
 					break;
 				}
 			case BEING: {
-					target = beingService.getBeing(token, Long.valueOf(a.getTargetCode()));
+					target = new BeingComposite(beingService.getBeing(token, Long.valueOf(a.getTargetCode())));
 					
-					if (target==null) {
+					if (((BeingComposite)target).getBeing()!=null) {
 						result.setTarget(target);
 					} else {
 						throw new EntityNotFoundException("Being " + a.getTargetCode() + " not found");
