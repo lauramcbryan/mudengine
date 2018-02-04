@@ -7,13 +7,16 @@ import java.util.Map;
 
 import com.jpinfo.mudengine.common.interfaces.ActionTarget;
 import com.jpinfo.mudengine.common.interfaces.Reaction;
+import com.jpinfo.mudengine.common.itemClass.ItemClass;
 
 public class Item implements Serializable, ActionTarget {
 	private static final long serialVersionUID = 1L;
 	
 	private Long itemCode;
 
-	private String itemClass;
+	private String itemClassCode;
+	
+	private ItemClass itemClass;
 	
 	private Integer quantity;
 
@@ -22,7 +25,7 @@ public class Item implements Serializable, ActionTarget {
 	private String curWorld;
 	
 	private Long curOwner;
-
+	
 	private Map<String, Integer> attrs;
 	
 	private Map<String, Collection<Reaction>> beforeReactions;
@@ -41,12 +44,12 @@ public class Item implements Serializable, ActionTarget {
 		this.itemCode = itemCode;
 	}
 
-	public String getItemClass() {
-		return itemClass;
+	public String getItemClassCode() {
+		return itemClassCode;
 	}
 
-	public void setItemClass(String itemClass) {
-		this.itemClass = itemClass;
+	public void setItemClassCode(String itemClassCode) {
+		this.itemClassCode = itemClassCode;
 	}
 
 	public Collection<Reaction> getReactions(String actionCode, boolean isBefore) {
@@ -93,5 +96,15 @@ public class Item implements Serializable, ActionTarget {
 	public void setCurOwner(Long curOwner) {
 		this.curOwner = curOwner;
 	}
+
+	public ItemClass getItemClass() {
+		return itemClass;
+	}
+
+	public void setItemClass(ItemClass itemClass) {
+		this.itemClass = itemClass;
+	}
+	
+	
 	
 }

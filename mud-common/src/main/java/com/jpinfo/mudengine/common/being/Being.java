@@ -18,11 +18,18 @@ import com.jpinfo.mudengine.common.item.Item;
 public class Being implements Serializable, ActionTarget {
 	private static final long serialVersionUID = 1L;
 	
+	public static final Integer BEING_TYPE_REGULAR_NON_SENTIENT = 0;
+	public static final Integer BEING_TYPE_REGULAR_SENTIENT = 1;
+	public static final Integer BEING_TYPE_NPC = 2;
+	public static final Integer BEING_TYPE_PLAYER = 3;
+	
 	private Long beingCode;
 	
 	private Integer beingType;
 
-	private String beingClass;
+	private String beingClassCode;
+	
+	private BeingClass beingClass;
 	
 	private Map<String, Integer> baseAttrs;
 	
@@ -71,12 +78,12 @@ public class Being implements Serializable, ActionTarget {
 		this.beingCode = beingCode;
 	}
 
-	public String getBeingClass() {
-		return beingClass;
+	public String getBeingClassCode() {
+		return beingClassCode;
 	}
 
-	public void setBeingClass(String beingClass) {
-		this.beingClass = beingClass;
+	public void setBeingClassCode(String beingClassCode) {
+		this.beingClassCode = beingClassCode;
 	}
 
 	public String getCurWorld() {
@@ -202,4 +209,13 @@ public class Being implements Serializable, ActionTarget {
 		this.baseSkills = baseSkills;
 	}
 
+
+
+	public void setBeingClass(BeingClass beingClass) {
+		this.beingClass = beingClass;
+	}
+	
+	public BeingClass getBeingClass() {
+		return this.beingClass;
+	}
 }

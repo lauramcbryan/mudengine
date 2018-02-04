@@ -159,7 +159,7 @@ public class BeingTests {
 		// *********** UPDATE **********
 		// =============================
 		readBeing.setBeingType(BeingTests.test2BeingType);
-		readBeing.setBeingClass(BeingTests.test2BeingClass);
+		readBeing.setBeingClassCode(BeingTests.test2BeingClass);
 		readBeing.setCurWorld(BeingTests.test2WorldName);
 		readBeing.setCurPlaceCode(BeingTests.test2PlaceCode);
 		readBeing.setQuantity(BeingTests.test2Quantity);

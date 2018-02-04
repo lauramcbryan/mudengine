@@ -93,9 +93,9 @@ public class ItemController implements ItemService {
 			
 		
 			// if the itemClass is changing, reset the attributes
-			if (!dbItem.getItemClass().getItemClass().equals(requestItem.getItemClass())) {
+			if (!dbItem.getItemClass().getItemClass().equals(requestItem.getItemClassCode())) {
 			
-				MudItemClass dbClassItem = itemClassRepository.findOne(requestItem.getItemClass());
+				MudItemClass dbClassItem = itemClassRepository.findOne(requestItem.getItemClassCode());
 				
 				if (dbClassItem!=null) {
 					dbItem = ItemHelper.changeItemAttrs(dbItem, dbItem.getItemClass(), dbClassItem);

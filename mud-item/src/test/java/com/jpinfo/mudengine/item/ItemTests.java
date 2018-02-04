@@ -85,7 +85,7 @@ public class ItemTests {
 		
 		Item createItem = createResponse.getBody();
 		
-		assertThat(createItem.getItemClass()).isEqualTo(ItemTests.testItemClass);
+		assertThat(createItem.getItemClassCode()).isEqualTo(ItemTests.testItemClass);
 		assertThat(createItem.getCurPlaceCode()).isEqualTo(ItemTests.testCurrentPlace);
 		assertThat(createItem.getCurWorld()).isEqualTo(ItemTests.testCurrentWorld);
 		assertThat(createItem.getQuantity()).isEqualTo(ItemTests.testQtty);
@@ -108,7 +108,7 @@ public class ItemTests {
 
 		Item readItem = readResponse.getBody();
 		
-		assertThat(readItem.getItemClass()).isEqualTo(ItemTests.testItemClass);
+		assertThat(readItem.getItemClassCode()).isEqualTo(ItemTests.testItemClass);
 		assertThat(readItem.getCurPlaceCode()).isEqualTo(ItemTests.testCurrentPlace);
 		assertThat(readItem.getCurWorld()).isEqualTo(ItemTests.testCurrentWorld);
 		
@@ -122,7 +122,7 @@ public class ItemTests {
 
 		readItem.setCurWorld(ItemTests.test2CurrentWorld);
 		readItem.setCurPlaceCode(ItemTests.test2CurrentPlace);
-		readItem.setItemClass(ItemTests.test2ItemClass);
+		readItem.setItemClassCode(ItemTests.test2ItemClass);
 		readItem.setQuantity(ItemTests.test2Qtty);
 		
 		readItem.getAttrs().put(ItemTests.testNewAttr, new Integer(55));
@@ -137,7 +137,7 @@ public class ItemTests {
 
 		Item updateItem = updateResponse.getBody();
 		
-		assertThat(updateItem.getItemClass()).isEqualTo(ItemTests.test2ItemClass);
+		assertThat(updateItem.getItemClassCode()).isEqualTo(ItemTests.test2ItemClass);
 		assertThat(updateItem.getCurPlaceCode()).isEqualTo(ItemTests.test2CurrentPlace);
 		assertThat(updateItem.getCurWorld()).isEqualTo(ItemTests.test2CurrentWorld);
 		assertThat(updateItem.getQuantity()).isEqualTo(ItemTests.test2Qtty);

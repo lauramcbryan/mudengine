@@ -92,9 +92,9 @@ public class BeingController implements BeingService {
 				
 			
 				// if the beingClass is changing, reset the attributes
-				if (!dbBeing.getBeingClass().equals(requestBeing.getBeingClass())) {
+				if (!dbBeing.getBeingClass().getBeingClassCode().equals(requestBeing.getBeingClassCode())) {
 					
-					MudBeingClass dbClassBeing = classRepository.findOne(requestBeing.getBeingClass());
+					MudBeingClass dbClassBeing = classRepository.findOne(requestBeing.getBeingClassCode());
 					
 					if (dbClassBeing!=null) {
 	
@@ -244,7 +244,7 @@ public class BeingController implements BeingService {
 				responseItem = itemService.getItem(token, curSlot.getItemCode());
 			} else {
 				responseItem = new Item();
-				responseItem.setItemClass("NOTHING");
+				responseItem.setItemClassCode("NOTHING");
 			}
 			
 			responseBeing.getEquipment().put(curSlot.getId().getSlotCode(), responseItem);

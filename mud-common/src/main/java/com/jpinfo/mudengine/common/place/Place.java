@@ -5,12 +5,15 @@ import java.util.*;
 
 import com.jpinfo.mudengine.common.interfaces.ActionTarget;
 import com.jpinfo.mudengine.common.interfaces.Reaction;
+import com.jpinfo.mudengine.common.placeClass.PlaceClass;
 
 public class Place implements ActionTarget {
 	
 	private Integer placeCode;
 
 	private String placeClassCode;
+	
+	private PlaceClass placeClass;
 	
 	private Map<String, PlaceExit> exits;
 	
@@ -73,6 +76,16 @@ public class Place implements ActionTarget {
 	
 	public void setAttr(String attrName, Integer attrValue) {
 		this.attrs.put(attrName, attrValue);
+	}
+
+
+	public PlaceClass getPlaceClass() {
+		return placeClass;
+	}
+
+
+	public void setPlaceClass(PlaceClass placeClass) {
+		this.placeClass = placeClass;
 	}
 
 }

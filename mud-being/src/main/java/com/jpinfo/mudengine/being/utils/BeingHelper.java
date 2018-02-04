@@ -39,12 +39,14 @@ public class BeingHelper {
 		
 		response.setBeingType(dbBeing.getBeingType());
 		response.setBeingCode(dbBeing.getBeingCode());
-		response.setBeingClass(dbBeing.getBeingClass().getBeingClassCode());
+		response.setBeingClassCode(dbBeing.getBeingClass().getBeingClassCode());
 		response.setName(dbBeing.getName());
 		response.setPlayerId(dbBeing.getPlayerId());
 		response.setCurPlaceCode(dbBeing.getCurPlaceCode());
 		response.setCurWorld(dbBeing.getCurWorld());
 		response.setQuantity(dbBeing.getQuantity());
+		
+		response.setBeingClass(BeingClassHelper.buildBeingClass(dbBeing.getBeingClass()));
 		
 		for(MudBeingAttr curAttr: dbBeing.getAttrs()) {
 			
