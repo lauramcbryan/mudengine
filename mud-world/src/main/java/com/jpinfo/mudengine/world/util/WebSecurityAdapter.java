@@ -16,7 +16,12 @@ public class WebSecurityAdapter extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 
+		// Disabling cross-site request forgery in order to be able to use H2 Console
 		http.csrf().disable();
+		
+		// Bypassing frame options security in order to be able to use H2 Console
+		http.headers().frameOptions().disable();
+		
 		http.authorizeRequests().antMatchers("/place/*").authenticated();
 		http.addFilterBefore(new CommonSecurityFilter(), UsernamePasswordAuthenticationFilter.class);
 	}
