@@ -4,6 +4,7 @@ import java.util.Collections;
 
 import java.util.Date;
 
+import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -53,9 +54,11 @@ public class TokenService {
 		
 		if (token!=null) {
 			
+			String decodedToken = new String(Base64.decodeBase64(token));
+			
 			String username = Jwts.parser()
 				.setSigningKey(TokenService.SECRET)
-				.parseClaimsJws(token).getBody().getSubject();
+				.parseClaimsJws(decodedToken).getBody().getSubject();
 			
 			result = new UsernamePasswordAuthenticationToken(username, null, Collections.<GrantedAuthority>emptyList());
 		}
@@ -94,5 +97,12 @@ public class TokenService {
 	
 	public static String buildInternalToken() {
 		return buildToken(TokenService.INTERNAL_ACCOUNT, TokenService.INTERNAL_PLAYER_ID);
+	}
+	
+	public static void main(String[] args) {
+		
+		String token = TokenService.buildInternalToken();
+		
+		System.out.println(new String(Base64.encodeBase64(token.getBytes())));
 	}
 }
