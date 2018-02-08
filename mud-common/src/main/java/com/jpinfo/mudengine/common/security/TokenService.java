@@ -54,11 +54,7 @@ public class TokenService {
 		
 		if (token!=null) {
 			
-			String decodedToken = new String(Base64.decodeBase64(token));
-			
-			String username = Jwts.parser()
-				.setSigningKey(TokenService.SECRET)
-				.parseClaimsJws(decodedToken).getBody().getSubject();
+			String username = TokenService.getUsernameFromToken(token);
 			
 			result = new UsernamePasswordAuthenticationToken(username, null, Collections.<GrantedAuthority>emptyList());
 		}
@@ -72,8 +68,9 @@ public class TokenService {
 		
 		if (token!=null) {
 			
-			result = Jwts.parser().setSigningKey(TokenService.SECRET)
-				.parseClaimsJws(token).getBody().getSubject();
+			Jws<Claims> parsedToken = TokenService.parseToken(token);
+			
+			result = parsedToken.getBody().getSubject();
 		}
 		
 		return result;
@@ -85,7 +82,7 @@ public class TokenService {
 		
 		if (token!=null) {
 			
-			Jws<Claims> parsedToken = Jwts.parser().setSigningKey(TokenService.SECRET).parseClaimsJws(token);
+			Jws<Claims> parsedToken = TokenService.parseToken(token);
 			
 			if (parsedToken.getBody().containsKey(TokenService.PLAYER_ID_CLAIM)) {
 				result = new Long(parsedToken.getBody().get(TokenService.PLAYER_ID_CLAIM).toString());
@@ -93,6 +90,16 @@ public class TokenService {
 		}
 		
 		return result;
+	}
+	
+	private static Jws<Claims> parseToken(String token) {
+		
+		String decodedToken = new String(Base64.decodeBase64(token.getBytes()));
+		
+		Jws<Claims> parsedToken = Jwts.parser().setSigningKey(TokenService.SECRET).parseClaimsJws(decodedToken);
+		
+		return parsedToken;
+		
 	}
 	
 	public static String buildInternalToken() {
