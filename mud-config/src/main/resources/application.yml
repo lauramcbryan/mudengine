@@ -31,5 +31,5 @@ spring:
       server:
         git:
           uri: https://github.com/JosielOliveira/mud-config
-      username: josieloliveira@hotmail.com
-      password: 123deoliveira4
+      username: ${GIT_USERNAME}
+      password: ${GIT_PASSWORD}
