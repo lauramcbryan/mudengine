@@ -15,7 +15,9 @@ public class MudActionClass {
 	@Column
 	private String verb;
 	
-
+	@Column(name="ACTION_TYPE")
+	private Integer actionType;
+	
 	@OneToMany(mappedBy="actionClassCode")
 	private Set<MudActionClassPrereq> prereqList;
 	
@@ -53,4 +55,14 @@ public class MudActionClass {
 	public String getVerb() {
 		return verb;
 	}
+
+	public Integer getActionType() {
+		return actionType;
+	}
+
+	public void setActionType(Integer actionType) {
+		this.actionType = actionType;
+	}
+	
+	
 }

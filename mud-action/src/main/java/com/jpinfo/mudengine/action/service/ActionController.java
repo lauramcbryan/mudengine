@@ -64,7 +64,7 @@ public class ActionController implements ActionService {
 		
 		dbAction.setActorCode(newAction.getActorCode());
 		dbAction.setIssuerCode(newAction.getIssuerCode());
-		dbAction.setActionCode(newAction.getActionCode());
+		dbAction.setActionClassCode(newAction.getActionClassCode());
 		dbAction.setMediatorCode(newAction.getMediatorCode());
 		dbAction.setPlaceCode(newAction.getPlaceCode());
 		dbAction.setTargetCode(newAction.getTargetCode());

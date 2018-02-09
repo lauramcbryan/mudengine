@@ -3,14 +3,13 @@ package com.jpinfo.mudengine.common.action;
 public class Action {
 	
 	public enum EnumActionState {NOT_STARTED, STARTED, COMPLETED, CANCELLED, REFUSED};
-	public enum EnumActionType {SIMPLE, RESISTED, CONTINUOUS};
 	public enum EnumTargetType {BEING, ITEM, PLACE};
 	
 	private Long issuerCode;
 	
 	private Long actorCode;
 
-	private String actionCode;
+	private String actionClassCode;
 	
 	private String worldName;
 	
@@ -23,8 +22,6 @@ public class Action {
 	private EnumTargetType targetType;  // {BEING, ITEM, PLACE, PLACE_CLASS}
 	
 	private Long actionId;
-	
-	private EnumActionType actionType;
 	
 	private Long startTurn;
 	
@@ -64,12 +61,12 @@ public class Action {
 
 
 
-	public String getActionCode() {
-		return actionCode;
+	public String getActionClassCode() {
+		return actionClassCode;
 	}
 
-	public void setActionCode(String actionCode) {
-		this.actionCode = actionCode;
+	public void setActionClassCode(String actionCode) {
+		this.actionClassCode = actionCode;
 	}
 
 	public String getWorldName() {
@@ -147,19 +144,6 @@ public class Action {
 	public void setTargetType(EnumTargetType targetType) {
 		this.targetType = targetType;
 	}
-
-
-
-	public EnumActionType getActionType() {
-		return actionType;
-	}
-
-
-
-	public void setActionType(EnumActionType actionType) {
-		this.actionType = actionType;
-	}
-
 
 
 	public EnumActionState getCurState() {

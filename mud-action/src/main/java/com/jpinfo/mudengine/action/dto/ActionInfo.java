@@ -95,11 +95,11 @@ public class ActionInfo extends Action {
 		return this.broadcastMessages;
 	}
 	
-	public String getActionCode() {
+	public String getActionClassCode() {
 		return actionCode;
 	}
 
-	public void setActionCode(String actionCode) {
+	public void setActionClassCode(String actionCode) {
 		this.actionCode = actionCode;
 	}
 

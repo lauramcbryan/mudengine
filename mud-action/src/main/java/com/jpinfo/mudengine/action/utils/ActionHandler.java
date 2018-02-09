@@ -98,7 +98,7 @@ public class ActionHandler {
 	
 	public void checkPrerequisites(ActionInfo e) throws ActionRefusedException {
 		
-		MudActionClass action = classRepository.findOne(e.getActionCode());
+		MudActionClass action = classRepository.findOne(e.getActionClassCode());
 		ExpressionParser parser = new SpelExpressionParser();
 		EvaluationContext context = new StandardEvaluationContext(e);
 		
@@ -122,7 +122,7 @@ public class ActionHandler {
 	
 	private ActionInfo calculateCost(ActionInfo e) {
 		
-		MudActionClass action = classRepository.findOne(e.getActionCode());
+		MudActionClass action = classRepository.findOne(e.getActionClassCode());
 		ExpressionParser parser = new SpelExpressionParser();
 		EvaluationContext context = new StandardEvaluationContext(e);
 		
@@ -139,7 +139,7 @@ public class ActionHandler {
 	
 	private ActionInfo calculateEffect(ActionInfo e) {
 		
-		MudActionClass action = classRepository.findOne(e.getActionCode());
+		MudActionClass action = classRepository.findOne(e.getActionClassCode());
 		ExpressionParser parser = new SpelExpressionParser();
 		EvaluationContext context = new StandardEvaluationContext(e);
 		
@@ -164,7 +164,7 @@ public class ActionHandler {
 		EvaluationContext context = new StandardEvaluationContext(e);
 		
 		// TODO: Apply effects caused by actor
-		for (Reaction curReaction: e.getActor().getReactions(e.getActionCode(), isBefore)) {
+		for (Reaction curReaction: e.getActor().getReactions(e.getActionClassCode(), isBefore)) {
 			applyReaction(context, curReaction);
 		}
 		
@@ -183,7 +183,7 @@ public class ActionHandler {
 
 		
 		// TODO: Apply effects caused by target
-		for (Reaction curReaction: e.getTarget().getReactions(e.getActionCode(), isBefore)) {
+		for (Reaction curReaction: e.getTarget().getReactions(e.getActionClassCode(), isBefore)) {
 			applyReaction(context, curReaction);
 		}
 		
@@ -191,7 +191,7 @@ public class ActionHandler {
 		// TODO: Apply effects caused by mediator (if present)
 		if (e.getMediator()!=null) {
 			
-			for (Reaction curReaction: e.getMediator().getReactions(e.getActionCode(), isBefore)) {
+			for (Reaction curReaction: e.getMediator().getReactions(e.getActionClassCode(), isBefore)) {
 				applyReaction(context, curReaction);
 			}
 		}

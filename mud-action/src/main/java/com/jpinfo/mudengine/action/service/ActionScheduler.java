@@ -137,21 +137,24 @@ public class ActionScheduler {
 	public void updateEntities(ActionInfo fullState) {
 		
 		String authToken = TokenService.buildInternalToken();
-		
+
+		// Update the actor
 		beingService.updateBeing(authToken, 
 					fullState.getActor().getBeing().getBeingCode(), 
 					fullState.getActor().getBeing());
-		
+
+		// If the Mediator is used, updated it too
 		if (fullState.getMediator()!=null) {
 			itemService.updateItem(authToken, fullState.getMediator().getItemCode(), fullState.getMediator());
 		}
-		
+
+		// Updating the target
 		switch(fullState.getTargetType()) {
 			case BEING: {
 				
-				Being targetBeing = (Being)fullState.getTarget();
+				BeingComposite targetBeing = (BeingComposite)fullState.getTarget();
 				
-				beingService.updateBeing(authToken, targetBeing.getBeingCode(), targetBeing);
+				beingService.updateBeing(authToken, targetBeing.getBeing().getBeingCode(), targetBeing.getBeing());
 
 				break;
 			}
@@ -165,9 +168,9 @@ public class ActionScheduler {
 			}
 			case PLACE: {
 				
-				Place targetPlace = (Place)fullState.getTarget();
+				PlaceComposite targetPlace = (PlaceComposite)fullState.getTarget();
 				
-				placeService.updatePlace(targetPlace.getPlaceCode(), targetPlace);
+				placeService.updatePlace(targetPlace.getPlace().getPlaceCode(), targetPlace.getPlace());
 				
 				break;
 			}
@@ -203,7 +206,7 @@ public class ActionScheduler {
 		String token = TokenService.buildInternalToken();
 
 		result.setActionId(a.getActionId());
-		result.setActionCode(a.getActionCode());
+		result.setActionClassCode(a.getActionClassCode());
 		
 		//Actor
 		if (a.getActorCode()!=null) {

@@ -24,7 +24,6 @@ import com.jpinfo.mudengine.action.utils.ActionHandler;
 import com.jpinfo.mudengine.action.utils.ActionHelper;
 import com.jpinfo.mudengine.common.action.Action;
 import com.jpinfo.mudengine.common.action.Action.EnumActionState;
-import com.jpinfo.mudengine.common.action.Action.EnumActionType;
 import com.jpinfo.mudengine.common.being.Being;
 import com.jpinfo.mudengine.common.place.Place;
 import com.jpinfo.mudengine.common.place.PlaceExit;
@@ -87,8 +86,7 @@ public class ActionTests {
 
 		testData.setActionId(1L);
 		testData.setIssuerCode(beingOne.getBeingCode());
-		testData.setActionCode("WALK");
-		testData.setActionType(EnumActionType.SIMPLE);
+		testData.setActionClassCode("WALK");
 		testData.setCurState(EnumActionState.NOT_STARTED);
 		
 		testData.setActorCode(beingOne.getBeingCode());

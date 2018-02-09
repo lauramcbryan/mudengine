@@ -22,7 +22,7 @@ public class MudAction {
 	
 
 	@Column(name="ACTION_CLASS_CODE")
-	private String actionCode;
+	private String actionClassCode;
 	
 	@Column(name="WORLD_NAME")
 	private String worldName;
@@ -51,20 +51,17 @@ public class MudAction {
 	@Column(name="SUCCESS_RATE")
 	private Float successRate;
 	
-	@Column(name="ACTION_TYPE")
-	private Integer actionType;
-	
 	public MudAction() {
 		this.currState = 0;
 		
 	}
 
-	public String getActionCode() {
-		return actionCode;
+	public String getActionClassCode() {
+		return actionClassCode;
 	}
 
-	public void setActionCode(String actionCode) {
-		this.actionCode = actionCode;
+	public void setActionClassCode(String actionClassCode) {
+		this.actionClassCode = actionClassCode;
 	}
 
 	public String getWorldName() {
@@ -180,14 +177,4 @@ public class MudAction {
 	public void setSuccessRate(Float successRate) {
 		this.successRate = successRate;
 	}
-
-	public Integer getActionType() {
-		return actionType;
-	}
-
-	public void setActionType(Integer actionType) {
-		this.actionType = actionType;
-	}
-	
-	
 }

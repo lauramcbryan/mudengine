@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: mud-action
+  datasource:
+    platform: h2
+    initialize: true
+
+server:
+  port: 8088
+  
+eureka:
+  client:
+    enabled: false
