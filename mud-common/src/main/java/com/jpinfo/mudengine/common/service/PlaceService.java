@@ -23,7 +23,7 @@ public interface PlaceService {
 	 * @param id
 	 * @param requestPlace
 	 */
-	@RequestMapping(method=RequestMethod.PUT, value="/")
+	@RequestMapping(method=RequestMethod.PUT)
 	ResponseEntity<Place> createPlace(@RequestParam("placeClassCode") String placeClassCode, @RequestParam("direction") String direction, @RequestParam("targetPlaceCode") Integer targetPlaceCode );
 	
 	/**

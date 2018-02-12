@@ -18,6 +18,7 @@ import com.jpinfo.mudengine.world.model.MudPlaceAttr;
 import com.jpinfo.mudengine.world.model.MudPlaceClass;
 import com.jpinfo.mudengine.world.model.MudPlaceExit;
 import com.jpinfo.mudengine.world.repository.PlaceClassRepository;
+import com.jpinfo.mudengine.world.repository.PlaceExitRepository;
 import com.jpinfo.mudengine.world.repository.PlaceRepository;
 import com.jpinfo.mudengine.world.util.WorldHelper;
 
@@ -32,6 +33,9 @@ public class PlaceController implements PlaceService {
 	
 	@Autowired
 	private PlaceRepository placeRepository;
+
+	@Autowired
+	private PlaceExitRepository placeExitRepository;
 	
 	@Autowired
 	private PlaceClassRepository placeClassRepository;
@@ -130,6 +134,16 @@ public class PlaceController implements PlaceService {
 				
 				dbPlace = WorldHelper.changePlaceAttrs(dbPlace, dbPlace.getPlaceClass(), placeClass);
 				dbPlace.setPlaceClass(placeClass);
+				
+				// Find all exits pointing to this place
+				Iterable<MudPlaceExit> exitList = placeExitRepository.findByTargetPlaceCode(dbPlace.getPlaceCode());
+				
+				// Update them all
+				for(MudPlaceExit curExit: exitList) {
+					
+					curExit.setName(placeClass.getName());
+					placeExitRepository.save(curExit);
+				}
 			}
 			
 			
@@ -165,6 +179,17 @@ public class PlaceController implements PlaceService {
 				dbPlace = WorldHelper.changePlaceAttrs(dbPlace, dbPlace.getPlaceClass(), placeClass);
 				dbPlace.setPlaceClass(placeClass);
 				
+				// Find all exits pointing to this place
+				Iterable<MudPlaceExit> exitList = placeExitRepository.findByTargetPlaceCode(dbPlace.getPlaceCode());
+				
+				// Update them all
+				for(MudPlaceExit curExit: exitList) {
+					
+					curExit.setName(placeClass.getName());
+					placeExitRepository.save(curExit);
+				}
+				
+				
 				updatedPlace = placeRepository.save(dbPlace);
 			} else {
 				
@@ -173,16 +198,21 @@ public class PlaceController implements PlaceService {
 				
 				String internalToken = TokenService.buildInternalToken();
 				
-				// Remove all beings from the place
-				// THAT MUST GOES FIRST!!!
-				// This call will drop all items belonging to beings into the place
-				// @TODO: solve the worldName
-				beingService.destroyAllFromPlace(internalToken, "aforgotten", placeId);
+				try {
 				
-				// Remove all items from the place
-				// (That will include items dropped from beings above)
-				// @TODO: solve the worldName
-				itemService.destroyAllFromPlace(internalToken, "aforgotten", placeId);
+					// Remove all beings from the place
+					// THAT MUST GOES FIRST!!!
+					// This call will drop all items belonging to beings into the place
+					// @TODO: solve the worldName
+					beingService.destroyAllFromPlace(internalToken, "aforgotten", placeId);
+					
+					// Remove all items from the place
+					// (That will include items dropped from beings above)
+					// @TODO: solve the worldName
+					itemService.destroyAllFromPlace(internalToken, "aforgotten", placeId);
+				} catch(Exception e) {
+					// Any exception on these calls will be disregarded
+				}
 				
 				updatedPlace = dbPlace;
 				updatedPlace.setPlaceCode(null);
@@ -236,6 +266,8 @@ public class PlaceController implements PlaceService {
 					MudPlaceExit newExit = WorldHelper.buildMudPlaceExit(dbPlace.getPlaceCode(), 
 							direction, targetPlaceCode);
 					newExit.setName(targetDbPlace.getPlaceClass().getName());
+					newExit.setOpened(true);
+					newExit.setVisible(true);
 					
 					dbPlace.getExits().add(newExit);
 					
@@ -247,6 +279,8 @@ public class PlaceController implements PlaceService {
 							WorldHelper.getOpposedDirection(direction), 
 							dbPlace.getPlaceCode());
 					correspondingExit.setName(dbPlaceClass.getName());
+					correspondingExit.setOpened(true);
+					correspondingExit.setVisible(true);
 					
 					targetDbPlace.getExits().add(correspondingExit);
 					
