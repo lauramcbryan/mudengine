@@ -118,7 +118,7 @@ public class BeingTests {
 		Being createdBeing = responseCreate.getBody();
 		
 		assertThat(createdBeing.getBeingType()).isEqualTo(BeingTests.testBeingType);
-		assertThat(createdBeing.getBeingClass()).isEqualTo(BeingTests.testBeingClass);
+		assertThat(createdBeing.getBeingClassCode()).isEqualTo(BeingTests.testBeingClass);
 		assertThat(createdBeing.getCurWorld()).isEqualTo(BeingTests.testWorldName);
 		assertThat(createdBeing.getCurPlaceCode()).isEqualTo(BeingTests.testPlaceCode);
 		assertThat(createdBeing.getQuantity()).isEqualTo(BeingTests.testQuantity);
@@ -149,7 +149,7 @@ public class BeingTests {
 		Being readBeing = responseRead.getBody();
 		
 		assertThat(readBeing.getBeingType()).isEqualTo(BeingTests.testBeingType);
-		assertThat(readBeing.getBeingClass()).isEqualTo(BeingTests.testBeingClass);
+		assertThat(readBeing.getBeingClassCode()).isEqualTo(BeingTests.testBeingClass);
 		assertThat(readBeing.getCurWorld()).isEqualTo(BeingTests.testWorldName);
 		assertThat(readBeing.getCurPlaceCode()).isEqualTo(BeingTests.testPlaceCode);
 		assertThat(readBeing.getQuantity()).isEqualTo(BeingTests.testQuantity);
@@ -178,7 +178,7 @@ public class BeingTests {
 		Being updatedBeing = responseUpdate.getBody();
 		
 		assertThat(updatedBeing.getBeingType()).isEqualTo(BeingTests.test2BeingType);
-		assertThat(updatedBeing.getBeingClass()).isEqualTo(BeingTests.test2BeingClass);
+		assertThat(updatedBeing.getBeingClassCode()).isEqualTo(BeingTests.test2BeingClass);
 		assertThat(updatedBeing.getCurWorld()).isEqualTo(BeingTests.test2WorldName);
 		assertThat(updatedBeing.getCurPlaceCode()).isEqualTo(BeingTests.test2PlaceCode);
 		assertThat(updatedBeing.getQuantity()).isEqualTo(BeingTests.test2Quantity);
