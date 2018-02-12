@@ -45,7 +45,7 @@ public class TokenService {
 		
 		token = builder.compact();
 		
-		return token;
+		return Base64.encodeBase64String(token.getBytes());
 	}
 	
 	public static Authentication getAuthenticationFromToken(String token) {
@@ -94,7 +94,7 @@ public class TokenService {
 	
 	private static Jws<Claims> parseToken(String token) {
 		
-		String decodedToken = new String(Base64.decodeBase64(token.getBytes()));
+		String decodedToken = new String(Base64.decodeBase64(token));
 		
 		Jws<Claims> parsedToken = Jwts.parser().setSigningKey(TokenService.SECRET).parseClaimsJws(decodedToken);
 		
@@ -104,15 +104,13 @@ public class TokenService {
 	
 	public static String buildInternalToken() {
 		
-		String plainToken = buildToken(TokenService.INTERNAL_ACCOUNT, TokenService.INTERNAL_PLAYER_ID); 
-		
-		return new String(Base64.encodeBase64(plainToken.getBytes()));
+		return buildToken(TokenService.INTERNAL_ACCOUNT, TokenService.INTERNAL_PLAYER_ID);
 	}
 	
 	public static void main(String[] args) {
 		
 		String token = TokenService.buildInternalToken();
 		
-		System.out.println(new String(Base64.encodeBase64(token.getBytes())));
+		System.out.println(token);
 	}
 }
