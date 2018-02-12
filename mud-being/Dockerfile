@@ -3,5 +3,5 @@ FROM openjdk:8-jre-alpine
 VOLUME /tmp
 ARG JAR_FILE
 ADD target/mud-being-*.jar app.jar
-ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom","-jar","/app.jar"]
+ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom -Xmx256m","-jar","/app.jar"]
 
