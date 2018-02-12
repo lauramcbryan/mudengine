@@ -15,7 +15,7 @@ endpoints:
 ---
 
 spring:
-  profiles: itgtest
+  profiles: itg, itgtest
 
   cloud:
     config:

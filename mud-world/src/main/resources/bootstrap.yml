@@ -15,13 +15,12 @@ endpoints:
 ---
 
 spring:
-  profiles: itgtest
+  profiles: itg, itgtest
 
   cloud:
     config:
       uri: http://jeremias:8888
       
-
 ---
 
 spring:

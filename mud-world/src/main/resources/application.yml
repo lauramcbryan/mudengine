@@ -11,3 +11,5 @@ server:
 eureka:
   client:
     enabled: false
+
+    
