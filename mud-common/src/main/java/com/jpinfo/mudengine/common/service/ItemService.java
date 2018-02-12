@@ -22,7 +22,7 @@ public interface ItemService {
 	@RequestMapping(method=RequestMethod.POST, value="{itemId}")
 	Item updateItem(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable("itemId") Long itemId, @RequestBody Item item);
 
-	@RequestMapping(method=RequestMethod.PUT, value="/")
+	@RequestMapping(method=RequestMethod.PUT)
 	ResponseEntity<Item> createItem(@RequestParam("itemClassCode") String itemClassCode, @RequestParam("worldName") Optional<String> worldName, @RequestParam("placeCode") Optional<Integer> placeCode, @RequestParam("quantity") Optional<Integer> quantity, @RequestParam("owner") Optional<Long> owner);
 	
 	@RequestMapping(method=RequestMethod.DELETE, value="{itemId}")
