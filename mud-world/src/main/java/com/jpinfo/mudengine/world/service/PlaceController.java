@@ -210,8 +210,11 @@ public class PlaceController implements PlaceService {
 					// (That will include items dropped from beings above)
 					// @TODO: solve the worldName
 					itemService.destroyAllFromPlace(internalToken, "aforgotten", placeId);
+					
 				} catch(Exception e) {
+					
 					// Any exception on these calls will be disregarded
+					e.printStackTrace(System.err);
 				}
 				
 				updatedPlace = dbPlace;

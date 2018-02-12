@@ -220,9 +220,17 @@ public class BeingController implements BeingService {
 		if (dbBeing!=null) {
 			
 			if (BeingHelper.canAccess(authToken, dbBeing.getPlayerId())) {
+				
+				try {
 			
-				// Update Item service to drop all items of this being
-				itemService.dropAllFromBeing(authToken, beingCode, dbBeing.getCurWorld(), dbBeing.getCurPlaceCode());
+					// Update Item service to drop all items of this being
+					itemService.dropAllFromBeing(authToken, beingCode, dbBeing.getCurWorld(), dbBeing.getCurPlaceCode());
+				} catch(Exception e) {
+					
+					// errors at this point are being disregarded
+					e.printStackTrace(System.err);
+					
+				}
 				
 				repository.delete(beingCode);
 			} else {
