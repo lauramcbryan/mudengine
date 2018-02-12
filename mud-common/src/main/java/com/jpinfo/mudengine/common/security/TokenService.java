@@ -103,7 +103,10 @@ public class TokenService {
 	}
 	
 	public static String buildInternalToken() {
-		return buildToken(TokenService.INTERNAL_ACCOUNT, TokenService.INTERNAL_PLAYER_ID);
+		
+		String plainToken = buildToken(TokenService.INTERNAL_ACCOUNT, TokenService.INTERNAL_PLAYER_ID); 
+		
+		return new String(Base64.encodeBase64(plainToken.getBytes()));
 	}
 	
 	public static void main(String[] args) {
