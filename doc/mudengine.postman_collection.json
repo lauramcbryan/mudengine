@@ -1,0 +1,429 @@
+{
+	"info": {
+		"name": "mudengine",
+		"_postman_id": "8d668981-645d-9109-78b1-d71febef721f",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "place",
+			"description": "",
+			"item": [
+				{
+					"name": "getPlace",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Auth",
+								"value": "ZXlKaGJHY2lPaUpJVXpVeE1pSjkuZXlKemRXSWlPaUpKYm5SbGNtNWhiQ0lzSW5Cc1lYbGxja2xrSWpvNU1qSXpNemN5TURNMk9EVTBOemMxT0RBM0xDSmxlSEFpT2pFMU1UZzFNekUwTnpSOS5oek5Ib3RDS0tFMDVqLTNSSnlSbl9zRHZBM2RqNFZaMy02SEpMWFNDZ2RENjNlNS1BM1RuVFZfTURyMlUybk0zOC1BNUtfTUxILVhwUFZUMjZmUW9BQQ=="
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "{{WORLD_SERVER_HOST}}/place/1",
+							"host": [
+								"{{WORLD_SERVER_HOST}}"
+							],
+							"path": [
+								"place",
+								"1"
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "createPlace",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Auth",
+								"value": "ZXlKaGJHY2lPaUpJVXpVeE1pSjkuZXlKemRXSWlPaUpKYm5SbGNtNWhiQ0lzSW5Cc1lYbGxja2xrSWpvNU1qSXpNemN5TURNMk9EVTBOemMxT0RBM0xDSmxlSEFpT2pFMU1UZzBOVGN5T0RCOS5nWExnTnBMbFJVNnh6cmVzUGJ1c2g1SVdSRmtvci1JdmxHWktWY2YyMkNrekV5U2ptcEhHZmVTYmozZW5ucTFyMVBreWVSYTBRVFpnak5OcnNTZXJLQQ=="
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "{{WORLD_SERVER_HOST}}/place/?placeClassCode=TUNNEL&direction=UP&targetPlaceCode=1",
+							"host": [
+								"{{WORLD_SERVER_HOST}}"
+							],
+							"path": [
+								"place",
+								""
+							],
+							"query": [
+								{
+									"key": "placeClassCode",
+									"value": "TUNNEL",
+									"equals": true
+								},
+								{
+									"key": "direction",
+									"value": "UP",
+									"equals": true
+								},
+								{
+									"key": "targetPlaceCode",
+									"value": "1",
+									"equals": true
+								}
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "getPlaceClass",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Auth",
+								"value": "ZXlKaGJHY2lPaUpJVXpVeE1pSjkuZXlKemRXSWlPaUpKYm5SbGNtNWhiQ0lzSW5Cc1lYbGxja2xrSWpvNU1qSXpNemN5TURNMk9EVTBOemMxT0RBM0xDSmxlSEFpT2pFMU1UZzBOVEU0TWpGOS5XdERVa0VLY2J3V0hLaUlNb1duSDVkT3Nxa2VNQXctQWZCbktMclFjTnR1ZlJzZzhzMHhPR1lNTFlJbW9wUHZCYmZyRndfRHhybm5pY2JLLU1uSUFmQQ=="
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "{{WORLD_SERVER_HOST}}/place/class/FOREST",
+							"host": [
+								"{{WORLD_SERVER_HOST}}"
+							],
+							"path": [
+								"place",
+								"class",
+								"FOREST"
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "destroyPlace",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Auth",
+								"value": "ZXlKaGJHY2lPaUpJVXpVeE1pSjkuZXlKemRXSWlPaUpKYm5SbGNtNWhiQ0lzSW5Cc1lYbGxja2xrSWpvNU1qSXpNemN5TURNMk9EVTBOemMxT0RBM0xDSmxlSEFpT2pFMU1UZzBOVGN5T0RCOS5nWExnTnBMbFJVNnh6cmVzUGJ1c2g1SVdSRmtvci1JdmxHWktWY2YyMkNrekV5U2ptcEhHZmVTYmozZW5ucTFyMVBreWVSYTBRVFpnak5OcnNTZXJLQQ=="
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "{{WORLD_SERVER_HOST}}/place/16",
+							"host": [
+								"{{WORLD_SERVER_HOST}}"
+							],
+							"path": [
+								"place",
+								"16"
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "being",
+			"description": "",
+			"item": [
+				{
+					"name": "getBeing",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Auth",
+								"value": "ZXlKaGJHY2lPaUpJVXpVeE1pSjkuZXlKemRXSWlPaUpKYm5SbGNtNWhiQ0lzSW5Cc1lYbGxja2xrSWpvNU1qSXpNemN5TURNMk9EVTBOemMxT0RBM0xDSmxlSEFpT2pFMU1UZzBOakV6TWpSOS5rV1ZRUzdTR1VJTmN5THZFdGYtTU5VZlo4U3Q1WlJGT1JaQk5CZV96M0FoUDItUndjRmNuLTlYSlVIQ3ptcVNXdG5IRXQ2bkgzOXV2SkYzb09PZHZqUQ=="
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "{{BEING_SERVER_HOST}}/being/2",
+							"host": [
+								"{{BEING_SERVER_HOST}}"
+							],
+							"path": [
+								"being",
+								"2"
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "createBeing",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Auth",
+								"value": "ZXlKaGJHY2lPaUpJVXpVeE1pSjkuZXlKemRXSWlPaUpKYm5SbGNtNWhiQ0lzSW5Cc1lYbGxja2xrSWpvNU1qSXpNemN5TURNMk9EVTBOemMxT0RBM0xDSmxlSEFpT2pFMU1UZzBOVGN5T0RCOS5nWExnTnBMbFJVNnh6cmVzUGJ1c2g1SVdSRmtvci1JdmxHWktWY2YyMkNrekV5U2ptcEhHZmVTYmozZW5ucTFyMVBreWVSYTBRVFpnak5OcnNTZXJLQQ=="
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "{{BEING_SERVER_HOST}}/being?beingType=3&beingClass=CRINOS&worldName=aforgotten&placeCode=1&quantity=1&playerId=1",
+							"host": [
+								"{{BEING_SERVER_HOST}}"
+							],
+							"path": [
+								"being"
+							],
+							"query": [
+								{
+									"key": "beingType",
+									"value": "3",
+									"equals": true
+								},
+								{
+									"key": "beingClass",
+									"value": "CRINOS",
+									"equals": true
+								},
+								{
+									"key": "worldName",
+									"value": "aforgotten",
+									"equals": true
+								},
+								{
+									"key": "placeCode",
+									"value": "1",
+									"equals": true
+								},
+								{
+									"key": "quantity",
+									"value": "1",
+									"equals": true
+								},
+								{
+									"key": "playerId",
+									"value": "1",
+									"equals": true
+								}
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "updateBeing",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Auth",
+								"value": "ZXlKaGJHY2lPaUpJVXpVeE1pSjkuZXlKemRXSWlPaUpKYm5SbGNtNWhiQ0lzSW5Cc1lYbGxja2xrSWpvNU1qSXpNemN5TURNMk9EVTBOemMxT0RBM0xDSmxlSEFpT2pFMU1UZzBOVGN5T0RCOS5nWExnTnBMbFJVNnh6cmVzUGJ1c2g1SVdSRmtvci1JdmxHWktWY2YyMkNrekV5U2ptcEhHZmVTYmozZW5ucTFyMVBreWVSYTBRVFpnak5OcnNTZXJLQQ=="
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"beingCode\": 1,\n    \"beingType\": 3,\n    \"beingClassCode\": \"CRINOS\",\n    \"baseAttrs\": {\n        \"STR\": 8,\n        \"DEX\": 8,\n        \"HP\": 10,\n        \"CHR\": 8,\n        \"INT\": 8\n    },\n    \"baseSkills\": {\n        \"BRAWLER\": 50,\n        \"FARMER\": 10\n    },\n    \"name\": \"Slash Calliber\",\n    \"curPlaceCode\": 1,\n    \"curWorld\": \"aforgotten\",\n    \"playerId\": 1,\n    \"quantity\": 1\n}"
+						},
+						"url": {
+							"raw": "{{BEING_SERVER_HOST}}/being/2",
+							"host": [
+								"{{BEING_SERVER_HOST}}"
+							],
+							"path": [
+								"being",
+								"2"
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "destroyBeing",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Auth",
+								"value": "ZXlKaGJHY2lPaUpJVXpVeE1pSjkuZXlKemRXSWlPaUpKYm5SbGNtNWhiQ0lzSW5Cc1lYbGxja2xrSWpvNU1qSXpNemN5TURNMk9EVTBOemMxT0RBM0xDSmxlSEFpT2pFMU1UZzBOVGN5T0RCOS5nWExnTnBMbFJVNnh6cmVzUGJ1c2g1SVdSRmtvci1JdmxHWktWY2YyMkNrekV5U2ptcEhHZmVTYmozZW5ucTFyMVBreWVSYTBRVFpnak5OcnNTZXJLQQ=="
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "{{BEING_SERVER_HOST}}/being/1",
+							"host": [
+								"{{BEING_SERVER_HOST}}"
+							],
+							"path": [
+								"being",
+								"1"
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "item",
+			"description": "",
+			"item": [
+				{
+					"name": "getItem",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Auth",
+								"value": "ZXlKaGJHY2lPaUpJVXpVeE1pSjkuZXlKemRXSWlPaUpKYm5SbGNtNWhiQ0lzSW5Cc1lYbGxja2xrSWpvNU1qSXpNemN5TURNMk9EVTBOemMxT0RBM0xDSmxlSEFpT2pFMU1UZzBOVGN5T0RCOS5nWExnTnBMbFJVNnh6cmVzUGJ1c2g1SVdSRmtvci1JdmxHWktWY2YyMkNrekV5U2ptcEhHZmVTYmozZW5ucTFyMVBreWVSYTBRVFpnak5OcnNTZXJLQQ=="
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "{{ITEM_SERVER_HOST}}/item/2",
+							"host": [
+								"{{ITEM_SERVER_HOST}}"
+							],
+							"path": [
+								"item",
+								"2"
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "createItem",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Auth",
+								"value": "ZXlKaGJHY2lPaUpJVXpVeE1pSjkuZXlKemRXSWlPaUpKYm5SbGNtNWhiQ0lzSW5Cc1lYbGxja2xrSWpvNU1qSXpNemN5TURNMk9EVTBOemMxT0RBM0xDSmxlSEFpT2pFMU1UZzBOVGN5T0RCOS5nWExnTnBMbFJVNnh6cmVzUGJ1c2g1SVdSRmtvci1JdmxHWktWY2YyMkNrekV5U2ptcEhHZmVTYmozZW5ucTFyMVBreWVSYTBRVFpnak5OcnNTZXJLQQ=="
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "{{ITEM_SERVER_HOST}}/item?itemClassCode=STONE&worldName=aforgotten&placeCode=1",
+							"host": [
+								"{{ITEM_SERVER_HOST}}"
+							],
+							"path": [
+								"item"
+							],
+							"query": [
+								{
+									"key": "itemClassCode",
+									"value": "STONE",
+									"equals": true
+								},
+								{
+									"key": "worldName",
+									"value": "aforgotten",
+									"equals": true
+								},
+								{
+									"key": "placeCode",
+									"value": "1",
+									"equals": true
+								}
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "destroyItem",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Auth",
+								"value": "ZXlKaGJHY2lPaUpJVXpVeE1pSjkuZXlKemRXSWlPaUpKYm5SbGNtNWhiQ0lzSW5Cc1lYbGxja2xrSWpvNU1qSXpNemN5TURNMk9EVTBOemMxT0RBM0xDSmxlSEFpT2pFMU1UZzBOVGN5T0RCOS5nWExnTnBMbFJVNnh6cmVzUGJ1c2g1SVdSRmtvci1JdmxHWktWY2YyMkNrekV5U2ptcEhHZmVTYmozZW5ucTFyMVBreWVSYTBRVFpnak5OcnNTZXJLQQ=="
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "{{ITEM_SERVER_HOST}}/item/1",
+							"host": [
+								"{{ITEM_SERVER_HOST}}"
+							],
+							"path": [
+								"item",
+								"1"
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "action",
+			"description": "",
+			"item": [
+				{
+					"name": "testAction",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Auth",
+								"value": "ZXlKaGJHY2lPaUpJVXpVeE1pSjkuZXlKemRXSWlPaUpKYm5SbGNtNWhiQ0lzSW5Cc1lYbGxja2xrSWpvNU1qSXpNemN5TURNMk9EVTBOemMxT0RBM0xDSmxlSEFpT2pFMU1UZzFNelU0TWpOOS5Jem00d3RNY25tdkxJZ0NVQ1NWemZfQVE4d3ZLWmpJeTNwUUlVd2xHdVY1QnAtWmUzTkQyZlM5TzkzMWs0SThjLUw4WEsyLTA1b2g5emFPWjFVWkc4QQ=="
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "{{ACTION_SERVER_HOST}}/action/test/WALK?actorCode=2&targetCode=DOWN&targetType=DIRECTION&expression=actor.being.curPlaceCode %3D actor.place.exits[%23root.targetCode].targetPlaceCode",
+							"host": [
+								"{{ACTION_SERVER_HOST}}"
+							],
+							"path": [
+								"action",
+								"test",
+								"WALK"
+							],
+							"query": [
+								{
+									"key": "actorCode",
+									"value": "2",
+									"equals": true
+								},
+								{
+									"key": "targetCode",
+									"value": "DOWN",
+									"equals": true
+								},
+								{
+									"key": "targetType",
+									"value": "DIRECTION",
+									"equals": true
+								},
+								{
+									"key": "expression",
+									"value": "actor.being.curPlaceCode %3D actor.place.exits[%23root.targetCode].targetPlaceCode",
+									"equals": true
+								}
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
