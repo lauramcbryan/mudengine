@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.jpinfo.mudengine.action.utils.ActionMessages;
 import com.jpinfo.mudengine.common.action.Action;
+import com.jpinfo.mudengine.common.action.ActionClass;
 import com.jpinfo.mudengine.common.being.Being;
 import com.jpinfo.mudengine.common.interfaces.ActionTarget;
 import com.jpinfo.mudengine.common.interfaces.Reaction;
@@ -14,6 +15,8 @@ public class ActionInfo extends Action {
 	
 	private String actionCode;
 	
+	private ActionClass actionClass;
+	
 	private BeingComposite actor;
 	
 	private Item mediator;
@@ -22,6 +25,8 @@ public class ActionInfo extends Action {
 	private ActionTarget target;
 	
 	private Reaction effect;
+	
+	private Double successRate;
 	
 	private List<ActionMessages> broadcastMessages;
 	
@@ -85,6 +90,10 @@ public class ActionInfo extends Action {
 				
 				break;
 			}
+			case DIRECTION: {
+				// Do nothing
+				break;
+			}
 		}
 		
 
@@ -133,4 +142,20 @@ public class ActionInfo extends Action {
 		this.effect = effect;
 	}
 
+	public ActionClass getActionClass() {
+		return actionClass;
+	}
+
+	public void setActionClass(ActionClass actionClass) {
+		this.actionClass = actionClass;
+	}
+
+	public Double getSuccessRate() {
+		return successRate;
+	}
+
+	public void setSuccessRate(Double successRate) {
+		this.successRate = successRate;
+	}
+	
 }

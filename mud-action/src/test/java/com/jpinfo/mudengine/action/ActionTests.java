@@ -19,6 +19,8 @@ import com.jpinfo.mudengine.action.client.PlaceServiceClient;
 import com.jpinfo.mudengine.action.dto.ActionInfo;
 import com.jpinfo.mudengine.action.dto.BeingComposite;
 import com.jpinfo.mudengine.action.model.MudAction;
+import com.jpinfo.mudengine.action.model.MudActionClass;
+import com.jpinfo.mudengine.action.repository.MudActionClassRepository;
 import com.jpinfo.mudengine.action.repository.MudActionRepository;
 import com.jpinfo.mudengine.action.utils.ActionHandler;
 import com.jpinfo.mudengine.action.utils.ActionHelper;
@@ -38,6 +40,9 @@ public class ActionTests {
 	
 	@Autowired
 	private MudActionRepository repository;
+
+	@Autowired
+	private MudActionClassRepository classRepository;
 	
 	@MockBean
 	private BeingServiceClient beingClient;
@@ -59,7 +64,11 @@ public class ActionTests {
 		
 		Action walkAction = ActionHelper.buildAction(dbAction);
 		
+		MudActionClass dbActionClass = classRepository.findOne(dbAction.getActionClassCode());
+		
 		ActionInfo testData = new ActionInfo();
+		
+		testData.setActionClass(ActionHelper.buildActionClass(dbActionClass));
 		
 		// Create the being
 		Being beingOne = new Being();
@@ -82,6 +91,7 @@ public class ActionTests {
 		// Adding the north exit to place 2
 		PlaceExit northExit = new PlaceExit();
 		northExit.setTargetPlaceCode(2);
+		northExit.setOpened(true);
 		placeOne.getExits().put("NORTH", northExit);
 
 		testData.setActionId(1L);
@@ -89,11 +99,7 @@ public class ActionTests {
 		testData.setActionClassCode("WALK");
 		testData.setCurState(EnumActionState.NOT_STARTED);
 		
-		testData.setActorCode(beingOne.getBeingCode());
-		testData.setActor(new BeingComposite(beingOne));		
-		
-		testData.setWorldName("aforgotten");
-		testData.setPlaceCode(placeOne.getPlaceCode());
+		testData.setActor(new BeingComposite(beingOne));
 		testData.getActor().setPlace(placeOne);
 		
 		testData.setTargetCode("NORTH");
@@ -107,17 +113,10 @@ public class ActionTests {
 		assertThat(walkAction.getEndTurn()).isNotNull();
 		assertThat(walkAction.getCurState()).isEqualTo(EnumActionState.STARTED);
 		
-		handler.updateAction(2L, walkAction, testData);
-		
-		// Assert that nothing has changed
-		
 		// Finishing the action
 		handler.updateAction(walkAction.getEndTurn(), walkAction, testData);
 		
-		//testData.getTarget().
-		
-		
 		assertThat(walkAction.getCurState()).isEqualTo(EnumActionState.COMPLETED);
-		assertThat(testData.getActor().getPlace().getPlaceCode()).isEqualTo(northExit.getTargetPlaceCode());
+		assertThat(testData.getActor().getBeing().getCurPlaceCode()).isEqualTo(northExit.getTargetPlaceCode());
 	}	
 }

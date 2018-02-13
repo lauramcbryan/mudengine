@@ -3,7 +3,7 @@ package com.jpinfo.mudengine.common.action;
 public class Action {
 	
 	public enum EnumActionState {NOT_STARTED, STARTED, COMPLETED, CANCELLED, REFUSED};
-	public enum EnumTargetType {BEING, ITEM, PLACE};
+	public enum EnumTargetType {BEING, ITEM, PLACE, DIRECTION};
 	
 	private Long issuerCode;
 	

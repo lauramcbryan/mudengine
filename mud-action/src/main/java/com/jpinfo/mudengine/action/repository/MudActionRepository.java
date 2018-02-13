@@ -17,7 +17,7 @@ public interface MudActionRepository extends CrudRepository<MudAction, Long> {
 	List<MudAction> findPendingActions();
 
 	@Query("select a from MudAction a, MudActionClass b where "
-	+ "    b.actionClassCode = a.actionCode and" 
+	+ "    b.actionClassCode = a.actionClassCode and" 
 	+ "((a.currState=1 and a.endTurn<= :currentTurn) or "
 	+ "(a.currState=1 and b.actionType=1))")
 	List<MudAction> findRunningActions(@Param("currentTurn") Long currentTurn);

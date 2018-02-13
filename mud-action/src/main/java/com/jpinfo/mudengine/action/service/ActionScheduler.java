@@ -21,11 +21,8 @@ import com.jpinfo.mudengine.action.utils.ActionHelper;
 import com.jpinfo.mudengine.action.utils.ActionMessages;
 import com.jpinfo.mudengine.common.action.Action;
 import com.jpinfo.mudengine.common.action.Action.EnumActionState;
-import com.jpinfo.mudengine.common.being.Being;
 import com.jpinfo.mudengine.common.exception.EntityNotFoundException;
-import com.jpinfo.mudengine.common.interfaces.ActionTarget;
 import com.jpinfo.mudengine.common.item.Item;
-import com.jpinfo.mudengine.common.place.Place;
 import com.jpinfo.mudengine.common.security.TokenService;
 
 @Service
@@ -48,7 +45,7 @@ public class ActionScheduler {
 	@Autowired
 	private ActionHandler handler;
 	
-	@Profile("!unitTest")
+	@Profile("!default")
 	@Scheduled(fixedRate=10000)
 	public void updateActions() {
 		
@@ -69,12 +66,12 @@ public class ActionScheduler {
 				try {
 				
 					Action curAction = ActionHelper.buildAction(curRunningAction);
-					ActionInfo fullState = buildAction(curAction);
+					ActionInfo fullState = handler.buildAction(curAction);
 					
 					handler.updateAction(getCurrentTurn(), curAction, fullState);
 					
-					//curPendingAction.setSuccessRate(curAction.gets);
 					curRunningAction.setCurrState(curAction.getCurState());
+					curRunningAction.setEndTurn(curAction.getEndTurn());
 					
 					// Update changed entities
 					updateEntities(fullState);
@@ -106,12 +103,10 @@ public class ActionScheduler {
 				try {
 				
 					Action curAction = ActionHelper.buildAction(curPendingAction);
-					ActionInfo fullState = buildAction(curAction);
+					ActionInfo fullState = handler.buildAction(curAction);
 					
 					handler.updateAction(getCurrentTurn(), curAction, fullState);
 
-					// TODO: Evaluate successRate
-					//curPendingAction.setSuccessRate(curAction.gets);
 					curPendingAction.setCurrState(curAction.getCurState());
 					curPendingAction.setStartTurn(curAction.getStartTurn());
 					curPendingAction.setEndTurn(curAction.getEndTurn());
@@ -134,14 +129,22 @@ public class ActionScheduler {
 		ActionScheduler.currentTurn++;
 	}
 	
-	public void updateEntities(ActionInfo fullState) {
+	private void updateEntities(ActionInfo fullState) {
 		
 		String authToken = TokenService.buildInternalToken();
+		
+		// TODO: Identify which entities must to be updated
 
 		// Update the actor
 		beingService.updateBeing(authToken, 
 					fullState.getActor().getBeing().getBeingCode(), 
 					fullState.getActor().getBeing());
+		
+		// Update the place where the actor is
+		placeService.updatePlace(authToken, 
+				fullState.getActor().getPlace().getPlaceCode(), 
+				fullState.getActor().getPlace());
+		;
 
 		// If the Mediator is used, updated it too
 		if (fullState.getMediator()!=null) {
@@ -170,8 +173,13 @@ public class ActionScheduler {
 				
 				PlaceComposite targetPlace = (PlaceComposite)fullState.getTarget();
 				
-				placeService.updatePlace(targetPlace.getPlace().getPlaceCode(), targetPlace.getPlace());
+				placeService.updatePlace(authToken, targetPlace.getPlace().getPlaceCode(), targetPlace.getPlace());
 				
+				break;
+			}
+			case DIRECTION: {
+				
+				// Do nothing
 				break;
 			}
 		}
@@ -179,7 +187,7 @@ public class ActionScheduler {
 		
 	}
 	
-	public void updateMessageQueue(ActionInfo fullState) {
+	private void updateMessageQueue(ActionInfo fullState) {
 		
 		for(ActionMessages curMessage: fullState.getMessages()) {
 			
@@ -197,91 +205,6 @@ public class ActionScheduler {
 	
 	public static Long getCurrentTurn() {
 		return ActionScheduler.currentTurn;
-	}
-	
-	private ActionInfo buildAction(Action a) throws EntityNotFoundException {
-		
-		ActionInfo result = new ActionInfo();
-		
-		String token = TokenService.buildInternalToken();
-
-		result.setActionId(a.getActionId());
-		result.setActionClassCode(a.getActionClassCode());
-		
-		//Actor
-		if (a.getActorCode()!=null) {
-			
-			BeingComposite actor = new BeingComposite(beingService.getBeing(token, a.getActorCode()));
-			
-			if (actor.getBeing()!=null) {
-				
-				// Assemble the composite
-				
-				result.setActor(actor);
-				
-			} else {
-				throw new EntityNotFoundException("Being " + a.getActorCode() + " not found");
-			}
-		}
-		
-		// Mediator
-		if (a.getMediatorCode()!=null) {
-			
-			Item mediator = itemService.getItem(token, a.getMediatorCode());
-			
-			if (mediator!=null) {
-				result.setMediator(mediator);
-			} else {
-				throw new EntityNotFoundException("Item " + a.getMediatorCode() + " not found");
-			}
-		}
-		
-		if (a.getTargetCode()!=null) {
-			
-			ActionTarget target = null;
-			
-			switch(a.getTargetType()) {
-			case ITEM: {
-					target = itemService.getItem(token, Long.valueOf(a.getTargetCode()));
-					
-					if (target!=null) {
-						result.setTarget(target);
-					} else {
-						throw new EntityNotFoundException("Item " + a.getTargetCode() + " not found");
-					}
-					
-					break;
-				}
-			case PLACE: {
-					target = new PlaceComposite(placeService.getPlace(Integer.valueOf(a.getTargetCode())));
-					
-					if (((PlaceComposite)target).getPlace()!=null) {
-						result.setTarget(target);
-					} else {
-						throw new EntityNotFoundException("Place " + a.getTargetCode() + " not found");
-					}
-					
-					break;
-				}
-			case BEING: {
-					target = new BeingComposite(beingService.getBeing(token, Long.valueOf(a.getTargetCode())));
-					
-					if (((BeingComposite)target).getBeing()!=null) {
-						result.setTarget(target);
-					} else {
-						throw new EntityNotFoundException("Being " + a.getTargetCode() + " not found");
-					}
-					
-					break;
-				}
-			}
-			
-			if (target!=null) {
-				result.setTarget(target);
-			}
-		}
-		
-		return result;
 	}
 
 }

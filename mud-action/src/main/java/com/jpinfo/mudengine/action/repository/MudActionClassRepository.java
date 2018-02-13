@@ -6,4 +6,5 @@ import com.jpinfo.mudengine.action.model.MudActionClass;
 
 public interface MudActionClassRepository extends CrudRepository<MudActionClass, String> {
 
+	public MudActionClass findByVerb(String verb);
 }
