@@ -22,7 +22,7 @@ import com.jpinfo.mudengine.action.model.MudAction;
 import com.jpinfo.mudengine.action.model.MudActionClass;
 import com.jpinfo.mudengine.action.repository.MudActionClassRepository;
 import com.jpinfo.mudengine.action.repository.MudActionRepository;
-import com.jpinfo.mudengine.action.utils.ActionHandler;
+import com.jpinfo.mudengine.action.service.ActionHandler;
 import com.jpinfo.mudengine.action.utils.ActionHelper;
 import com.jpinfo.mudengine.common.action.Action;
 import com.jpinfo.mudengine.common.action.Action.EnumActionState;
