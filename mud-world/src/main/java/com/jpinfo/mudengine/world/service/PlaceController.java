@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.jpinfo.mudengine.common.exception.EntityNotFoundException;
@@ -41,7 +42,7 @@ public class PlaceController implements PlaceService {
 	private PlaceClassRepository placeClassRepository;
 
 	@Override
-	public Place getPlace(@PathVariable Integer placeId) {
+	public Place getPlace(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable Integer placeId) {
 		
 		Place response = null;
 		
@@ -58,7 +59,7 @@ public class PlaceController implements PlaceService {
 
 	
 	@Override
-	public Place updatePlace(@PathVariable Integer placeId, @RequestBody Place requestPlace) {
+	public Place updatePlace(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable Integer placeId, @RequestBody Place requestPlace) {
 		
 		Place response = null;
 		
@@ -78,7 +79,7 @@ public class PlaceController implements PlaceService {
 					response = WorldHelper.buildPlace(dbPlace);
 		
 					// destroy the place
-					destroyPlace(placeId);
+					destroyPlace(authToken, placeId);
 					
 					
 					
@@ -165,7 +166,7 @@ public class PlaceController implements PlaceService {
 
 
 	@Override
-	public void destroyPlace(@PathVariable Integer placeId) {
+	public void destroyPlace(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable Integer placeId) {
 		
 		MudPlace dbPlace = placeRepository.findOne(placeId);
 		

@@ -3,11 +3,13 @@ package com.jpinfo.mudengine.common.service;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.jpinfo.mudengine.common.place.Place;
+import com.jpinfo.mudengine.common.security.TokenService;
 
 @RequestMapping("/place")
 public interface PlaceService {
@@ -37,7 +39,7 @@ public interface PlaceService {
 	 * @return
 	 */
 	@RequestMapping(method=RequestMethod.GET, value="/{placeId}")
-	Place getPlace(@PathVariable("placeId") Integer placeId);
+	Place getPlace(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable("placeId") Integer placeId);
 
 	/**
 	 * Update an existing place.
@@ -51,7 +53,7 @@ public interface PlaceService {
 	 * @param requestPlace
 	 */
 	@RequestMapping(method=RequestMethod.POST, value="/{placeId}")
-	Place updatePlace(@PathVariable("placeId") Integer placeId, @RequestBody Place requestPlace);
+	Place updatePlace(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable("placeId") Integer placeId, @RequestBody Place requestPlace);
 	
 	/**
 	 * Destroys a place.
@@ -63,6 +65,6 @@ public interface PlaceService {
 	 * @param placeId
 	 */
 	@RequestMapping(method=RequestMethod.DELETE, value="/{placeId}")
-	void destroyPlace(@PathVariable("placeId") Integer placeId);
+	void destroyPlace(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable("placeId") Integer placeId);
 
 }
