@@ -495,7 +495,7 @@ public class BeingTests {
 		
 		// Creating a security token for playerId 3
 		HttpHeaders authHeaders = new HttpHeaders();
-		authHeaders.add(TokenService.HEADER_TOKEN, TokenService.buildToken(BeingTests.testUsername, BeingTests.test3PlayerId));
+		authHeaders.add(TokenService.HEADER_TOKEN, TokenService.buildToken(BeingTests.testUsername, BeingTests.test3PlayerId, TokenService.INTERNAL_LOCALE));
 		
 		HttpEntity<Object> playerOneAuthEntity = new HttpEntity<Object>(authHeaders);
 		
@@ -557,7 +557,11 @@ public class BeingTests {
 		
 		// Creating authentication token for one player
 		HttpHeaders authHeaders = new HttpHeaders();
-		authHeaders.add(TokenService.HEADER_TOKEN, TokenService.buildToken(BeingTests.testUsername, BeingTests.test4PlayerId));
+		authHeaders.add(TokenService.HEADER_TOKEN, TokenService.buildToken(
+				BeingTests.testUsername, 
+				BeingTests.test4PlayerId, 
+				TokenService.INTERNAL_LOCALE));
+		
 		HttpEntity<Object> playerAuthEntity = new HttpEntity<Object>(authHeaders);
 
 		Map<String, Object> urlVariables = new HashMap<String, Object>();

@@ -208,7 +208,7 @@ public class PlayerController implements PlayerService {
 						
 						
 						// Build the jwts token
-						String token = TokenService.buildToken(username, dbPlayer.getPlayerId());
+						String token = TokenService.buildToken(username, dbPlayer.getPlayerId(), dbPlayer.getLanguage());
 						
 						HttpHeaders header = new HttpHeaders();
 						header.add(TokenService.HEADER_TOKEN, token);
