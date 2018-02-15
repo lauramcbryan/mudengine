@@ -1,9 +1,14 @@
 package com.jpinfo.mudengine.message.service;
 
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang.LocaleUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -37,16 +42,20 @@ public class MessageController implements MessageService {
 	private MudMessageLocaleRepository localeRepository;
 
 	@Override
-	public void putMessage(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable("targetCode") Long targetCode, @RequestParam("message") String message, @RequestParam(name="parms", required=false) String...parms) {
+	public void putMessage(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, 
+			@PathVariable("targetCode") Long targetCode, @RequestParam("message") String message, 
+			@RequestParam(name="senderCode", required=false) Long senderCode, @RequestParam(name="senderName", required=false) String senderName, 
+			@RequestParam(name="parms", required=false) String...parms) {
 		
 		MudMessage dbMessage = new MudMessage();
 		
 		dbMessage.setBeingCode(targetCode);
 		dbMessage.setMessageKey(message);
 		dbMessage.setReadFlag(false);
+		dbMessage.setInsertDate(new java.sql.Timestamp(System.currentTimeMillis()));
 		
-		dbMessage.setSenderCode(null);
-		dbMessage.setSenderName(null);
+		dbMessage.setSenderCode(senderCode);
+		dbMessage.setSenderName(senderName);
 		
 		dbMessage = repository.save(dbMessage);
 		
@@ -75,7 +84,10 @@ public class MessageController implements MessageService {
 	}
 
 	@Override
-	public void broadcastMessage(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable("placeCode") Integer placeCode, @RequestParam("message") String message, @RequestParam(name="parms", required=false) String...parms) {
+	public void broadcastMessage(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, 
+			@PathVariable("placeCode") Integer placeCode, @RequestParam("message") String message, 
+			@RequestParam(name="senderCode", required=false) Long senderCode, @RequestParam(name="senderName", required=false) String senderName, 
+			@RequestParam(name="parms", required=false) String...parms) {
 		
 		// Select all beings from a place
 		List<Being> allBeingFromPlace = beingService.getAllFromPlace("aforgotten", placeCode);
@@ -83,16 +95,21 @@ public class MessageController implements MessageService {
 		for(Being curBeing: allBeingFromPlace) {
 			
 			if (curBeing.getBeingType() == Being.BEING_TYPE_PLAYER) {
-				putMessage(authToken, curBeing.getBeingCode(), message, parms);
+				putMessage(authToken, curBeing.getBeingCode(), message, senderCode, senderName, parms);
 			}
 		}
 	}
 	
 	
 	@Override
-	public List<Message> getMessage(@RequestHeader(TokenService.HEADER_TOKEN) String authToken) {
+	public List<Message> getMessage(@RequestHeader(TokenService.HEADER_TOKEN) String authToken,
+			@RequestParam(name="allMessages", defaultValue="false", required=false) Boolean allMessages,
+			@RequestParam(name="pageCount", defaultValue="0", required=false) Integer pageCount,
+			@RequestParam(name="pageSize", defaultValue="10", required=false) Integer pageSize) {
 		
 		List<Message> result = new ArrayList<Message>();
+		
+		PageRequest page = new PageRequest(pageCount, pageSize, Sort.Direction.DESC, "insertDate");
 		
 		// Obtaining the caller locale
 		String callerLocale = TokenService.getLocaleFromToken(authToken);
@@ -101,9 +118,15 @@ public class MessageController implements MessageService {
 		Long beingCode = TokenService.getBeingCodeFromToken(authToken);
 		
 		if (beingCode!=null) {
-			Iterable<MudMessage> lstMessage = repository.findByBeingCode(beingCode);
+			Page<MudMessage> lstMessage = null;
 			
-			for(MudMessage curDbMessage: lstMessage) {
+			if (allMessages) {
+				lstMessage = repository.findByBeingCode(beingCode, page);
+			} else {
+				lstMessage = repository.findUnreadByBeingCode(beingCode, page);
+			}
+			
+			for(MudMessage curDbMessage: lstMessage.getContent()) {
 				
 				result.add(buildMessage(curDbMessage, callerLocale));
 
@@ -173,7 +196,12 @@ public class MessageController implements MessageService {
 		
 		result.setSenderCode(a.getSenderCode());
 		result.setSenderName(a.getSenderName());
-		result.setInsertTurn(a.getInsertTurn());
+
+		DateFormat df = 
+				DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, 
+						LocaleUtils.toLocale(callerLocale));
+		
+		result.setMessageDate(df.format(a.getInsertDate()));
 		result.setMessage(actualMessage);
 
 		return result;

@@ -1,5 +1,6 @@
 package com.jpinfo.mudengine.message.model;
 
+import java.sql.Timestamp;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -33,8 +34,8 @@ public class MudMessage {
 	@Column(name="SENDER_NAME")
 	private String senderName;
 
-	@Column(name="INSERT_TURN")
-	private Long insertTurn;
+	@Column(name="INSERT_DATE")
+	private Timestamp insertDate;
 
 	@Column(name="MESSAGE_KEY")
 	private String messageKey;
@@ -67,12 +68,12 @@ public class MudMessage {
 		this.messageId = messageId;
 	}
 
-	public Long getInsertTurn() {
-		return insertTurn;
+	public Timestamp getInsertDate() {
+		return insertDate;
 	}
 
-	public void setInsertTurn(Long insertTurn) {
-		this.insertTurn = insertTurn;
+	public void setInsertDate(Timestamp insertDate) {
+		this.insertDate = insertDate;
 	}
 
 	public String getMessageKey() {

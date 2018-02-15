@@ -16,11 +16,20 @@ public interface MessageService {
 	
 	
 	@RequestMapping(method=RequestMethod.PUT, path="/being/{targetCode}")
-	public void putMessage(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable("targetCode") Long targetCode, @RequestParam("message") String message, @RequestParam(name="parms", required=false) String...parms);
+	public void putMessage(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, 
+			@PathVariable("targetCode") Long targetCode, @RequestParam("message") String message, 
+			@RequestParam(name="senderCode", required=false) Long senderCode, @RequestParam(name="senderName", required=false) String senderName, 
+			@RequestParam(name="parms", required=false) String...parms);
 
 	@RequestMapping(method=RequestMethod.PUT, path="/place/{placeCode}")
-	public void broadcastMessage(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable("placeCode") Integer placeCode, @RequestParam("message") String message, @RequestParam(name="parms", required=false) String...parms);
+	public void broadcastMessage(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, 
+			@PathVariable("placeCode") Integer placeCode, @RequestParam("message") String message, 
+			@RequestParam(name="senderCode", required=false) Long senderCode, @RequestParam(name="senderName", required=false) String senderName, 
+			@RequestParam(name="parms", required=false) String...parms);
 	
 	@RequestMapping(method=RequestMethod.GET)
-	public List<Message> getMessage(@RequestHeader(TokenService.HEADER_TOKEN) String authToken);
+	public List<Message> getMessage(@RequestHeader(TokenService.HEADER_TOKEN) String authToken,
+			@RequestParam(name="allMessages", defaultValue="false", required=false) Boolean allMessages,
+			@RequestParam(name="pageCount", defaultValue="1", required=false) Integer pageCount,
+			@RequestParam(name="pageSize", defaultValue="10", required=false) Integer pageSize);
 }

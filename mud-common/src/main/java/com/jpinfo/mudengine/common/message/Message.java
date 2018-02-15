@@ -2,7 +2,7 @@ package com.jpinfo.mudengine.common.message;
 
 public class Message {
 
-	private Long insertTurn;
+	private String messageDate;
 	
 	private Long senderCode;
 	
@@ -10,12 +10,12 @@ public class Message {
 	
 	private String message;
 
-	public Long getInsertTurn() {
-		return insertTurn;
+	public String getMessageDate() {
+		return messageDate;
 	}
 
-	public void setInsertTurn(Long insertTurn) {
-		this.insertTurn = insertTurn;
+	public void setMessageDate(String messageDate) {
+		this.messageDate = messageDate;
 	}
 
 	public Long getSenderCode() {
