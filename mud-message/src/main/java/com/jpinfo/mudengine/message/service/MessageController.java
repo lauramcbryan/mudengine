@@ -15,7 +15,6 @@ import com.jpinfo.mudengine.common.message.Message;
 import com.jpinfo.mudengine.common.security.TokenService;
 import com.jpinfo.mudengine.common.service.MessageService;
 import com.jpinfo.mudengine.message.client.BeingServiceClient;
-import com.jpinfo.mudengine.message.client.PlaceServiceClient;
 import com.jpinfo.mudengine.message.model.MudMessage;
 import com.jpinfo.mudengine.message.model.MudMessageLocale;
 import com.jpinfo.mudengine.message.model.MudMessageParm;
@@ -38,12 +37,12 @@ public class MessageController implements MessageService {
 	private MudMessageLocaleRepository localeRepository;
 
 	@Override
-	public void putMessage(@RequestHeader String authToken, @PathVariable Long targetCode, @RequestParam String messageKey, @RequestParam String... parms) {
+	public void putMessage(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable("targetCode") Long targetCode, @RequestParam("message") String message, @RequestParam(name="parms", required=false) String...parms) {
 		
 		MudMessage dbMessage = new MudMessage();
 		
 		dbMessage.setBeingCode(targetCode);
-		dbMessage.setMessageKey(messageKey);
+		dbMessage.setMessageKey(message);
 		dbMessage.setReadFlag(false);
 		
 		dbMessage.setSenderCode(null);
@@ -53,26 +52,30 @@ public class MessageController implements MessageService {
 		
 		
 		int evalOrder = 0;
+		
+		if (parms!=null) {
 
-		for(String curParam: parms) {
-			
-			MudMessageParm dbParm = new MudMessageParm();
-			MudMessageParmPK pk = new MudMessageParmPK();
-			
-			pk.setMessageId(dbMessage.getMessageId());
-			pk.setEvalOrder(evalOrder);
-			dbParm.setValue(curParam);
-			
-			dbMessage.getParms().add(dbParm);
-			
-			evalOrder++;
+			for(String curParam: parms) {
+				
+				MudMessageParm dbParm = new MudMessageParm();
+				MudMessageParmPK pk = new MudMessageParmPK();
+				
+				pk.setMessageId(dbMessage.getMessageId());
+				pk.setEvalOrder(evalOrder);
+				dbParm.setValue(curParam);
+				dbParm.setId(pk);
+				
+				dbMessage.getParms().add(dbParm);
+				
+				evalOrder++;
+			}
 		}
 		
 		repository.save(dbMessage);
 	}
 
 	@Override
-	public void broadcastMessage(String authToken, Integer placeCode, String messageKey, String... parms) {
+	public void broadcastMessage(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable("placeCode") Integer placeCode, @RequestParam("message") String message, @RequestParam(name="parms", required=false) String...parms) {
 		
 		// Select all beings from a place
 		List<Being> allBeingFromPlace = beingService.getAllFromPlace("aforgotten", placeCode);
@@ -80,7 +83,7 @@ public class MessageController implements MessageService {
 		for(Being curBeing: allBeingFromPlace) {
 			
 			if (curBeing.getBeingType() == Being.BEING_TYPE_PLAYER) {
-				putMessage(authToken, curBeing.getBeingCode(), messageKey, parms);
+				putMessage(authToken, curBeing.getBeingCode(), message, parms);
 			}
 		}
 	}
@@ -123,10 +126,10 @@ public class MessageController implements MessageService {
 		
 		Message result = new Message();
 		List<Object> parmsList = new ArrayList<Object>();
-		String localizedMessage = null;
+		String actualMessage = a.getMessageKey();
 		
 		// Verify if the messageKey is a string table entry
-		if (MessageHelper.isLocalizedKey(a.getMessageKey())) {
+		if (MessageHelper.isLocalizedKey(actualMessage)) {
 			
 			MudMessageLocalePK pk = new MudMessageLocalePK();
 			pk.setMessageKey(MessageHelper.getLocalizedKey(a.getMessageKey()));
@@ -135,9 +138,9 @@ public class MessageController implements MessageService {
 			MudMessageLocale dbLocalizedMessage = localeRepository.findOne(pk);
 			
 			if (dbLocalizedMessage!=null) {
-				localizedMessage = dbLocalizedMessage.getMessageText();
+				actualMessage = dbLocalizedMessage.getMessageText();
 			} else {
-				localizedMessage = "Message key " + pk.getMessageKey() + " not found in " + callerLocale + " locale";
+				actualMessage = "Message key " + pk.getMessageKey() + " not found in " + callerLocale + " locale";
 			}
 		}
 
@@ -163,19 +166,15 @@ public class MessageController implements MessageService {
 			}
 		}
 		
-		String formattedMessage = null;
-		
 		if (parmsList.size()>0) {
 			// Format the message
-			formattedMessage = String.format(localizedMessage, parmsList.toArray());			
-		} else {
-			formattedMessage = localizedMessage;
+			actualMessage = String.format(actualMessage, parmsList.toArray());			
 		}
 		
 		result.setSenderCode(a.getSenderCode());
 		result.setSenderName(a.getSenderName());
 		result.setInsertTurn(a.getInsertTurn());
-		result.setMessage(formattedMessage);
+		result.setMessage(actualMessage);
 
 		return result;
 	}

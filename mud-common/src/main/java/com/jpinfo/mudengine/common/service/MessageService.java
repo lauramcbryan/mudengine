@@ -16,10 +16,10 @@ public interface MessageService {
 	
 	
 	@RequestMapping(method=RequestMethod.PUT, path="/being/{targetCode}")
-	public void putMessage(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable("targetCode") Long targetCode, @RequestParam("message") String messageKey, @RequestParam(name="parms") String...parms);
+	public void putMessage(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable("targetCode") Long targetCode, @RequestParam("message") String message, @RequestParam(name="parms", required=false) String...parms);
 
 	@RequestMapping(method=RequestMethod.PUT, path="/place/{placeCode}")
-	public void broadcastMessage(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable("placeCode") Integer placeCode, @RequestParam("message") String messageKey, @RequestParam(name="parms") String...parms);
+	public void broadcastMessage(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable("placeCode") Integer placeCode, @RequestParam("message") String message, @RequestParam(name="parms", required=false) String...parms);
 	
 	@RequestMapping(method=RequestMethod.GET)
 	public List<Message> getMessage(@RequestHeader(TokenService.HEADER_TOKEN) String authToken);
