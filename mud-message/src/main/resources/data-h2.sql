@@ -22,8 +22,8 @@ insert into mud_message(message_id, being_code, insert_turn, message_key, read_f
 insert into mud_message(message_id, being_code, insert_turn, message_key, read_flag) values(3, 1, 12, '{str:MESSAGE2}', false);
 insert into mud_message(message_id, being_code, insert_turn, message_key, read_flag) values(4, 1, 13, '{str:MESSAGE3}', false);
 insert into mud_message_parm(message_id, eval_order, value) values(3, 1, 'ONE');
-insert into mud_message_parm(message_id, eval_order, value) values(4, 1, 'TEXT');
 insert into mud_message_parm(message_id, eval_order, value) values(4, 2, 'NUMERIC');
+insert into mud_message_parm(message_id, eval_order, value) values(4, 1, 'TEXT');
 
 -- localized parameter
 insert into mud_message(message_id, being_code, insert_turn, message_key, read_flag) values(5, 1, 14, '{str:MESSAGE4}', false);

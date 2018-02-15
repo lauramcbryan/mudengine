@@ -2,6 +2,7 @@ package com.jpinfo.mudengine.common.security;
 
 import java.util.Collections;
 
+
 import java.util.Date;
 
 import org.apache.tomcat.util.codec.binary.Base64;
@@ -162,8 +163,13 @@ public class TokenService {
 	
 	public static void main(String[] args) {
 		
-		String token = TokenService.buildInternalToken();
+		String internalToken = TokenService.buildInternalToken();
 		
-		System.out.println(token);
+		String usToken = TokenService.buildToken("username",1L,"en_US", 1L);
+		String brToken = TokenService.buildToken("username",1L,"pt_BR", 1L);
+		
+		System.out.println("internal = " + internalToken);
+		System.out.println("en_US = " + usToken);
+		System.out.println("pt_BR = " + brToken);
 	}
 }

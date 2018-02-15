@@ -9,14 +9,18 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.jpinfo.mudengine.common.being.Being;
 import com.jpinfo.mudengine.common.exception.IllegalParameterException;
 import com.jpinfo.mudengine.common.message.Message;
 import com.jpinfo.mudengine.common.security.TokenService;
 import com.jpinfo.mudengine.common.service.MessageService;
+import com.jpinfo.mudengine.message.client.BeingServiceClient;
+import com.jpinfo.mudengine.message.client.PlaceServiceClient;
 import com.jpinfo.mudengine.message.model.MudMessage;
 import com.jpinfo.mudengine.message.model.MudMessageLocale;
 import com.jpinfo.mudengine.message.model.MudMessageParm;
 import com.jpinfo.mudengine.message.model.pk.MudMessageLocalePK;
+import com.jpinfo.mudengine.message.model.pk.MudMessageParmPK;
 import com.jpinfo.mudengine.message.repository.MudMessageLocaleRepository;
 import com.jpinfo.mudengine.message.repository.MudMessageRepository;
 import com.jpinfo.mudengine.message.utils.MessageHelper;
@@ -24,6 +28,8 @@ import com.jpinfo.mudengine.message.utils.MessageHelper;
 @RestController
 public class MessageController implements MessageService {
 	
+	@Autowired
+	private BeingServiceClient beingService;
 	
 	@Autowired
 	private MudMessageRepository repository;
@@ -32,11 +38,54 @@ public class MessageController implements MessageService {
 	private MudMessageLocaleRepository localeRepository;
 
 	@Override
-	public void putMessage(@RequestHeader String authToken, @PathVariable Long targetCode, @RequestParam String messageKey, @RequestParam Object... parms) {
-		// TODO Auto-generated method stub
+	public void putMessage(@RequestHeader String authToken, @PathVariable Long targetCode, @RequestParam String messageKey, @RequestParam String... parms) {
+		
+		MudMessage dbMessage = new MudMessage();
+		
+		dbMessage.setBeingCode(targetCode);
+		dbMessage.setMessageKey(messageKey);
+		dbMessage.setReadFlag(false);
+		
+		dbMessage.setSenderCode(null);
+		dbMessage.setSenderName(null);
+		
+		dbMessage = repository.save(dbMessage);
+		
+		
+		int evalOrder = 0;
 
+		for(String curParam: parms) {
+			
+			MudMessageParm dbParm = new MudMessageParm();
+			MudMessageParmPK pk = new MudMessageParmPK();
+			
+			pk.setMessageId(dbMessage.getMessageId());
+			pk.setEvalOrder(evalOrder);
+			dbParm.setValue(curParam);
+			
+			dbMessage.getParms().add(dbParm);
+			
+			evalOrder++;
+		}
+		
+		repository.save(dbMessage);
 	}
 
+	@Override
+	public void broadcastMessage(String authToken, Integer placeCode, String messageKey, String... parms) {
+		
+		// Select all beings from a place
+		List<Being> allBeingFromPlace = beingService.getAllFromPlace("aforgotten", placeCode);
+		
+		for(Being curBeing: allBeingFromPlace) {
+			
+			if (curBeing.getBeingType() == Being.BEING_TYPE_PLAYER) {
+				putMessage(authToken, curBeing.getBeingCode(), messageKey, parms);
+			}
+		}
+	}
+	
+	
 	@Override
 	public List<Message> getMessage(@RequestHeader(TokenService.HEADER_TOKEN) String authToken) {
 		
