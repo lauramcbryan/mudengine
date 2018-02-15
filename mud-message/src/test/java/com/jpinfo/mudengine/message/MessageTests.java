@@ -61,7 +61,7 @@ public class MessageTests {
 		usHeaders.add(TokenService.HEADER_TOKEN, usToken);
 
 		HttpHeaders brHeaders = new HttpHeaders();
-		usHeaders.add(TokenService.HEADER_TOKEN, brToken);
+		brHeaders.add(TokenService.HEADER_TOKEN, brToken);
 		
 		HttpEntity<Object> usAuthEntity = new HttpEntity<Object>(usHeaders);
 		HttpEntity<Object> brAuthEntity = new HttpEntity<Object>(brHeaders);

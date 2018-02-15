@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.jpinfo.mudengine.common.exception.IllegalParameterException;
 import com.jpinfo.mudengine.common.message.Message;
@@ -20,6 +21,7 @@ import com.jpinfo.mudengine.message.repository.MudMessageLocaleRepository;
 import com.jpinfo.mudengine.message.repository.MudMessageRepository;
 import com.jpinfo.mudengine.message.utils.MessageHelper;
 
+@RestController
 public class MessageController implements MessageService {
 	
 	
@@ -36,7 +38,7 @@ public class MessageController implements MessageService {
 	}
 
 	@Override
-	public List<Message> getMessage(@RequestHeader String authToken) {
+	public List<Message> getMessage(@RequestHeader(TokenService.HEADER_TOKEN) String authToken) {
 		
 		List<Message> result = new ArrayList<Message>();
 		
@@ -111,10 +113,15 @@ public class MessageController implements MessageService {
 				parmsList.add(curParm.getValue().toString());
 			}
 		}
-
-		// Format the message
-		String formattedMessage = String.format(localizedMessage, parmsList.toArray());
 		
+		String formattedMessage = null;
+		
+		if (parmsList.size()>0) {
+			// Format the message
+			formattedMessage = String.format(localizedMessage, parmsList.toArray());			
+		} else {
+			formattedMessage = localizedMessage;
+		}
 		
 		result.setSenderCode(a.getSenderCode());
 		result.setSenderName(a.getSenderName());

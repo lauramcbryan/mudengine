@@ -19,5 +19,5 @@ public interface MessageService {
 	public void putMessage(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable("targetCode") Long targetCode, @RequestParam("message") String messageKey, @RequestParam(name="parms") Object...parms);
 	
 	@RequestMapping(method=RequestMethod.GET)
-	public List<Message> getMessage(String authToken);
+	public List<Message> getMessage(@RequestHeader(TokenService.HEADER_TOKEN) String authToken);
 }

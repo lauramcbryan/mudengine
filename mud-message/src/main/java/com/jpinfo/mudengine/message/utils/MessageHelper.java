@@ -4,11 +4,11 @@ public class MessageHelper {
 	
 	public static boolean isLocalizedKey(String messageKey) {
 
-		return messageKey.startsWith("${");
+		return messageKey.startsWith("{str:");
 	}
 	
 	public static String getLocalizedKey(String messageKey) {
 		
-		return messageKey.substring(2, messageKey.length()-1);
+		return messageKey.substring("{str:".length(), messageKey.length()-1);
 	}
 }
