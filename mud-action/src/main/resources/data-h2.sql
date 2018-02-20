@@ -1,21 +1,82 @@
-insert into mud_action_class(action_class_code, verb, action_type) values ('WALK', 'WALK', 0);
+insert into mud_action_class(action_class_code, verb, mediator_type, target_type, action_type) values ('WALKDIR', 'WALK', null, 'DIRECTION', 0);
+insert into mud_action_class_prereq(action_class_code, eval_order, check_expression, fail_expression) values ('WALKDIR', 1, 'actor.place.exits[#root.targetCode]!=null', 'actor.addMessage(''${str:NOEXIT}'')');
+insert into mud_action_class_prereq(action_class_code, eval_order, check_expression, fail_expression) values ('WALKDIR', 2, 'actor.place.exits[#root.targetCode].opened', 'actor.addMessage(''${str:EXITCLOSED}'')');
 
-insert into mud_action_class_prereq(action_class_code, eval_order, expression, message_code) values ('WALK', 1, 'actor.place.exits[#root.targetCode]!=null', 10);
-insert into mud_action_class_prereq(action_class_code, eval_order, expression, message_code) values ('WALK', 2, 'actor.place.exits[#root.targetCode].opened', 11);
-
-insert into mud_action_class_effect(action_class_code, eval_order, expression, message_code) values ('WALK', 1, 'actor.being.curPlaceCode = actor.place.exits[#root.targetCode].targetPlaceCode', 12);
+insert into mud_action_class_effect(action_class_code, eval_order, effect_expression, message_expression) values ('WALKDIR', 1, 'actor.being.curPlaceCode = actor.place.exits[#root.targetCode].targetPlaceCode', null);
 -- insert into mud_action_class_effect(action_class_code, eval_order, expression) values ('WALK', 2, 'actor.being.curWorld = actor.place.exits[#root.targetCode].targetWorld');
-insert into mud_action_class_effect(action_class_code, eval_order, expression) values ('WALK', 2, 'actor.place = null');
+insert into mud_action_class_effect(action_class_code, eval_order, effect_expression) values ('WALKDIR', 2, 'actor.place = null');
+
+-- ========================================================================================================
 
 
-insert into mud_action_class(action_class_code, verb, action_type) values ('LOOK', 'LOOK', 0);
+insert into mud_action_class(action_class_code, verb, mediator_type, target_type, action_type) values ('LOOKPLACE', 'LOOK', null, 'PLACE' 0);
 
-insert into mud_action_class_effect(action_class_code, eval_order, expression) values ('LOOK', 1, '$action.sendMessageTo($action.being.beingCode, ''BEING'', ''YOUAREIN'', actor.place.name)');
-insert into mud_action_class_effect(action_class_code, eval_order, expression) values ('LOOK', 2, '$action.sendMessageTo($action.being.beingCode, ''BEING'', ''YOUAREINDESC'', actor.place.description)');
-insert into mud_action_class_effect(action_class_code, eval_order, expression) values ('LOOK', 3, '$action.sendMessageTo($action.being.beingCode, ''BEING'', ''EXITHEADER'')');
-insert into mud_action_class_effect(action_class_code, eval_order, expression) values ('LOOK', 4, '$action.sendMessageTo($action.being.beingCode, ''BEING'', ''YOUAREIN'', actor.place.name)');
+insert into mud_action_class_prereq(action_class_code, eval_order, check_expression, fail_expression) values ('LOOKPLACE', 1, 
+	'actor.being.curPlaceCode==target.place.plaCeCode', 'actor.addMessage(''${str:NOPLACE}'', #root.targetCode)');
+
+insert into mud_action_class_effect(action_class_code, eval_order, effect_expression) values ('LOOKPLACE', 1, 'target.describeIt(#root.actor)');
 
 
-insert into mud_action(ACTION_UID, ISSUER_CODE, ACTOR_CODE, ACTION_CLASS_CODE, WORLD_NAME, MEDIATOR_CODE, PLACE_CODE, TARGET_CODE, TARGET_TYPE, START_TURN, CUR_STATE) 
-	values(1, 1, 1, 'WALK', 'aforgotten', null, 1, 'NORTH', 3, 1, 0);
 
+insert into mud_action_class(action_class_code, verb, mediator_type, target_type, action_type) values ('LOOKBEING', 'LOOK', null, 'BEING' 0);
+
+insert into mud_action_class_prereq(action_class_code, eval_order, check_expression, fail_expression) values ('LOOKBEING', 1, 
+	'actor.being.curPlaceCode==target.being.curPlaCeCode', 'actor.addMessage(''${str:NOBEING}'', #root.targetCode)');
+
+insert into mud_action_class_effect(action_class_code, eval_order, effect_expression) values ('LOOKBEING', 1, 'target.describeIt(#root.actor)');
+
+
+
+insert into mud_action_class(action_class_code, verb, mediator_type, target_type, action_type) values ('LOOKITEM', 'LOOK', null, 'ITEM' 0);
+
+insert into mud_action_class_prereq(action_class_code, eval_order, check_expression, fail_expression) values ('LOOKITEM', 1, 
+	'((actor.being.curPlaceCode==target.item.plaCeCode) || (actor.being.curPlaceCode==target.item.owner))', 
+	'actor.addMessage(''${str:NOTHAVE}'', #root.targetCode)');
+
+insert into mud_action_class_effect(action_class_code, eval_order, effect_expression) values ('LOOKITEM', 1, 'target.describeIt(#root.actor)');
+
+-- ========================================================================================================
+
+
+insert into mud_action_class(action_class_code, verb, mediator_type, target_type, action_type) values ('TAKE', 'TAKE', null, 'ITEM', 0);
+
+insert into mud_action_class_prereq(action_class_code, eval_order, check_expression, fail_expression) values ('TAKE', 1, 'actor.being.curPlaceCode==target.item.curPlaceCode)', 'actor.addMessage(''${str:NOTITEM}'')');
+
+insert into mud_action_class_effect(action_class_code, eval_order, effect_expression) values ('TAKE', 1, 'target.item.owner=actor.being.beingCode');
+insert into mud_action_class_effect(action_class_code, eval_order, effect_expression, message_expression) values ('TAKE', 2, 'target.item.curPlaceCode=null', 'actor.addMessage(''${str:YOUTAKE}'', #root.target.item.itemClass.name)');
+
+
+-- ========================================================================================================
+
+
+insert into mud_action_class(action_class_code, verb, mediator_type, target_type, action_type) values ('DROP', 'DROP', null, 'ITEM', 0);
+
+insert into mud_action_class_prereq(action_class_code, eval_order, check_expression, fail_expression) values ('DROP', 1, 'actor.being.beingCode==target.item.owner)', 'actor.addMessage(''${str:NOTHAVE}'')');
+
+insert into mud_action_class_effect(action_class_code, eval_order, effect_expression) values ('DROP', 1, 'target.item.owner=null');
+insert into mud_action_class_effect(action_class_code, eval_order, effect_expression, message_expression) values ('DROP', 2, 'target.item.curPlaceCode=actor.place.placeCode', 'actor.addMessage(''${str:YOUDROP}'', #root.target.item.itemClass.name)');
+
+
+-- ========================================================================================================
+
+insert into mud_action_class(action_class_code, verb, mediator_type, target_type, action_type) values ('TALK', 'TALK', 0, null, 'BEING');
+
+insert into mud_action_class_prereq(action_class_code, eval_order, check_expression, fail_expression) values ('TALK', 1, 'actor.being.curPlaceCode==target.being.curPlaceCode)', 'actor.addMessage(''${str:NOBEING}'')');
+
+insert into mud_action_class_effect(action_class_code, eval_order, effect_expression) values ('TALK', 1, 'target.addMessage(#root.mediatorCode)');
+
+
+-- ========================================================================================================
+
+insert into mud_action_class(action_class_code, verb, mediator_type, target_type, action_type) values ('SHOUT', 'SHOUT', null, 'PLACE', 0);
+
+insert into mud_action_class_prereq(action_class_code, eval_order, check_expression, fail_expression) values ('SHOUT', 1, 'actor.place.placeCode==target.place.placeCode)', 'actor.addMessage(''${str:NOTHERE_PLACE}'')');
+
+insert into mud_action_class_effect(action_class_code, eval_order, effect_expression) values ('SHOUT', 1, 'target.addMessage(#root.mediatorCode)');
+
+
+-- ========================================================================================================
+
+
+--insert into mud_action(ACTION_UID, ISSUER_CODE, ACTOR_CODE, ACTION_CLASS_CODE, WORLD_NAME, MEDIATOR_CODE, PLACE_CODE, TARGET_CODE, TARGET_TYPE, START_TURN, CUR_STATE) 
+--	values(1, 1, 1, 'WALK', 'aforgotten', null, 1, 'NORTH', 'DIRECTION', 1, 0);

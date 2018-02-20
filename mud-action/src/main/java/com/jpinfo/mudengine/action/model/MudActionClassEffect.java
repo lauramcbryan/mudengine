@@ -21,7 +21,7 @@ public class MudActionClassEffect implements java.io.Serializable {
 	private String expression;
 	
 	@Column
-	private Integer messageCode;
+	private String messageExpression;
 
 	public String getActionClassCode() {
 		return actionClassCode;
@@ -47,12 +47,12 @@ public class MudActionClassEffect implements java.io.Serializable {
 		this.expression = expression;
 	}
 
-	public Integer getMessageCode() {
-		return messageCode;
+	public String getMessageExpression() {
+		return messageExpression;
 	}
 
-	public void setMessageCode(Integer messageCode) {
-		this.messageCode = messageCode;
+	public void setMessageExpression(String messageExpression) {
+		this.messageExpression = messageExpression;
 	}
 
 	@Override

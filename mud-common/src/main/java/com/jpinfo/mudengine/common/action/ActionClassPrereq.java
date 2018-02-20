@@ -5,7 +5,9 @@ public class ActionClassPrereq implements Comparable<ActionClassPrereq> {
 
 	private Integer evalOrder;
 	
-	private String expression;
+	private String checkExpression;
+	
+	private String failExpression;
 
 	public Integer getEvalOrder() {
 		return evalOrder;
@@ -15,12 +17,20 @@ public class ActionClassPrereq implements Comparable<ActionClassPrereq> {
 		this.evalOrder = evalOrder;
 	}
 
-	public String getExpression() {
-		return expression;
+	public String getCheckExpression() {
+		return checkExpression;
 	}
 
-	public void setExpression(String expression) {
-		this.expression = expression;
+	public void setCheckExpression(String checkExpression) {
+		this.checkExpression = checkExpression;
+	}
+
+	public String getFailExpression() {
+		return failExpression;
+	}
+
+	public void setFailExpression(String failExpression) {
+		this.failExpression = failExpression;
 	}
 
 	public int compareTo(ActionClassPrereq other) {

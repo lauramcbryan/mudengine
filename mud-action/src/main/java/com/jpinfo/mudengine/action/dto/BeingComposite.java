@@ -1,13 +1,12 @@
 package com.jpinfo.mudengine.action.dto;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
-import com.jpinfo.mudengine.action.utils.ActionMessages;
+import com.jpinfo.mudengine.action.interfaces.ActionTarget;
+import com.jpinfo.mudengine.action.utils.ActionMessage;
+import com.jpinfo.mudengine.common.action.Action.EnumTargetType;
 import com.jpinfo.mudengine.common.being.Being;
-import com.jpinfo.mudengine.common.interfaces.ActionTarget;
-import com.jpinfo.mudengine.common.interfaces.Reaction;
 import com.jpinfo.mudengine.common.item.Item;
 import com.jpinfo.mudengine.common.place.Place;
 
@@ -19,16 +18,16 @@ public class BeingComposite implements ActionTarget  {
 	
 	private Place place;
 	
-	private List<ActionMessages> messages;
+	private List<ActionMessage> messages;
 	
 	public BeingComposite() {
-		
+		this.messages = new ArrayList<ActionMessage>();		
 	}
 	
 	public BeingComposite(Being simpleBeing) {
 		this.being = simpleBeing;
 		
-		this.messages = new ArrayList<ActionMessages>();
+		this.messages = new ArrayList<ActionMessage>();
 	}
 
 	public List<Item> getInventory() {
@@ -51,19 +50,36 @@ public class BeingComposite implements ActionTarget  {
 		return being;
 	}
 
-	@Override
-	public Collection<Reaction> getReactions(String actionCode, boolean isBefore) {
-		return this.being.getReactions(actionCode, isBefore);
-	}
-
-	public List<ActionMessages> getMessages() {
+	public List<ActionMessage> getMessages() {
 		return messages;
 	}
 	
-	public void addMessage(String messageKey, Object... parms) {
+	public void addMessage(Long senderCode, String messageKey, String... parms) {
 		
-		this.messages.add(new ActionMessages(this.getBeing().getBeingCode(), messageKey, parms));
+		this.messages.add(new ActionMessage(senderCode, this.getBeing().getBeingCode(), 
+				EnumTargetType.BEING, messageKey, parms));
+	}
+
+	@Override
+	public void describeIt(ActionTarget target) {
+
+		// TODO Add more information about the being
+		if (getBeing().getBeingType().equals(Being.BEING_TYPE_REGULAR_NON_SENTIENT)) {
+			target.addMessage(null, "{str:PACKOFBEINGS}", getBeing().getBeingClass().getName());
+		} else if (getBeing().getBeingType().equals(Being.BEING_TYPE_REGULAR_SENTIENT)) {
+			target.addMessage(null, "{str:GROUPOFBEINGS}", getBeing().getBeingClass().getName());
+		} else {
+			target.addMessage(null, "{str:HEREIS}", getBeing().getName());
+		}
 		
+
+	}
+	
+	public void describeYourself() {
+		
+		// TODO Add more information about yourself
+		this.addMessage(null, "{str:YOUAREIN}", getPlace().getPlaceClass().getName());	
+		this.addMessage(null, "{str:YOUAREINDESC}", getPlace().getPlaceClass().getDescription());
 	}
 	
 }

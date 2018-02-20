@@ -15,6 +15,13 @@ public class MudActionClass {
 	@Column
 	private String verb;
 	
+	@Column(name="MEDIATOR_TYPE")
+	private String mediatorType;  // {BEING, ITEM, PLACE, DIRECTION, MESSAGE}
+	
+	@Column(name="TARGET_TYPE")
+	private String targetType;  // {BEING, ITEM, PLACE, DIRECTION, MESSAGE}
+	
+	
 	@Column(name="ACTION_TYPE")
 	private Integer actionType;    // 0 = SIMPLE, 1 = CONTINUOUS (effects every turn)
 	
@@ -82,5 +89,20 @@ public class MudActionClass {
 	public void setVerb(String verb) {
 		this.verb = verb;
 	}
-	
+
+	public String getMediatorType() {
+		return mediatorType;
+	}
+
+	public void setMediatorType(String mediatorType) {
+		this.mediatorType = mediatorType;
+	}
+
+	public String getTargetType() {
+		return targetType;
+	}
+
+	public void setTargetType(String targetType) {
+		this.targetType = targetType;
+	}
 }

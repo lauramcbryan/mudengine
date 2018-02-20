@@ -1,15 +1,13 @@
 package com.jpinfo.mudengine.common.item;
 
+
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.jpinfo.mudengine.common.interfaces.ActionTarget;
-import com.jpinfo.mudengine.common.interfaces.Reaction;
 import com.jpinfo.mudengine.common.itemClass.ItemClass;
 
-public class Item implements Serializable, ActionTarget {
+public class Item implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	private Long itemCode;
@@ -28,10 +26,6 @@ public class Item implements Serializable, ActionTarget {
 	
 	private Map<String, Integer> attrs;
 	
-	private Map<String, Collection<Reaction>> beforeReactions;
-	
-	private Map<String, Collection<Reaction>> afterReactions;
-
 	public Item() {
 		this.attrs = new HashMap<String, Integer>();
 	}
@@ -50,15 +44,6 @@ public class Item implements Serializable, ActionTarget {
 
 	public void setItemClassCode(String itemClassCode) {
 		this.itemClassCode = itemClassCode;
-	}
-
-	public Collection<Reaction> getReactions(String actionCode, boolean isBefore) {
-		
-		if (isBefore) {
-			return this.beforeReactions.get(actionCode);
-		} else {
-			return this.afterReactions.get(actionCode);
-		}
 	}
 
 	public Integer getCurPlaceCode() {

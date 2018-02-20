@@ -16,11 +16,11 @@ public class MudActionClassPrereq implements java.io.Serializable {
 	@Column
 	private Integer evalOrder;
 	
-	@Column
-	private String expression;
+	@Column(name="CHECK_EXPRESSION")
+	private String checkExpression;
 	
-	@Column
-	private String messageCode;
+	@Column(name="FAIL_EXPRESSION")
+	private String failExpression;
 
 	public String getActionClassCode() {
 		return actionClassCode;
@@ -38,20 +38,20 @@ public class MudActionClassPrereq implements java.io.Serializable {
 		this.evalOrder = evalOrder;
 	}
 
-	public String getExpression() {
-		return expression;
+	public String getCheckExpression() {
+		return checkExpression;
 	}
 
-	public void setExpression(String expression) {
-		this.expression = expression;
+	public void setCheckExpression(String checkExpression) {
+		this.checkExpression = checkExpression;
 	}
 
-	public String getMessageCode() {
-		return messageCode;
+	public String getFailExpression() {
+		return failExpression;
 	}
 
-	public void setMessageCode(String messageCode) {
-		this.messageCode = messageCode;
+	public void setFailExpr(String failExpr) {
+		this.failExpression = failExpr;
 	}
 
 	@Override

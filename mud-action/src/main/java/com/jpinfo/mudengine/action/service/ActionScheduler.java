@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.jpinfo.mudengine.action.client.BeingServiceClient;
 import com.jpinfo.mudengine.action.client.ItemServiceClient;
+import com.jpinfo.mudengine.action.client.MessageServiceClient;
 import com.jpinfo.mudengine.action.client.PlaceServiceClient;
 import com.jpinfo.mudengine.action.dto.ActionInfo;
 import com.jpinfo.mudengine.action.dto.BeingComposite;
@@ -17,10 +18,11 @@ import com.jpinfo.mudengine.action.dto.PlaceComposite;
 import com.jpinfo.mudengine.action.model.MudAction;
 import com.jpinfo.mudengine.action.repository.MudActionRepository;
 import com.jpinfo.mudengine.action.utils.ActionHelper;
-import com.jpinfo.mudengine.action.utils.ActionMessages;
+import com.jpinfo.mudengine.action.utils.ActionMessage;
 import com.jpinfo.mudengine.common.action.Action;
 import com.jpinfo.mudengine.common.action.Action.EnumActionState;
 import com.jpinfo.mudengine.common.exception.EntityNotFoundException;
+import com.jpinfo.mudengine.common.exception.IllegalParameterException;
 import com.jpinfo.mudengine.common.item.Item;
 import com.jpinfo.mudengine.common.security.TokenService;
 
@@ -40,6 +42,9 @@ public class ActionScheduler {
 	
 	@Autowired
 	private ItemServiceClient itemService;
+	
+	@Autowired
+	private MessageServiceClient messageService;
 	
 	@Autowired
 	private ActionHandler handler;
@@ -76,7 +81,7 @@ public class ActionScheduler {
 					updateEntities(fullState);
 					
 					// Update message queue
-					updateMessageQueue(fullState);
+					sendMessages(fullState);
 					
 				} catch(EntityNotFoundException e) {
 					curRunningAction.setCurrState(EnumActionState.CANCELLED);
@@ -111,7 +116,7 @@ public class ActionScheduler {
 					curPendingAction.setEndTurn(curAction.getEndTurn());
 					
 					// Update message queue
-					updateMessageQueue(fullState);
+					sendMessages(fullState);
 					
 				} catch(EntityNotFoundException e) {
 					curPendingAction.setCurrState(EnumActionState.CANCELLED);
@@ -131,8 +136,6 @@ public class ActionScheduler {
 	private void updateEntities(ActionInfo fullState) {
 		
 		String authToken = TokenService.buildInternalToken();
-		
-		// TODO: Identify which entities must to be updated
 
 		// Update the actor
 		beingService.updateBeing(authToken, 
@@ -143,8 +146,8 @@ public class ActionScheduler {
 		placeService.updatePlace(authToken, 
 				fullState.getActor().getPlace().getPlaceCode(), 
 				fullState.getActor().getPlace());
-		;
 
+		
 		// If the Mediator is used, updated it too
 		if (fullState.getMediator()!=null) {
 			itemService.updateItem(authToken, fullState.getMediator().getItemCode(), fullState.getMediator());
@@ -186,19 +189,40 @@ public class ActionScheduler {
 		
 	}
 	
-	private void updateMessageQueue(ActionInfo fullState) {
+	private void sendMessages(ActionInfo fullState) {
 		
-		for(ActionMessages curMessage: fullState.getMessages()) {
+		String authToken = TokenService.buildInternalToken();
+		
+		for(ActionMessage curActorMessage : fullState.getActor().getMessages()) {
 			
-			if (curMessage.getPlainMessage()!=null) {
+			// Send message to the actor
+			this.messageService.putMessage(authToken, fullState.getActorCode(), 
+					curActorMessage.getMessageKey(), 
+					null, null,
+					curActorMessage.args);
+			
+		}
+		
+		for(ActionMessage curTargetMessage: fullState.getTarget().getMessages()) {
+
+			// Send message to the target
+			switch (fullState.getTargetType()) {
+			
+			case BEING:
+				this.messageService.putMessage(authToken, fullState.getActorCode(), 
+						curTargetMessage.getMessageKey(), 
+						fullState.getActor().getBeing().getBeingCode(), fullState.getActor().getBeing().getName(),
+						curTargetMessage.args);
+				break;
+			
+			case PLACE:
+				throw new IllegalParameterException("Messages to PLACEs not supported.");
 				
-				// TODO: Send the message 
+			case ITEM:
+				throw new IllegalParameterException("Messages to ITEMs not supported.");
 				
-				
-			} else {
-				// TODO: Send the message				
+			default:
 			}
-			
 		}
 	}
 	

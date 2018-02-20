@@ -8,6 +8,7 @@ import com.jpinfo.mudengine.common.action.Action;
 import com.jpinfo.mudengine.common.action.ActionClass;
 import com.jpinfo.mudengine.common.action.ActionClassEffect;
 import com.jpinfo.mudengine.common.action.ActionClassPrereq;
+import com.jpinfo.mudengine.common.action.Action.EnumTargetType;
 
 public class ActionHelper {
 	
@@ -21,6 +22,12 @@ public class ActionHelper {
 		state.setCurState(a.getCurrStateEnum());
 		state.setActionClassCode(a.getActionClassCode());
 		state.setActorCode(a.getActorCode());
+		
+		state.setMediatorCode(a.getMediatorCode());
+		state.setMediatorType(EnumTargetType.valueOf(a.getMediatorType()));
+		
+		state.setTargetCode(a.getTargetCode());
+		state.setTargetType(a.getTargetTypeEnum());
 		
 		return state;
 	}
@@ -40,7 +47,8 @@ public class ActionHelper {
 			ActionClassPrereq newPrereq = new ActionClassPrereq();
 			
 			newPrereq.setEvalOrder(curPrereq.getEvalOrder());
-			newPrereq.setExpression(curPrereq.getExpression());
+			newPrereq.setCheckExpression(curPrereq.getCheckExpression());
+			newPrereq.setFailExpression(curPrereq.getFailExpression());
 			
 			result.getPrereqList().add(newPrereq);
 		}
@@ -51,6 +59,7 @@ public class ActionHelper {
 			
 			newEffect.setEvalOrder(curEffect.getEvalOrder());
 			newEffect.setExpression(curEffect.getExpression());
+			newEffect.setMessageExpression(curEffect.getMessageExpression());
 			
 			result.getEffectList().add(newEffect);
 		}

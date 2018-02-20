@@ -11,15 +11,13 @@ public class Action {
 
 	private String actionClassCode;
 	
-	private String worldName;
-	
-	private Long mediatorCode;
-	
-	private Integer placeCode;
-	
+	private String mediatorCode;
+
+	private EnumTargetType mediatorType;  // {BEING, ITEM, PLACE, DIRECTION, MESSAGE}
+
 	private String targetCode;
 
-	private EnumTargetType targetType;  // {BEING, ITEM, PLACE, PLACE_CLASS}
+	private EnumTargetType targetType;  // {BEING, ITEM, PLACE, DIRECTION, MESSAGE}
 	
 	private Long actionId;
 	
@@ -69,28 +67,22 @@ public class Action {
 		this.actionClassCode = actionCode;
 	}
 
-	public String getWorldName() {
-		return worldName;
-	}
-
-	public void setWorldName(String worldName) {
-		this.worldName = worldName;
-	}
-
-	public Long getMediatorCode() {
+	public String getMediatorCode() {
 		return mediatorCode;
 	}
 
-	public void setMediatorCode(Long mediatorCode) {
+	public void setMediatorCode(String mediatorCode) {
 		this.mediatorCode = mediatorCode;
 	}
-
-	public Integer getPlaceCode() {
-		return placeCode;
+	
+	public EnumTargetType getMediatorType() {
+		return mediatorType;
 	}
 
-	public void setPlaceCode(Integer placeCode) {
-		this.placeCode = placeCode;
+
+
+	public void setMediatorType(EnumTargetType mediatorType) {
+		this.mediatorType = mediatorType;
 	}
 
 	public String getTargetCode() {

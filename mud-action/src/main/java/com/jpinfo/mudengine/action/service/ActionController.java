@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.expression.EvaluationContext;
@@ -75,7 +76,10 @@ public class ActionController implements ActionService {
 	
 	@Override
 	public Action insertCommand(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, 
-			@PathVariable("verb") String verb, @RequestParam("actorCode") Long actorCode, 
+			@PathVariable("verb") String verb, 
+			@RequestParam("actorCode") Long actorCode, 
+			@RequestParam("mediatorCode") Optional<String> mediatorCode, 
+			@RequestParam("mediatorType") Optional<String> mediatorType,
 			@RequestParam("targetCode") String targetCode, @RequestParam("targetType") String targetType)
 	{
 		
@@ -83,7 +87,7 @@ public class ActionController implements ActionService {
 		
 		MudAction dbAction = new MudAction();
 		
-		MudActionClass dbActionClass = classRepository.findByVerb(verb);
+		MudActionClass dbActionClass = classRepository.findByVerbAndMediatorTypeAndTargetType(verb, mediatorType.get(), targetType);
 		
 		if (dbActionClass!=null) {
 			dbAction.setActorCode(actorCode);
@@ -110,16 +114,18 @@ public class ActionController implements ActionService {
 	@RequestMapping(value="/test/{verb}", method=RequestMethod.GET)
 	public ActionTestResult testExpression(@PathVariable("verb") String verb, 
 			@RequestParam("actorCode") Long actorCode, 
+			@RequestParam("mediatorCode") Optional<String> mediatorCode, 
+			@RequestParam("mediatorType") Optional<String> mediatorType,
 			@RequestParam("targetCode") String targetCode, 
 			@RequestParam("targetType") String targetType,
-			@RequestParam(value="expression", required=false) String expression) {
+			@RequestParam("expression") Optional<String> expression) {
 		
 		ActionTestResult result = new ActionTestResult();
 		
 		// mount an Action
 		Action action = new Action();
 		
-		MudActionClass dbActionClass = classRepository.findByVerb(verb);
+		MudActionClass dbActionClass = classRepository.findByVerbAndMediatorTypeAndTargetType(verb, mediatorCode.get(), targetType);
 		
 		if (dbActionClass!=null) {
 		
@@ -135,7 +141,7 @@ public class ActionController implements ActionService {
 			// mount an ActionInfo
 			result.setTestData(handler.buildAction(action));
 			
-			if (expression!=null) {
+			if (expression.isPresent()) {
 				
 				try {
 					ExpressionParser parser = new SpelExpressionParser();
@@ -143,7 +149,7 @@ public class ActionController implements ActionService {
 					context.setVariable("action", result.getTestData());
 	
 					// Running successRate expressions
-					Expression curExpression = parser.parseExpression(expression);
+					Expression curExpression = parser.parseExpression(expression.get());
 	
 					result.setResult(curExpression.getValue(context));
 				} catch(Exception e) {

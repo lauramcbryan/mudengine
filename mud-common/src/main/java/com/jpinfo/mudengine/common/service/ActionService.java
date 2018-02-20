@@ -1,5 +1,7 @@
 package com.jpinfo.mudengine.common.service;
 
+import java.util.Optional;
+
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,7 +25,9 @@ public interface ActionService {
 	@RequestMapping(method=RequestMethod.PUT, value="/{verb}")
 	public Action insertCommand(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, 
 			@PathVariable("verb") String verb,
-			@RequestParam("actorCode") Long actorCode, 
+			@RequestParam("actorCode") Long actorCode,
+			@RequestParam("mediatorCode") Optional<String> mediatorCode, 
+			@RequestParam("mediatorType") Optional<String> mediatorType,
 			@RequestParam("targetCode") String targetCode, @RequestParam("targetType") String targetType);
 
 	@RequestMapping(method=RequestMethod.DELETE, value="{actionCode}")

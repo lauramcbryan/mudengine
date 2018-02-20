@@ -19,25 +19,21 @@ public class MudAction {
 	
 	@Column(name="ACTOR_CODE")
 	private Long actorCode;
-	
 
 	@Column(name="ACTION_CLASS_CODE")
 	private String actionClassCode;
 	
-	@Column(name="WORLD_NAME")
-	private String worldName;
-	
 	@Column(name="MEDIATOR_CODE")
-	private Long mediatorCode;
-	
-	@Column(name="PLACE_CODE")
-	private Integer placeCode;
+	private String mediatorCode;
+
+	@Column(name="MEDIATOR_TYPE")
+	private String mediatorType;  // {BEING, ITEM, PLACE, DIRECTION, MESSAGE}
 	
 	@Column(name="TARGET_CODE")
 	private String targetCode;
 
 	@Column(name="TARGET_TYPE")
-	private Integer targetType;  // {BEING, ITEM, PLACE, PLACE_CLASS}
+	private String targetType;  // {BEING, ITEM, PLACE, DIRECTION, MESSAGE}
 	
 	@Column(name="START_TURN")
 	private Long startTurn;
@@ -64,28 +60,20 @@ public class MudAction {
 		this.actionClassCode = actionClassCode;
 	}
 
-	public String getWorldName() {
-		return worldName;
-	}
-
-	public void setWorldName(String worldName) {
-		this.worldName = worldName;
-	}
-
-	public Long getMediatorCode() {
+	public String getMediatorCode() {
 		return mediatorCode;
 	}
 
-	public void setMediatorCode(Long mediatorCode) {
+	public void setMediatorCode(String mediatorCode) {
 		this.mediatorCode = mediatorCode;
 	}
-
-	public Integer getPlaceCode() {
-		return placeCode;
+	
+	public String getMediatorType() {
+		return mediatorType;
 	}
 
-	public void setPlaceCode(Integer placeCode) {
-		this.placeCode = placeCode;
+	public void setMediatorType(String mediatorType) {
+		this.mediatorType = mediatorType;
 	}
 
 	public String getTargetCode() {
@@ -96,20 +84,20 @@ public class MudAction {
 		this.targetCode = targetCode;
 	}
 
-	public Integer getTargetType() {
+	public String getTargetType() {
 		return targetType;
 	}
 	
-	public void setTargetType(Integer targetType) {
+	public void setTargetType(String targetType) {
 		this.targetType = targetType;
 	}
 	
 	public Action.EnumTargetType getTargetTypeEnum() {
-		return Action.EnumTargetType.values()[this.targetType];
+		return Action.EnumTargetType.valueOf(this.targetType);
 	}
 	
 	public void setTargetType(Action.EnumTargetType enumTargetType) {
-		this.targetType = enumTargetType.ordinal();
+		this.targetType = enumTargetType.toString();
 	}
 
 	public Long getActionId() {

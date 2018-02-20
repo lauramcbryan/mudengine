@@ -2,7 +2,9 @@ package com.jpinfo.mudengine.message;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
@@ -10,17 +12,24 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import com.jpinfo.mudengine.common.being.Being;
 import com.jpinfo.mudengine.common.message.Message;
 import com.jpinfo.mudengine.common.security.TokenService;
+import com.jpinfo.mudengine.message.client.BeingServiceClient;
 
+import static org.mockito.BDDMockito.*;
+
+@ActiveProfiles("test")
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment=WebEnvironment.RANDOM_PORT)
 public class MessageTests {
@@ -42,6 +51,12 @@ public class MessageTests {
 
 	public static final Long TEST_BEING_CODE_4 = 4L;
 
+
+	// For broadcast messages
+	public static final Integer TEST_PLACE_ID = 999;
+	public static final Long TEST_BEING_CODE_5 = 5L;
+	public static final Long TEST_BEING_CODE_6 = 6L;
+	
 	
 	// Plain Message
 	public static final String TEST_MESSAGE_1 = "Test Message";
@@ -70,6 +85,8 @@ public class MessageTests {
 	// For pagination
 	public static final String TEST_MESSAGE_6 = "Test Message %s";
 
+	@MockBean
+	private BeingServiceClient beingClient;
 	
 	@Autowired
 	private TestRestTemplate restTemplate;
@@ -504,5 +521,82 @@ public class MessageTests {
 		assertThat(responseRead.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(responseRead.getBody().length).isEqualTo(0);
 		
+	}
+
+	@Test
+	public void testBroadcastMessage() {
+		
+		// Configure the mock placeService to return two expected beings when called
+		List<Being> testBeingList = new ArrayList<Being>();
+		
+		Being firstBeing = new Being();
+		firstBeing.setBeingCode(MessageTests.TEST_BEING_CODE_5);
+		firstBeing.setBeingType(Being.BEING_TYPE_PLAYER);
+
+		Being secondBeing = new Being();
+		secondBeing.setBeingCode(MessageTests.TEST_BEING_CODE_6);
+		secondBeing.setBeingType(Being.BEING_TYPE_PLAYER);
+		
+		testBeingList.add(firstBeing);
+		testBeingList.add(secondBeing);
+		
+		given(this.beingClient.getAllFromPlace("aforgotten", MessageTests.TEST_PLACE_ID))
+		.willReturn(testBeingList);
+
+		
+		String firstToken = TokenService.buildToken(
+				MessageTests.TEST_USERNAME, 
+				MessageTests.TEST_PLAYER_ID, 
+				MessageTests.TEST_LOCALE_US, 
+				MessageTests.TEST_BEING_CODE_5);
+		
+		HttpHeaders firstHeaders = new HttpHeaders();
+		firstHeaders.add(TokenService.HEADER_TOKEN, firstToken);
+		
+		HttpEntity<Object> firstAuthEntity = new HttpEntity<Object>(firstHeaders);		
+
+		String secondToken = TokenService.buildToken(
+				MessageTests.TEST_USERNAME, 
+				MessageTests.TEST_PLAYER_ID, 
+				MessageTests.TEST_LOCALE_US, 
+				MessageTests.TEST_BEING_CODE_6);
+		
+		HttpHeaders secondHeaders = new HttpHeaders();
+		secondHeaders.add(TokenService.HEADER_TOKEN, secondToken);
+		
+		HttpEntity<Object> secondAuthEntity = new HttpEntity<Object>(secondHeaders);		
+		
+		
+		Map<String, Object> urlVariables = new HashMap<String, Object>();
+		
+		// PUT a message
+		urlVariables.put("placeCode", MessageTests.TEST_PLACE_ID);
+		urlVariables.put("message", MessageTests.TEST_MESSAGE_1);
+		
+		ResponseEntity<Void> responsePut = restTemplate.exchange(
+				"/message/place/{placeCode}?message={message}", HttpMethod.PUT, 
+				getUsAuthHeader(), Void.class, urlVariables);
+
+		assertThat(responsePut.getStatusCode()).isEqualTo(HttpStatus.OK);
+		
+		// GET the message with one being
+		urlVariables.clear();
+
+		ResponseEntity<Message[]> responseRead = restTemplate.exchange(
+				"/message", HttpMethod.GET, firstAuthEntity, Message[].class, urlVariables);
+		
+		assertThat(responseRead.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(responseRead.getBody().length).isEqualTo(1);
+	
+
+		// GET the message with other
+		urlVariables.clear();
+
+		responseRead = restTemplate.exchange(
+				"/message", HttpMethod.GET, secondAuthEntity, Message[].class, urlVariables);
+		
+		assertThat(responseRead.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(responseRead.getBody().length).isEqualTo(1);
+
 	}
 }

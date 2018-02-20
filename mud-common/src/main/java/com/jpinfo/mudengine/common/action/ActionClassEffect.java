@@ -7,6 +7,8 @@ public class ActionClassEffect implements Comparable<ActionClassEffect> {
 	
 	private String expression;
 
+	private String messageExpression;
+	
 	public Integer getEvalOrder() {
 		return evalOrder;
 	}
@@ -21,6 +23,14 @@ public class ActionClassEffect implements Comparable<ActionClassEffect> {
 
 	public void setExpression(String expression) {
 		this.expression = expression;
+	}
+
+	public String getMessageExpression() {
+		return messageExpression;
+	}
+
+	public void setMessageExpression(String messageExpression) {
+		this.messageExpression = messageExpression;
 	}
 
 	public int compareTo(ActionClassEffect other) {

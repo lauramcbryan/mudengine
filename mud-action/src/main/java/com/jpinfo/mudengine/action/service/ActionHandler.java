@@ -13,8 +13,10 @@ import com.jpinfo.mudengine.action.client.ItemServiceClient;
 import com.jpinfo.mudengine.action.client.PlaceServiceClient;
 import com.jpinfo.mudengine.action.dto.ActionInfo;
 import com.jpinfo.mudengine.action.dto.BeingComposite;
+import com.jpinfo.mudengine.action.dto.ItemComposite;
 import com.jpinfo.mudengine.action.dto.PlaceComposite;
 import com.jpinfo.mudengine.action.exception.ActionRefusedException;
+import com.jpinfo.mudengine.action.interfaces.ActionTarget;
 import com.jpinfo.mudengine.action.model.MudActionClass;
 import com.jpinfo.mudengine.action.repository.MudActionClassRepository;
 import com.jpinfo.mudengine.action.utils.ActionHelper;
@@ -22,8 +24,9 @@ import com.jpinfo.mudengine.common.action.Action;
 import com.jpinfo.mudengine.common.action.ActionClass;
 import com.jpinfo.mudengine.common.action.ActionClassEffect;
 import com.jpinfo.mudengine.common.action.ActionClassPrereq;
+import com.jpinfo.mudengine.common.being.Being;
 import com.jpinfo.mudengine.common.exception.EntityNotFoundException;
-import com.jpinfo.mudengine.common.interfaces.ActionTarget;
+import com.jpinfo.mudengine.common.exception.IllegalParameterException;
 import com.jpinfo.mudengine.common.item.Item;
 import com.jpinfo.mudengine.common.place.Place;
 import com.jpinfo.mudengine.common.security.TokenService;
@@ -134,12 +137,12 @@ public class ActionHandler {
 		for (ActionClassPrereq curPrereq : e.getActionClass().getPrereqList()) {
 
 			// Running prereq expressions
-			Expression curExpression = parser.parseExpression(curPrereq.getExpression());
+			Expression curExpression = parser.parseExpression(curPrereq.getCheckExpression());
 			
 			boolean accepted = false;
 			
 			try {
-
+				// Evaluate the expression
 				accepted = curExpression.getValue(context, Boolean.class);
 	
 			} catch(Exception ex) {
@@ -149,9 +152,14 @@ public class ActionHandler {
 			
 			if (!accepted) {
 				
-				// TODO: Update the message queue
-				// e.sendMessageTo(e.getActorCode(), Action.EnumTargetType.BEING,
-				// curPrereq.getMessageCode(), new Object[] {});
+				if (curPrereq.getFailExpression()!=null) {
+					
+					// Prepare the fail expression
+					Expression failExpression = parser.parseExpression(curPrereq.getFailExpression());
+					
+					// Just evaluate the expression
+					failExpression.getValue(context);
+				}
 
 				throw new ActionRefusedException();
 			}
@@ -172,11 +180,6 @@ public class ActionHandler {
 
 			// Just evaluate the expression
 			curExpression.getValue(context);
-
-			// TODO: Update the message queue
-
-			// TODO: Mark the changed entities for update
-
 		}
 
 		return e;
@@ -235,14 +238,15 @@ public class ActionHandler {
 		//Actor
 		if (a.getActorCode()!=null) {
 			
-			BeingComposite actor = new BeingComposite(beingService.getBeing(token, a.getActorCode()));
+			Being actorBeing = beingService.getBeing(token, a.getActorCode());
 			
-			if (actor.getBeing()!=null) {
+			if (actorBeing!=null) {
 				
 				// Assemble the composite
+				BeingComposite actor = new BeingComposite(actorBeing);
 				
 				// Set the place
-				Place curPlace = placeService.getPlace(token, actor.getBeing().getCurPlaceCode());
+				Place curPlace = placeService.getPlace(token, actorBeing.getCurPlaceCode());
 				actor.setPlace(curPlace);
 				
 				result.setActor(actor);
@@ -255,13 +259,29 @@ public class ActionHandler {
 		// Mediator
 		if (a.getMediatorCode()!=null) {
 			
-			Item mediator = itemService.getItem(token, a.getMediatorCode());
+			switch(a.getMediatorType()) {
 			
-			if (mediator!=null) {
-				result.setMediator(mediator);
-			} else {
-				throw new EntityNotFoundException("Item " + a.getMediatorCode() + " not found");
+			case ITEM: {
+				Item mediator = itemService.getItem(token, Long.valueOf(a.getMediatorCode()));
+				
+				if (mediator!=null) {
+					result.setMediator(mediator);
+				} else {
+					throw new EntityNotFoundException("Item " + a.getMediatorCode() + " not found");
+				}
+				
+				break;
 			}
+			
+			case PLACE:
+				throw new IllegalParameterException("PLACE Mediators not supported.");
+				
+			case BEING:
+				throw new IllegalParameterException("BEING Mediators not supported.");
+			
+			default:
+			}
+			
 		}
 		
 		if (a.getTargetCode()!=null) {
@@ -270,10 +290,11 @@ public class ActionHandler {
 			
 			switch(a.getTargetType()) {
 			case ITEM: {
-					target = itemService.getItem(token, Long.valueOf(a.getTargetCode()));
+				
+					Item targetItem = itemService.getItem(token, Long.valueOf(a.getTargetCode()));
 					
-					if (target!=null) {
-						result.setTarget(target);
+					if (targetItem!=null) {
+						target = new ItemComposite(targetItem);
 					} else {
 						throw new EntityNotFoundException("Item " + a.getTargetCode() + " not found");
 					}
@@ -281,10 +302,11 @@ public class ActionHandler {
 					break;
 				}
 			case PLACE: {
-					target = new PlaceComposite(placeService.getPlace(token, Integer.valueOf(a.getTargetCode())));
-					
-					if (((PlaceComposite)target).getPlace()!=null) {
-						result.setTarget(target);
+				
+					Place targetPlace = placeService.getPlace(token, Integer.valueOf(a.getTargetCode()));
+				
+					if (targetPlace!=null) {
+						target = new PlaceComposite(targetPlace);
 					} else {
 						throw new EntityNotFoundException("Place " + a.getTargetCode() + " not found");
 					}
@@ -292,10 +314,10 @@ public class ActionHandler {
 					break;
 				}
 			case BEING: {
-					target = new BeingComposite(beingService.getBeing(token, Long.valueOf(a.getTargetCode())));
+					Being targetBeing = beingService.getBeing(token, Long.valueOf(a.getTargetCode()));
 					
-					if (((BeingComposite)target).getBeing()!=null) {
-						result.setTarget(target);
+					if (targetBeing!=null) {
+						target = new BeingComposite(targetBeing);
 					} else {
 						throw new EntityNotFoundException("Being " + a.getTargetCode() + " not found");
 					}
@@ -315,68 +337,4 @@ public class ActionHandler {
 		
 		return result;
 	}	
-	
-	
-	/*
-	private ActionInfo calculateReactions(ActionInfo e, boolean isBefore) {
-
-		EvaluationContext context = new StandardEvaluationContext(e);
-
-		// TODO: Apply effects caused by actor
-		for (Reaction curReaction : e.getActor().getReactions(e.getActionClassCode(), isBefore)) {
-			applyReaction(context, curReaction);
-		}
-
-		// Items of being:
-		// It´s disabled by now because I should have all being items retrieved at this
-		// time to retrieve their reactions
-		// and that could be expensive.
-		/*
-		 * for(BeingItem curItem: e.getActor().getItems().values()) {
-		 * 
-		 * for(Reaction curReaction: curItem.getReactions(e.getActionCode(), isBefore))
-		 * {
-		 * 
-		 * applyReaction(context, curReaction); } }
-
-
-		// TODO: Apply effects caused by target
-		for (Reaction curReaction : e.getTarget().getReactions(e.getActionClassCode(), isBefore)) {
-			applyReaction(context, curReaction);
-		}
-
-		// TODO: Apply effects caused by mediator (if present)
-		if (e.getMediator() != null) {
-
-			for (Reaction curReaction : e.getMediator().getReactions(e.getActionClassCode(), isBefore)) {
-				applyReaction(context, curReaction);
-			}
-		}
-
-		return e;
-	}
-
-	private EvaluationContext applyReaction(EvaluationContext context, Reaction reaction) {
-
-		ExpressionParser parser = new SpelExpressionParser();
-
-		// Running prereq expressions
-		Expression prereqExpression = parser.parseExpression(reaction.getPrereq());
-
-		boolean accepted = prereqExpression.getValue(context, Boolean.class);
-
-		if (accepted) {
-			// apply the effect
-
-			Expression effectExpression = parser.parseExpression(reaction.getExpression());
-
-			effectExpression.getValue(context, ActionInfo.class);
-		}
-
-		return context;
-
-	}
-	
-	*/
-
 }

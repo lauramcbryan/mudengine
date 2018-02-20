@@ -1,13 +1,10 @@
 package com.jpinfo.mudengine.common.being;
 
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.jpinfo.mudengine.common.interfaces.ActionTarget;
-import com.jpinfo.mudengine.common.interfaces.Reaction;
 import com.jpinfo.mudengine.common.item.Item;
 
 
@@ -15,7 +12,7 @@ import com.jpinfo.mudengine.common.item.Item;
  * The persistent class for the mud_being database table.
  * 
  */
-public class Being implements Serializable, ActionTarget {
+public class Being implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	public static final Integer BEING_TYPE_REGULAR_NON_SENTIENT = 0;
@@ -51,10 +48,6 @@ public class Being implements Serializable, ActionTarget {
 	
 	private Long playerId;
 	
-	private Map<String, Collection<Reaction>> beforeReactions;
-	
-	private Map<String, Collection<Reaction>> afterReactions;
-	
 	private Map<String, Item> equipment;
 	
 	private Integer quantity;
@@ -67,8 +60,6 @@ public class Being implements Serializable, ActionTarget {
 		//this.attrModifiers = new ArrayList<BeingAttrModifier>();
 		//this.skillModifiers = new ArrayList<BeingSkillModifier>();
 	}
-	
-	
 
 	public Long getBeingCode() {
 		return beingCode;
@@ -149,18 +140,6 @@ public class Being implements Serializable, ActionTarget {
 	public void setEquipment(Map<String, Item> equipment) {
 		this.equipment = equipment;
 	}
-
-
-
-	public Collection<Reaction> getReactions(String actionCode, boolean isBefore) {
-		
-		if (isBefore) {
-			return this.beforeReactions.get(actionCode);
-		} else {
-			return this.afterReactions.get(actionCode);
-		}
-	}
-
 
 
 	public Integer getBeingType() {

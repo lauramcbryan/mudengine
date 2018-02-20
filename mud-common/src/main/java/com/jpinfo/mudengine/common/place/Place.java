@@ -3,11 +3,9 @@ package com.jpinfo.mudengine.common.place;
 import java.util.*;
 
 
-import com.jpinfo.mudengine.common.interfaces.ActionTarget;
-import com.jpinfo.mudengine.common.interfaces.Reaction;
 import com.jpinfo.mudengine.common.placeClass.PlaceClass;
 
-public class Place implements ActionTarget {
+public class Place {
 	
 	private Integer placeCode;
 
@@ -19,15 +17,9 @@ public class Place implements ActionTarget {
 	
 	private Map<String, Integer> attrs;
 	
-	private Map<String, Collection<Reaction>> beforeReactions;
-	
-	private Map<String, Collection<Reaction>> afterReactions;
-	
 	public Place() {
 		this.attrs = new HashMap<String, Integer>();
 		this.exits = new HashMap<String, PlaceExit>();
-		this.beforeReactions = new HashMap<String, Collection<Reaction>>();
-		this.afterReactions = new HashMap<String, Collection<Reaction>>();
 	}
 	
 
@@ -54,16 +46,6 @@ public class Place implements ActionTarget {
 	public void setExits(Map<String, PlaceExit> exits) {
 		this.exits = exits;
 	}
-	
-	public Collection<Reaction> getReactions(String actionCode, boolean isBefore) {
-		
-		if (isBefore) {
-			return this.beforeReactions.get(actionCode);
-		} else {
-			return this.afterReactions.get(actionCode);
-		}
-	}
-
 
 	public Map<String, Integer> getAttrs() {
 		return attrs;
