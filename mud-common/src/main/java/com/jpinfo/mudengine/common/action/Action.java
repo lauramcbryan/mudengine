@@ -30,7 +30,7 @@ public class Action {
 	
 	
 	public Action() {
-		
+		this.curState = EnumActionState.NOT_STARTED;
 	}
 
 	

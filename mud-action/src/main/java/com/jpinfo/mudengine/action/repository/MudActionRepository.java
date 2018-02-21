@@ -27,9 +27,6 @@ public interface MudActionRepository extends CrudRepository<MudAction, Long> {
 	@Query("select a from MudAction a where a.currState in (0,1) and a.actorCode=:actorCode")
 	List<MudAction> findActiveByActorCode(@Param("actorCode") Long actorCode);
 
-	@Query("select a from MudAction a where a.currState in (0,1) and a.worldName=:worldName and a.placeCode=:placeCode")
-	List<MudAction> findActiveByPlace(@Param("worldName") String worldName, @Param("placeCode") Integer placeCode);
-	
 	@Query("select a from MudAction a where a.currState in (0,1) and a.actionId=:actionId")
 	MudAction findActiveOne(@Param("actionId") Long actionId);
 	

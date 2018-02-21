@@ -70,7 +70,7 @@ public class ActionScheduler {
 				try {
 				
 					Action curAction = ActionHelper.buildAction(curRunningAction);
-					ActionInfo fullState = handler.buildAction(curAction);
+					ActionInfo fullState = handler.buildActionInfo(curAction);
 					
 					handler.updateAction(getCurrentTurn(), curAction, fullState);
 					
@@ -107,7 +107,7 @@ public class ActionScheduler {
 				try {
 				
 					Action curAction = ActionHelper.buildAction(curPendingAction);
-					ActionInfo fullState = handler.buildAction(curAction);
+					ActionInfo fullState = handler.buildActionInfo(curAction);
 					
 					handler.updateAction(getCurrentTurn(), curAction, fullState);
 

@@ -37,11 +37,4 @@ public interface ActionService {
 	@RequestMapping(method=RequestMethod.DELETE, value="/actor/{actorCode}")
 	public void cancelAllActionFromBeing(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, 
 			@PathVariable("actorCode") Long actorCode);
-	
-	@RequestMapping(method=RequestMethod.DELETE, value="/place/{worldName}/{placeCode}")
-	public void cancelAllActionFromPlace(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, 
-			@PathVariable("worldName") String worldName, @PathVariable("placeCode") Integer placeCode);
-
-	
-	
 }

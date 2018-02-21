@@ -7,6 +7,8 @@ import com.jpinfo.mudengine.action.interfaces.ActionTarget;
 import com.jpinfo.mudengine.action.utils.ActionMessage;
 import com.jpinfo.mudengine.common.action.Action.EnumTargetType;
 import com.jpinfo.mudengine.common.being.Being;
+import com.jpinfo.mudengine.common.being.BeingAttrModifier;
+import com.jpinfo.mudengine.common.being.BeingSkillModifier;
 import com.jpinfo.mudengine.common.item.Item;
 import com.jpinfo.mudengine.common.place.Place;
 
@@ -14,7 +16,7 @@ public class BeingComposite implements ActionTarget  {
 
 	private Being being;
 	
-	private List<Item> inventory;
+	private List<Item> items;
 	
 	private Place place;
 	
@@ -30,12 +32,12 @@ public class BeingComposite implements ActionTarget  {
 		this.messages = new ArrayList<ActionMessage>();
 	}
 
-	public List<Item> getInventory() {
-		return inventory;
+	public List<Item> getItems() {
+		return items;
 	}
 
-	public void setInventory(List<Item> inventory) {
-		this.inventory = inventory;
+	public void setItems(List<Item> items) {
+		this.items = items;
 	}
 
 	public Place getPlace() {
@@ -60,16 +62,32 @@ public class BeingComposite implements ActionTarget  {
 				EnumTargetType.BEING, messageKey, parms));
 	}
 
+	public void addMessage(String messageKey, String... parms) {
+		
+		this.addMessage(null,  messageKey, parms);
+	}
+
 	@Override
 	public void describeIt(ActionTarget target) {
 
-		// TODO Add more information about the being
 		if (getBeing().getBeingType().equals(Being.BEING_TYPE_REGULAR_NON_SENTIENT)) {
-			target.addMessage(null, "{str:PACKOFBEINGS}", getBeing().getBeingClass().getName());
+			
+			if (getBeing().getQuantity()>1) {
+				target.addMessage("{str:PACKOFBEINGS}", getBeing().getBeingClass().getName());				
+			} else {
+				target.addMessage("{str:SIMPLESTR}", getBeing().getBeingClass().getName());				
+			}
+			
 		} else if (getBeing().getBeingType().equals(Being.BEING_TYPE_REGULAR_SENTIENT)) {
-			target.addMessage(null, "{str:GROUPOFBEINGS}", getBeing().getBeingClass().getName());
+			
+			if (getBeing().getQuantity()>1) {
+				target.addMessage("{str:GROUPOFBEINGS}", getBeing().getBeingClass().getName());
+			} else {
+				target.addMessage("{str:SIMPLESTR}", getBeing().getBeingClass().getName());
+			}
+			
 		} else {
-			target.addMessage(null, "{str:HEREIS}", getBeing().getName());
+			target.addMessage("{str:SIMPLEBEING}", getBeing().getBeingClass().getName(), getBeing().getName());
 		}
 		
 
@@ -77,9 +95,70 @@ public class BeingComposite implements ActionTarget  {
 	
 	public void describeYourself() {
 		
-		// TODO Add more information about yourself
-		this.addMessage(null, "{str:YOUAREIN}", getPlace().getPlaceClass().getName());	
-		this.addMessage(null, "{str:YOUAREINDESC}", getPlace().getPlaceClass().getDescription());
+		this.addMessage("{str:YOUARE}", this.getBeing().getName(), this.getBeing().getBeingClass().getName());	
+		this.addMessage("{str:YOUAREDESC}", this.getBeing().getBeingClass().getDescription());
+		
+		// =========== ATTRIBUTES ==========
+		this.addMessage("{str:ATTRHEADER}");
+		
+		for(String curAttr: this.getBeing().getAttrs().keySet()) {
+			
+			Float attrModifier = 0.0F;
+			
+			for (BeingAttrModifier curModifier: this.getBeing().getAttrModifiers()) {
+				if (curModifier.getAttribute().equals(curAttr)) {
+					
+					attrModifier += curModifier.getOffset();
+				}
+			}
+			
+			if (attrModifier == 0.0F) {
+				this.addMessage("{str:ATTR}", curAttr, String.valueOf(this.getBeing().getAttrs().get(curAttr)));				
+			}
+			else {
+				this.addMessage("{str:ATTRMOD}", curAttr, 
+						String.valueOf(this.getBeing().getAttrs().get(curAttr)),
+						String.valueOf(attrModifier)
+						);
+			}
+		}
+		
+		// =========== SKILLS ==========
+		this.addMessage("{str:SKILLHEADER}");
+
+		for(String curSkill: this.getBeing().getSkills().keySet()) {
+			
+			Float skillModifier = 0.0F;
+			
+			for(BeingSkillModifier curModifier: this.getBeing().getSkillModifiers()) {
+				
+				if (curModifier.getSkillCode().equals(curSkill)) {
+					skillModifier += curModifier.getOffset();
+				}
+			}
+			
+			if (skillModifier == 0.0F) {
+				this.addMessage("{str:SKILL}", curSkill, String.valueOf(this.getBeing().getSkills().get(curSkill)));
+			} else {
+				
+				this.addMessage("{str:SKILLMOD}", curSkill, 
+						String.valueOf(this.getBeing().getSkills().get(curSkill)),
+						String.valueOf(skillModifier)
+						);
+			}
+			
+		}
+		
+		// =========== ITEMS ==========
+		this.addMessage("{str:YOUHAVEHEADER}");
+
+		for(Item curItem: this.getItems()) {
+			this.addMessage("{str:SIMPLESTR}", curItem.getItemClass().getDescription());
+		}
+		
+		if (this.getItems().isEmpty()) {
+			this.addMessage("{str:NOTHING}");
+		}
 	}
 	
 }

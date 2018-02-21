@@ -57,6 +57,9 @@ public class ActionHandler {
 
 				// Set the start turn to check
 				curAction.setStartTurn(currentTurn);
+				
+				// Variable to hold the future state of the action
+				Action.EnumActionState futureState = Action.EnumActionState.STARTED;
 
 				// Check the prerequisites
 				checkPrerequisites(fullActionState);
@@ -68,14 +71,30 @@ public class ActionHandler {
 					if (fullActionState.getActionClass().getNroTurnsExpr() != null) {
 						
 						curAction.setEndTurn(calculateEndTurn(currentTurn, fullActionState));
+
 					} else {
+						
 						// If not specified, the endTurn is the same as the initial one (instant action)
 						curAction.setEndTurn(curAction.getStartTurn());
+						
+						// Calculate successRate
+						if (fullActionState.getActionClass().getSuccessRateExpr()!=null) {
+							fullActionState = calculateSuccessRate(fullActionState);
+						} else {
+							fullActionState.setSuccessRate(1.0D);
+						}
+
+						// Reapply effects
+						fullActionState = calculateEffect(fullActionState);
+						
+						// As it is a instant action, it goes straight to COMPLETED status
+						futureState = Action.EnumActionState.COMPLETED;
+						
 					}
-				}
+				} 
 
 				// Update the action to Started
-				curAction.setCurState(Action.EnumActionState.STARTED);
+				curAction.setCurState(futureState);
 
 			} catch (ActionRefusedException e) {
 
@@ -213,14 +232,14 @@ public class ActionHandler {
 		EvaluationContext context = new StandardEvaluationContext(e);
 
 		// Running successRate expressions
-		Expression curExpression = parser.parseExpression(e.getActionClass().getSuccessRateExpr());
+		Expression curExpression = parser.parseExpression(e.getActionClass().getNroTurnsExpr());
 
 		Long nroTurns = curExpression.getValue(context, Long.class);
 
 		return (nroTurns + currentTurn);
 	}
 	
-	public ActionInfo buildAction(Action a) throws EntityNotFoundException {
+	public ActionInfo buildActionInfo(Action a) throws EntityNotFoundException {
 		
 		ActionInfo result = new ActionInfo();
 		

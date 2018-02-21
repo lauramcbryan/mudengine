@@ -139,7 +139,7 @@ public class ActionController implements ActionService {
 			action.setCurState(Action.EnumActionState.NOT_STARTED);
 			
 			// mount an ActionInfo
-			result.setTestData(handler.buildAction(action));
+			result.setTestData(handler.buildActionInfo(action));
 			
 			if (expression.isPresent()) {
 				
@@ -182,19 +182,6 @@ public class ActionController implements ActionService {
 	public void cancelAllActionFromBeing(@RequestHeader String authToken, @PathVariable Long actorCode) {
 		
 		List<MudAction> dbActionList = repository.findActiveByActorCode(actorCode);
-		
-		for(MudAction curAction: dbActionList) {
-			
-			curAction.setCurrState(Action.EnumActionState.CANCELLED);
-			
-			repository.save(curAction);
-		}
-	}
-
-	@Override
-	public void cancelAllActionFromPlace(@RequestHeader String authToken, @PathVariable String worldName, @PathVariable Integer placeCode) {
-		
-		List<MudAction> dbActionList = repository.findActiveByPlace(worldName, placeCode);
 		
 		for(MudAction curAction: dbActionList) {
 			

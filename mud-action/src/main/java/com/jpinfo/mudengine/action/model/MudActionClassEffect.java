@@ -17,7 +17,7 @@ public class MudActionClassEffect implements java.io.Serializable {
 	@Column
 	private Integer evalOrder;
 	
-	@Column
+	@Column(name="EFFECT_EXPRESSION")
 	private String expression;
 	
 	@Column

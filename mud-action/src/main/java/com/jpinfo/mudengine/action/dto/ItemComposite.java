@@ -25,7 +25,12 @@ public class ItemComposite implements ActionTarget {
 	public void addMessage(Long senderCode, String messageKey, String... args) {
 		this.messages.add(new ActionMessage(senderCode, this.getItem().getItemCode(), EnumTargetType.ITEM, messageKey, args));
 	}
-	
+
+	@Override
+	public void addMessage(String messageKey, String... args) {
+		this.addMessage(null,  messageKey, args);
+	}
+
 	@Override
 	public List<ActionMessage> getMessages() {
 		
@@ -36,7 +41,7 @@ public class ItemComposite implements ActionTarget {
 	public void describeIt(ActionTarget target) {
 		
 		// TODO Add more information about the item
-		target.addMessage(null, "{str:HEREIS}", this.getItem().getItemClass().getDescription());
+		target.addMessage("{str:SIMPLESTR}", this.getItem().getItemClass().getDescription());
 	}
 
 	public Item getItem() {
