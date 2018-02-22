@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: mud-player
+  datasource:
+    platform: h2
+    initialize: true
+
+server:
+  port: 8092
+  
+eureka:
+  client:
+    enabled: false

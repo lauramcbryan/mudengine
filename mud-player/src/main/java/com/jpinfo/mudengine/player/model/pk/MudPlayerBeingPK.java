@@ -1,24 +1,22 @@
-package com.jpinfo.mudengine.being.model.pk;
+package com.jpinfo.mudengine.player.model.pk;
 
-import java.util.Date;
-
-import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
 @Embeddable
-public class MudBeingMessagePK implements java.io.Serializable {
+public class MudPlayerBeingPK implements java.io.Serializable {
 
 	private static final long serialVersionUID = 1L;
+
+	private Long playerId;
 	
-	@Column(name="being_code")
 	private Long beingCode;
-	
-	@Column(name="create_date")
-	private Date createDate;
-	
-	
-	public MudBeingMessagePK() {
-		
+
+	public Long getPlayerId() {
+		return playerId;
+	}
+
+	public void setPlayerId(Long playerId) {
+		this.playerId = playerId;
 	}
 
 	public Long getBeingCode() {
@@ -29,20 +27,12 @@ public class MudBeingMessagePK implements java.io.Serializable {
 		this.beingCode = beingCode;
 	}
 
-	public Date getCreateDate() {
-		return createDate;
-	}
-
-	public void setCreateDate(Date createDate) {
-		this.createDate = createDate;
-	}
-
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((beingCode == null) ? 0 : beingCode.hashCode());
-		result = prime * result + ((createDate == null) ? 0 : createDate.hashCode());
+		result = prime * result + ((playerId == null) ? 0 : playerId.hashCode());
 		return result;
 	}
 
@@ -54,18 +44,17 @@ public class MudBeingMessagePK implements java.io.Serializable {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		MudBeingMessagePK other = (MudBeingMessagePK) obj;
+		MudPlayerBeingPK other = (MudPlayerBeingPK) obj;
 		if (beingCode == null) {
 			if (other.beingCode != null)
 				return false;
 		} else if (!beingCode.equals(other.beingCode))
 			return false;
-		if (createDate == null) {
-			if (other.createDate != null)
+		if (playerId == null) {
+			if (other.playerId != null)
 				return false;
-		} else if (!createDate.equals(other.createDate))
+		} else if (!playerId.equals(other.playerId))
 			return false;
 		return true;
 	}
-
 }

@@ -14,9 +14,13 @@ public class Session implements java.io.Serializable {
 	
 	private Date sessionEnd;
 
-	private String language;
+	private String locale;
 	
-	private String country;
+	private String ipAddress;
+	
+	private String clientType;
+	
+	private Long beingCode;
 	
 	public Session() {
 		
@@ -54,20 +58,35 @@ public class Session implements java.io.Serializable {
 		this.sessionEnd = sessionEnd;
 	}
 
-	public String getLanguage() {
-		return language;
+	public String getLocale() {
+		return locale;
 	}
 
-	public void setLanguage(String language) {
-		this.language = language;
+	public void setLocale(String locale) {
+		this.locale = locale;
 	}
 
-	public String getCountry() {
-		return country;
+	public String getIpAddress() {
+		return ipAddress;
 	}
 
-	public void setCountry(String country) {
-		this.country = country;
+	public void setIpAddress(String ipAddress) {
+		this.ipAddress = ipAddress;
 	}
-	
+
+	public String getClientType() {
+		return clientType;
+	}
+
+	public void setClientType(String clientType) {
+		this.clientType = clientType;
+	}
+
+	public Long getBeingCode() {
+		return beingCode;
+	}
+
+	public void setBeingCode(Long beingCode) {
+		this.beingCode = beingCode;
+	}
 }

@@ -1,8 +1,10 @@
 package com.jpinfo.mudengine.player.util;
 
 import com.jpinfo.mudengine.common.player.Player;
+import com.jpinfo.mudengine.common.player.PlayerBeing;
 import com.jpinfo.mudengine.common.player.Session;
 import com.jpinfo.mudengine.player.model.MudPlayer;
+import com.jpinfo.mudengine.player.model.MudPlayerBeing;
 import com.jpinfo.mudengine.player.model.MudSession;
 
 public class PlayerHelper {
@@ -13,11 +15,20 @@ public class PlayerHelper {
 		
 		response.setPlayerId(dbPlayer.getPlayerId());
 		response.setUsername(dbPlayer.getUsername());
-		response.setName(dbPlayer.getName());
 		response.setEmail(dbPlayer.getEmail());
-		response.setLanguage(dbPlayer.getLanguage());
-		response.setCountry(dbPlayer.getCountry());
+		response.setLocale(dbPlayer.getLocale());
 		response.setStatus(dbPlayer.getStatus());
+		
+		for(MudPlayerBeing curBeing: dbPlayer.getBeingList()) {
+			
+			PlayerBeing newBeing = new PlayerBeing();
+			newBeing.setBeingCode(curBeing.getId().getBeingCode());
+			newBeing.setBeingName(newBeing.getBeingName());
+			newBeing.setBeingClass(newBeing.getBeingClass());
+			newBeing.setLastPlayed(newBeing.getLastPlayed());
+			
+			response.getBeingList().add(newBeing);
+		}
 		
 		return response;
 	}
@@ -35,9 +46,9 @@ public class PlayerHelper {
 		response.setSessionId(dbSession.getSessionId());
 		response.setSessionStart(dbSession.getSessionStart());
 		response.setSessionEnd(dbSession.getSessionEnd());
-		response.setLanguage(dbSession.getPlayer().getLanguage());
-		response.setCountry(dbSession.getPlayer().getCountry());
 		response.setPlayerId(dbSession.getPlayer().getPlayerId());
+		response.setClientType(dbSession.getClientType());
+		response.setIpAddress(dbSession.getIpAddress());
 		
 		return response;
 	}
