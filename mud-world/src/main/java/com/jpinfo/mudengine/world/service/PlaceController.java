@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.jpinfo.mudengine.common.exception.EntityNotFoundException;
@@ -18,6 +19,7 @@ import com.jpinfo.mudengine.world.model.MudPlaceAttr;
 import com.jpinfo.mudengine.world.model.MudPlaceClass;
 import com.jpinfo.mudengine.world.model.MudPlaceExit;
 import com.jpinfo.mudengine.world.repository.PlaceClassRepository;
+import com.jpinfo.mudengine.world.repository.PlaceExitRepository;
 import com.jpinfo.mudengine.world.repository.PlaceRepository;
 import com.jpinfo.mudengine.world.util.WorldHelper;
 
@@ -32,12 +34,15 @@ public class PlaceController implements PlaceService {
 	
 	@Autowired
 	private PlaceRepository placeRepository;
+
+	@Autowired
+	private PlaceExitRepository placeExitRepository;
 	
 	@Autowired
 	private PlaceClassRepository placeClassRepository;
 
 	@Override
-	public Place getPlace(@PathVariable Integer placeId) {
+	public Place getPlace(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable Integer placeId) {
 		
 		Place response = null;
 		
@@ -54,7 +59,7 @@ public class PlaceController implements PlaceService {
 
 	
 	@Override
-	public Place updatePlace(@PathVariable Integer placeId, @RequestBody Place requestPlace) {
+	public Place updatePlace(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable Integer placeId, @RequestBody Place requestPlace) {
 		
 		Place response = null;
 		
@@ -74,7 +79,7 @@ public class PlaceController implements PlaceService {
 					response = WorldHelper.buildPlace(dbPlace);
 		
 					// destroy the place
-					destroyPlace(placeId);
+					destroyPlace(authToken, placeId);
 					
 					
 					
@@ -130,6 +135,16 @@ public class PlaceController implements PlaceService {
 				
 				dbPlace = WorldHelper.changePlaceAttrs(dbPlace, dbPlace.getPlaceClass(), placeClass);
 				dbPlace.setPlaceClass(placeClass);
+				
+				// Find all exits pointing to this place
+				Iterable<MudPlaceExit> exitList = placeExitRepository.findByTargetPlaceCode(dbPlace.getPlaceCode());
+				
+				// Update them all
+				for(MudPlaceExit curExit: exitList) {
+					
+					curExit.setName(placeClass.getName());
+					placeExitRepository.save(curExit);
+				}
 			}
 			
 			
@@ -151,7 +166,7 @@ public class PlaceController implements PlaceService {
 
 
 	@Override
-	public void destroyPlace(@PathVariable Integer placeId) {
+	public void destroyPlace(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable Integer placeId) {
 		
 		MudPlace dbPlace = placeRepository.findOne(placeId);
 		
@@ -165,6 +180,17 @@ public class PlaceController implements PlaceService {
 				dbPlace = WorldHelper.changePlaceAttrs(dbPlace, dbPlace.getPlaceClass(), placeClass);
 				dbPlace.setPlaceClass(placeClass);
 				
+				// Find all exits pointing to this place
+				Iterable<MudPlaceExit> exitList = placeExitRepository.findByTargetPlaceCode(dbPlace.getPlaceCode());
+				
+				// Update them all
+				for(MudPlaceExit curExit: exitList) {
+					
+					curExit.setName(placeClass.getName());
+					placeExitRepository.save(curExit);
+				}
+				
+				
 				updatedPlace = placeRepository.save(dbPlace);
 			} else {
 				
@@ -173,16 +199,24 @@ public class PlaceController implements PlaceService {
 				
 				String internalToken = TokenService.buildInternalToken();
 				
-				// Remove all beings from the place
-				// THAT MUST GOES FIRST!!!
-				// This call will drop all items belonging to beings into the place
-				// @TODO: solve the worldName
-				beingService.destroyAllFromPlace(internalToken, "aforgotten", placeId);
+				try {
 				
-				// Remove all items from the place
-				// (That will include items dropped from beings above)
-				// @TODO: solve the worldName
-				itemService.destroyAllFromPlace(internalToken, "aforgotten", placeId);
+					// Remove all beings from the place
+					// THAT MUST GOES FIRST!!!
+					// This call will drop all items belonging to beings into the place
+					// @TODO: solve the worldName
+					beingService.destroyAllFromPlace(internalToken, "aforgotten", placeId);
+					
+					// Remove all items from the place
+					// (That will include items dropped from beings above)
+					// @TODO: solve the worldName
+					itemService.destroyAllFromPlace(internalToken, "aforgotten", placeId);
+					
+				} catch(Exception e) {
+					
+					// Any exception on these calls will be disregarded
+					e.printStackTrace(System.err);
+				}
 				
 				updatedPlace = dbPlace;
 				updatedPlace.setPlaceCode(null);
@@ -236,6 +270,8 @@ public class PlaceController implements PlaceService {
 					MudPlaceExit newExit = WorldHelper.buildMudPlaceExit(dbPlace.getPlaceCode(), 
 							direction, targetPlaceCode);
 					newExit.setName(targetDbPlace.getPlaceClass().getName());
+					newExit.setOpened(true);
+					newExit.setVisible(true);
 					
 					dbPlace.getExits().add(newExit);
 					
@@ -247,6 +283,8 @@ public class PlaceController implements PlaceService {
 							WorldHelper.getOpposedDirection(direction), 
 							dbPlace.getPlaceCode());
 					correspondingExit.setName(dbPlaceClass.getName());
+					correspondingExit.setOpened(true);
+					correspondingExit.setVisible(true);
 					
 					targetDbPlace.getExits().add(correspondingExit);
 					

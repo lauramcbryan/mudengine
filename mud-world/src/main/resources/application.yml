@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: mud-world
+  datasource:
+    platform: h2
+    initialize: true
+
+server:
+  port: 8082
+  
+eureka:
+  client:
+    enabled: false
+
+    

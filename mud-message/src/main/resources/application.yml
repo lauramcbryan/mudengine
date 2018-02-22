@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: mud-message
+  datasource:
+    platform: h2
+    initialize: true
+
+server:
+  port: 8090
+  
+eureka:
+  client:
+    enabled: false
+
+    

@@ -3,7 +3,7 @@ set role MUDENGINE_BEING;
 create sequence MUDENGINE_BEING.MUD_BEING_SEQ;
 
 CREATE TABLE MUDENGINE_BEING.MUD_ATTRIBUTE (
-		ATTR_CODE		varchar(5) not null,
+		ATTR_CODE		varchar(6) not null,
 		NAME			varchar(30) not null,
 		DESCRIPTION		varchar(100),		
 		CONSTRAINT MUD_ATTRIBUTES_PK PRIMARY KEY (ATTR_CODE)

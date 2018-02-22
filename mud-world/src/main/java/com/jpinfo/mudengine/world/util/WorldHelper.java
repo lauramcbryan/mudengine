@@ -26,6 +26,9 @@ public class WorldHelper {
 		result.setPlaceCode(a.getPlaceCode());
 		
 		result.setPlaceClassCode(a.getPlaceClass().getPlaceClassCode());
+				
+		result.setPlaceClass(WorldHelper.buildPlaceClass(a.getPlaceClass()));
+		
 		
 		for(MudPlaceExit curExit: a.getExits()) {
 			result.getExits().put(curExit.getPk().getDirection(), WorldHelper.buildPlaceExits(curExit));

@@ -92,9 +92,9 @@ public class BeingController implements BeingService {
 				
 			
 				// if the beingClass is changing, reset the attributes
-				if (!dbBeing.getBeingClass().equals(requestBeing.getBeingClass())) {
+				if (!dbBeing.getBeingClass().getBeingClassCode().equals(requestBeing.getBeingClassCode())) {
 					
-					MudBeingClass dbClassBeing = classRepository.findOne(requestBeing.getBeingClass());
+					MudBeingClass dbClassBeing = classRepository.findOne(requestBeing.getBeingClassCode());
 					
 					if (dbClassBeing!=null) {
 	
@@ -220,9 +220,17 @@ public class BeingController implements BeingService {
 		if (dbBeing!=null) {
 			
 			if (BeingHelper.canAccess(authToken, dbBeing.getPlayerId())) {
+				
+				try {
 			
-				// Update Item service to drop all items of this being
-				itemService.dropAllFromBeing(authToken, beingCode, dbBeing.getCurWorld(), dbBeing.getCurPlaceCode());
+					// Update Item service to drop all items of this being
+					itemService.dropAllFromBeing(authToken, beingCode, dbBeing.getCurWorld(), dbBeing.getCurPlaceCode());
+				} catch(Exception e) {
+					
+					// errors at this point are being disregarded
+					e.printStackTrace(System.err);
+					
+				}
 				
 				repository.delete(beingCode);
 			} else {
@@ -244,7 +252,7 @@ public class BeingController implements BeingService {
 				responseItem = itemService.getItem(token, curSlot.getItemCode());
 			} else {
 				responseItem = new Item();
-				responseItem.setItemClass("NOTHING");
+				responseItem.setItemClassCode("NOTHING");
 			}
 			
 			responseBeing.getEquipment().put(curSlot.getId().getSlotCode(), responseItem);

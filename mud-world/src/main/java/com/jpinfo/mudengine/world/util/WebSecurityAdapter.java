@@ -1,7 +1,6 @@
 package com.jpinfo.mudengine.world.util;
 
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -9,7 +8,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import com.jpinfo.mudengine.common.security.CommonSecurityFilter;
 
-@Profile("!default")
 @Configuration
 @EnableWebSecurity
 public class WebSecurityAdapter extends WebSecurityConfigurerAdapter {
@@ -18,7 +16,12 @@ public class WebSecurityAdapter extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 
+		// Disabling cross-site request forgery in order to be able to use H2 Console
 		http.csrf().disable();
+		
+		// Bypassing frame options security in order to be able to use H2 Console
+		http.headers().frameOptions().disable();
+		
 		http.authorizeRequests().antMatchers("/place/*").authenticated();
 		http.addFilterBefore(new CommonSecurityFilter(), UsernamePasswordAuthenticationFilter.class);
 	}

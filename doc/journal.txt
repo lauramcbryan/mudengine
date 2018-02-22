@@ -1,0 +1,10 @@
+Q. Do I need to check prereq at each turn?
+R. Yes, because the actor can consume the resources with other action,
+he can move away from the place, he can issue a lengthly action and just run.
+
+Simple actions needs to be, in essence, short-lived actions.
+
+For long-lived, all actions became Continuous.
+The prerequisite is checked each turn and the action is cancelled if this check fails at any moment.
+If the prerequisite fails before endTurn (or even AT endTurn), no effect is triggered.
+

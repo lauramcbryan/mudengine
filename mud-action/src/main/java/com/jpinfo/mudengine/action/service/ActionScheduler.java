@@ -4,25 +4,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.jpinfo.mudengine.action.client.BeingServiceClient;
 import com.jpinfo.mudengine.action.client.ItemServiceClient;
+import com.jpinfo.mudengine.action.client.MessageServiceClient;
 import com.jpinfo.mudengine.action.client.PlaceServiceClient;
+import com.jpinfo.mudengine.action.dto.ActionInfo;
+import com.jpinfo.mudengine.action.dto.BeingComposite;
+import com.jpinfo.mudengine.action.dto.PlaceComposite;
 import com.jpinfo.mudengine.action.model.MudAction;
 import com.jpinfo.mudengine.action.repository.MudActionRepository;
-import com.jpinfo.mudengine.action.utils.ActionHandler;
 import com.jpinfo.mudengine.action.utils.ActionHelper;
-import com.jpinfo.mudengine.action.utils.ActionInfo;
-import com.jpinfo.mudengine.action.utils.ActionMessages;
+import com.jpinfo.mudengine.action.utils.ActionMessage;
 import com.jpinfo.mudengine.common.action.Action;
 import com.jpinfo.mudengine.common.action.Action.EnumActionState;
-import com.jpinfo.mudengine.common.being.Being;
 import com.jpinfo.mudengine.common.exception.EntityNotFoundException;
-import com.jpinfo.mudengine.common.interfaces.ActionTarget;
+import com.jpinfo.mudengine.common.exception.IllegalParameterException;
 import com.jpinfo.mudengine.common.item.Item;
-import com.jpinfo.mudengine.common.place.Place;
 import com.jpinfo.mudengine.common.security.TokenService;
 
 @Service
@@ -43,8 +44,12 @@ public class ActionScheduler {
 	private ItemServiceClient itemService;
 	
 	@Autowired
+	private MessageServiceClient messageService;
+	
+	@Autowired
 	private ActionHandler handler;
 	
+	@Profile("!default")
 	@Scheduled(fixedRate=10000)
 	public void updateActions() {
 		
@@ -53,7 +58,7 @@ public class ActionScheduler {
 		// List of processed actors in this iteraction
 		List<Long> processedActors = new ArrayList<Long>();
 		
-		// List of pending actions
+		// Get the list of running actions and update them.
 		List<MudAction> runningActions = repository.findRunningActions(getCurrentTurn());
 		
 		for(MudAction curRunningAction: runningActions) {
@@ -65,18 +70,18 @@ public class ActionScheduler {
 				try {
 				
 					Action curAction = ActionHelper.buildAction(curRunningAction);
-					ActionInfo fullState = buildAction(curAction);
+					ActionInfo fullState = handler.buildActionInfo(curAction);
 					
 					handler.updateAction(getCurrentTurn(), curAction, fullState);
 					
-					//curPendingAction.setSuccessRate(curAction.gets);
 					curRunningAction.setCurrState(curAction.getCurState());
+					curRunningAction.setEndTurn(curAction.getEndTurn());
 					
 					// Update changed entities
 					updateEntities(fullState);
 					
 					// Update message queue
-					updateMessageQueue(fullState);
+					sendMessages(fullState);
 					
 				} catch(EntityNotFoundException e) {
 					curRunningAction.setCurrState(EnumActionState.CANCELLED);
@@ -90,7 +95,7 @@ public class ActionScheduler {
 		} // next runningAction
 
 
-		// List of pending actions
+		// Retrieve the list of pending (not started) actions and start them.
 		List<MudAction> pendingActions = repository.findPendingActions();
 		
 		for(MudAction curPendingAction: pendingActions) {
@@ -102,17 +107,16 @@ public class ActionScheduler {
 				try {
 				
 					Action curAction = ActionHelper.buildAction(curPendingAction);
-					ActionInfo fullState = buildAction(curAction);
+					ActionInfo fullState = handler.buildActionInfo(curAction);
 					
 					handler.updateAction(getCurrentTurn(), curAction, fullState);
-					
-					//curPendingAction.setSuccessRate(curAction.gets);
+
 					curPendingAction.setCurrState(curAction.getCurState());
 					curPendingAction.setStartTurn(curAction.getStartTurn());
 					curPendingAction.setEndTurn(curAction.getEndTurn());
 					
 					// Update message queue
-					updateMessageQueue(fullState);
+					sendMessages(fullState);
 					
 				} catch(EntityNotFoundException e) {
 					curPendingAction.setCurrState(EnumActionState.CANCELLED);
@@ -129,22 +133,33 @@ public class ActionScheduler {
 		ActionScheduler.currentTurn++;
 	}
 	
-	public void updateEntities(ActionInfo fullState) {
+	private void updateEntities(ActionInfo fullState) {
 		
 		String authToken = TokenService.buildInternalToken();
+
+		// Update the actor
+		beingService.updateBeing(authToken, 
+					fullState.getActor().getBeing().getBeingCode(), 
+					fullState.getActor().getBeing());
 		
-		beingService.updateBeing(authToken, fullState.getActor().getBeingCode(), fullState.getActor());
+		// Update the place where the actor is
+		placeService.updatePlace(authToken, 
+				fullState.getActor().getPlace().getPlaceCode(), 
+				fullState.getActor().getPlace());
+
 		
+		// If the Mediator is used, updated it too
 		if (fullState.getMediator()!=null) {
 			itemService.updateItem(authToken, fullState.getMediator().getItemCode(), fullState.getMediator());
 		}
-		
+
+		// Updating the target
 		switch(fullState.getTargetType()) {
 			case BEING: {
 				
-				Being targetBeing = (Being)fullState.getTarget();
+				BeingComposite targetBeing = (BeingComposite)fullState.getTarget();
 				
-				beingService.updateBeing(authToken, targetBeing.getBeingCode(), targetBeing);
+				beingService.updateBeing(authToken, targetBeing.getBeing().getBeingCode(), targetBeing.getBeing());
 
 				break;
 			}
@@ -158,10 +173,15 @@ public class ActionScheduler {
 			}
 			case PLACE: {
 				
-				Place targetPlace = (Place)fullState.getTarget();
+				PlaceComposite targetPlace = (PlaceComposite)fullState.getTarget();
 				
-				placeService.updatePlace(targetPlace.getPlaceCode(), targetPlace);
+				placeService.updatePlace(authToken, targetPlace.getPlace().getPlaceCode(), targetPlace.getPlace());
 				
+				break;
+			}
+			case DIRECTION: {
+				
+				// Do nothing
 				break;
 			}
 		}
@@ -169,117 +189,45 @@ public class ActionScheduler {
 		
 	}
 	
-	public void updateMessageQueue(ActionInfo fullState) {
+	private void sendMessages(ActionInfo fullState) {
 		
-		for(ActionMessages curMessage: fullState.getMessages()) {
+		String authToken = TokenService.buildInternalToken();
+		
+		for(ActionMessage curActorMessage : fullState.getActor().getMessages()) {
 			
-			if (curMessage.getPlainMessage()!=null) {
+			// Send message to the actor
+			this.messageService.putMessage(authToken, fullState.getActorCode(), 
+					curActorMessage.getMessageKey(), 
+					null, null,
+					curActorMessage.args);
+			
+		}
+		
+		for(ActionMessage curTargetMessage: fullState.getTarget().getMessages()) {
+
+			// Send message to the target
+			switch (fullState.getTargetType()) {
+			
+			case BEING:
+				this.messageService.putMessage(authToken, fullState.getActorCode(), 
+						curTargetMessage.getMessageKey(), 
+						fullState.getActor().getBeing().getBeingCode(), fullState.getActor().getBeing().getName(),
+						curTargetMessage.args);
+				break;
+			
+			case PLACE:
+				throw new IllegalParameterException("Messages to PLACEs not supported.");
 				
-				// TODO: Send the message 
+			case ITEM:
+				throw new IllegalParameterException("Messages to ITEMs not supported.");
 				
-				
-			} else {
-				// TODO: Send the message				
+			default:
 			}
-			
 		}
 	}
 	
 	public static Long getCurrentTurn() {
 		return ActionScheduler.currentTurn;
-	}
-	
-	private ActionInfo buildAction(Action a) throws EntityNotFoundException {
-		
-		ActionInfo result = new ActionInfo();
-		
-		String token = TokenService.buildInternalToken();
-
-		result.setActionId(a.getActionId());
-		result.setActionCode(a.getActionCode());
-		
-		//Actor
-		if (a.getActorCode()!=null) {
-			
-			Being actor = beingService.getBeing(token, a.getActorCode());
-			
-			if (actor!=null) {
-				result.setActor(actor);
-			} else {
-				throw new EntityNotFoundException("Being " + a.getActorCode() + " not found");
-			}
-		}
-		
-		// Mediator
-		if (a.getMediatorCode()!=null) {
-			
-			Item mediator = itemService.getItem(token, a.getMediatorCode());
-			
-			if (mediator!=null) {
-				result.setMediator(mediator);
-			} else {
-				throw new EntityNotFoundException("Item " + a.getMediatorCode() + " not found");
-			}
-		}
-		
-		// Place
-		if (a.getPlaceCode()!=null) {
-			
-			Place place = placeService.getPlace(a.getPlaceCode());
-			
-			if (place!=null) {
-				result.setPlace(place);
-			} else {
-				throw new EntityNotFoundException("Place  " + a.getPlaceCode() + " not found");
-			}
-		}
-		
-		if (a.getTargetCode()!=null) {
-			
-			ActionTarget target = null;
-			
-			switch(a.getTargetType()) {
-			case ITEM: {
-					target = itemService.getItem(token, Long.valueOf(a.getTargetCode()));
-					
-					if (target!=null) {
-						result.setTarget(target);
-					} else {
-						throw new EntityNotFoundException("Item " + a.getTargetCode() + " not found");
-					}
-					
-					break;
-				}
-			case PLACE: {
-					target = placeService.getPlace(Integer.valueOf(a.getTargetCode()));
-					
-					if (target==null) {
-						result.setTarget(target);
-					} else {
-						throw new EntityNotFoundException("Place " + a.getTargetCode() + " not found");
-					}
-					
-					break;
-				}
-			case BEING: {
-					target = beingService.getBeing(token, Long.valueOf(a.getTargetCode()));
-					
-					if (target==null) {
-						result.setTarget(target);
-					} else {
-						throw new EntityNotFoundException("Being " + a.getTargetCode() + " not found");
-					}
-					
-					break;
-				}
-			}
-			
-			if (target!=null) {
-				result.setTarget(target);
-			}
-		}
-		
-		return result;
 	}
 
 }

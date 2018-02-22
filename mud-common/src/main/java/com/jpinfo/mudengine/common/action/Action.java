@@ -3,28 +3,23 @@ package com.jpinfo.mudengine.common.action;
 public class Action {
 	
 	public enum EnumActionState {NOT_STARTED, STARTED, COMPLETED, CANCELLED, REFUSED};
-	public enum EnumActionType {SIMPLE, RESISTED, CONTINUOUS};
-	public enum EnumTargetType {BEING, ITEM, PLACE};
+	public enum EnumTargetType {BEING, ITEM, PLACE, DIRECTION};
 	
 	private Long issuerCode;
 	
 	private Long actorCode;
 
-	private String actionCode;
+	private String actionClassCode;
 	
-	private String worldName;
-	
-	private Long mediatorCode;
-	
-	private Integer placeCode;
-	
+	private String mediatorCode;
+
+	private EnumTargetType mediatorType;  // {BEING, ITEM, PLACE, DIRECTION, MESSAGE}
+
 	private String targetCode;
 
-	private EnumTargetType targetType;  // {BEING, ITEM, PLACE, PLACE_CLASS}
+	private EnumTargetType targetType;  // {BEING, ITEM, PLACE, DIRECTION, MESSAGE}
 	
 	private Long actionId;
-	
-	private EnumActionType actionType;
 	
 	private Long startTurn;
 	
@@ -35,7 +30,7 @@ public class Action {
 	
 	
 	public Action() {
-		
+		this.curState = EnumActionState.NOT_STARTED;
 	}
 
 	
@@ -64,36 +59,30 @@ public class Action {
 
 
 
-	public String getActionCode() {
-		return actionCode;
+	public String getActionClassCode() {
+		return actionClassCode;
 	}
 
-	public void setActionCode(String actionCode) {
-		this.actionCode = actionCode;
+	public void setActionClassCode(String actionCode) {
+		this.actionClassCode = actionCode;
 	}
 
-	public String getWorldName() {
-		return worldName;
-	}
-
-	public void setWorldName(String worldName) {
-		this.worldName = worldName;
-	}
-
-	public Long getMediatorCode() {
+	public String getMediatorCode() {
 		return mediatorCode;
 	}
 
-	public void setMediatorCode(Long mediatorCode) {
+	public void setMediatorCode(String mediatorCode) {
 		this.mediatorCode = mediatorCode;
 	}
-
-	public Integer getPlaceCode() {
-		return placeCode;
+	
+	public EnumTargetType getMediatorType() {
+		return mediatorType;
 	}
 
-	public void setPlaceCode(Integer placeCode) {
-		this.placeCode = placeCode;
+
+
+	public void setMediatorType(EnumTargetType mediatorType) {
+		this.mediatorType = mediatorType;
 	}
 
 	public String getTargetCode() {
@@ -147,19 +136,6 @@ public class Action {
 	public void setTargetType(EnumTargetType targetType) {
 		this.targetType = targetType;
 	}
-
-
-
-	public EnumActionType getActionType() {
-		return actionType;
-	}
-
-
-
-	public void setActionType(EnumActionType actionType) {
-		this.actionType = actionType;
-	}
-
 
 
 	public EnumActionState getCurState() {

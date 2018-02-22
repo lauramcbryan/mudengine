@@ -15,11 +15,13 @@ public class ItemHelper {
 		Item response = new Item();
 		
 		response.setItemCode(dbItem.getItemCode());
-		response.setItemClass(dbItem.getItemClass().getItemClass());
+		response.setItemClassCode(dbItem.getItemClass().getItemClass());
 		response.setCurPlaceCode(dbItem.getCurPlaceCode());
 		response.setCurWorld(dbItem.getCurWorld());
 		response.setQuantity(dbItem.getQuantity());
 		response.setCurOwner(dbItem.getCurOwner());
+		
+		response.setItemClass(ItemHelper.buildItemClass(dbItem.getItemClass()));
 		
 		for(MudItemAttr curAttr: dbItem.getAttrs()) {
 			response.getAttrs().put(curAttr.getId().getAttrCode(), curAttr.getAttrValue());
