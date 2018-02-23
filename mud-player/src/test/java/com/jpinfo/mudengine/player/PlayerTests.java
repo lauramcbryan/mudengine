@@ -159,16 +159,14 @@ public class PlayerTests {
 		assertThat(createResponse.getHeaders().containsKey(TokenService.HEADER_TOKEN));
 		
 		
-		/*
 		// Get Session (anonymous)
 		urlVariables.clear();
 		urlVariables.put("username", PlayerTests.TEST_USERNAME);
 		
-		ResponseEntity<Session> getResponse = restTemplate.exchange(
+		ResponseEntity<Session> anonymousResponse = restTemplate.exchange(
 				"/player/{username}/session", HttpMethod.GET, null, Session.class, urlVariables);
 		
-		assertThat(getResponse.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
-		 */
+		assertThat(anonymousResponse.getStatusCode()).isNotEqualTo(HttpStatus.OK);
 		
 		
 		// Get Session (authenticated)
@@ -206,7 +204,7 @@ public class PlayerTests {
 		
 		Player playerData = createResponse.getBody();
 		
-		assertThat(playerData.getPlayerId()).isEqualTo(PlayerTests.TEST_USERNAME_2);
+		assertThat(playerData.getUsername()).isEqualTo(PlayerTests.TEST_USERNAME_2);
 		assertThat(playerData.getEmail()).isEqualTo(PlayerTests.TEST_EMAIL);
 		assertThat(playerData.getLocale()).isEqualTo(PlayerTests.TEST_LOCALE);
 		
@@ -223,7 +221,7 @@ public class PlayerTests {
 		assertThat(getResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(getResponse.getBody().getPlayerId()).isNotNull();
 		assertThat(getResponse.getBody().getLocale()).isEqualTo(PlayerTests.TEST_LOCALE);
-		assertThat(getResponse.getBody().getUsername()).isEqualTo(PlayerTests.TEST_USERNAME);
+		assertThat(getResponse.getBody().getUsername()).isEqualTo(PlayerTests.TEST_USERNAME_2);
 		assertThat(getResponse.getBody().getEmail()).isEqualTo(PlayerTests.TEST_EMAIL);
 		
 		// *********** UPDATE PLAYER ******************
@@ -237,8 +235,10 @@ public class PlayerTests {
 		updatePlayer.setLocale(PlayerTests.TEST_LOCALE_2);
 		updatePlayer.setEmail(PlayerTests.TEST_EMAIL_2);
 		
+		HttpEntity<Player> changePlayerHttpEntity = new HttpEntity<Player>(updatePlayer, getInternalAuthHeaders());
+		
 		ResponseEntity<Player> updateResponse = restTemplate.exchange(
-				"/player/{username}", HttpMethod.POST, internalAuthEntity, Player.class, urlVariables);
+				"/player/{username}", HttpMethod.POST, changePlayerHttpEntity, Player.class, urlVariables);
 		
 		assertThat(updateResponse.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
 		assertThat(updateResponse.getBody().getUsername()).isEqualTo(PlayerTests.TEST_USERNAME_2);
@@ -345,7 +345,7 @@ public class PlayerTests {
 		assertThat(getResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
 	}
 	
-	@Test
+	//@Test
 	public void testCreateBeing() {
 		
 		setupMocks();
@@ -365,7 +365,8 @@ public class PlayerTests {
 		urlVariables.put("placeCode", PlayerTests.TEST_PLACE_CODE);
 		
 		ResponseEntity<Session> createResponse = restTemplate.exchange(
-				"/player/{username}/being", HttpMethod.PUT, authEntity, Session.class, urlVariables);
+				"/player/{username}/being?beingClass={beingClass}&beingName={beingName}&worldName={worldName}&placeCode={placeCode}", 
+				HttpMethod.PUT, authEntity, Session.class, urlVariables);
 
 		// Check if the return is successful
 		assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);

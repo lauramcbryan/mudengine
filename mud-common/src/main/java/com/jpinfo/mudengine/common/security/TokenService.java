@@ -4,6 +4,7 @@ import java.util.Collections;
 
 
 import java.util.Date;
+import java.util.Map;
 import java.util.Optional;
 
 import org.apache.tomcat.util.codec.binary.Base64;
@@ -46,12 +47,15 @@ public class TokenService {
 		JwtBuilder builder = Jwts.builder();
 		
 		builder.setSubject(userName);
-		builder.claim(TokenService.PLAYER_DATA, playerData);
-		builder.claim(TokenService.SESSION_DATA, session);
+		
+		if (playerData!=null)
+			builder.claim(TokenService.PLAYER_DATA, playerData);
+		
+		if (session!=null)
+			builder.claim(TokenService.SESSION_DATA, session);
 		
 		builder.setExpiration(new Date(System.currentTimeMillis() + TokenService.TOKEN_TTL));
-		builder.signWith(SignatureAlgorithm.HS512, TokenService.SECRET);
-		
+		builder.signWith(SignatureAlgorithm.HS256, TokenService.SECRET);
 		
 		token = builder.compact();
 		
@@ -63,9 +67,12 @@ public class TokenService {
 	
 		Jws<Claims> parsedToken = TokenService.parseToken(token);
 		
+		Session oldSession = TokenService.getSessionDataFromToken(token);
+		Player oldPlayer = TokenService.getPlayerDataFromToken(token);
+		
 		return TokenService.buildToken(parsedToken.getBody().getSubject(),
-				(playerData.isPresent() ? playerData.get() : (Player) parsedToken.getBody().get(PLAYER_DATA)),
-				(sessionData.isPresent() ? sessionData.get(): (Session) parsedToken.getBody().get(SESSION_DATA))
+				(playerData.isPresent() ? playerData.get() : oldPlayer),
+				(sessionData.isPresent() ? sessionData.get(): oldSession)
 				);
 	}
 	
@@ -103,14 +110,10 @@ public class TokenService {
 		
 		if (token!=null) {
 			
-			Jws<Claims> parsedToken = TokenService.parseToken(token);
+			Player player = getPlayerDataFromToken(token);
 			
-			if (parsedToken.getBody().containsKey(TokenService.PLAYER_DATA)) {
-				
-				Player playerData = (Player)parsedToken.getBody().get(TokenService.PLAYER_DATA);
-				
-				result = playerData.getPlayerId();
-			}
+			if (player!=null)
+				result = player.getPlayerId();
 		}
 		
 		return result;
@@ -122,14 +125,10 @@ public class TokenService {
 		
 		if (token!=null) {
 			
-			Jws<Claims> parsedToken = TokenService.parseToken(token);
+			Session sessionData = getSessionDataFromToken(token);
 			
-			if (parsedToken.getBody().containsKey(TokenService.SESSION_DATA)) {
-				
-				Session sessionData = (Session)parsedToken.getBody().get(TokenService.SESSION_DATA);
-				
+			if (sessionData!=null)
 				result = sessionData.getBeingCode();
-			}
 		}
 		
 		return result;
@@ -141,19 +140,16 @@ public class TokenService {
 		
 		if (token!=null) {
 			
-			Jws<Claims> parsedToken = TokenService.parseToken(token);
+			Player player = getPlayerDataFromToken(token);
 			
-			if (parsedToken.getBody().containsKey(TokenService.PLAYER_DATA)) {
-				
-				Player playerData = (Player)parsedToken.getBody().get(TokenService.PLAYER_DATA);
-				
-				result = playerData.getLocale();
-			}
+			if (player!=null)
+				result = player.getLocale();
 		}
 		
 		return result;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public static Session getSessionDataFromToken(String token) {
 		
 		Session result = null;
@@ -164,14 +160,30 @@ public class TokenService {
 			
 			if (parsedToken.getBody().containsKey(TokenService.SESSION_DATA)) {
 				
-				Session sessionData = (Session)parsedToken.getBody().get(TokenService.SESSION_DATA);
-				
-				result = sessionData;
+				result = new Session((Map<String, Object>)parsedToken.getBody().get(TokenService.SESSION_DATA));
 			}
 		}
 		
 		return result;
 	}	
+	
+	@SuppressWarnings("unchecked")
+	public static Player getPlayerDataFromToken(String token) {
+		
+		Player result = null;
+		
+		if (token!=null) {
+			
+			Jws<Claims> parsedToken = TokenService.parseToken(token);
+			
+			if (parsedToken.getBody().containsKey(TokenService.PLAYER_DATA)) {
+				
+				result = new Player((Map<String, Object>)parsedToken.getBody().get(TokenService.PLAYER_DATA));
+			}
+		}
+		
+		return result;
+	}
 	
 	private static Jws<Claims> parseToken(String token) {
 		
@@ -198,7 +210,9 @@ public class TokenService {
 	public static void main(String[] args) {
 		
 		String internalToken = TokenService.buildInternalToken();
-		
 		System.out.println("internal = " + internalToken);
+		
+		System.out.println("sessionData= " + TokenService.getSessionDataFromToken(internalToken));
+		
 	}
 }

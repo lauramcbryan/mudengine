@@ -19,16 +19,19 @@ public class PlayerHelper {
 		response.setLocale(dbPlayer.getLocale());
 		response.setStatus(dbPlayer.getStatus());
 		
-		for(MudPlayerBeing curBeing: dbPlayer.getBeingList()) {
-			
-			PlayerBeing newBeing = new PlayerBeing();
-			newBeing.setBeingCode(curBeing.getId().getBeingCode());
-			newBeing.setBeingName(newBeing.getBeingName());
-			newBeing.setBeingClass(newBeing.getBeingClass());
-			newBeing.setLastPlayed(newBeing.getLastPlayed());
-			
-			response.getBeingList().add(newBeing);
+		if (dbPlayer.getBeingList()!=null) {
+			for(MudPlayerBeing curBeing: dbPlayer.getBeingList()) {
+				
+				PlayerBeing newBeing = new PlayerBeing();
+				newBeing.setBeingCode(curBeing.getId().getBeingCode());
+				newBeing.setBeingName(newBeing.getBeingName());
+				newBeing.setBeingClass(newBeing.getBeingClass());
+				newBeing.setLastPlayed(newBeing.getLastPlayed());
+				
+				response.getBeingList().add(newBeing);
+			}			
 		}
+		
 		
 		return response;
 	}

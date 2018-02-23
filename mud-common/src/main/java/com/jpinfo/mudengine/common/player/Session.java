@@ -1,6 +1,7 @@
 package com.jpinfo.mudengine.common.player;
 
 import java.util.Date;
+import java.util.Map;
 
 public class Session implements java.io.Serializable {
 
@@ -24,6 +25,18 @@ public class Session implements java.io.Serializable {
 	
 	public Session() {
 		
+	}
+	
+	public Session(Map<String, Object> map) {
+		
+		this.sessionId = (Long)map.get("sessionId");
+		this.playerId = (Long)map.get("playerId");
+		this.sessionStart = (Date)map.get("sessionStart");
+		this.sessionEnd = (Date)map.get("sessionEnd");;
+		this.locale = (String)map.get("locale");
+		this.ipAddress = (String)map.get("ipAddress");
+		this.clientType = (String)map.get("clientType");
+		this.beingCode = (Long)map.get("beingCode");
 	}
 
 	public Long getSessionId() {

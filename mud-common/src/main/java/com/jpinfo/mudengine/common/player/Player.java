@@ -2,6 +2,7 @@ package com.jpinfo.mudengine.common.player;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * The persistent class for the mud_player database table.
@@ -31,6 +32,17 @@ public class Player implements java.io.Serializable {
 
 	public Player() {
 		this.beingList = new ArrayList<PlayerBeing>();
+	}
+	
+	public Player(Map<String, Object> map) {
+		
+		this();
+
+		this.playerId = (Long)map.get("playerId");
+		this.username = (String)map.get("username");
+		this.email = (String)map.get("email");
+		this.locale = (String)map.get("locale");
+		this.status = (Integer)map.get("status");
 	}
 
 	public Long getPlayerId() {
