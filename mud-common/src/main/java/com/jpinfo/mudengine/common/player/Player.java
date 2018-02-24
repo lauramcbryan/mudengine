@@ -1,10 +1,14 @@
 package com.jpinfo.mudengine.common.player;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 /**
  * The persistent class for the mud_player database table.
  * 
  */
-public class Player extends PlayerSimpleData  {
+public class Player implements java.io.Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -18,14 +22,27 @@ public class Player extends PlayerSimpleData  {
 
 	private String username;
 	
-	private String language;
+	private String email;
 	
-	private String country;
-	
+	private String locale;
 	
 	private Integer status;
+	
+	private List<PlayerBeing> beingList;
 
 	public Player() {
+		this.beingList = new ArrayList<PlayerBeing>();
+	}
+	
+	public Player(Map<String, Object> map) {
+		
+		this();
+
+		this.playerId = (Long)map.get("playerId");
+		this.username = (String)map.get("username");
+		this.email = (String)map.get("email");
+		this.locale = (String)map.get("locale");
+		this.status = (Integer)map.get("status");
 	}
 
 	public Long getPlayerId() {
@@ -52,19 +69,27 @@ public class Player extends PlayerSimpleData  {
 		this.status = status;
 	}
 
-	public String getLanguage() {
-		return language;
+	public String getEmail() {
+		return email;
 	}
 
-	public void setLanguage(String language) {
-		this.language = language;
+	public void setEmail(String email) {
+		this.email = email;
 	}
 
-	public String getCountry() {
-		return country;
+	public String getLocale() {
+		return locale;
 	}
 
-	public void setCountry(String country) {
-		this.country = country;
+	public void setLocale(String locale) {
+		this.locale = locale;
+	}
+
+	public List<PlayerBeing> getBeingList() {
+		return beingList;
+	}
+
+	public void setBeingList(List<PlayerBeing> beingList) {
+		this.beingList = beingList;
 	}
 }

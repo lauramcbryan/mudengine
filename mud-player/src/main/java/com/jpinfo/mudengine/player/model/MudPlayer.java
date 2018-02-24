@@ -1,10 +1,15 @@
 package com.jpinfo.mudengine.player.model;
 
+import java.util.Date;
+import java.util.List;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
@@ -24,18 +29,19 @@ public class MudPlayer implements java.io.Serializable {
 	
 	private String password;
 	
-	private String name;
-	
 	private String email;
 	
-	private String language;
+	private String locale;
 	
-	private String country;
+	private Date createDate;
 	
 	private Integer status;
 	
+	@OneToMany(mappedBy="id.playerId", cascade=CascadeType.ALL)
+	private List<MudPlayerBeing> beingList;
+	
 	public MudPlayer() {
-		
+
 	}
 
 	public Long getPlayerId() {
@@ -62,30 +68,6 @@ public class MudPlayer implements java.io.Serializable {
 		this.password = password;
 	}
 
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getLanguage() {
-		return language;
-	}
-
-	public void setLanguage(String language) {
-		this.language = language;
-	}
-
-	public String getCountry() {
-		return country;
-	}
-
-	public void setCountry(String country) {
-		this.country = country;
-	}
-
 	public String getEmail() {
 		return email;
 	}
@@ -102,6 +84,28 @@ public class MudPlayer implements java.io.Serializable {
 		this.status = status;
 	}
 
-	
-	
+	public String getLocale() {
+		return locale;
+	}
+
+	public void setLocale(String locale) {
+		this.locale = locale;
+	}
+
+	public Date getCreateDate() {
+		return createDate;
+	}
+
+	public void setCreateDate(Date createDate) {
+		this.createDate = createDate;
+	}
+
+	public List<MudPlayerBeing> getBeingList() {
+		return beingList;
+	}
+
+	public void setBeingList(List<MudPlayerBeing> beingList) {
+		this.beingList = beingList;
+	}
+		
 }

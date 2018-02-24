@@ -24,6 +24,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import com.jpinfo.mudengine.common.being.Being;
 import com.jpinfo.mudengine.common.message.Message;
+import com.jpinfo.mudengine.common.player.Player;
+import com.jpinfo.mudengine.common.player.Session;
 import com.jpinfo.mudengine.common.security.TokenService;
 import com.jpinfo.mudengine.message.client.BeingServiceClient;
 
@@ -92,12 +94,23 @@ public class MessageTests {
 	private TestRestTemplate restTemplate;
 
 	
+	public String getToken(Long beingCode, String locale) {
+		Player playerData = new Player();
+		playerData.setUsername(TEST_USERNAME);
+		playerData.setPlayerId(TEST_PLAYER_ID);
+		
+		Session sessionData = new Session();
+		sessionData.setBeingCode(beingCode);
+		sessionData.setLocale(locale);
+		
+		String usToken = TokenService.buildToken(MessageTests.TEST_USERNAME, playerData, sessionData);
+		
+		return usToken;
+	}
+	
 	public HttpEntity<Object> getUsAuthHeader() {
-		String usToken = TokenService.buildToken(
-				MessageTests.TEST_USERNAME, 
-				MessageTests.TEST_PLAYER_ID, 
-				MessageTests.TEST_LOCALE_US, 
-				MessageTests.TEST_BEING_CODE);
+		
+		String usToken = getToken(MessageTests.TEST_BEING_CODE, MessageTests.TEST_LOCALE_US);		
 		
 		HttpHeaders usHeaders = new HttpHeaders();
 		usHeaders.add(TokenService.HEADER_TOKEN, usToken);
@@ -109,11 +122,9 @@ public class MessageTests {
 	
 	
 	public HttpEntity<Object> getBrAuthHeader() {
-		String brToken = TokenService.buildToken(
-				MessageTests.TEST_USERNAME, 
-				MessageTests.TEST_PLAYER_ID, 
-				MessageTests.TEST_LOCALE_PT, 
-				MessageTests.TEST_BEING_CODE);
+
+		
+		String brToken = getToken(MessageTests.TEST_BEING_CODE, MessageTests.TEST_LOCALE_PT);		
 		
 		HttpHeaders brHeaders = new HttpHeaders();
 		brHeaders.add(TokenService.HEADER_TOKEN, brToken);
@@ -389,12 +400,8 @@ public class MessageTests {
 	@Test
 	public void testPagination() {
 		
-		String usToken = TokenService.buildToken(
-				MessageTests.TEST_USERNAME, 
-				MessageTests.TEST_PLAYER_ID, 
-				MessageTests.TEST_LOCALE_US, 
-				MessageTests.TEST_BEING_CODE_2);
-		
+		String usToken = getToken(MessageTests.TEST_BEING_CODE_2, MessageTests.TEST_LOCALE_US);		
+			
 		HttpHeaders usHeaders = new HttpHeaders();
 		usHeaders.add(TokenService.HEADER_TOKEN, usToken);
 		
@@ -433,11 +440,7 @@ public class MessageTests {
 	@Test
 	public void testUnreadMessages() {
 		
-		String usToken = TokenService.buildToken(
-				MessageTests.TEST_USERNAME, 
-				MessageTests.TEST_PLAYER_ID, 
-				MessageTests.TEST_LOCALE_US, 
-				MessageTests.TEST_BEING_CODE_3);
+		String usToken = getToken(MessageTests.TEST_BEING_CODE_3, MessageTests.TEST_LOCALE_US);		
 		
 		HttpHeaders usHeaders = new HttpHeaders();
 		usHeaders.add(TokenService.HEADER_TOKEN, usToken);
@@ -488,12 +491,8 @@ public class MessageTests {
 
 	@Test
 	public void testIsolation() {
-
-		String anotherBeingToken = TokenService.buildToken(
-				MessageTests.TEST_USERNAME, 
-				MessageTests.TEST_PLAYER_ID, 
-				MessageTests.TEST_LOCALE_US, 
-				MessageTests.TEST_BEING_CODE_3);
+		
+		String anotherBeingToken = getToken(MessageTests.TEST_BEING_CODE_3, MessageTests.TEST_LOCALE_US);		
 		
 		HttpHeaders anotherBeingHeaders = new HttpHeaders();
 		anotherBeingHeaders.add(TokenService.HEADER_TOKEN, anotherBeingToken);
@@ -543,23 +542,14 @@ public class MessageTests {
 		given(this.beingClient.getAllFromPlace("aforgotten", MessageTests.TEST_PLACE_ID))
 		.willReturn(testBeingList);
 
-		
-		String firstToken = TokenService.buildToken(
-				MessageTests.TEST_USERNAME, 
-				MessageTests.TEST_PLAYER_ID, 
-				MessageTests.TEST_LOCALE_US, 
-				MessageTests.TEST_BEING_CODE_5);
+		String firstToken = getToken(MessageTests.TEST_BEING_CODE_5, MessageTests.TEST_LOCALE_US);		
 		
 		HttpHeaders firstHeaders = new HttpHeaders();
 		firstHeaders.add(TokenService.HEADER_TOKEN, firstToken);
 		
 		HttpEntity<Object> firstAuthEntity = new HttpEntity<Object>(firstHeaders);		
 
-		String secondToken = TokenService.buildToken(
-				MessageTests.TEST_USERNAME, 
-				MessageTests.TEST_PLAYER_ID, 
-				MessageTests.TEST_LOCALE_US, 
-				MessageTests.TEST_BEING_CODE_6);
+		String secondToken = getToken(MessageTests.TEST_BEING_CODE_6, MessageTests.TEST_LOCALE_US);
 		
 		HttpHeaders secondHeaders = new HttpHeaders();
 		secondHeaders.add(TokenService.HEADER_TOKEN, secondToken);

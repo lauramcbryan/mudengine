@@ -26,6 +26,12 @@ public class MudSession {
 	@Column(name="session_end")
 	private Date sessionEnd;
 	
+	private String clientType;
+	
+	private String ipAddress;
+	
+	private Long beingCode;
+	
 	public MudSession() {
 		
 	}
@@ -68,5 +74,29 @@ public class MudSession {
 
 	public void setPlayerId(Long playerId) {
 		this.playerId = playerId;
+	}
+
+	public String getClientType() {
+		return clientType;
+	}
+
+	public void setClientType(String clientType) {
+		this.clientType = clientType;
+	}
+
+	public String getIpAddress() {
+		return ipAddress;
+	}
+
+	public void setIpAddress(String ipAddress) {
+		this.ipAddress = ipAddress;
+	}
+
+	public Long getBeingCode() {
+		return beingCode;
+	}
+
+	public void setBeingCode(Long beingCode) {
+		this.beingCode = beingCode;
 	}
 }

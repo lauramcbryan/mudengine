@@ -1,6 +1,7 @@
 package com.jpinfo.mudengine.common.player;
 
 import java.util.Date;
+import java.util.Map;
 
 public class Session implements java.io.Serializable {
 
@@ -14,12 +15,28 @@ public class Session implements java.io.Serializable {
 	
 	private Date sessionEnd;
 
-	private String language;
+	private String locale;
 	
-	private String country;
+	private String ipAddress;
+	
+	private String clientType;
+	
+	private Long beingCode;
 	
 	public Session() {
 		
+	}
+	
+	public Session(Map<String, Object> map) {
+		
+		this.sessionId = (Long)map.get("sessionId");
+		this.playerId = (Long)map.get("playerId");
+		this.sessionStart = (Date)map.get("sessionStart");
+		this.sessionEnd = (Date)map.get("sessionEnd");;
+		this.locale = (String)map.get("locale");
+		this.ipAddress = (String)map.get("ipAddress");
+		this.clientType = (String)map.get("clientType");
+		this.beingCode = (Long)map.get("beingCode");
 	}
 
 	public Long getSessionId() {
@@ -54,20 +71,35 @@ public class Session implements java.io.Serializable {
 		this.sessionEnd = sessionEnd;
 	}
 
-	public String getLanguage() {
-		return language;
+	public String getLocale() {
+		return locale;
 	}
 
-	public void setLanguage(String language) {
-		this.language = language;
+	public void setLocale(String locale) {
+		this.locale = locale;
 	}
 
-	public String getCountry() {
-		return country;
+	public String getIpAddress() {
+		return ipAddress;
 	}
 
-	public void setCountry(String country) {
-		this.country = country;
+	public void setIpAddress(String ipAddress) {
+		this.ipAddress = ipAddress;
 	}
-	
+
+	public String getClientType() {
+		return clientType;
+	}
+
+	public void setClientType(String clientType) {
+		this.clientType = clientType;
+	}
+
+	public Long getBeingCode() {
+		return beingCode;
+	}
+
+	public void setBeingCode(Long beingCode) {
+		this.beingCode = beingCode;
+	}
 }

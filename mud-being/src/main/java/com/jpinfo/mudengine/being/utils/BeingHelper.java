@@ -13,7 +13,6 @@ import com.jpinfo.mudengine.being.model.MudBeingClass;
 import com.jpinfo.mudengine.being.model.MudBeingClassAttr;
 import com.jpinfo.mudengine.being.model.MudBeingClassSkill;
 import com.jpinfo.mudengine.being.model.MudBeingClassSlot;
-import com.jpinfo.mudengine.being.model.MudBeingMessage;
 import com.jpinfo.mudengine.being.model.MudBeingSkill;
 import com.jpinfo.mudengine.being.model.MudBeingSkillModifier;
 import com.jpinfo.mudengine.being.model.MudBeingSlot;
@@ -24,7 +23,6 @@ import com.jpinfo.mudengine.being.model.pk.MudBeingSkillPK;
 import com.jpinfo.mudengine.being.model.pk.MudBeingSlotPK;
 import com.jpinfo.mudengine.common.being.Being;
 import com.jpinfo.mudengine.common.being.BeingAttrModifier;
-import com.jpinfo.mudengine.common.being.BeingMessage;
 import com.jpinfo.mudengine.common.being.BeingSkillModifier;
 import com.jpinfo.mudengine.common.security.TokenService;
 
@@ -333,21 +331,6 @@ public class BeingHelper {
 		}
 		
 		return dbBeing;
-	}
-	
-	public static BeingMessage buildMessage(MudBeingMessage dbMessage, MudBeing sender) {
-		
-		BeingMessage response = new BeingMessage();
-
-		response.setMessageDateTime(dbMessage.getId().getCreateDate());
-		response.setMessage(dbMessage.getMessage());
-
-		if (sender!=null) {
-			response.setSenderCode(sender.getBeingCode());
-			response.setSender(sender.getName());
-		}
-
-		return response;
 	}
 	
 	private static int calcEffectiveAttr(String attrCode, Integer baseValue, MudBeing dbBeing) {
