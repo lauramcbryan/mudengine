@@ -1,7 +1,11 @@
-FROM openjdk:8-jre-alpine
+FROM rappdw/docker-java-python
 
 VOLUME /tmp
-ARG JAR_FILE
+
+ADD awscloud/ecs-get-port-mapping.py ecs-get-port-mapping.py
+ADD awscloud/entry_point.sh entry_point.sh
 ADD target/mud-world-*.jar app.jar
-ENTRYPOINT ["java","-Xmx256m", "-Xss32m", "-Djava.security.egd=file:/dev/./urandom","-jar","/app.jar"]
+
+RUN ["chmod", "+x", "entry_point.sh"]
+ENTRYPOINT ["/bin/bash", "/entry_point.sh"]
 
