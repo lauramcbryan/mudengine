@@ -1,5 +1,9 @@
 package com.jpinfo.mudengine.world.service;
 
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -87,44 +91,50 @@ public class PlaceController implements PlaceService {
 					// If HP is greater than MAX_HP, adjust it
 					if ((maxHP!=null) && (currentHP > maxHP)) {
 						
-						for(MudPlaceAttr curAttr: dbPlace.getAttrs()) {
+						Optional<MudPlaceAttr> hpAttr = 
+						dbPlace.getAttrs().stream()
+							.filter((MudPlaceAttr a) -> a.getId().getAttrCode().equals(WorldHelper.PLACE_HP_ATTR))
+							.findFirst();
+						
+						if (hpAttr.isPresent()) {
+							hpAttr.get().setAttrValue(maxHP);
 							
-							if (curAttr.getId().getAttrCode().equals(WorldHelper.PLACE_HP_ATTR)) {
-								curAttr.setAttrValue(maxHP);
-							}
 						}
 					}
 				}
 			}
 			
 			// Looking for attributes to remove
-			for(MudPlaceAttr curAttr: dbPlace.getAttrs()) {
-				
-				// if doesn't exist in request entity, remove it
-				if (requestPlace.getAttrs().get(curAttr.getId().getAttrCode())==null) {
-					dbPlace.getAttrs().remove(curAttr);
-				}
-			}
+			Set<MudPlaceAttr> filteredSet =
+				dbPlace.getAttrs().stream()
+					.filter((MudPlaceAttr a) -> requestPlace.getAttrs().get(a.getId().getAttrCode())!=null)
+					.collect(Collectors.toSet());
+
+			dbPlace.getAttrs().clear();
+			dbPlace.getAttrs().addAll(filteredSet);
 			
 			// Looking for attributes to add
 			for(String curAttr: requestPlace.getAttrs().keySet()) {
 				
-				boolean found = false;
-				for(MudPlaceAttr curDbAttr: dbPlace.getAttrs()) {
+				Integer curValue = requestPlace.getAttrs().get(curAttr);
+
+				// Looking for existing attribute in db record list
+				Optional<MudPlaceAttr> foundAttr = 
+					dbPlace.getAttrs().stream()
+						.filter(a -> a.getId().getAttrCode().equals(curAttr))
+						.findFirst();
+
+				if (foundAttr.isPresent()) {
 					
-					if (curDbAttr.getId().getAttrCode().equals(curAttr)) {
-						curDbAttr.setAttrValue(requestPlace.getAttrs().get(curAttr));
-						found = true;
-					}
-				}
-				
-				if (!found) {
+					// Updates the value of existing attribute
+					foundAttr.get().setAttrValue(curValue);
+				} else {
 					
+					// Creates a new attribute
 					dbPlace.getAttrs().add(
-							WorldHelper.buildPlaceAttr(dbPlace.getPlaceCode(), curAttr, requestPlace.getAttrs().get(curAttr))
+							WorldHelper.buildPlaceAttr(dbPlace.getPlaceCode(), curAttr, curValue)
 							);
 				}
-				
 			}
 			
 			// if placeClass is changed, update the attributes of changed place
