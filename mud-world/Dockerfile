@@ -14,5 +14,5 @@ ADD awscloud/entry_point.sh entry_point.sh
 ADD target/mud-world-*.jar app.jar
 
 RUN ["chmod", "+x", "entry_point.sh"]
-ENTRYPOINT ["/entry_point.sh"]
+ENTRYPOINT ["entry_point.sh"]
 
