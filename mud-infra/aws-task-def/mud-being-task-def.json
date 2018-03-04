@@ -1,0 +1,39 @@
+{
+	"containerDefinitions": [
+		{
+			"name": "mud-being-container", 
+			"image": "406396693860.dkr.ecr.us-east-2.amazonaws.com/mud-being:latest", 
+			"memoryReservation": 300, 
+			"portMappings": [
+				{
+				  "hostPort": 0,
+				  "protocol": "tcp",
+				  "containerPort": 5000
+				}
+			],
+			"essential": true, 
+			"environment": [
+				{
+				  "name": "CONFIG_SERVER_URL",
+				  "value": "http://ec2-52-14-59-146.us-east-2.compute.amazonaws.com:8888"
+				},
+				{
+				  "name": "SPRING_PROFILES_ACTIVE",
+				  "value": "prod"
+				}
+			  ],
+			"logConfiguration": {
+				"logDriver": "awslogs",
+				"options": {
+				  "awslogs-group": "mudengine",
+				  "awslogs-region": "us-east-2",
+				  "awslogs-stream-prefix": "mud-being"
+				}
+			}
+		}
+	], 
+	"family": "mud-being-task-def", 
+	"requiresCompatibilities": [
+		"EC2"
+	]
+}

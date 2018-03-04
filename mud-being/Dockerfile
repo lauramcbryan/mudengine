@@ -1,7 +1,19 @@
 FROM openjdk:8-jre-alpine
 
+RUN apk --no-cache add python
+RUN apk --no-cache add py-pip
+RUN apk --no-cache add bash
+RUN pip install boto
+RUN pip install boto3
+RUN pip install requests
+RUN pip install datetime
+
 VOLUME /tmp
-ARG JAR_FILE
+
+ADD awscloud/ecs-get-port-mapping.py ecs-get-port-mapping.py
+ADD awscloud/entry_point.sh entry_point.sh
 ADD target/mud-being-*.jar app.jar
-ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom -Xmx256m","-jar","/app.jar"]
+
+RUN ["chmod", "+x", "entry_point.sh"]
+ENTRYPOINT ["/bin/bash", "entry_point.sh"]
 
