@@ -1,0 +1,116 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<maven2-moduleset plugin="maven-plugin@3.0">
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>5</daysToKeep>
+        <numToKeep>5</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.28.1">
+      <projectUrl>https://github.com/JosielOliveira/mudengine/</projectUrl>
+      <displayName></displayName>
+    </com.coravy.hudson.plugins.github.GithubProjectProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <net.uaznia.lukanus.hudson.plugins.gitparameter.GitParameterDefinition plugin="git-parameter@0.9.0">
+          <name>GIT_BRANCH</name>
+          <description>Branch to build</description>
+          <uuid>e346be0a-d402-46b6-9888-1be5a24d8399</uuid>
+          <type>PT_BRANCH</type>
+          <branch></branch>
+          <tagFilter>*</tagFilter>
+          <branchFilter>.*</branchFilter>
+          <sortMode>NONE</sortMode>
+          <defaultValue></defaultValue>
+          <selectedValue>NONE</selectedValue>
+          <quickFilterEnabled>false</quickFilterEnabled>
+        </net.uaznia.lukanus.hudson.plugins.gitparameter.GitParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@3.7.0">
+    <configVersion>2</configVersion>
+    <userRemoteConfigs>
+      <hudson.plugins.git.UserRemoteConfig>
+        <url>https://github.com/JosielOliveira/mudengine</url>
+        <credentialsId>3464d058-cb5c-466f-93fe-8970f049dfa4</credentialsId>
+      </hudson.plugins.git.UserRemoteConfig>
+    </userRemoteConfigs>
+    <branches>
+      <hudson.plugins.git.BranchSpec>
+        <name>${GIT_BRANCH}</name>
+      </hudson.plugins.git.BranchSpec>
+    </branches>
+    <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+    <submoduleCfg class="list"/>
+    <extensions/>
+  </scm>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <rootModule>
+    <groupId>com.jpinfo.mudengine</groupId>
+    <artifactId>mud-item</artifactId>
+  </rootModule>
+  <rootPOM>mud-item/pom.xml</rootPOM>
+  <goals>install -Dbuild-version=${BUILD_NUMBER}</goals>
+  <aggregatorStyleBuild>true</aggregatorStyleBuild>
+  <incrementalBuild>false</incrementalBuild>
+  <ignoreUpstremChanges>true</ignoreUpstremChanges>
+  <ignoreUnsuccessfulUpstreams>false</ignoreUnsuccessfulUpstreams>
+  <archivingDisabled>false</archivingDisabled>
+  <siteArchivingDisabled>false</siteArchivingDisabled>
+  <fingerprintingDisabled>false</fingerprintingDisabled>
+  <resolveDependencies>false</resolveDependencies>
+  <processPlugins>false</processPlugins>
+  <mavenValidationLevel>-1</mavenValidationLevel>
+  <runHeadless>false</runHeadless>
+  <disableTriggerDownstreamProjects>false</disableTriggerDownstreamProjects>
+  <blockTriggerWhenBuilding>true</blockTriggerWhenBuilding>
+  <settings class="jenkins.mvn.DefaultSettingsProvider"/>
+  <globalSettings class="jenkins.mvn.DefaultGlobalSettingsProvider"/>
+  <reporters/>
+  <publishers/>
+  <buildWrappers/>
+  <prebuilders/>
+  <postbuilders>
+    <com.nirima.jenkins.plugins.docker.builder.DockerBuilderPublisher plugin="docker-plugin@1.1.2">
+      <dockerFileDirectory>mud-item</dockerFileDirectory>
+      <pullCredentialsId></pullCredentialsId>
+      <tags>
+        <string>mud-item:${BUILD_NUMBER}</string>
+      </tags>
+      <pushOnSuccess>false</pushOnSuccess>
+      <pushCredentialsId></pushCredentialsId>
+      <cleanImages>false</cleanImages>
+      <cleanupWithJenkinsJobDelete>true</cleanupWithJenkinsJobDelete>
+      <cloud>jeremias-cloud</cloud>
+    </com.nirima.jenkins.plugins.docker.builder.DockerBuilderPublisher>
+    <hudson.tasks.Shell>
+      <command>docker container stop mud-item-container  || echo Container mud-item-container isnt running.
+
+</command>
+    </hudson.tasks.Shell>
+    <hudson.tasks.Shell>
+      <command>docker container rm mud-item-container || echo Container mud-item-container doesnt exist.</command>
+    </hudson.tasks.Shell>
+    <hudson.tasks.Shell>
+      <command>docker container run -d -p 8084:8084 -e SPRING_PROFILES_ACTIVE=itg -m512m --name=mud-item-container mud-item:${BUILD_NUMBER}</command>
+    </hudson.tasks.Shell>
+  </postbuilders>
+  <runPostStepsIfResult>
+    <name>SUCCESS</name>
+    <ordinal>0</ordinal>
+    <color>BLUE</color>
+    <completeBuild>true</completeBuild>
+  </runPostStepsIfResult>
+</maven2-moduleset>
