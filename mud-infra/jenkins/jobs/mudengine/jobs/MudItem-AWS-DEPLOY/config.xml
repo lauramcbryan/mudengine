@@ -1,0 +1,50 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>AWS_REPOSITORY</name>
+          <description>ECR Repository URL</description>
+          <defaultValue>406396693860.dkr.ecr.us-east-2.amazonaws.com</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>SOURCE_NUMBER</name>
+          <description>Number of the build to promote</description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>aws ecr get-login --no-include-email &gt; awslogin.sh
+chmod 777 ./awslogin.sh
+./awslogin.sh
+docker tag mud-item:${SOURCE_NUMBER} ${AWS_REPOSITORY}/mud-item:${SOURCE_NUMBER}
+docker push ${AWS_REPOSITORY}/mud-item:${SOURCE_NUMBER}
+docker tag mud-item:${SOURCE_NUMBER} ${AWS_REPOSITORY}/mud-item:latest
+docker push ${AWS_REPOSITORY}/mud-item:latest
+</command>
+    </hudson.tasks.Shell>
+    <hudson.tasks.Shell>
+      <command>aws ecs register-task-definition --cli-input-json file://${JENKINS_HOME}/aws-task-def/mud-item-task-def.json
+aws ecs update-service --cluster mudengine --service mud-item-service --task-definition mud-item-task-def
+</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>
