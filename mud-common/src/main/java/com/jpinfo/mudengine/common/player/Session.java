@@ -29,14 +29,16 @@ public class Session implements java.io.Serializable {
 	
 	public Session(Map<String, Object> map) {
 		
-		this.sessionId = (Long)map.get("sessionId");
-		this.playerId = (Long)map.get("playerId");
+		this.sessionId = new Long(String.valueOf(map.get("sessionId")));
+		this.playerId = new Long(String.valueOf(map.get("playerId")));
 		this.sessionStart = (Date)map.get("sessionStart");
 		this.sessionEnd = (Date)map.get("sessionEnd");;
 		this.locale = (String)map.get("locale");
 		this.ipAddress = (String)map.get("ipAddress");
 		this.clientType = (String)map.get("clientType");
-		this.beingCode = (Long)map.get("beingCode");
+		
+		if (map.get("beingCode")!=null)
+			this.beingCode = new Long(String.valueOf(map.get("beingCode")));
 	}
 
 	public Long getSessionId() {

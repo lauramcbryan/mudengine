@@ -138,7 +138,9 @@ public class BeingController implements BeingService {
 			dbBeing.setBeingClass(dbBeingClass);
 			dbBeing.setCurPlaceCode(placeCode);
 			dbBeing.setCurWorld(worldName);
-			dbBeing.setName(beingName.get());
+			
+			if (beingName.isPresent())
+				dbBeing.setName(beingName.get());
 			
 			if (quantity.isPresent())
 				dbBeing.setQuantity(quantity.get());

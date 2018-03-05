@@ -212,7 +212,24 @@ public class TokenService {
 		String internalToken = TokenService.buildInternalToken();
 		System.out.println("internal = " + internalToken);
 		
-		System.out.println("sessionData= " + TokenService.getSessionDataFromToken(internalToken));
+		System.out.println("playerData= " + TokenService.getPlayerIdFromToken(internalToken));
+		
+		
+		Player playerData = new Player();
+		playerData.setUsername(TokenService.INTERNAL_ACCOUNT);
+		playerData.setPlayerId(4L);
+		
+		Session sessionData = new Session();
+		sessionData.setSessionId(1234L);
+		sessionData.setPlayerId(4L);
+		sessionData.setLocale(TokenService.INTERNAL_LOCALE);
+		
+		String usToken = TokenService.buildToken("username", playerData, sessionData);
+		
+		System.out.println("playerId=" + TokenService.getPlayerDataFromToken(usToken));
+		
+		System.out.println("sessionData=" + TokenService.getSessionDataFromToken(usToken));
+		
 		
 	}
 }

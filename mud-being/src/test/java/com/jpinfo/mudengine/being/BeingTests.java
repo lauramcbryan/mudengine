@@ -82,15 +82,14 @@ public class BeingTests {
 		return authHeaders;
 	}
 	
-	private HttpHeaders getAuthHeaders(Long beingCode) {
+	private HttpHeaders getAuthHeaders(Long playerId) {
 		HttpHeaders authHeaders = new HttpHeaders();
 		
 		Player playerData = new Player();
 		playerData.setUsername(TokenService.INTERNAL_ACCOUNT);
-		playerData.setPlayerId(TokenService.INTERNAL_PLAYER_ID);
+		playerData.setPlayerId(playerId);
 		
 		Session sessionData = new Session();
-		sessionData.setBeingCode(beingCode);
 		sessionData.setLocale(TokenService.INTERNAL_LOCALE);
 		
 		String usToken = TokenService.buildToken(BeingTests.testUsername, playerData, sessionData);		
