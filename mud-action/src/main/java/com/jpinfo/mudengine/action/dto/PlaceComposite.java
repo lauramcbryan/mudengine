@@ -25,6 +25,8 @@ public class PlaceComposite implements ActionTarget {
 		
 		this.place = simplePlace;
 		this.messages = new ArrayList<ActionMessage>();
+		this.beings = new ArrayList<Being>();
+		this.items = new ArrayList<Item>();
 	}
 
 	public List<Item> getItems() {
@@ -92,7 +94,6 @@ public class PlaceComposite implements ActionTarget {
 		// =========== BEINGS ==========
 		target.addMessage("{str:BEINGHEADER");
 		
-		
 		for(Being curBeing: this.getBeings()) {
 			
 			if (curBeing.getBeingType().equals(Being.BEING_TYPE_REGULAR_NON_SENTIENT)) {
@@ -103,10 +104,11 @@ public class PlaceComposite implements ActionTarget {
 				target.addMessage("{str:HEREIS}", curBeing.getName());
 			}
 		}
-		
+
 		if (this.getBeings().isEmpty()) {
 			target.addMessage("{str:NOBODY");			
 		}
+		
 		
 		// =========== ITEMS ==========
 		target.addMessage("{str:ITEMHEADER");
