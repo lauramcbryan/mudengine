@@ -38,7 +38,7 @@ public class Player implements java.io.Serializable {
 		
 		this();
 
-		this.playerId = (Long)map.get("playerId");
+		this.playerId = new Long(String.valueOf(map.get("playerId")));
 		this.username = (String)map.get("username");
 		this.email = (String)map.get("email");
 		this.locale = (String)map.get("locale");
