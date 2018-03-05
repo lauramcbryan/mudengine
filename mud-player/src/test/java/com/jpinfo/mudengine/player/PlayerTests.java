@@ -114,10 +114,13 @@ public class PlayerTests {
 		Player playerData = new Player();
 		playerData.setUsername(TokenService.INTERNAL_ACCOUNT);
 		playerData.setPlayerId(TokenService.INTERNAL_PLAYER_ID);
+		playerData.setLocale(TokenService.INTERNAL_LOCALE);
 		
 		Session sessionData = new Session();
+		sessionData.setSessionId(Long.MAX_VALUE);
+		sessionData.setPlayerId(TokenService.INTERNAL_PLAYER_ID);
 		//sessionData.setBeingCode(beingCode);
-		sessionData.setLocale(TokenService.INTERNAL_LOCALE);
+
 		
 		String usToken = TokenService.buildToken(userName, playerData, sessionData);		
 		

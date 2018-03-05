@@ -202,6 +202,8 @@ public class TokenService {
 		playerData.setLocale(TokenService.INTERNAL_LOCALE);
 		
 		Session sessionData = new Session();
+		sessionData.setSessionId(Long.MAX_VALUE);
+		sessionData.setPlayerId(TokenService.INTERNAL_PLAYER_ID);
 		sessionData.setBeingCode(TokenService.INTERNAL_BEING_CODE);
 		
 		return buildToken(TokenService.INTERNAL_ACCOUNT, playerData, sessionData);
@@ -218,11 +220,11 @@ public class TokenService {
 		Player playerData = new Player();
 		playerData.setUsername(TokenService.INTERNAL_ACCOUNT);
 		playerData.setPlayerId(4L);
+		playerData.setLocale(TokenService.INTERNAL_LOCALE);
 		
 		Session sessionData = new Session();
 		sessionData.setSessionId(1234L);
 		sessionData.setPlayerId(4L);
-		sessionData.setLocale(TokenService.INTERNAL_LOCALE);
 		
 		String usToken = TokenService.buildToken("username", playerData, sessionData);
 		

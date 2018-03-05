@@ -88,9 +88,11 @@ public class BeingTests {
 		Player playerData = new Player();
 		playerData.setUsername(TokenService.INTERNAL_ACCOUNT);
 		playerData.setPlayerId(playerId);
+		playerData.setLocale(TokenService.INTERNAL_LOCALE);
 		
 		Session sessionData = new Session();
-		sessionData.setLocale(TokenService.INTERNAL_LOCALE);
+		sessionData.setPlayerId(playerId);
+		sessionData.setSessionId(Long.MAX_VALUE);
 		
 		String usToken = TokenService.buildToken(BeingTests.testUsername, playerData, sessionData);		
 		
