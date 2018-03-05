@@ -15,8 +15,6 @@ public class Session implements java.io.Serializable {
 	
 	private Date sessionEnd;
 
-	private String locale;
-	
 	private String ipAddress;
 	
 	private String clientType;
@@ -33,7 +31,6 @@ public class Session implements java.io.Serializable {
 		this.playerId = new Long(String.valueOf(map.get("playerId")));
 		this.sessionStart = (Date)map.get("sessionStart");
 		this.sessionEnd = (Date)map.get("sessionEnd");;
-		this.locale = (String)map.get("locale");
 		this.ipAddress = (String)map.get("ipAddress");
 		this.clientType = (String)map.get("clientType");
 		
@@ -71,14 +68,6 @@ public class Session implements java.io.Serializable {
 
 	public void setSessionEnd(Date sessionEnd) {
 		this.sessionEnd = sessionEnd;
-	}
-
-	public String getLocale() {
-		return locale;
-	}
-
-	public void setLocale(String locale) {
-		this.locale = locale;
 	}
 
 	public String getIpAddress() {

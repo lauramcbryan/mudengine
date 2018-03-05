@@ -1,10 +1,11 @@
 package com.jpinfo.mudengine.message.service;
 
 import java.text.DateFormat;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
-import org.apache.commons.lang.LocaleUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -199,7 +200,7 @@ public class MessageController implements MessageService {
 
 		DateFormat df = 
 				DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, 
-						LocaleUtils.toLocale(callerLocale));
+						Locale.forLanguageTag(callerLocale));
 		
 		result.setMessageDate(df.format(a.getInsertDate()));
 		result.setMessage(actualMessage);

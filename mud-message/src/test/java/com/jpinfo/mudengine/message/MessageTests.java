@@ -98,10 +98,12 @@ public class MessageTests {
 		Player playerData = new Player();
 		playerData.setUsername(TEST_USERNAME);
 		playerData.setPlayerId(TEST_PLAYER_ID);
+		playerData.setLocale(locale);
 		
 		Session sessionData = new Session();
+		sessionData.setSessionId(Long.MAX_VALUE);
 		sessionData.setBeingCode(beingCode);
-		sessionData.setLocale(locale);
+		sessionData.setPlayerId(MessageTests.TEST_PLAYER_ID);
 		
 		String usToken = TokenService.buildToken(MessageTests.TEST_USERNAME, playerData, sessionData);
 		
