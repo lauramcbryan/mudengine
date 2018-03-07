@@ -20,6 +20,10 @@
 				{
 				  "name": "SPRING_PROFILES_ACTIVE",
 				  "value": "prod"
+                                },
+                                {
+                                  "name": "DEPLOY_ENV",
+                                  "value": "AWS"
 				}
 			  ],
 			"logConfiguration": {
