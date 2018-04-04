@@ -150,6 +150,7 @@ public class ItemTests {
 		assertThat(updateItem.getAttrs().get(ItemTests.test2ItemClassAttr1)).isNotNull();
 		assertThat(updateItem.getAttrs().get(ItemTests.test2ItemClassAttr2)).isNotNull();
 		
+		// This attribute cannot be changed!
 		assertThat(updateItem.getAttrs().get(ItemTests.testNewAttr)).isNotNull();
 		
 		// *********** DELETE **************
