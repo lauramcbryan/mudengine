@@ -251,7 +251,7 @@ public class PlayerTests {
 	}
 	
 	@Test
-	public void testPendingAccount() {
+	public void testPendingAccount() throws Exception {
 		
 		Map<String, Object> urlVariables = new HashMap<String, Object>();
 		
@@ -259,7 +259,8 @@ public class PlayerTests {
 		// ============== (it should return error) ===========================
 		
 		// First I need to get the password generated in database
-		MudPlayer dbPlayer = repository.findOne(PlayerTests.TEST_PENDING_PLAYER_ID);
+		MudPlayer dbPlayer = repository.findById(PlayerTests.TEST_PENDING_PLAYER_ID)
+				.orElseThrow(() -> new Exception("Test player not found in database"));
 		
 		// Create Session
 		urlVariables.put("username", PlayerTests.TEST_PENDING_USERNAME);
@@ -349,7 +350,7 @@ public class PlayerTests {
 	}
 	
 	//@Test
-	public void testCreateBeing() {
+	public void testCreateBeing() throws Exception {
 		
 		setupMocks();
 		
@@ -375,7 +376,8 @@ public class PlayerTests {
 		assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
 		// Check if the being is persisted in database
-		MudPlayer dbPlayer = repository.findOne(createResponse.getBody().getPlayerId());
+		MudPlayer dbPlayer = repository.findById(createResponse.getBody().getPlayerId())
+				.orElseThrow(() -> new Exception("Test player not found in database"));
 		
 		MudPlayerBeing dbBeing = new MudPlayerBeing();
 		MudPlayerBeingPK pk = new MudPlayerBeingPK();

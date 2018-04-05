@@ -1,6 +1,6 @@
 package com.jpinfo.mudengine.player.client;
 
-import org.springframework.cloud.netflix.feign.FeignClient;
+import org.springframework.cloud.openfeign.FeignClient;
 
 import com.jpinfo.mudengine.common.service.BeingService;
 
