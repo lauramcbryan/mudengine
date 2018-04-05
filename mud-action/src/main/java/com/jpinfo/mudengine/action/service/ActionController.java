@@ -65,7 +65,8 @@ public class ActionController implements ActionService {
 		
 		Action response = null;
 		
-		MudAction state = repository.findOne(actionCode);
+		MudAction state = repository.findById(actionCode)
+				.orElseThrow(() -> new EntityNotFoundException("Action not found"));
 		
 		if (state!=null) {
 			response = ActionHelper.buildAction(state);

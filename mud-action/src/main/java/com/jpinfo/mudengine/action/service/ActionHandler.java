@@ -247,7 +247,10 @@ public class ActionHandler {
 		result.setActionClassCode(a.getActionClassCode());
 		
 		// Solving the actionClass
-		MudActionClass dbActionClass = classRepository.findOne(a.getActionClassCode());
+		MudActionClass dbActionClass = classRepository
+				.findById(a.getActionClassCode())
+				.orElseThrow(() -> new EntityNotFoundException("Being " + a.getActorCode() + " not found"));
+
 		result.setActionClass(ActionHelper.buildActionClass(dbActionClass));
 
 		// Preparing the token to internally call the services to compose the ActionInfo
