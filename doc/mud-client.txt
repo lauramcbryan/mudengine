@@ -1,0 +1,242 @@
+
+flow:
+
+- cliente se conecta;
+- recebe o welcome screen, são mostradas as opções de register ou login
+
+Comandos:
+	REGISTER username;
+	LOGIN username / password;
+
+Qualquer outro comando quando nesse estado resulta em:
+
+You aren't logged in.  Please REGISTER ou issue LOGIN to continue.
+     REGISTER username
+     LOGIN username / password
+
+REGISTER username
+
+Please fill additional details for registration:
+Email address ==> .........
+Preferred locale (1=en_US <default>, 2=pt_BR) ==> .......
+
+Your registration was accepted.
+Please check your email for activation code.
+
+
+ACTIVATE activationCode  <newPassword>
+
+Your account is activated.
+
+
+You have 0 being(s) created at this world.
+To create a being, issue the CREATE BEING command.
+
+CREATE BEING
+
+Name ==>
+Class (? = display the list of classes) ==>
+
+1 - WATCHMAN
+One of the watchman that crash when the ship collapsed.
+Physically superior to others, but too dumb to find food and not all charismatic.
+
+2 - SPECIALIST
+
+3 - 
+
+
+
+
++****************************************************************************+
+|																			 |
+|                   A L M O S T     F O R G O T T E N    					 |
+|																			 |
+| ========================================================================== |
+|																			 |
+|																			 |
+|	You were being conducted in a colonization expedition to another new	 |
+| world between the stars.  But in the middle of the travel your ship		 |
+| collapsed in the neighborhood of an uninhabited planet.					 |
+|	You and a few survivors managed to escape before the fall and now are	 |
+| entangled in middle of nowhere in an unknown and ALMOST FORGOTTEN world.	 |
+|																			 |
+|																			 |
++****************************************************************************+
+
+Author: Josiel S Oliveira
+You can check the code at my GitHub
+
+
+/world/aforgotten
+
+
+	defaultSpawningPlace
+	welcomeText
+	nativeBeingClasses   Long[]
+
+
+CHOOSE BEING
+
+You have the beings below:
+
+1 - Slash Calliber (WATCHMAN, HP: 45/50, escape pod)
+2 - Chapolim Colorado (SPECIALIST, HP: 1/50, plain)
+
+CHOOSE BEING Slash Calliber
+CHOOSE BEING 1
+CHOOSE BEING Slash
+
+Selected Slash Calliber
+
+
+You wake in a escape pod
+
+
+
+Dictionary:
+
+
+VERB
+	{ targetType: BEING, mediatorType: NONE, targetRequired: false, mediatorRequired: false, defaultTarget: '${actor.being.curPlaceCode}' };
+
+LOOK
+	{ targetType: BEING, mediatorType: NONE, targetRequired: true, mediatorRequired: false, defaultTarget: '${actor.being}' };
+	{ targetType: PLACE, mediatorType: NONE, targetRequired: false, mediatorRequired: false, defaultTarget: '${actor.being.curPlaceCode}' };
+
+
+LOOK
+	<BEING>
+	<PLACE>
+
+
+VERBS
+
+Client commands:
+
+REGISTER
+LOGIN
+ACTIVATE
+CHANGEPWD
+LOCALE
+VERBS
+EXIT  <GAME | WORLD >
+CREATE BEING
+CHOOSE BEING
+DISPOSE BEING
+
+
+# client mode
+aforgotten> game mode
+
+
+LOOK <target>
+
+CRAFT <target> [ WITH <mediator>]
+
+
+CommandDictionary
+	Map<String, List<CommandTemplate>  verbs;
+
+
+commands.get(string[0]);
+
+CommandTemplate
+	targetType
+	targetRegex
+	targetRequired
+	mediatorType
+	mediatorRegex
+	mediatorRequired
+
+
+Command
+	verb
+	targetCode
+	targetType
+	mediatorCode
+	mediatorType
+
+
+DEF "Arvoré frondosa" as "ARV"
+
+
+CRAFT 
+
+
+LOOK at BEING
+LOOK BEING
+LOOK 1
+LOOK HERE
+
+TALK TO <BEING>: <MEDIATOR>
+
+
+
+0 - identificar o verbo com a regex padrão;
+1 - extrair o elemento target usando a regex do target;
+2 - extrair o elemento mediator usando a regex do mediator;
+3 - converter em ids (depende do tipo, né);
+
+
+tenho uma lista de patterns para um determinado verbo.
+pode dar match em mais de um, como descobrir qual é o correto?
+Só puxando os ids, nessa hora descubro se é um PLACE ou se é um BEING ou um ITEM.
+
+então terei de criar uma lista de Commands em tudo que der match no verbo
+e ver qual deles é válido ou não.
+
+
+getIdentifier(value, type)
+
+
+se eu mando o VERB para a camada de serviços, posso ter de identificar
+o targetType e o mediatorType mas se eu mandar o ACTION_CLASS_ID não preciso disso.
+sõ mandar os valores e o Action pega do metadado dele.
+
+Posso mandar os valores também e deixar o ActionController traduzir?
+
+
+Esse código do client está virando uma macarronada.
+
+isso tudo por causa das variações de verbos que aceitam ora PLACE, ora BEING, ora ITEM.
+
+Acabo tendo um monte de opções de comando e não sei o que o cliente quis dizer com aquele targetCode
+a menos que eu passe por todas as possibilidades de comando verificando.
+
+Isso significa que quem for fazer essa verificação tem de ter toda a gama de dados
+disponíveis, e isso pode requerer chamadas adicionais só para perder tempo.
+
+Quando eu referencio um ITEM, por exemplo, não sou claro sobre se é o item
+que está no chão ou o ITEM que está com o being.
+
+Na hora que eu precisar puxar os dados para verificar todos os elementos (target, mediator)
+eu já deveria manter os IDs guardados.  Em tabela talvez.
+
+Uma tabela de ACTION guardaria os comandos não-validados, com string nos targets.
+Outra já guardaria as actions in progress, já com os IDs guardados para não ter que me
+preocupar com isso de novo.
+
+Se bem que o maior esforço é para descobrir o type dos parametros.
+
+
+Descobrir no client: significa ter TODOS os dados em mãos e sair buscando por eles.
+Nesse caso o ActionService recebe o actionClassId e só precisa persistir em banco.
+O client pode ficar com informações do client em memória e usar essas informações
+sem precisar ficar buscando toda hora.  Só precisaria receber notificações do engine
+(buscar em modelo igual ao das messages) para saber que precisa atualizar um determinado
+elemento do seu being.  Isso bem que poderia estar no Message, né?  Uma lista de entidades
+que ficaram invalidadas com aquele evento.
+
+Quem setaria?  O action mesmo, na hora que enviasse a mensagem.
+Nos casos de mensagens automáticas, os módulos de worker enviariam.
+Nem toda mudança gera mensagem: não estou prevendo mandar notificações para alteração de
+items no
+
+Descobrir no server: significa um client mais leve, processamento no Action, buscar
+TODOS os dados lá, buscar lá, abandonar.  Nesse caso o Action recebe o verbo, os parametros
+e descobre o que fazer com eles.
+
+Mezzo: nem todos os verbos terão essas variações, vou ter todo esse esforço mesmo nesse
+caso?  Se eu tenho apenas um match para o verbo, já poderia subir esse match e aliviar
+o trabalho do engine.
