@@ -5,6 +5,7 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -136,7 +137,7 @@ public class MessageController implements MessageService {
 			}
 			
 			// Save all message changes
-			repository.save(lstMessage);
+			repository.saveAll(lstMessage);
 			
 		} else {
 			throw new IllegalParameterException("Being not set in header");
@@ -159,13 +160,12 @@ public class MessageController implements MessageService {
 			pk.setMessageKey(MessageHelper.getLocalizedKey(a.getMessageKey()));
 			pk.setLocale(callerLocale);
 		
-			MudMessageLocale dbLocalizedMessage = localeRepository.findOne(pk);
+			Optional<MudMessageLocale> dbLocalizedMessage = localeRepository.findById(pk);
 			
-			if (dbLocalizedMessage!=null) {
-				actualMessage = dbLocalizedMessage.getMessageText();
-			} else {
-				actualMessage = "Message key " + pk.getMessageKey() + " not found in " + callerLocale + " locale";
+			if (dbLocalizedMessage.isPresent()) {
+				actualMessage = dbLocalizedMessage.get().getMessageText();
 			}
+				
 		}
 
 		// Build an object array with all parameters
@@ -178,10 +178,10 @@ public class MessageController implements MessageService {
 				pk.setMessageKey(MessageHelper.getLocalizedKey(curParm.getValue().toString()));
 				pk.setLocale(callerLocale);
 			
-				MudMessageLocale dbLocalizedMessage = localeRepository.findOne(pk);
+				Optional<MudMessageLocale> dbLocalizedMessage = localeRepository.findById(pk);
 				
-				if (dbLocalizedMessage!=null) {
-					parmsList.add(dbLocalizedMessage.getMessageText());
+				if (dbLocalizedMessage.isPresent()) {
+					parmsList.add(dbLocalizedMessage.get().getMessageText());
 				} else {
 					parmsList.add("Value key " + pk.getMessageKey() + " not found in " + callerLocale + " locale");
 				}
