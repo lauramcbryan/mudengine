@@ -44,20 +44,15 @@ public class BeingController implements BeingService {
 		
 		Being response = null;
 		
+		MudBeing dbBeing = repository
+				.findById(beingCode)
+				.orElseThrow(() -> new EntityNotFoundException("Being entity not found"));
 		
-		MudBeing dbBeing = repository.findOne(beingCode);
+		boolean fullResponse = BeingHelper.canAccess(authToken, dbBeing.getPlayerId());
 		
-		if (dbBeing!=null) {
-			
-			boolean fullResponse = BeingHelper.canAccess(authToken, dbBeing.getPlayerId());
-			
-			response = BeingHelper.buildBeing(dbBeing, fullResponse);
-			
-			response = expandBeingEquipment(authToken, response, dbBeing, fullResponse);
-			
-		} else {
-			throw new EntityNotFoundException("Being entity not found");
-		}
+		response = BeingHelper.buildBeing(dbBeing, fullResponse);
+		
+		response = expandBeingEquipment(authToken, response, dbBeing, fullResponse);
 		
 		return response;
 	}
@@ -67,53 +62,45 @@ public class BeingController implements BeingService {
 		
 		Being response = null;
 		
-		MudBeing dbBeing = repository.findOne(beingCode);
+		MudBeing dbBeing = repository
+				.findById(beingCode)
+				.orElseThrow(() -> new EntityNotFoundException("Being entity not found"));
 		
-		if (dbBeing!=null) {
-			
-			if (BeingHelper.canAccess(authToken, dbBeing.getPlayerId())) {
-		
-				// Basic data
-				dbBeing.setName(requestBeing.getName());
-				dbBeing.setPlayerId(requestBeing.getPlayerId());
-				dbBeing.setCurPlaceCode(requestBeing.getCurPlaceCode());
-				dbBeing.setCurWorld(requestBeing.getCurWorld());
-				dbBeing.setQuantity(requestBeing.getQuantity());
-				dbBeing.setBeingType(requestBeing.getBeingType());
-				
-			
-				// if the beingClass is changing, reset the attributes
-				if (!dbBeing.getBeingClass().getBeingClassCode().equals(requestBeing.getBeingClassCode())) {
-					
-					MudBeingClass dbClassBeing = classRepository.findOne(requestBeing.getBeingClassCode());
-					
-					if (dbClassBeing!=null) {
+		if (BeingHelper.canAccess(authToken, dbBeing.getPlayerId())) {
 	
-						dbBeing = BeingHelper.updateBeingClass(dbBeing, dbBeing.getBeingClass(), dbClassBeing);
-						
-					} else {
-						throw new EntityNotFoundException("Being Class entity not found");
-					}
-					
-					dbBeing.setBeingClass(dbClassBeing);
-				}
+			// Basic data
+			dbBeing.setName(requestBeing.getName());
+			dbBeing.setPlayerId(requestBeing.getPlayerId());
+			dbBeing.setCurPlaceCode(requestBeing.getCurPlaceCode());
+			dbBeing.setCurWorld(requestBeing.getCurWorld());
+			dbBeing.setQuantity(requestBeing.getQuantity());
+			dbBeing.setBeingType(requestBeing.getBeingType());
+			
+		
+			// if the beingClass is changing, reset the attributes
+			if (!dbBeing.getBeingClass().getBeingClassCode().equals(requestBeing.getBeingClassCode())) {
 				
-				// 2. attrModifiers
-				dbBeing = BeingHelper.updateBeingAttrModifiers(dbBeing, requestBeing);
+				MudBeingClass dbClassBeing = classRepository
+						.findById(requestBeing.getBeingClassCode())
+						.orElseThrow(() -> new EntityNotFoundException("Being Class not found"));
 				
-				// 3. skillModifiers
-				dbBeing = BeingHelper.updateBeingSkillModifiers(dbBeing, requestBeing);
+				dbBeing = BeingHelper.updateBeingClass(dbBeing, dbBeing.getBeingClass(), dbClassBeing);
 				
-				// Updating the entity
-				MudBeing changedBeing = repository.save(dbBeing);
-				
-				response = BeingHelper.buildBeing(changedBeing, true);
-			} else {
-				throw new AccessDeniedException("No access to that being");
+				dbBeing.setBeingClass(dbClassBeing);
 			}
 			
+			// 2. attrModifiers
+			dbBeing = BeingHelper.updateBeingAttrModifiers(dbBeing, requestBeing);
+			
+			// 3. skillModifiers
+			dbBeing = BeingHelper.updateBeingSkillModifiers(dbBeing, requestBeing);
+			
+			// Updating the entity
+			MudBeing changedBeing = repository.save(dbBeing);
+			
+			response = BeingHelper.buildBeing(changedBeing, true);
 		} else {
-			throw new EntityNotFoundException("Being entity not found"); 
+			throw new AccessDeniedException("No access to that being");
 		}
 		
 		return response;
@@ -132,7 +119,9 @@ public class BeingController implements BeingService {
 		
 			MudBeing dbBeing = new MudBeing();
 			
-			MudBeingClass dbBeingClass = classRepository.findOne(beingClass);
+			MudBeingClass dbBeingClass = classRepository
+					.findById(beingClass)
+					.orElseThrow(() -> new EntityNotFoundException("Being Class not found"));
 	
 			dbBeing.setBeingType(beingType);
 			dbBeing.setBeingClass(dbBeingClass);
@@ -210,31 +199,28 @@ public class BeingController implements BeingService {
 	@Override
 	public void destroyBeing(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable Long beingCode) {
 		
-		MudBeing dbBeing = repository.findOne(beingCode);
+		MudBeing dbBeing = repository.findById(beingCode)
+				.orElseThrow(() -> new EntityNotFoundException("Being entity not found"));
 		
-		if (dbBeing!=null) {
+		if (BeingHelper.canAccess(authToken, dbBeing.getPlayerId())) {
 			
-			if (BeingHelper.canAccess(authToken, dbBeing.getPlayerId())) {
+			try {
+		
+				// Update Item service to drop all items of this being
+				itemService.dropAllFromBeing(authToken, beingCode, dbBeing.getCurWorld(), dbBeing.getCurPlaceCode());
+			} catch(Exception e) {
 				
-				try {
+				// as this is a *should have* feature, errors at this point
+				// are being disregarded and just logged.
+				e.printStackTrace(System.err);
+				
+			}
 			
-					// Update Item service to drop all items of this being
-					itemService.dropAllFromBeing(authToken, beingCode, dbBeing.getCurWorld(), dbBeing.getCurPlaceCode());
-				} catch(Exception e) {
-					
-					// errors at this point are being disregarded
-					e.printStackTrace(System.err);
-					
-				}
-				
-				repository.delete(beingCode);
+			repository.deleteById(beingCode);
+			
 			} else {
 				throw new AccessDeniedException("No access to that being");
 			}
-			
-		} else {
-			throw new EntityNotFoundException("Being entity not found");
-		}
 	}
 	
 	private Being expandBeingEquipment(String token, Being responseBeing, MudBeing dbBeing, boolean fullResponse) {
