@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.jpinfo.mudengine.common.exception.EntityNotFoundException;
 import com.jpinfo.mudengine.common.itemClass.ItemClass;
 import com.jpinfo.mudengine.common.service.ItemClassService;
 import com.jpinfo.mudengine.item.model.MudItemClass;
@@ -20,7 +21,9 @@ public class ItemClassController implements ItemClassService {
 	@Override
 	public ItemClass getItemClass(@PathVariable String id) {
 		
-		MudItemClass found = repository.findOne(id);
+		MudItemClass found = repository
+				.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException("Item Class entity not found"));
 		
 		return ItemHelper.buildItemClass(found);
 	}
