@@ -1,5 +1,7 @@
 package com.jpinfo.mudengine.world.service;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,10 +25,10 @@ public class PlaceClassController implements PlaceClassService {
 		
 		PlaceClass result = null;
 		
-		MudPlaceClass found = repository.findOne(placeClass);
+		Optional<MudPlaceClass> found = repository.findById(placeClass);
 		
-		if (found!=null) {
-			result = WorldHelper.buildPlaceClass(found);
+		if (found.isPresent()) {
+			result = WorldHelper.buildPlaceClass(found.get());
 		} else {
 			throw new EntityNotFoundException("Place class not found");
 		}

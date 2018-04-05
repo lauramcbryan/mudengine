@@ -1,6 +1,7 @@
 package com.jpinfo.mudengine.world.util;
 
 import java.util.HashSet;
+
 import java.util.Set;
 
 import com.jpinfo.mudengine.common.place.Place;
@@ -19,26 +20,29 @@ public class WorldHelper {
 	public static final String PLACE_HP_ATTR = "HP";
 	public static final String PLACE_MAX_HP_ATTR = "MAX_HP";
 
-	public static Place buildPlace(MudPlace a) {
+	public static Place buildPlace(MudPlace originalDbPlace) {
 		
 		Place result = new Place();
 		
-		result.setPlaceCode(a.getPlaceCode());
+		result.setPlaceCode(originalDbPlace.getPlaceCode());
 		
-		result.setPlaceClassCode(a.getPlaceClass().getPlaceClassCode());
+		result.setPlaceClassCode(originalDbPlace.getPlaceClass().getPlaceClassCode());
 				
-		result.setPlaceClass(WorldHelper.buildPlaceClass(a.getPlaceClass()));
-		
-		
-		for(MudPlaceExit curExit: a.getExits()) {
-			result.getExits().put(curExit.getPk().getDirection(), WorldHelper.buildPlaceExits(curExit));
-		}
-		
-		for(MudPlaceAttr curAttr: a.getAttrs()) {
+		result.setPlaceClass(WorldHelper.buildPlaceClass(originalDbPlace.getPlaceClass()));
+
+		// Map the database list with the exits in a map
+		originalDbPlace.getExits().forEach(d -> {
+			result.getExits().put(
+					d.getPk().getDirection(), 
+					WorldHelper.buildPlaceExits(d));
+		});
+
+		originalDbPlace.getAttrs().forEach(d -> {
+			result.getAttrs().put(
+					d.getId().getAttrCode(), 
+					d.getAttrValue());
 			
-			result.getAttrs().put(curAttr.getId().getAttrCode(), curAttr.getAttrValue());
-			
-		}
+		});
 		
 		
 		return result;
@@ -58,11 +62,9 @@ public class WorldHelper {
 		response.setBuildEffort(a.getBuildEffort());
 		response.setBuildCost(a.getBuildCost());
 		
-		for(MudPlaceClassAttr curAttr: a.getAttrs()) {
-			
-			response.getAttrs().put(curAttr.getId().getAttrCode(), curAttr.getAttrValue());
-			
-		}
+		a.getAttrs().stream().forEach(d -> {
+			response.getAttrs().put(d.getId().getAttrCode(), d.getAttrValue());
+		});
 		
 		return response;
 	}
@@ -103,7 +105,8 @@ public class WorldHelper {
 			
 			Set<MudPlaceExit> newExits = new HashSet<MudPlaceExit>();
 			
-			for(String curDirection: requestPlace.getExits().keySet()) {
+			requestPlace.getExits().keySet().stream()
+				.forEach(curDirection -> {
 				
 				PlaceExit curExit = requestPlace.getExits().get(curDirection);
 				
@@ -116,7 +119,7 @@ public class WorldHelper {
 				newExit.setLockable(curExit.isLockable());
 				
 				newExits.add(newExit);
-			}
+			});
 			
 			// As hibernate manages the child list returned by him, we must not to create
 			// a new list, but to clear the existing one to force DELETE/UPDATE of changed entries
@@ -171,21 +174,20 @@ public class WorldHelper {
 	public static MudPlace changePlaceAttrs(MudPlace dbPlace, MudPlaceClass previousPlaceClass, MudPlaceClass placeClass) {
 		
 		if (previousPlaceClass!=null) {
-		
-			for(MudPlaceClassAttr curClassAttr: previousPlaceClass.getAttrs()) {
-				
-				MudPlaceAttr oldAttr = WorldHelper.buildPlaceAttr(dbPlace.getPlaceCode(), curClassAttr);
-				
-				dbPlace.getAttrs().remove(oldAttr);
-			}
+			
+			previousPlaceClass.getAttrs().stream()
+				.forEach(curClassAttr -> {
+					MudPlaceAttr oldAttr = WorldHelper.buildPlaceAttr(dbPlace.getPlaceCode(), curClassAttr);
+					dbPlace.getAttrs().remove(oldAttr);
+			});
+			
 		}
 		
-		for(MudPlaceClassAttr curClassAttr: placeClass.getAttrs()) {
-			
-			MudPlaceAttr newAttr = WorldHelper.buildPlaceAttr(dbPlace.getPlaceCode(), curClassAttr);
-			
-			dbPlace.getAttrs().add(newAttr);
-		}
+		placeClass.getAttrs().stream()
+			.forEach(curClassAttr -> {
+				MudPlaceAttr newAttr = WorldHelper.buildPlaceAttr(dbPlace.getPlaceCode(), curClassAttr);
+				dbPlace.getAttrs().add(newAttr);
+		});
 
 		return dbPlace;
 	}

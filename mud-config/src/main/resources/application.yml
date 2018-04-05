@@ -11,13 +11,10 @@ management:
   info:
     build:
       enabled: true
-  security:
-    enabled: true
       
-endpoints:
-  info:
-    enabled: true
-    sensitive: false
+  endpoint:
+    info:
+      enabled: true
 
 server:
   port: 8888      
@@ -31,5 +28,5 @@ spring:
       server:
         git:
           uri: https://github.com/JosielOliveira/mud-config
-      username: ${GIT_USERNAME}
-      password: ${GIT_PASSWORD}
+          username: ${GIT_USERNAME}
+          password: ${GIT_PASSWORD}
