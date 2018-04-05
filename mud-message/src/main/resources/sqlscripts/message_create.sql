@@ -7,7 +7,7 @@ CREATE TABLE mudengine_message.MUD_MESSAGE (
 	BEING_CODE			bigint NOT NULL,
 	SENDER_CODE			bigint,
 	SENDER_NAME			varchar(50),
-	CREATE_DATE			timestamp not null default current_timestamp,
+	INSERT_DATE			timestamp not null default current_timestamp,
 	MESSAGE_KEY			varchar(1024) not null,
 	READ_FLAG			boolean,
 	CONSTRAINT MUD_MESSAGE_PK PRIMARY KEY (MESSAGE_ID)
