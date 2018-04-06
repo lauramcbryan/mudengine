@@ -1,0 +1,21 @@
+version: '2'
+services:
+  mud-world:
+    restart: always
+    build:
+      context: ../../mud-world/
+      dockerfile: ./Dockerfile  
+    image: mudengine/mud-world
+    ports:
+      - 8082:5000
+    environment:
+      - spring.profiles.active=prod
+      - CONFIG_SERVER_URL=http://ec2-52-14-59-146.us-east-2.compute.amazonaws.com:8888
+    networks:
+      - app_net
+networks:
+  app_net:
+    ipam:
+      driver: default
+      config:
+        - subnet: 170.27.0.0/16

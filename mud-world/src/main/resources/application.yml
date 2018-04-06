@@ -3,7 +3,6 @@ spring:
     name: mud-world
   datasource:
     platform: h2
-    initialize: true
 
 server:
   port: 8082

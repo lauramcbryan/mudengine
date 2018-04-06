@@ -7,10 +7,9 @@ management:
     build:
       enabled: true
       
-endpoints:
-  info:
-    enabled: true
-    sensitive: false
+  endpoint:
+    info:
+      enabled: true
 
 ---
 
