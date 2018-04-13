@@ -1,16 +1,22 @@
 spring:
   application:
     name: mud-item
+  cloud:
+    config:
+      enabled: false
 
+eureka:
+  client:
+    enabled: false
+    
 management:
   info:
     build:
       enabled: true
       
-endpoints:
-  info:
-    enabled: true
-    sensitive: false
+  endpoint:
+    info:
+      enabled: true
 
 ---
 
@@ -19,9 +25,9 @@ spring:
 
   cloud:
     config:
+      enabled: true
       uri: http://jeremias:8888
       
-
 ---
 
 spring:
@@ -29,5 +35,6 @@ spring:
 
   cloud:
     config:
+      enabled: true
       uri: ${CONFIG_SERVER_URL} 
       

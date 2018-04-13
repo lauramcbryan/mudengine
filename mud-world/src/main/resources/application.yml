@@ -4,11 +4,6 @@ spring:
   datasource:
     platform: h2
 
-server:
-  port: 8082
-  
-eureka:
-  client:
-    enabled: false
+
 
     

@@ -7,10 +7,12 @@ services:
       dockerfile: ./Dockerfile  
     image: mudengine/mud-world
     ports:
-      - 8082:5000
+      - 8082:8082
     environment:
-      - spring.profiles.active=prod
+      - spring.profiles.active=qa
       - CONFIG_SERVER_URL=http://ec2-52-14-59-146.us-east-2.compute.amazonaws.com:8888
+      - DOCKER_HOST=jeremias
+      - PORT_TCP_8082=8082
     networks:
       - app_net
 networks:

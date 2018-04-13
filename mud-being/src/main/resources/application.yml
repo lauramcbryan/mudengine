@@ -3,11 +3,3 @@ spring:
     name: mud-being
   datasource:
     platform: h2
-    initialize: true
-
-server:
-  port: 8086
-  
-eureka:
-  client:
-    enabled: false
