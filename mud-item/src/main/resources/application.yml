@@ -3,11 +3,3 @@ spring:
     name: mud-item
   datasource:
     platform: h2
-    initialize: true
-
-server:
-  port: 8084
-  
-eureka:
-  client:
-    enabled: false
