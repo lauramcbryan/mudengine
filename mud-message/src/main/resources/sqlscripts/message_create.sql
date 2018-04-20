@@ -25,6 +25,6 @@ CREATE TABLE mudengine_message.MUD_MESSAGE_PARM (
 CREATE TABLE mudengine_message.MUD_MESSAGE_LOCALE (
 	MESSAGE_KEY			varchar(50) not null,
 	LOCALE 				varchar(50) not null,
-	MESSAGE_TEXT 		varchar(1024) not null
+	MESSAGE_TEXT 		varchar(1024) not null,
 	CONSTRAINT MUD_MESSAGE_LOCALE_PK PRIMARY KEY (MESSAGE_KEY, LOCALE)
 );

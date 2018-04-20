@@ -22,7 +22,7 @@ server:
 ---
 
 spring:
-  profiles: itgtest         
+  profiles: qa         
   cloud:
     config:
       server:

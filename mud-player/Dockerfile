@@ -11,7 +11,7 @@ RUN pip install datetime
 VOLUME /tmp
 
 ADD awscloud/ecs-get-port-mapping.py ecs-get-port-mapping.py
-ADD awscloud/entry_point.sh entry_point.sh
+ADD awscloud/entry_point.shell entry_point.sh
 ADD target/mud-player-*.jar app.jar
 
 RUN ["chmod", "+x", "entry_point.sh"]
