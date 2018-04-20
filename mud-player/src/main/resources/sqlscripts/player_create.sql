@@ -11,7 +11,7 @@ CREATE TABLE MUDENGINE_PLAYER.MUD_PLAYER (
 		EMAIL			varchar(30) not null,
 		NAME			varchar(30),
 		LOCALE  		varchar(30),
-		INSERT_DATE		timestamp not null default current_timestamp,		
+		CREATE_DATE		timestamp not null default current_timestamp,		
 		STATUS			integer not null default 0,
 		CONSTRAINT MUD_PLAYER_PK PRIMARY KEY (PLAYER_ID)
 );	

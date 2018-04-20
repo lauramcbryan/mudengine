@@ -1,18 +1,99 @@
-version: '2'
+version: '3.6'
 services:
   mud-world:
-    restart: always
     build:
       context: ../../mud-world/
       dockerfile: ./Dockerfile  
     image: mudengine/mud-world
+    deploy:
+      replicas: 1
     ports:
-      - 8082:8082
+      - 8082:8080
     environment:
-      - spring.profiles.active=qa
-      - CONFIG_SERVER_URL=http://ec2-52-14-59-146.us-east-2.compute.amazonaws.com:8888
-      - DOCKER_HOST=jeremias
-      - PORT_TCP_8082=8082
+      - spring.profiles.active
+      - CONFIG_SERVER_URL
+      - EXPOSED_HOST
+      - EXPOSED_PORT=8082
+    networks:
+      - app_net
+  mud-item:
+    build:
+      context: ../../mud-item/
+      dockerfile: ./Dockerfile  
+    image: mudengine/mud-item
+    deploy:
+      replicas: 1
+    ports:
+      - 8084:8080
+    environment:
+      - spring.profiles.active
+      - CONFIG_SERVER_URL
+      - EXPOSED_HOST
+      - EXPOSED_PORT=8084
+    networks:
+      - app_net
+  mud-being:
+    build:
+      context: ../../mud-being/
+      dockerfile: ./Dockerfile  
+    image: mudengine/mud-being
+    deploy:
+      replicas: 1
+    ports:
+      - 8086:8080
+    environment:
+      - spring.profiles.active
+      - CONFIG_SERVER_URL
+      - EXPOSED_HOST
+      - EXPOSED_PORT=8086
+    networks:
+      - app_net
+  mud-message:
+    build:
+      context: ../../mud-message/
+      dockerfile: ./Dockerfile  
+    image: mudengine/mud-message
+    deploy:
+      replicas: 1
+    ports:
+      - 8088:8080
+    environment:
+      - spring.profiles.active
+      - CONFIG_SERVER_URL
+      - EXPOSED_HOST
+      - EXPOSED_PORT=8088
+    networks:
+      - app_net
+  mud-action:
+    build:
+      context: ../../mud-action/
+      dockerfile: ./Dockerfile  
+    image: mudengine/mud-action
+    deploy:
+      replicas: 1
+    ports:
+      - 8090:8080
+    environment:
+      - spring.profiles.active
+      - CONFIG_SERVER_URL
+      - EXPOSED_HOST
+      - EXPOSED_PORT=8090
+    networks:
+      - app_net
+  mud-player:
+    build:
+      context: ../../mud-player/
+      dockerfile: ./Dockerfile  
+    image: mudengine/mud-player
+    deploy:
+      replicas: 1
+    ports:
+      - 8092:8080
+    environment:
+      - spring.profiles.active
+      - CONFIG_SERVER_URL
+      - EXPOSED_HOST
+      - EXPOSED_PORT=8092
     networks:
       - app_net
 networks:
