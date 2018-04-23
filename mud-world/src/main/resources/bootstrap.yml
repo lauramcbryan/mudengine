@@ -37,4 +37,5 @@ spring:
     config:
       enabled: true
       uri: ${CONFIG_SERVER_URL} 
+        
       
