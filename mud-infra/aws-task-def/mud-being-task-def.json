@@ -18,6 +18,10 @@
 				  "value": "http://ec2-52-14-59-146.us-east-2.compute.amazonaws.com:8888"
 				},
 				{
+				  "name": "EUREKA_SERVER_URL",
+				  "value": "http://ec2-52-14-59-146.us-east-2.compute.amazonaws.com:8761/eureka/"
+				},
+				{
 				  "name": "SPRING_PROFILES_ACTIVE",
 				  "value": "prod"
                 },
