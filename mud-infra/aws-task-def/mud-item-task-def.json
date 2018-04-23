@@ -8,7 +8,7 @@
 				{
 				  "hostPort": 0,
 				  "protocol": "tcp",
-				  "containerPort": 5000
+				  "containerPort": 8080
 				}
 			],
 			"essential": true, 
@@ -20,10 +20,10 @@
 				{
 				  "name": "SPRING_PROFILES_ACTIVE",
 				  "value": "prod"
-                                },
-                                {
-                                  "name": "DEPLOY_ENV",
-                                  "value": "AWS"
+                },
+                {
+                  "name": "DEPLOY_ENV",
+                  "value": "AWS"
 				}
 			  ],
 			"logConfiguration": {

@@ -1,8 +1,8 @@
 {
 	"containerDefinitions": [
 		{
-			"name": "mud-being-container", 
-			"image": "406396693860.dkr.ecr.us-east-2.amazonaws.com/mud-being:latest", 
+			"name": "mud-player-container", 
+			"image": "406396693860.dkr.ecr.us-east-2.amazonaws.com/mud-player:latest", 
 			"memoryReservation": 300, 
 			"portMappings": [
 				{
@@ -31,12 +31,12 @@
 				"options": {
 				  "awslogs-group": "mudengine",
 				  "awslogs-region": "us-east-2",
-				  "awslogs-stream-prefix": "mud-being"
+				  "awslogs-stream-prefix": "mud-player"
 				}
 			}
 		}
 	], 
-	"family": "mud-being-task-def", 
+	"family": "mud-player-task-def", 
 	"requiresCompatibilities": [
 		"EC2"
 	]
