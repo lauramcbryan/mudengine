@@ -88,7 +88,7 @@ def main():
 
     if contains_key(container, 'networkBindings'):
         for b in container['networkBindings']:
-            print("export PORT_%s_%d=%d;" % (b['protocol'].upper(), b['containerPort'], b['hostPort']))
+            print("export EXPOSED_PORT=%d;" % b['hostPort']))
 
 
 if __name__ == '__main__':
