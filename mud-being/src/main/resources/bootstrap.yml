@@ -27,7 +27,9 @@ spring:
     config:
       enabled: true    
       uri: http://jeremias:8888   
-
+      fail-fast: true
+      retry:
+        max-attempts: 10
 ---
 
 spring:
@@ -37,4 +39,6 @@ spring:
     config:
       enabled: true    
       uri: ${CONFIG_SERVER_URL} 
-      
+      fail-fast: true
+      retry:
+        max-attempts: 10      
