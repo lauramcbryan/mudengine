@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: mud-api
+
+server:
+  port: 8080
+  
+eureka:
+  client:
+    enabled: true
+    register-with-eureka: false
+    serviceUrl:
+      defaultZone: ${EUREKA_SERVER_URL}
