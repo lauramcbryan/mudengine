@@ -2,6 +2,16 @@ spring:
   application:
     name: mud-api
 
+eureka:
+  client:
+    enabled: false
+
+
+---
+
+spring:
+  profiles: itg, qa, prod
+  
 server:
   port: 8080
   
