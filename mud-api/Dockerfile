@@ -1,13 +1,11 @@
 FROM openjdk:8-jre-alpine
 
-RUN apk --no-cache add bash
-
 VOLUME /tmp
 
-EXPOSE 8888
+EXPOSE 8080
 
 ADD awscloud/entry_point.shell entry_point.sh
-ADD target/mud-config-*.jar app.jar
+ADD target/mud-api-*.jar app.jar
 
 RUN ["chmod", "+x", "entry_point.sh"]
 ENTRYPOINT ["/bin/bash", "entry_point.sh"]
