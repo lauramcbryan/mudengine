@@ -4,8 +4,6 @@ RUN apk --no-cache add bash
 
 VOLUME /tmp
 
-EXPOSE 8888
-
 ADD awscloud/entry_point.shell entry_point.sh
 ADD target/mud-config-*.jar app.jar
 
