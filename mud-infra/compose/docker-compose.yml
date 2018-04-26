@@ -10,11 +10,12 @@ services:
     ports:
       - 8082:8080
     environment:
-      - spring.profiles.active
+      - EXPOSED_PORT=8082
+    secrets:
+      - SPRING_PROFILES_ACTIVE
       - CONFIG_SERVER_URL
       - EUREKA_SERVER_URL
       - EXPOSED_HOST
-      - EXPOSED_PORT=8082
     networks:
       - app_net
     depends_on:
@@ -30,11 +31,12 @@ services:
     ports:
       - 8084:8080
     environment:
-      - spring.profiles.active
+      - EXPOSED_PORT=8084
+    secrets:
+      - SPRING_PROFILES_ACTIVE
       - CONFIG_SERVER_URL
       - EUREKA_SERVER_URL
       - EXPOSED_HOST
-      - EXPOSED_PORT=8084
     networks:
       - app_net
     depends_on:
@@ -50,11 +52,12 @@ services:
     ports:
       - 8086:8080
     environment:
-      - spring.profiles.active
+      - EXPOSED_PORT=8086
+    secrets:
+      - SPRING_PROFILES_ACTIVE
       - CONFIG_SERVER_URL
       - EUREKA_SERVER_URL
       - EXPOSED_HOST
-      - EXPOSED_PORT=8086
     networks:
       - app_net
     depends_on:
@@ -70,11 +73,12 @@ services:
     ports:
       - 8088:8080
     environment:
-      - spring.profiles.active
+      - EXPOSED_PORT=8088
+    secrets:
+      - SPRING_PROFILES_ACTIVE
       - CONFIG_SERVER_URL
       - EUREKA_SERVER_URL
       - EXPOSED_HOST
-      - EXPOSED_PORT=8088
     networks:
       - app_net
     depends_on:
@@ -90,11 +94,12 @@ services:
     ports:
       - 8090:8080
     environment:
-      - spring.profiles.active
+      - EXPOSED_PORT=8090
+    secrets:
+      - SPRING_PROFILES_ACTIVE
       - CONFIG_SERVER_URL
       - EUREKA_SERVER_URL
       - EXPOSED_HOST
-      - EXPOSED_PORT=8090
     networks:
       - app_net
     depends_on:
@@ -110,11 +115,12 @@ services:
     ports:
       - 8092:8080
     environment:
-      - spring.profiles.active
+      - EXPOSED_PORT=8092
+    secrets:
+      - SPRING_PROFILES_ACTIVE
       - CONFIG_SERVER_URL
       - EUREKA_SERVER_URL
       - EXPOSED_HOST
-      - EXPOSED_PORT=8092
     networks:
       - app_net
     depends_on:
@@ -129,8 +135,8 @@ services:
       replicas: 1
     ports:
       - 8888:8888
-    environment:
-      - spring.profiles.active
+    secrets:
+      - SPRING_PROFILES_ACTIVE
       - GIT_USERNAME
       - GIT_PASSWORD
     networks:
@@ -152,3 +158,17 @@ networks:
       driver: default
       config:
         - subnet: 170.27.0.0/16
+secrets:
+  SPRING_PROFILES_ACTIVE:
+    external: true
+  CONFIG_SERVER_URL:
+    external: true
+  EUREKA_SERVER_URL:
+    external: true
+  EXPOSED_HOST:
+    external: true  
+  GIT_USERNAME:
+    external: true  
+  GIT_PASSWORD:
+    external: true
+ 
