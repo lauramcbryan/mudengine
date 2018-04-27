@@ -5,17 +5,14 @@ services:
       context: ../../mud-world/
       dockerfile: ./Dockerfile  
     image: mudengine/mud-world
-    deploy:
-      replicas: 1
     ports:
       - 8082:8080
     environment:
       - EXPOSED_PORT=8082
-    secrets:
-      - SPRING_PROFILES_ACTIVE
-      - CONFIG_SERVER_URL
-      - EUREKA_SERVER_URL
-      - EXPOSED_HOST
+      - EXPOSED_HOST=localhost
+      - CONFIG_SERVER_URL=http://mud-config:8888/
+      - EUREKA_SERVER_URL=http://mud-registry:8761/eureka/
+      - SPRING_PROFILES_ACTIVE=prod
     networks:
       - app_net
     depends_on:
@@ -26,17 +23,14 @@ services:
       context: ../../mud-item/
       dockerfile: ./Dockerfile  
     image: mudengine/mud-item
-    deploy:
-      replicas: 1
     ports:
       - 8084:8080
     environment:
       - EXPOSED_PORT=8084
-    secrets:
-      - SPRING_PROFILES_ACTIVE
-      - CONFIG_SERVER_URL
-      - EUREKA_SERVER_URL
-      - EXPOSED_HOST
+      - EXPOSED_HOST=localhost
+      - CONFIG_SERVER_URL=http://mud-config:8888/
+      - EUREKA_SERVER_URL=http://mud-registry:8761/eureka/
+      - SPRING_PROFILES_ACTIVE=prod
     networks:
       - app_net
     depends_on:
@@ -47,17 +41,14 @@ services:
       context: ../../mud-being/
       dockerfile: ./Dockerfile  
     image: mudengine/mud-being
-    deploy:
-      replicas: 1
     ports:
       - 8086:8080
     environment:
       - EXPOSED_PORT=8086
-    secrets:
-      - SPRING_PROFILES_ACTIVE
-      - CONFIG_SERVER_URL
-      - EUREKA_SERVER_URL
-      - EXPOSED_HOST
+      - EXPOSED_HOST=localhost
+      - CONFIG_SERVER_URL=http://mud-config:8888/
+      - EUREKA_SERVER_URL=http://mud-registry:8761/eureka/
+      - SPRING_PROFILES_ACTIVE=prod
     networks:
       - app_net
     depends_on:
@@ -68,17 +59,14 @@ services:
       context: ../../mud-message/
       dockerfile: ./Dockerfile  
     image: mudengine/mud-message
-    deploy:
-      replicas: 1
     ports:
       - 8088:8080
     environment:
       - EXPOSED_PORT=8088
-    secrets:
-      - SPRING_PROFILES_ACTIVE
-      - CONFIG_SERVER_URL
-      - EUREKA_SERVER_URL
-      - EXPOSED_HOST
+      - EXPOSED_HOST=localhost
+      - CONFIG_SERVER_URL=http://mud-config:8888/
+      - EUREKA_SERVER_URL=http://mud-registry:8761/eureka/
+      - SPRING_PROFILES_ACTIVE=prod
     networks:
       - app_net
     depends_on:
@@ -89,17 +77,14 @@ services:
       context: ../../mud-action/
       dockerfile: ./Dockerfile  
     image: mudengine/mud-action
-    deploy:
-      replicas: 1
     ports:
       - 8090:8080
     environment:
       - EXPOSED_PORT=8090
-    secrets:
-      - SPRING_PROFILES_ACTIVE
-      - CONFIG_SERVER_URL
-      - EUREKA_SERVER_URL
-      - EXPOSED_HOST
+      - EXPOSED_HOST=localhost
+      - CONFIG_SERVER_URL=http://mud-config:8888/
+      - EUREKA_SERVER_URL=http://mud-registry:8761/eureka/
+      - SPRING_PROFILES_ACTIVE=prod
     networks:
       - app_net
     depends_on:
@@ -110,33 +95,40 @@ services:
       context: ../../mud-player/
       dockerfile: ./Dockerfile  
     image: mudengine/mud-player
-    deploy:
-      replicas: 1
     ports:
       - 8092:8080
     environment:
       - EXPOSED_PORT=8092
-    secrets:
-      - SPRING_PROFILES_ACTIVE
-      - CONFIG_SERVER_URL
-      - EUREKA_SERVER_URL
-      - EXPOSED_HOST
+      - EXPOSED_HOST=localhost
+      - CONFIG_SERVER_URL=http://mud-config:8888/
+      - EUREKA_SERVER_URL=http://mud-registry:8761/eureka/
+      - SPRING_PROFILES_ACTIVE=prod
     networks:
       - app_net
     depends_on:
       - mud-config
       - mud-registry
+  mud-api:
+    image: mudengine/mud-api
+    ports:
+      - 8080:8080
+    environment:
+      - EXPOSED_HOST=localhost
+      - EUREKA_SERVER_URL=http://mud-registry:8761/eureka/
+      - SPRING_PROFILES_ACTIVE=prod
+    networks:
+      - app_net  
+    depends_on:
+      - mud-registry      
   mud-config:
     build:
       context: ../../mud-config/
       dockerfile: ./Dockerfile  
     image: mudengine/mud-config
-    deploy:
-      replicas: 1
     ports:
       - 8888:8888
-    secrets:
-      - SPRING_PROFILES_ACTIVE
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
       - GIT_USERNAME
       - GIT_PASSWORD
     networks:
@@ -146,8 +138,6 @@ services:
       context: ../../mud-registry/
       dockerfile: ./Dockerfile  
     image: mudengine/mud-registry
-    deploy:
-      replicas: 1
     ports:
       - 8761:8761
     networks:
@@ -158,17 +148,5 @@ networks:
       driver: default
       config:
         - subnet: 170.27.0.0/16
-secrets:
-  SPRING_PROFILES_ACTIVE:
-    external: true
-  CONFIG_SERVER_URL:
-    external: true
-  EUREKA_SERVER_URL:
-    external: true
-  EXPOSED_HOST:
-    external: true  
-  GIT_USERNAME:
-    external: true  
-  GIT_PASSWORD:
-    external: true
+
  

@@ -1,0 +1,159 @@
+version: '3.6'
+services:
+  mud-world:
+    image: mudengine/mud-world
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+    environment:
+      - CONFIG_SERVER_URL=http://mud-config:8888/
+      - EUREKA_SERVER_URL=http://mud-registry:8761/eureka/
+      - SPRING_PROFILES_ACTIVE=prod
+    networks:
+      - app_net
+    depends_on:
+      - mud-config
+      - mud-registry
+  mud-item:
+    image: mudengine/mud-item
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+    environment:
+      - CONFIG_SERVER_URL=http://mud-config:8888/
+      - EUREKA_SERVER_URL=http://mud-registry:8761/eureka/        
+      - SPRING_PROFILES_ACTIVE=prod
+    networks:
+      - app_net
+    depends_on:
+      - mud-config
+      - mud-registry
+  mud-being:
+    image: mudengine/mud-being
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M      
+    environment:
+      - CONFIG_SERVER_URL=http://mud-config:8888/
+      - EUREKA_SERVER_URL=http://mud-registry:8761/eureka/
+      - SPRING_PROFILES_ACTIVE=prod
+    networks:
+      - app_net
+    depends_on:
+      - mud-config
+      - mud-registry
+  mud-message:
+    image: mudengine/mud-message
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+    environment:
+      - CONFIG_SERVER_URL=http://mud-config:8888/
+      - EUREKA_SERVER_URL=http://mud-registry:8761/eureka/
+      - SPRING_PROFILES_ACTIVE=prod
+    networks:
+      - app_net
+    depends_on:
+      - mud-config
+      - mud-registry
+  mud-action:
+    image: mudengine/mud-action
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+    environment:
+      - CONFIG_SERVER_URL=http://mud-config:8888/
+      - EUREKA_SERVER_URL=http://mud-registry:8761/eureka/
+      - SPRING_PROFILES_ACTIVE=prod
+    networks:
+      - app_net
+    depends_on:
+      - mud-config
+      - mud-registry
+  mud-player:
+    image: mudengine/mud-player
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+    environment:
+      - CONFIG_SERVER_URL=http://mud-config:8888/
+      - EUREKA_SERVER_URL=http://mud-registry:8761/eureka/
+      - SPRING_PROFILES_ACTIVE=prod
+    networks:
+      - app_net
+    depends_on:
+      - mud-config
+      - mud-registry
+  mud-api:
+    image: mudengine/mud-api
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+    ports:
+      - 8080:8080
+    environment:
+      - EUREKA_SERVER_URL=http://mud-registry:8761/eureka/
+      - SPRING_PROFILES_ACTIVE=prod
+    networks:
+      - app_net  
+    depends_on:
+      - mud-registry          
+  mud-config:
+    image: mudengine/mud-config
+    deploy:
+      replicas: 1
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod      
+    secrets:
+      - GIT_USERNAME
+      - GIT_PASSWORD
+    networks:
+      - app_net
+  mud-registry:
+    image: mudengine/mud-registry
+    deploy:
+      replicas: 1
+    ports:
+      - 8761:8761
+    networks:
+      - app_net
+networks:
+  app_net:
+    ipam:
+      driver: default
+      config:
+        - subnet: 170.27.0.0/16
+secrets:
+  GIT_USERNAME:
+    external: true  
+  GIT_PASSWORD:
+    external: true
+ 
