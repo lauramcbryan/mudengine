@@ -1,0 +1,183 @@
+version: '3.6'
+services:
+  mud-world:
+    image: mudengine/mud-world
+    ports:
+      - 8082:8080    
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+    environment:
+      - EXPOSED_PORT=8082    
+      - EXPOSED_HOST=jeremias
+      - CONFIG_SERVER_URL=http://mud-config:8888/
+      - EUREKA_SERVER_URL=http://mud-registry:8761/eureka/
+      - SPRING_PROFILES_ACTIVE=qa
+    networks:
+      - app_net
+    depends_on:
+      - mud-config
+      - mud-registry
+  mud-item:
+    image: mudengine/mud-item
+    ports:
+      - 8084:8080    
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+    environment:
+      - EXPOSED_PORT=8084
+      - EXPOSED_HOST=jeremias
+      - CONFIG_SERVER_URL=http://mud-config:8888/
+      - EUREKA_SERVER_URL=http://mud-registry:8761/eureka/        
+      - SPRING_PROFILES_ACTIVE=qa
+    networks:
+      - app_net
+    depends_on:
+      - mud-config
+      - mud-registry
+  mud-being:
+    image: mudengine/mud-being
+    ports:
+      - 8086:8080    
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M      
+    environment:
+      - EXPOSED_PORT=8086
+      - EXPOSED_HOST=jeremias
+      - CONFIG_SERVER_URL=http://mud-config:8888/
+      - EUREKA_SERVER_URL=http://mud-registry:8761/eureka/
+      - SPRING_PROFILES_ACTIVE=qa
+    networks:
+      - app_net
+    depends_on:
+      - mud-config
+      - mud-registry
+  mud-message:
+    image: mudengine/mud-message
+    ports:
+      - 8088:8080    
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+    environment:
+      - EXPOSED_PORT=8088
+      - EXPOSED_HOST=jeremias
+      - CONFIG_SERVER_URL=http://mud-config:8888/
+      - EUREKA_SERVER_URL=http://mud-registry:8761/eureka/
+      - SPRING_PROFILES_ACTIVE=qa
+    networks:
+      - app_net
+    depends_on:
+      - mud-config
+      - mud-registry
+  mud-action:
+    image: mudengine/mud-action
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+    ports:
+      - 8090:8080
+    environment:
+      - EXPOSED_PORT=8090
+      - EXPOSED_HOST=jeremias
+      - CONFIG_SERVER_URL=http://mud-config:8888/
+      - EUREKA_SERVER_URL=http://mud-registry:8761/eureka/
+      - SPRING_PROFILES_ACTIVE=qa
+    networks:
+      - app_net
+    depends_on:
+      - mud-config
+      - mud-registry
+  mud-player:
+    image: mudengine/mud-player
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+    ports:
+      - 8092:8080
+    environment:
+      - EXPOSED_PORT=8092
+      - EXPOSED_HOST=jeremias
+      - CONFIG_SERVER_URL=http://mud-config:8888/
+      - EUREKA_SERVER_URL=http://mud-registry:8761/eureka/
+      - SPRING_PROFILES_ACTIVE=qa
+    networks:
+      - app_net
+    depends_on:
+      - mud-config
+      - mud-registry
+  mud-api:
+    image: mudengine/mud-api
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+    ports:
+      - 8080:8080
+    environment:
+      - EUREKA_SERVER_URL=http://mud-registry:8761/eureka/
+      - SPRING_PROFILES_ACTIVE=qa
+    networks:
+      - app_net  
+    depends_on:
+      - mud-registry          
+  mud-config:
+    image: mudengine/mud-config
+    deploy:
+      replicas: 1
+    environment:
+      - SPRING_PROFILES_ACTIVE=qa
+    secrets:
+      - GIT_USERNAME
+      - GIT_PASSWORD
+    networks:
+      - app_net
+  mud-registry:
+    image: mudengine/mud-registry
+    deploy:
+      replicas: 1
+    ports:
+      - 8761:8761
+    networks:
+      - app_net
+networks:
+  app_net:
+    ipam:
+      driver: default
+      config:
+        - subnet: 170.27.0.0/16
+secrets:
+  GIT_USERNAME:
+    external: true  
+  GIT_PASSWORD:
+    external: true
+ 
