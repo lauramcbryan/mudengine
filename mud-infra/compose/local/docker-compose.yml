@@ -2,7 +2,7 @@ version: '3.6'
 services:
   mud-world:
     build:
-      context: ../../mud-world/
+      context: ../../../mud-world/
       dockerfile: ./Dockerfile  
     image: mudengine/mud-world
     ports:
@@ -20,7 +20,7 @@ services:
       - mud-registry
   mud-item:
     build:
-      context: ../../mud-item/
+      context: ../../../mud-item/
       dockerfile: ./Dockerfile  
     image: mudengine/mud-item
     ports:
@@ -38,7 +38,7 @@ services:
       - mud-registry
   mud-being:
     build:
-      context: ../../mud-being/
+      context: ../../../mud-being/
       dockerfile: ./Dockerfile  
     image: mudengine/mud-being
     ports:
@@ -56,7 +56,7 @@ services:
       - mud-registry
   mud-message:
     build:
-      context: ../../mud-message/
+      context: ../../../mud-message/
       dockerfile: ./Dockerfile  
     image: mudengine/mud-message
     ports:
@@ -74,7 +74,7 @@ services:
       - mud-registry
   mud-action:
     build:
-      context: ../../mud-action/
+      context: ../../../mud-action/
       dockerfile: ./Dockerfile  
     image: mudengine/mud-action
     ports:
@@ -92,7 +92,7 @@ services:
       - mud-registry
   mud-player:
     build:
-      context: ../../mud-player/
+      context: ../../../mud-player/
       dockerfile: ./Dockerfile  
     image: mudengine/mud-player
     ports:
@@ -122,7 +122,7 @@ services:
       - mud-registry      
   mud-config:
     build:
-      context: ../../mud-config/
+      context: ../../../mud-config/
       dockerfile: ./Dockerfile  
     image: mudengine/mud-config
     ports:
@@ -135,7 +135,7 @@ services:
       - app_net
   mud-registry:
     build:
-      context: ../../mud-registry/
+      context: ../../../mud-registry/
       dockerfile: ./Dockerfile  
     image: mudengine/mud-registry
     ports:
