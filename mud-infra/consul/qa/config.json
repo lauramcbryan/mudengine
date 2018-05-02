@@ -1,0 +1,12 @@
+{
+    "server": true,
+    "bootstrap": true,
+    "datacenter":"qa",
+    "data_dir": "/home/mudengine/consul/data",
+    "encrypt":"HDxJ8fqDdCqGXvuB6qTohQ==",
+    "enable_syslog": true,
+    "client_addr": "0.0.0.0",
+    "bind_addr": "192.168.1.10",
+    "log_level": "INFO"
+}
+

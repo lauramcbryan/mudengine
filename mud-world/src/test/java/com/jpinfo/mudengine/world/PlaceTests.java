@@ -54,6 +54,10 @@ public class PlaceTests {
 	
 	private static final String extraPlaceAttr="HP3";
 	
+	@Test
+	public void contextLoads() {
+		
+	}
 	
 	@Test
 	public void testCrudPlace() {

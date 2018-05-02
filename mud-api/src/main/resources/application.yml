@@ -2,22 +2,25 @@ spring:
   application:
     name: mud-api
 
-eureka:
-  client:
-    enabled: false
-
+  cloud:
+    consul:
+      enabled: false
+      discovery:
+        enabled: false
 
 ---
 
 spring:
   profiles: itg, qa, prod
   
+  cloud:
+    consul:
+      enabled: true
+      host: ${CONSUL_HOST}
+      port: ${CONSUL_PORT}
+      discovery:
+        enabled: true
+        register: false
+
 server:
   port: 8080
-  
-eureka:
-  client:
-    enabled: true
-    register-with-eureka: false
-    serviceUrl:
-      defaultZone: ${EUREKA_SERVER_URL}

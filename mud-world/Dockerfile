@@ -10,8 +10,8 @@ RUN pip install datetime
 
 VOLUME /tmp
 
-ADD awscloud/ecs-get-port-mapping.py ecs-get-port-mapping.py
-ADD awscloud/entry_point.shell entry_point.sh
+ADD infra/ecs-get-port-mapping.py ecs-get-port-mapping.py
+ADD infra/entry_point.shell entry_point.sh
 ADD target/mud-world-*.jar app.jar
 
 RUN ["chmod", "+x", "entry_point.sh"]
