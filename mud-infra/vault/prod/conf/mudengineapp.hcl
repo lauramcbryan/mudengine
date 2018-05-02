@@ -1,23 +1,51 @@
+path "secret/application" {
+     capabilities = ["read", "list"]
+}
+
+path "secret/application/*" {
+     capabilities = ["read", "list"]
+}
+
+
 path "secret/mud-world" {
-     capabilities = ["read"]
+     capabilities = ["read", "list"]
+}
+
+path "secret/mud-world/*" {
+     capabilities = ["read", "list"]
 }
 
 path "secret/mud-item" {
-     capabilities = ["read"]
+     capabilities = ["read", "list"]
+}
+path "secret/mud-item/*" {
+     capabilities = ["read", "list"]
 }
 
 path "secret/mud-being" {
-     capabilities = ["read"]
+     capabilities = ["read", "list"]
+}
+path "secret/mud-being/*" {
+     capabilities = ["read", "list"]
 }
 
 path "secret/mud-action" {
-     capabilities = ["read"]
+     capabilities = ["read", "list"]
+}
+path "secret/mud-action/*" {
+     capabilities = ["read", "list"]
 }
 
 path "secret/mud-player" {
-     capabilities = ["read"]
+     capabilities = ["read", "list"]
+}
+path "secret/mud-player/*" {
+     capabilities = ["read", "list"]
 }
 
 path "secret/mud-message" {
-     capabilities = ["read"]
+     capabilities = ["read", "list"]
+}
+path "secret/mud-message/*" {
+     capabilities = ["read", "list"]
 }
