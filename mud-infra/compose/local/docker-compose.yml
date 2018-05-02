@@ -10,14 +10,13 @@ services:
     environment:
       - EXPOSED_PORT=8082
       - EXPOSED_HOST=localhost
-      - CONFIG_SERVER_URL=http://mud-config:8888/
-      - EUREKA_SERVER_URL=http://mud-registry:8761/eureka/
-      - SPRING_PROFILES_ACTIVE=prod
+      - CONSUL_HOST=http://jeremias
+      - CONSUL_PORT=8500
+      - VAULT_ADDR=http://jeremias:8200
+      - VAULT_TOKEN=b7f25df0-c544-b12c-19c0-0140d8c34f08
+      - SPRING_PROFILES_ACTIVE=qa      
     networks:
       - app_net
-    depends_on:
-      - mud-config
-      - mud-registry
   mud-item:
     build:
       context: ../../../mud-item/
@@ -28,14 +27,13 @@ services:
     environment:
       - EXPOSED_PORT=8084
       - EXPOSED_HOST=localhost
-      - CONFIG_SERVER_URL=http://mud-config:8888/
-      - EUREKA_SERVER_URL=http://mud-registry:8761/eureka/
-      - SPRING_PROFILES_ACTIVE=prod
+      - CONSUL_HOST=http://jeremias
+      - CONSUL_PORT=8500
+      - VAULT_ADDR=http://jeremias:8200
+      - VAULT_TOKEN=b7f25df0-c544-b12c-19c0-0140d8c34f08
+      - SPRING_PROFILES_ACTIVE=qa      
     networks:
       - app_net
-    depends_on:
-      - mud-config
-      - mud-registry
   mud-being:
     build:
       context: ../../../mud-being/
@@ -46,14 +44,13 @@ services:
     environment:
       - EXPOSED_PORT=8086
       - EXPOSED_HOST=localhost
-      - CONFIG_SERVER_URL=http://mud-config:8888/
-      - EUREKA_SERVER_URL=http://mud-registry:8761/eureka/
-      - SPRING_PROFILES_ACTIVE=prod
+      - CONSUL_HOST=http://jeremias
+      - CONSUL_PORT=8500
+      - VAULT_ADDR=http://jeremias:8200
+      - VAULT_TOKEN=b7f25df0-c544-b12c-19c0-0140d8c34f08
+      - SPRING_PROFILES_ACTIVE=qa      
     networks:
       - app_net
-    depends_on:
-      - mud-config
-      - mud-registry
   mud-message:
     build:
       context: ../../../mud-message/
@@ -64,14 +61,13 @@ services:
     environment:
       - EXPOSED_PORT=8088
       - EXPOSED_HOST=localhost
-      - CONFIG_SERVER_URL=http://mud-config:8888/
-      - EUREKA_SERVER_URL=http://mud-registry:8761/eureka/
-      - SPRING_PROFILES_ACTIVE=prod
+      - CONSUL_HOST=http://jeremias
+      - CONSUL_PORT=8500
+      - VAULT_ADDR=http://jeremias:8200
+      - VAULT_TOKEN=b7f25df0-c544-b12c-19c0-0140d8c34f08
+      - SPRING_PROFILES_ACTIVE=qa      
     networks:
       - app_net
-    depends_on:
-      - mud-config
-      - mud-registry
   mud-action:
     build:
       context: ../../../mud-action/
@@ -82,14 +78,13 @@ services:
     environment:
       - EXPOSED_PORT=8090
       - EXPOSED_HOST=localhost
-      - CONFIG_SERVER_URL=http://mud-config:8888/
-      - EUREKA_SERVER_URL=http://mud-registry:8761/eureka/
-      - SPRING_PROFILES_ACTIVE=prod
+      - CONSUL_HOST=http://jeremias
+      - CONSUL_PORT=8500
+      - VAULT_ADDR=http://jeremias:8200
+      - VAULT_TOKEN=b7f25df0-c544-b12c-19c0-0140d8c34f08
+      - SPRING_PROFILES_ACTIVE=qa      
     networks:
       - app_net
-    depends_on:
-      - mud-config
-      - mud-registry
   mud-player:
     build:
       context: ../../../mud-player/
@@ -100,53 +95,30 @@ services:
     environment:
       - EXPOSED_PORT=8092
       - EXPOSED_HOST=localhost
-      - CONFIG_SERVER_URL=http://mud-config:8888/
-      - EUREKA_SERVER_URL=http://mud-registry:8761/eureka/
-      - SPRING_PROFILES_ACTIVE=prod
+      - CONSUL_HOST=http://jeremias
+      - CONSUL_PORT=8500
+      - VAULT_ADDR=http://jeremias:8200
+      - VAULT_TOKEN=b7f25df0-c544-b12c-19c0-0140d8c34f08
+      - SPRING_PROFILES_ACTIVE=qa      
     networks:
       - app_net
-    depends_on:
-      - mud-config
-      - mud-registry
   mud-api:
+    build:
+      context: ../../../mud-api/
+      dockerfile: ./Dockerfile  
     image: mudengine/mud-api
     ports:
       - 8080:8080
     environment:
       - EXPOSED_HOST=localhost
-      - EUREKA_SERVER_URL=http://mud-registry:8761/eureka/
-      - SPRING_PROFILES_ACTIVE=prod
+      - CONSUL_HOST=http://jeremias
+      - CONSUL_PORT=8500
+      - SPRING_PROFILES_ACTIVE=qa      
     networks:
       - app_net  
-    depends_on:
-      - mud-registry      
-  mud-config:
-    build:
-      context: ../../../mud-config/
-      dockerfile: ./Dockerfile  
-    image: mudengine/mud-config
-    ports:
-      - 8888:8888
-    environment:
-      - SPRING_PROFILES_ACTIVE=prod
-      - GIT_USERNAME
-      - GIT_PASSWORD
-    networks:
-      - app_net
-  mud-registry:
-    build:
-      context: ../../../mud-registry/
-      dockerfile: ./Dockerfile  
-    image: mudengine/mud-registry
-    ports:
-      - 8761:8761
-    networks:
-      - app_net
 networks:
   app_net:
     ipam:
       driver: default
       config:
         - subnet: 170.27.0.0/16
-
- 
