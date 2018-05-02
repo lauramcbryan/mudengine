@@ -10,14 +10,13 @@ services:
         reservations:
           memory: 128M
     environment:
-      - CONFIG_SERVER_URL=http://mud-config:8888/
-      - EUREKA_SERVER_URL=http://mud-registry:8761/eureka/
+      - CONSUL_HOST=http://ec2-52-14-59-146.us-east-2.compute.amazonaws.com
+      - CONSUL_PORT=8500
+      - VAULT_ADDR=http://ec2-52-14-59-146.us-east-2.compute.amazonaws.com:8200
+      - VAULT_TOKEN=393bda7d-c44a-2c33-6d69-c8d47c83094a
       - SPRING_PROFILES_ACTIVE=prod
     networks:
       - app_net
-    depends_on:
-      - mud-config
-      - mud-registry
   mud-item:
     image: mudengine/mud-item
     deploy:
@@ -28,14 +27,13 @@ services:
         reservations:
           memory: 128M
     environment:
-      - CONFIG_SERVER_URL=http://mud-config:8888/
-      - EUREKA_SERVER_URL=http://mud-registry:8761/eureka/        
+      - CONSUL_HOST=http://ec2-52-14-59-146.us-east-2.compute.amazonaws.com
+      - CONSUL_PORT=8500
+      - VAULT_ADDR=http://ec2-52-14-59-146.us-east-2.compute.amazonaws.com:8200
+      - VAULT_TOKEN=393bda7d-c44a-2c33-6d69-c8d47c83094a
       - SPRING_PROFILES_ACTIVE=prod
     networks:
       - app_net
-    depends_on:
-      - mud-config
-      - mud-registry
   mud-being:
     image: mudengine/mud-being
     deploy:
@@ -46,14 +44,13 @@ services:
         reservations:
           memory: 128M      
     environment:
-      - CONFIG_SERVER_URL=http://mud-config:8888/
-      - EUREKA_SERVER_URL=http://mud-registry:8761/eureka/
+      - CONSUL_HOST=http://ec2-52-14-59-146.us-east-2.compute.amazonaws.com
+      - CONSUL_PORT=8500
+      - VAULT_ADDR=http://ec2-52-14-59-146.us-east-2.compute.amazonaws.com:8200
+      - VAULT_TOKEN=393bda7d-c44a-2c33-6d69-c8d47c83094a
       - SPRING_PROFILES_ACTIVE=prod
     networks:
       - app_net
-    depends_on:
-      - mud-config
-      - mud-registry
   mud-message:
     image: mudengine/mud-message
     deploy:
@@ -64,14 +61,13 @@ services:
         reservations:
           memory: 128M
     environment:
-      - CONFIG_SERVER_URL=http://mud-config:8888/
-      - EUREKA_SERVER_URL=http://mud-registry:8761/eureka/
+      - CONSUL_HOST=http://ec2-52-14-59-146.us-east-2.compute.amazonaws.com
+      - CONSUL_PORT=8500
+      - VAULT_ADDR=http://ec2-52-14-59-146.us-east-2.compute.amazonaws.com:8200
+      - VAULT_TOKEN=393bda7d-c44a-2c33-6d69-c8d47c83094a
       - SPRING_PROFILES_ACTIVE=prod
     networks:
       - app_net
-    depends_on:
-      - mud-config
-      - mud-registry
   mud-action:
     image: mudengine/mud-action
     deploy:
@@ -82,14 +78,13 @@ services:
         reservations:
           memory: 128M
     environment:
-      - CONFIG_SERVER_URL=http://mud-config:8888/
-      - EUREKA_SERVER_URL=http://mud-registry:8761/eureka/
+      - CONSUL_HOST=http://ec2-52-14-59-146.us-east-2.compute.amazonaws.com
+      - CONSUL_PORT=8500
+      - VAULT_ADDR=http://ec2-52-14-59-146.us-east-2.compute.amazonaws.com:8200
+      - VAULT_TOKEN=393bda7d-c44a-2c33-6d69-c8d47c83094a
       - SPRING_PROFILES_ACTIVE=prod
     networks:
       - app_net
-    depends_on:
-      - mud-config
-      - mud-registry
   mud-player:
     image: mudengine/mud-player
     deploy:
@@ -100,14 +95,13 @@ services:
         reservations:
           memory: 128M
     environment:
-      - CONFIG_SERVER_URL=http://mud-config:8888/
-      - EUREKA_SERVER_URL=http://mud-registry:8761/eureka/
+      - CONSUL_HOST=http://ec2-52-14-59-146.us-east-2.compute.amazonaws.com
+      - CONSUL_PORT=8500
+      - VAULT_ADDR=http://ec2-52-14-59-146.us-east-2.compute.amazonaws.com:8200
+      - VAULT_TOKEN=393bda7d-c44a-2c33-6d69-c8d47c83094a
       - SPRING_PROFILES_ACTIVE=prod
     networks:
       - app_net
-    depends_on:
-      - mud-config
-      - mud-registry
   mud-api:
     image: mudengine/mud-api
     deploy:
@@ -120,40 +114,14 @@ services:
     ports:
       - 8080:8080
     environment:
-      - EUREKA_SERVER_URL=http://mud-registry:8761/eureka/
+      - CONSUL_HOST=http://ec2-52-14-59-146.us-east-2.compute.amazonaws.com
+      - CONSUL_PORT=8500
       - SPRING_PROFILES_ACTIVE=prod
     networks:
       - app_net  
-    depends_on:
-      - mud-registry          
-  mud-config:
-    image: mudengine/mud-config
-    deploy:
-      replicas: 1
-    environment:
-      - SPRING_PROFILES_ACTIVE=prod      
-    secrets:
-      - GIT_USERNAME
-      - GIT_PASSWORD
-    networks:
-      - app_net
-  mud-registry:
-    image: mudengine/mud-registry
-    deploy:
-      replicas: 1
-    ports:
-      - 8761:8761
-    networks:
-      - app_net
 networks:
   app_net:
     ipam:
       driver: default
       config:
         - subnet: 170.27.0.0/16
-secrets:
-  GIT_USERNAME:
-    external: true  
-  GIT_PASSWORD:
-    external: true
- 
