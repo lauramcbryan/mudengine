@@ -86,8 +86,12 @@ spring:
       host: ${CONSUL_HOST}
       port: ${CONSUL_PORT}
       discovery:
+        enabled: true
         hostname: ${EXPOSED_HOST:mud-item}
-        port: ${EXPOSED_PORT:8080}      
+        port: ${EXPOSED_PORT:8080}
+      config:
+        enabled: true
+        fail-fast: true
       retry:
         max-attempts: 6
         initial-interval: 10000   
