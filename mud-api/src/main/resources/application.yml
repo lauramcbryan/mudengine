@@ -7,6 +7,36 @@ spring:
       enabled: false
       discovery:
         enabled: false
+        
+zuul:
+  ignored-services: "*"
+  routes:
+    place:
+      path: /place/**
+      serviceId: mud-world
+      strip-prefix: false
+    item:
+      path: /item/**
+      serviceId: mud-item
+      strip-prefix: false
+    being:
+      path: /being/**
+      serviceId: mud-being
+      strip-prefix: false
+    message:
+      path: /message/**
+      serviceId: mud-message
+      strip-prefix: false
+    player:
+      path: /player/**
+      serviceId: mud-player
+      strip-prefix: false
+    action:
+      path: /action/**
+      serviceId: mud-action
+      strip-prefix: false
+      
+
 
 ---
 

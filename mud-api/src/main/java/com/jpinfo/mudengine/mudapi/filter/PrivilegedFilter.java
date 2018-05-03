@@ -23,9 +23,9 @@ public class PrivilegedFilter extends ZuulFilter {
 		
 		String uri = request.getRequestURI();
 		
-		if ((uri.startsWith("/mud-world")) ||
-			(uri.startsWith("/mud-item")) ||
-			(uri.startsWith("/mud-being"))) {
+		if ((uri.startsWith("/place")) ||
+			(uri.startsWith("/item")) ||
+			(uri.startsWith("/being"))) {
 			
 			if (!request.getMethod().equals("GET")) {
 				ctx.setSendZuulResponse(false);
