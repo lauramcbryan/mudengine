@@ -1,5 +1,46 @@
 version: '3.6'
 services:
+  consul:
+    image: consul:latest
+    ports:
+      - 8500:8500
+    networks:
+      - app_net
+  consul-dev:
+    build:
+      context: ../../consul/local
+      dockerfile: ./Dockerfile  
+    image: mudengine/consul-dev
+    environment:
+      - CONSUL_HTTP_ADDR=http://consul:8500
+    command: consul kv import @data.json      
+    networks:
+      - app_net
+    depends_on:
+      - consul
+  vault:
+    image: vault:latest
+    ports:
+      - 8200:8200
+    environment:
+      - VAULT_DEV_ROOT_TOKEN_ID=myroot
+    cap_add:
+      - IPC_LOCK      
+    networks:
+      - app_net
+  vault-dev:
+    build:
+      context: ../../vault/local
+      dockerfile: ./Dockerfile
+    image: mudengine/vault-dev
+    environment:
+      - VAULT_TOKEN=myroot
+      - VAULT_ADDR=http://vault:8200
+    command: ./vault-initialize.sh
+    depends_on:
+      - vault
+    networks:
+      - app_net
   mud-world:
     build:
       context: ../../../mud-world/
@@ -9,14 +50,16 @@ services:
       - 8082:8080
     environment:
       - EXPOSED_PORT=8082
-      - EXPOSED_HOST=localhost
-      - CONSUL_HOST=http://jeremias
+      - CONSUL_HOST=http://consul
       - CONSUL_PORT=8500
-      - VAULT_ADDR=http://jeremias:8200
-      - VAULT_TOKEN=b7f25df0-c544-b12c-19c0-0140d8c34f08
-      - SPRING_PROFILES_ACTIVE=qa      
+      - VAULT_TOKEN=myroot
+      - VAULT_ADDR=http://vault:8200
+      - SPRING_PROFILES_ACTIVE=qa
     networks:
       - app_net
+    depends_on:
+      - consul
+      - vault
   mud-item:
     build:
       context: ../../../mud-item/
@@ -27,10 +70,10 @@ services:
     environment:
       - EXPOSED_PORT=8084
       - EXPOSED_HOST=localhost
-      - CONSUL_HOST=http://jeremias
+      - CONSUL_HOST=http://consul
       - CONSUL_PORT=8500
-      - VAULT_ADDR=http://jeremias:8200
-      - VAULT_TOKEN=b7f25df0-c544-b12c-19c0-0140d8c34f08
+      - VAULT_TOKEN=myroot
+      - VAULT_ADDR=http://vault:8200
       - SPRING_PROFILES_ACTIVE=qa      
     networks:
       - app_net
@@ -44,10 +87,10 @@ services:
     environment:
       - EXPOSED_PORT=8086
       - EXPOSED_HOST=localhost
-      - CONSUL_HOST=http://jeremias
+      - CONSUL_HOST=http://consul
       - CONSUL_PORT=8500
-      - VAULT_ADDR=http://jeremias:8200
-      - VAULT_TOKEN=b7f25df0-c544-b12c-19c0-0140d8c34f08
+      - VAULT_TOKEN=myroot
+      - VAULT_ADDR=http://vault:8200
       - SPRING_PROFILES_ACTIVE=qa      
     networks:
       - app_net
@@ -61,10 +104,10 @@ services:
     environment:
       - EXPOSED_PORT=8088
       - EXPOSED_HOST=localhost
-      - CONSUL_HOST=http://jeremias
+      - CONSUL_HOST=http://consul
       - CONSUL_PORT=8500
-      - VAULT_ADDR=http://jeremias:8200
-      - VAULT_TOKEN=b7f25df0-c544-b12c-19c0-0140d8c34f08
+      - VAULT_TOKEN=myroot
+      - VAULT_ADDR=http://vault:8200
       - SPRING_PROFILES_ACTIVE=qa      
     networks:
       - app_net
@@ -78,10 +121,10 @@ services:
     environment:
       - EXPOSED_PORT=8090
       - EXPOSED_HOST=localhost
-      - CONSUL_HOST=http://jeremias
+      - CONSUL_HOST=http://consul
       - CONSUL_PORT=8500
-      - VAULT_ADDR=http://jeremias:8200
-      - VAULT_TOKEN=b7f25df0-c544-b12c-19c0-0140d8c34f08
+      - VAULT_TOKEN=myroot
+      - VAULT_ADDR=http://vault:8200
       - SPRING_PROFILES_ACTIVE=qa      
     networks:
       - app_net
@@ -95,10 +138,10 @@ services:
     environment:
       - EXPOSED_PORT=8092
       - EXPOSED_HOST=localhost
-      - CONSUL_HOST=http://jeremias
+      - CONSUL_HOST=http://consul
       - CONSUL_PORT=8500
-      - VAULT_ADDR=http://jeremias:8200
-      - VAULT_TOKEN=b7f25df0-c544-b12c-19c0-0140d8c34f08
+      - VAULT_TOKEN=myroot
+      - VAULT_ADDR=http://vault:8200
       - SPRING_PROFILES_ACTIVE=qa      
     networks:
       - app_net
@@ -111,7 +154,7 @@ services:
       - 8080:8080
     environment:
       - EXPOSED_HOST=localhost
-      - CONSUL_HOST=http://jeremias
+      - CONSUL_HOST=http://consul
       - CONSUL_PORT=8500
       - SPRING_PROFILES_ACTIVE=qa      
     networks:
