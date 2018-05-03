@@ -38,7 +38,7 @@ insert into mud_place_class_attr(place_class_code, attr_code, attr_value) values
 INSERT INTO mud_place(place_code, place_class_code) values(1, 'POD');
 INSERT INTO mud_place(place_code, place_class_code) values(2, 'FOREST');
 INSERT INTO mud_place(place_code, place_class_code) values(3, 'LAKE');
-INSERT INTO mud_place(place_code, place_class_code) values(4, 'UNDERWATER');
+INSERT INTO mud_place(place_code, place_class_code) values(4, 'UWATER');
 select setval('MUD_PLACE_SEQ', 10);
 
 INSERT INTO mud_place_exit(place_code, direction, name, opened, visible, target_place_code) values (1, 'OUT', 'Forest', true, true, 2);
