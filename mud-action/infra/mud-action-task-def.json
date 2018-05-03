@@ -14,20 +14,28 @@
 			"essential": true, 
 			"environment": [
 				{
-				  "name": "CONFIG_SERVER_URL",
-				  "value": "http://ec2-52-14-59-146.us-east-2.compute.amazonaws.com:8888"
+				  "name": "CONSUL_HOST",
+				  "value": "http://ec2-52-14-59-146.us-east-2.compute.amazonaws.com"
 				},
 				{
-				  "name": "EUREKA_SERVER_URL",
-				  "value": "http://ec2-52-14-59-146.us-east-2.compute.amazonaws.com:8761/eureka/"
-				},				
+				  "name": "CONSUL_PORT",
+				  "value": "8500"
+				},
 				{
-				  "name": "SPRING_PROFILES_ACTIVE",
-				  "value": "prod"
-                },
+				  "name": "VAULT_ADDR",
+				  "value": "http://ec2-52-14-59-146.us-east-2.compute.amazonaws.com:8200"
+				},
+				{
+				  "name": "VAULT_TOKEN",
+				  "value": "393bda7d-c44a-2c33-6d69-c8d47c83094a"
+				},
                 {
                   "name": "DEPLOY_ENV",
                   "value": "AWS"
+                },
+				{
+				  "name": "SPRING_PROFILES_ACTIVE",
+				  "value": "prod"
 				}
 			  ],
 			"logConfiguration": {
