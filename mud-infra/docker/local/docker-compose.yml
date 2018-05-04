@@ -6,11 +6,11 @@ services:
       - 8500:8500
     networks:
       - app_net
-  consul-dev:
+  consul-loader:
     build:
       context: ../../consul/local
       dockerfile: ./Dockerfile  
-    image: mudengine/consul-dev
+    image: mudengine/consul-loader
     environment:
       - CONSUL_HTTP_ADDR=http://consul:8500
     command: consul kv import @data.json      
@@ -19,7 +19,7 @@ services:
     depends_on:
       - consul
   vault:
-    image: vault:latest
+    image: vault:0.8.3
     ports:
       - 8200:8200
     environment:
@@ -28,11 +28,11 @@ services:
       - IPC_LOCK      
     networks:
       - app_net
-  vault-dev:
+  vault-loader:
     build:
       context: ../../vault/local
       dockerfile: ./Dockerfile
-    image: mudengine/vault-dev
+    image: mudengine/vault-loader
     environment:
       - VAULT_TOKEN=myroot
       - VAULT_ADDR=http://vault:8200
@@ -50,6 +50,7 @@ services:
       - 8082:8080
     environment:
       - EXPOSED_PORT=8082
+      - EXPOSED_HOST=10.1.11.65      
       - CONSUL_HOST=http://consul
       - CONSUL_PORT=8500
       - VAULT_TOKEN=myroot
@@ -58,8 +59,8 @@ services:
     networks:
       - app_net
     depends_on:
-      - consul
-      - vault
+      - consul-loader
+      - vault-loader
   mud-item:
     build:
       context: ../../../mud-item/
@@ -69,7 +70,7 @@ services:
       - 8084:8080
     environment:
       - EXPOSED_PORT=8084
-      - EXPOSED_HOST=localhost
+      - EXPOSED_HOST=10.1.11.65      
       - CONSUL_HOST=http://consul
       - CONSUL_PORT=8500
       - VAULT_TOKEN=myroot
@@ -86,7 +87,7 @@ services:
       - 8086:8080
     environment:
       - EXPOSED_PORT=8086
-      - EXPOSED_HOST=localhost
+      - EXPOSED_HOST=10.1.11.65      
       - CONSUL_HOST=http://consul
       - CONSUL_PORT=8500
       - VAULT_TOKEN=myroot
@@ -103,7 +104,7 @@ services:
       - 8088:8080
     environment:
       - EXPOSED_PORT=8088
-      - EXPOSED_HOST=localhost
+      - EXPOSED_HOST=10.1.11.65      
       - CONSUL_HOST=http://consul
       - CONSUL_PORT=8500
       - VAULT_TOKEN=myroot
@@ -120,7 +121,7 @@ services:
       - 8090:8080
     environment:
       - EXPOSED_PORT=8090
-      - EXPOSED_HOST=localhost
+      - EXPOSED_HOST=10.1.11.65            
       - CONSUL_HOST=http://consul
       - CONSUL_PORT=8500
       - VAULT_TOKEN=myroot
@@ -137,7 +138,7 @@ services:
       - 8092:8080
     environment:
       - EXPOSED_PORT=8092
-      - EXPOSED_HOST=localhost
+      - EXPOSED_HOST=10.1.11.65
       - CONSUL_HOST=http://consul
       - CONSUL_PORT=8500
       - VAULT_TOKEN=myroot
@@ -153,7 +154,6 @@ services:
     ports:
       - 8080:8080
     environment:
-      - EXPOSED_HOST=localhost
       - CONSUL_HOST=http://consul
       - CONSUL_PORT=8500
       - SPRING_PROFILES_ACTIVE=qa      
