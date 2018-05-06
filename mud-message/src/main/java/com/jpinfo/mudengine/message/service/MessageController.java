@@ -111,7 +111,7 @@ public class MessageController implements MessageService {
 		
 		List<Message> result = new ArrayList<Message>();
 		
-		PageRequest page = new PageRequest(pageCount, pageSize, Sort.Direction.DESC, "insertDate");
+		PageRequest page = PageRequest.of(pageCount, pageSize, Sort.Direction.DESC, "insertDate");
 		
 		// Obtaining the caller locale
 		String callerLocale = TokenService.getLocaleFromToken(authToken);
