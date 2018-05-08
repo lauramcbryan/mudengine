@@ -1,2 +1,129 @@
-# mudengine
-MUD engine using Spring EL and REST microservices
+# MUDEngine
+
+This project was designed with some goals in mind.
+
+The first of them is to be a laboratory to study and try new technologies
+specially regarding microservice and cloud technologies.
+Here I'm not afraid to kick things out if I feel like they aren't contributing
+for the project in a manner that pays off the trouble they caused.
+
+The second goal, and that's because we must have some fun, is to provide an
+implementation of a Multi User Dungeon (MUD) engine that could be adapted to
+different world games and scenarios.  With a rules engine that work based on
+predicates (pretty much like lambdas, but coded in SpEl for now), the 
+objective is to present a platform from where the administrator can create a 
+brand new game world just through database initial loading.
+
+That being said, please note that:
+
+- THIS ISN'T A HELLO WORLD PROJECT.
+Here we have some serious effort put on architecture, design and implementation
+for the (currently) 10 services distributed among 4 layers and 9 projects.  
+Database was modeled externally before the JPA entities, because I trust that's
+the way to optimize data storage and access strategy.  Each service runs under 
+an isolated schema that can be implemented in Postgre, mySQL, mongoDB, you name
+it.
+
+
+- THIS ISN'T A FINISHED WORK.
+And probably never will be.  There's a long list of new things I wanna try here
+before I can move them for real-life projects.  So, for safe code, stay in the
+master branch (or develop for some finished features) and avoid the inner
+depths of my mind (called the feature branches).  There be dragons.
+
+- I'M NOT A PREACHER of Java, Spring Boot, Docker or any particular technology.
+Although I've used here a variety of tools, some of them beyond necessity, on
+my work (and in my life) I believe that technology is just a way that humans,
+business and corporations created to achieve their dreams.  And more: put them
+in a tangible matter.
+
+
+
+## Architecture
+
+
+This project is encomprised to 4 different layers:
+
+
+### Worker layer
+
+Here we have the basic entities of the game.  Each of of them resides in a
+separate project with no iteraction between them.  (Well, some iteraction at
+the moment, but I'll find a way to further isolate them).
+Each entity includes a metadata service with the suffix "-class".  That
+service is used to retrieve information used to create new entities and to
+tag properties that are common to all instances of the particular entity.
+
+The services are:
+
+[Place](mud-world): a place in the game world.  Each place can depict a large space (like
+a forest) or a small place, like a tunnel.  Places can contain items, beings
+and exits.
+
+[Item](mud-item): an item in the game.  Items can be used by beings to increase their
+statistics and abilities.  Some items may be consumed to create structures
+or other items.
+
+[Being](mud-being): the central piece of the game.  Beings are self-aware entities that
+wander through the game world.  Beings can iteract with items and navigate
+through places, executing actions.  Beings can be controlled by an human
+or by the A.I.
+
+
+
+### Orchestration layer
+
+This layer responds to player's needies.  It encomprises
+
+[Action](mud-action): rules engine that receives player commands, process the actions and
+triggers outcomes to services in worker layer.  In this service is the
+action runtime and the turns counter.
+
+[Player](mud-player): administrative service where humans can register themselves and perform
+other mundane tasks like password reset and profile edit.
+In this service the player triggers a being creation that will be his avatar
+in the game world.
+
+[Message](mud-message): notification service to store the events that must be propagated to
+the player.  Each message is bound to a being and is stored until consumed.
+That service is built with multi language support, according to player's
+language settings.
+
+
+### Interface layer
+
+This layer contain the service gateway the unify and regulates the clients
+access to inner services.  In some platforms (like AWS) this goal is achieved
+by use of already available tools, like AWS API Gateway.  Where these resources
+aren't available, a Zuul implemented proxy ([MudApi](mud-api)) serves as gateway.
+
+
+### Client layer
+
+This layer is encomprised by a unique java client project ([MudClient](mud-client)).
+This project is here just for demonstration purposes in order to demonstrate
+how a player interface can iteract with the service gateway.
+Implemented as a telnet server, it retains a 80's retro visual, just like the
+text adventures of that epoch. In cause you didn't notice by now, this readme
+is all in 80 columns.  ;)
+
+
+### Support projects
+
+These other projects contains shared classes and scripts to develop and deploy
+the solution.
+
+
+[Mud-Common](mud-common): service signatures and shared security support code used by all
+the services.
+
+[Mud-Common-Client](mud-common-client): support project with the classes returned by all services.
+No Spring Boot, no cloud dependency, just Plain Old Java Objects.
+(Used by MudClient)
+
+[Mud-Infra](mud-infra): simple project used to store the docker files to deploy the solution
+in qa and prod environments.  For local launch, a compose file is available.
+QA and prod launch, uses an swarm file.  For AWS environment, the AWS task
+definition files are spread among the projects.
+Docker files to create and populate the Consul and the Vault images are also
+available.
