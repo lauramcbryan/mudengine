@@ -2,7 +2,7 @@
 
 This project was designed with some goals in mind.
 
-The first of them is to be a laboratory to study and try new technologies
+The first of them is to be a laboratory to study and try new technologies 
 specially regarding microservice and cloud technologies.
 Here I'm not afraid to kick things out if I feel like they aren't contributing
 for the project in a manner that pays off the trouble they caused.
@@ -76,7 +76,7 @@ or by the A.I.
 This layer responds to player's needies.  It encomprises
 
 [Action](mud-action): rules engine that receives player commands, process the actions and
-triggers outcomes to services in worker layer.  In this service is the
+triggers outcomes to services in worker layer.  In this service resides the
 action runtime and the turns counter.
 
 [Player](mud-player): administrative service where humans can register themselves and perform
@@ -101,11 +101,10 @@ aren't available, a Zuul implemented proxy ([MudApi](mud-api)) serves as gateway
 ### Client layer
 
 This layer is encomprised by a unique java client project ([MudClient](mud-client)).
-This project is here just for demonstration purposes in order to demonstrate
-how a player interface can iteract with the service gateway.
+This project is here just for demonstration purposes in order to show up how a 
+player interface can iteract with the service gateway.
 Implemented as a telnet server, it retains a 80's retro visual, just like the
-text adventures of that epoch. In cause you didn't notice by now, this readme
-is all in 80 columns.  ;)
+text adventures of that epoch.
 
 
 ### Support projects
