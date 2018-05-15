@@ -1,0 +1,79 @@
+{
+	"dictionary": [
+		{
+			"verb": "register",
+			"category": "SYSTEM",
+			"parameters": [
+				{
+					"name": "username",
+					"inputMessage": "Please enter the username: ",
+					"type": "anyString",
+					"required": true
+				},
+				{
+					"name": "email",
+					"inputMessage": "Please enter the email: ",
+					"type": "email",
+					"required": true
+				},
+				{
+					"name": "locale",
+					"inputMessage": "Please choose a locale: ",
+					"type": "anyString",
+					"required": false,
+					"domainValues": [
+						"en_US",
+						"pt_BR"
+					],
+					"defaultValue": "en_US"
+				}
+			]
+		},
+		{
+			"verb": "profile",
+			"category": "SYSTEM",
+			"parameters": [
+				{
+					"name": "email",
+					"inputMessage": "Please enter the email: ",
+					"type": "email",
+					"required": true
+				},
+				{
+					"name": "locale",
+					"inputMessage": "Please choose a locale: ",
+					"type": "anyString",
+					"required": false,
+					"domainValues": [
+						"en_US",
+						"pt_BR"
+					],
+					"defaultValue": "en_US"
+				}
+			]
+		},
+		{
+			"verb": "password",
+			"category": "SYSTEM",
+			"parameters": [
+				{
+					"name": "email",
+					"inputMessage": "Please enter the email: ",
+					"type": "email",
+					"required": true
+				},
+				{
+					"name": "locale",
+					"inputMessage": "Please choose a locale: ",
+					"type": "anyString",
+					"required": false,
+					"domainValues": [
+						"en_US",
+						"pt_BR"
+					],
+					"defaultValue": "en_US"
+				}
+			]
+		}		
+	]
+}

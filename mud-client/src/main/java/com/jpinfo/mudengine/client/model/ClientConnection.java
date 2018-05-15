@@ -4,38 +4,47 @@ import org.springframework.integration.ip.tcp.connection.TcpConnection;
 
 public class ClientConnection {
 
-	private Long playerId;
+	private String username;
 	
-	private Long beingId;
+	private Long currentBeingId;
 	
 	private String authToken;
 	
+	private boolean needGreetings;
+	
 	private TcpConnection connection;
+	
+	private Command curCommand;
+	
+	private CommandParam curParam;
 	
 	
 	public ClientConnection(TcpConnection connection) {
 		this.connection = connection;
+		this.needGreetings = true;
 	}
 
 
-	public Long getPlayerId() {
-		return playerId;
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
 	}
 
 
-	public void setPlayerId(Long playerId) {
-		this.playerId = playerId;
+
+	public Long getCurrentBeingId() {
+		return currentBeingId;
 	}
 
 
-	public Long getBeingId() {
-		return beingId;
+
+	public void setCurrentBeingId(Long currentBeingId) {
+		this.currentBeingId = currentBeingId;
 	}
 
-
-	public void setBeingId(Long beingId) {
-		this.beingId = beingId;
-	}
 
 
 	public String getAuthToken() {
@@ -50,5 +59,36 @@ public class ClientConnection {
 
 	public TcpConnection getConnection() {
 		return connection;
+	}
+
+
+	public boolean isNeedGreetings() {
+		return needGreetings;
+	}
+
+
+	public void setNeedGreetings(boolean needGreetings) {
+		this.needGreetings = needGreetings;
+	}
+
+
+	public Command getCurCommand() {
+		return curCommand;
+	}
+
+
+	public void setCurCommand(Command curCommand) {
+		this.curCommand = curCommand;
+		this.curParam = null;
+	}
+
+
+	public CommandParam getCurParam() {
+		return curParam;
+	}
+
+
+	public void setCurParam(CommandParam curParam) {
+		this.curParam = curParam;
 	}
 }
