@@ -25,7 +25,7 @@ public class MudClientScheduler {
 	
 	private RestTemplate restTemplate;
 	
-	@Scheduled(fixedRate=10000)
+	@Scheduled(fixedDelay=1000)
 	public void updateClientScreen() {
 		
 		// For each client:
@@ -35,7 +35,7 @@ public class MudClientScheduler {
 			.forEach((t) -> {
 				
 				// Player logged and with a being attached
-				if ((t.getCurrentBeingId()!=null) && (t.getAuthToken()!=null)) {
+				if (t.isLogged() && t.hasBeingSelected()) {
 					
 					// Check the messages of this being
 					HttpHeaders clientHeaders = new HttpHeaders();
@@ -64,22 +64,19 @@ public class MudClientScheduler {
 					} // end if responseRead = SUCCESSFUL
 				} // end if being !=null
 				else 
-					// Player logged and with no being attached
-					if (t.getAuthToken()!=null) {
-						
-					} else {
-						
-						// Player not logged.  Just check if I already gave greetings.
+					// Player not logged.  Just check if I already gave greetings.
+					if (!t.isLogged()) {
+
 						if (t.isNeedGreetings()) {
 							
 							try {
-								ClientHelper.sendMessage(t, "Greetings!");
+								ClientHelper.sendFile(t, ClientHelper.GREETINGS_FILE);
 								t.setNeedGreetings(false);
+								
+								
 							} catch(Exception e) {
 								e.printStackTrace();
 							}
-							
-							
 						}
 					}
 			

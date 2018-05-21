@@ -3,22 +3,25 @@
 		{
 			"verb": "register",
 			"category": "SYSTEM",
+			"logged": false,
+			"description": "Creates a account in the system.",
+			"usage": "register [<username> [<email> [<locale>] ] ]",
 			"parameters": [
 				{
 					"name": "username",
-					"inputMessage": "Please enter the username: ",
+					"inputMessage": "Please enter the username",
 					"type": "anyString",
 					"required": true
 				},
 				{
 					"name": "email",
-					"inputMessage": "Please enter the email: ",
+					"inputMessage": "Please enter the email",
 					"type": "email",
 					"required": true
 				},
 				{
 					"name": "locale",
-					"inputMessage": "Please choose a locale: ",
+					"inputMessage": "Please choose a locale",
 					"type": "anyString",
 					"required": false,
 					"domainValues": [
@@ -30,18 +33,21 @@
 			]
 		},
 		{
-			"verb": "profile",
+			"verb": "change profile",
 			"category": "SYSTEM",
+			"logged": true,			
+			"description": "Changes profile details. (Must be logged in order to use)",
+			"usage": "change profile [<email> [<locale>] ]",			
 			"parameters": [
 				{
 					"name": "email",
-					"inputMessage": "Please enter the email: ",
+					"inputMessage": "Please enter the email",
 					"type": "email",
 					"required": true
 				},
 				{
 					"name": "locale",
-					"inputMessage": "Please choose a locale: ",
+					"inputMessage": "Please choose a locale",
 					"type": "anyString",
 					"required": false,
 					"domainValues": [
@@ -53,27 +59,60 @@
 			]
 		},
 		{
-			"verb": "password",
+			"verb": "activate account",
 			"category": "SYSTEM",
+			"logged": false,			
+			"description": "Activates an account created through register command.",
+			"usage": "activate account [<activationCode> [<newPassword>] ]",
 			"parameters": [
 				{
-					"name": "email",
-					"inputMessage": "Please enter the email: ",
-					"type": "email",
+					"name": "activationCode",
+					"inputMessage": "Please type the activation code received",
+					"type": "anyString",
 					"required": true
 				},
 				{
-					"name": "locale",
-					"inputMessage": "Please choose a locale: ",
+					"name": "newPassword",
+					"inputMessage": "Please type the new password",
 					"type": "anyString",
-					"required": false,
-					"domainValues": [
-						"en_US",
-						"pt_BR"
-					],
-					"defaultValue": "en_US"
+					"required": true
 				}
 			]
-		}		
+		},
+		{
+			"verb": "quit",
+			"description": "Closes the connection.",
+			"logged": false,			
+			"usage": "quit",			
+			"category": "SYSTEM"
+		},
+		{
+			"verb": "help",
+			"description": "Display the command list",
+			"logged": false,			
+			"usage": "help",
+			"category": "SYSTEM"
+		},		
+		{
+			"verb": "login",
+			"category": "SYSTEM",
+			"description": "Authenticate the account",
+			"logged": false,			
+			"usage": "login [<username> [<password>] ]",
+			"parameters": [
+				{
+					"name": "username",
+					"inputMessage": "Please enter the username",
+					"type": "anyString",
+					"required": true
+				},
+				{
+					"name": "password",
+					"inputMessage": "Please enter the password",
+					"type": "anyString",
+					"required": true
+				}
+			]
+		}
 	]
 }

@@ -1,19 +1,24 @@
-package com.jpinfo.mudengine.client.model;
+package com.jpinfo.mudengine.common.action;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Command {
-	
+
 	public static enum enumCategory {GAME, SYSTEM};
 	
 	private String verb;
+	private String description;
+	private String usage;
+	private boolean logged;
+	
 	private enumCategory category;
 	
 	private List<CommandParam> parameters;
 	
 	public Command() {
 		this.parameters = new ArrayList<CommandParam>();
+		this.logged = true;
 	}
 
 	public String getVerb() {
@@ -24,6 +29,22 @@ public class Command {
 		this.verb = verb;
 	}
 
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public String getUsage() {
+		return usage;
+	}
+
+	public void setUsage(String usage) {
+		this.usage = usage;
+	}
+
 	public enumCategory getCategory() {
 		return category;
 	}
@@ -31,7 +52,7 @@ public class Command {
 	public void setCategory(enumCategory category) {
 		this.category = category;
 	}
-
+	
 	public List<CommandParam> getParameters() {
 		return parameters;
 	}
@@ -39,13 +60,12 @@ public class Command {
 	public void setParameters(List<CommandParam> parameters) {
 		this.parameters = parameters;
 	}
-	
-	public boolean isReady() {
-		if (parameters!=null) {
-			return parameters.stream().allMatch(d-> d.isValid());
-		} else {
-			return true;
-		}
+
+	public boolean isLogged() {
+		return logged;
 	}
 
+	public void setLogged(boolean logged) {
+		this.logged = logged;
+	}
 }
