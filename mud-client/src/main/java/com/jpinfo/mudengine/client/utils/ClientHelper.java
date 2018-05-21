@@ -19,22 +19,13 @@ import org.springframework.integration.ip.tcp.connection.TcpConnection;
 public class ClientHelper {
 	
 	public static final String HEADER_TOKEN = "Auth";
+	
+	public static final String CLIENT_TYPE = "text/plain";
+	
 
 	public static final String GREETINGS_FILE = "greetings.txt";
 	public static final String GOODBYE_FILE = "goodbye.txt";
-	
-	public static final String REGISTER_COMMAND = "register";
-	public static final String QUIT_COMMAND = "quit";
-	public static final String HELP_COMMAND = "help";
-	public static final String LOGIN_COMMAND = "login";
-	public static final String LOGOUT_COMMAND = "logout";
-	public static final String CHANGEPROF_COMMAND = "change profile";
-	public static final String ACTIVATE_COMMAND = "activate account";
-	public static final String PASSWORD_COMMAND = "change password";
-	public static final String CREATEBEING_COMMAND = "create character";
-	public static final String SELECTBEING_COMMAND = "select character";
-	public static final String DELETEBEING_COMMAND = "delete character";
-	
+		
 	private static Scanner console = new Scanner(System.in);
 	
 	public static int readIntInput() {

@@ -82,6 +82,7 @@ public class ClientConnection {
 	}
 	
 	public Command getCurCommand() {
+		
 		return (this.curCommandState!=null ? this.curCommandState.getCommand(): null);
 		
 	}

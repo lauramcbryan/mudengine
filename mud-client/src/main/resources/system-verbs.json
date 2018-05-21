@@ -80,6 +80,27 @@
 			]
 		},
 		{
+			"verb": "change password",
+			"category": "SYSTEM",
+			"logged": false,			
+			"description": "Change user password",
+			"usage": "change password [<oldPassword> [<newPassword>] ]",
+			"parameters": [
+				{
+					"name": "oldPassword",
+					"inputMessage": "Please type the current password",
+					"type": "anyString",
+					"required": true
+				},
+				{
+					"name": "newPassword",
+					"inputMessage": "Please type the new password",
+					"type": "anyString",
+					"required": true
+				}
+			]
+		},
+		{
 			"verb": "quit",
 			"description": "Closes the connection.",
 			"logged": false,			
@@ -111,6 +132,61 @@
 					"inputMessage": "Please enter the password",
 					"type": "anyString",
 					"required": true
+				}
+			]
+		},		
+		{
+			"verb": "logout",
+			"category": "SYSTEM",
+			"description": "Finishes a session",
+			"usage": "logout",
+			"parameters": null
+		},		
+		{
+			"verb": "create being",
+			"category": "SYSTEM",
+			"description": "Creates a new being",
+			"usage": "create being <beingClass> <beingName>",
+			"parameters": [
+				{
+					"name": "beingClass",
+					"inputMessage": "Please enter the being class",
+					"type": "anyString",
+					"required": true
+				},
+				{
+					"name": "beingName",
+					"inputMessage": "Please enter the being name",
+					"type": "anyString",
+					"required": true
+				}
+			]
+		},
+		{
+			"verb": "select being",
+			"category": "SYSTEM",
+			"description": "Selects an existing being",
+			"usage": "select being <beingCode>",
+			"parameters": [
+				{
+					"name": "beingCode",
+					"inputMessage": "Please enter the being code",
+					"type": "anyNumber",
+					"required": false
+				}
+			]
+		},
+		{
+			"verb": "destroy  being",
+			"category": "SYSTEM",
+			"description": "Destroy an existing being",
+			"usage": "destroy being <beingCode>",
+			"parameters": [
+				{
+					"name": "beingCode",
+					"inputMessage": "Please enter the being code",
+					"type": "anyNumber",
+					"required": false
 				}
 			]
 		}
