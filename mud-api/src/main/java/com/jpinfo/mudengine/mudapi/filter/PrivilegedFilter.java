@@ -42,7 +42,15 @@ public class PrivilegedFilter extends ZuulFilter {
 
 	@Override
 	public boolean shouldFilter() {
-		return true;
+		
+		RequestContext ctx = RequestContext.getCurrentContext();
+		HttpServletRequest request = ctx.getRequest();
+		
+		String uri = request.getRequestURI();
+		String method = request.getMethod();
+
+		return (((uri.startsWith("/place")) || (uri.startsWith("/item")) || (uri.startsWith("/being"))) && 
+				(!method.equals("GET")));
 	}
 
 	@Override
