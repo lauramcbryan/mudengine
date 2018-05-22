@@ -37,6 +37,9 @@ zuul:
       strip-prefix: false
       
 
+ribbon:
+  ReadTimeout: 10000
+
 
 ---
 
