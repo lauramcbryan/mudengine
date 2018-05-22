@@ -1,5 +1,9 @@
 package com.jpinfo.mudengine.being.service;
 
+import java.util.ArrayList;
+
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,6 +33,21 @@ public class BeingClassController implements BeingClassService {
 		
 	
 		return result;
+	}
+
+	@Override
+	public List<BeingClass> listAllAvailable() {
+		
+		List<BeingClass> resultList = new ArrayList<BeingClass>();
+		
+		Iterable<MudBeingClass> dbList = repository.findAll();
+		
+		
+		dbList.forEach(d -> {
+			resultList.add(BeingClassHelper.buildBeingClass(d));
+		});
+		
+		return resultList;
 	}
 
 }
