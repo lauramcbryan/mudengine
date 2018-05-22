@@ -49,8 +49,6 @@ services:
     ports:
       - 8082:8080
     environment:
-      - EXPOSED_PORT=8082
-      - EXPOSED_HOST=10.1.11.65      
       - CONSUL_HOST=http://consul
       - CONSUL_PORT=8500
       - VAULT_TOKEN=myroot
@@ -69,8 +67,6 @@ services:
     ports:
       - 8084:8080
     environment:
-      - EXPOSED_PORT=8084
-      - EXPOSED_HOST=10.1.11.65      
       - CONSUL_HOST=http://consul
       - CONSUL_PORT=8500
       - VAULT_TOKEN=myroot
@@ -78,6 +74,9 @@ services:
       - SPRING_PROFILES_ACTIVE=qa      
     networks:
       - app_net
+    depends_on:
+      - consul-loader
+      - vault-loader
   mud-being:
     build:
       context: ../../../mud-being/
@@ -86,8 +85,6 @@ services:
     ports:
       - 8086:8080
     environment:
-      - EXPOSED_PORT=8086
-      - EXPOSED_HOST=10.1.11.65      
       - CONSUL_HOST=http://consul
       - CONSUL_PORT=8500
       - VAULT_TOKEN=myroot
@@ -95,6 +92,9 @@ services:
       - SPRING_PROFILES_ACTIVE=qa      
     networks:
       - app_net
+    depends_on:
+      - consul-loader
+      - vault-loader
   mud-message:
     build:
       context: ../../../mud-message/
@@ -103,8 +103,6 @@ services:
     ports:
       - 8088:8080
     environment:
-      - EXPOSED_PORT=8088
-      - EXPOSED_HOST=10.1.11.65      
       - CONSUL_HOST=http://consul
       - CONSUL_PORT=8500
       - VAULT_TOKEN=myroot
@@ -112,6 +110,9 @@ services:
       - SPRING_PROFILES_ACTIVE=qa      
     networks:
       - app_net
+    depends_on:
+      - consul-loader
+      - vault-loader
   mud-action:
     build:
       context: ../../../mud-action/
@@ -119,9 +120,7 @@ services:
     image: mudengine/mud-action
     ports:
       - 8090:8080
-    environment:
-      - EXPOSED_PORT=8090
-      - EXPOSED_HOST=10.1.11.65            
+    environment:          
       - CONSUL_HOST=http://consul
       - CONSUL_PORT=8500
       - VAULT_TOKEN=myroot
@@ -129,6 +128,9 @@ services:
       - SPRING_PROFILES_ACTIVE=qa      
     networks:
       - app_net
+    depends_on:
+      - consul-loader
+      - vault-loader
   mud-player:
     build:
       context: ../../../mud-player/
@@ -137,8 +139,6 @@ services:
     ports:
       - 8092:8080
     environment:
-      - EXPOSED_PORT=8092
-      - EXPOSED_HOST=10.1.11.65
       - CONSUL_HOST=http://consul
       - CONSUL_PORT=8500
       - VAULT_TOKEN=myroot
@@ -146,6 +146,9 @@ services:
       - SPRING_PROFILES_ACTIVE=qa      
     networks:
       - app_net
+    depends_on:
+      - consul-loader
+      - vault-loader
   mud-api:
     build:
       context: ../../../mud-api/

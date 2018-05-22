@@ -4,7 +4,7 @@
 			"verb": "register",
 			"category": "SYSTEM",
 			"logged": false,
-			"description": "Creates a account in the system.",
+			"description": "Creates an account in the system.",
 			"usage": "register [<username> [<email> [<locale>] ] ]",
 			"parameters": [
 				{
@@ -35,8 +35,7 @@
 		{
 			"verb": "change profile",
 			"category": "SYSTEM",
-			"logged": true,			
-			"description": "Changes profile details. (Must be logged in order to use)",
+			"description": "Changes profile details.",
 			"usage": "change profile [<email> [<locale>] ]",			
 			"parameters": [
 				{
@@ -66,6 +65,12 @@
 			"usage": "activate account [<activationCode> [<newPassword>] ]",
 			"parameters": [
 				{
+					"name": "username",
+					"inputMessage": "Please enter your username",
+					"type": "anyString",
+					"required": true
+				},
+				{
 					"name": "activationCode",
 					"inputMessage": "Please type the activation code received",
 					"type": "anyString",
@@ -81,8 +86,7 @@
 		},
 		{
 			"verb": "change password",
-			"category": "SYSTEM",
-			"logged": false,			
+			"category": "SYSTEM",		
 			"description": "Change user password",
 			"usage": "change password [<oldPassword> [<newPassword>] ]",
 			"parameters": [
@@ -177,7 +181,7 @@
 			]
 		},
 		{
-			"verb": "destroy  being",
+			"verb": "destroy being",
 			"category": "SYSTEM",
 			"description": "Destroy an existing being",
 			"usage": "destroy being <beingCode>",

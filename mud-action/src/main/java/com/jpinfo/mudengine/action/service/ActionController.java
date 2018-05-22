@@ -28,8 +28,8 @@ import com.jpinfo.mudengine.action.utils.ActionHelper;
 import com.jpinfo.mudengine.action.utils.ActionTestResult;
 import com.jpinfo.mudengine.common.action.Action;
 import com.jpinfo.mudengine.common.exception.EntityNotFoundException;
-import com.jpinfo.mudengine.common.security.TokenService;
 import com.jpinfo.mudengine.common.service.ActionService;
+import com.jpinfo.mudengine.common.utils.CommonConstants;
 
 @RestController
 @RequestMapping("/action")
@@ -76,7 +76,7 @@ public class ActionController implements ActionService {
 	}	
 	
 	@Override
-	public Action insertCommand(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, 
+	public Action insertCommand(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, 
 			@PathVariable("verb") String verb, 
 			@RequestParam("actorCode") Long actorCode, 
 			@RequestParam("mediatorCode") Optional<String> mediatorCode, 

@@ -21,6 +21,7 @@ import com.jpinfo.mudengine.common.exception.IllegalParameterException;
 import com.jpinfo.mudengine.common.message.Message;
 import com.jpinfo.mudengine.common.security.TokenService;
 import com.jpinfo.mudengine.common.service.MessageService;
+import com.jpinfo.mudengine.common.utils.CommonConstants;
 import com.jpinfo.mudengine.message.client.BeingServiceClient;
 import com.jpinfo.mudengine.message.model.MudMessage;
 import com.jpinfo.mudengine.message.model.MudMessageLocale;
@@ -44,7 +45,7 @@ public class MessageController implements MessageService {
 	private MudMessageLocaleRepository localeRepository;
 
 	@Override
-	public void putMessage(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, 
+	public void putMessage(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, 
 			@PathVariable("targetCode") Long targetCode, @RequestParam("message") String message, 
 			@RequestParam(name="senderCode", required=false) Long senderCode, @RequestParam(name="senderName", required=false) String senderName, 
 			@RequestParam(name="parms", required=false) String...parms) {
@@ -86,7 +87,7 @@ public class MessageController implements MessageService {
 	}
 
 	@Override
-	public void broadcastMessage(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, 
+	public void broadcastMessage(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, 
 			@PathVariable("placeCode") Integer placeCode, @RequestParam("message") String message, 
 			@RequestParam(name="senderCode", required=false) Long senderCode, @RequestParam(name="senderName", required=false) String senderName, 
 			@RequestParam(name="parms", required=false) String...parms) {
@@ -104,7 +105,7 @@ public class MessageController implements MessageService {
 	
 	
 	@Override
-	public List<Message> getMessage(@RequestHeader(TokenService.HEADER_TOKEN) String authToken,
+	public List<Message> getMessage(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken,
 			@RequestParam(name="allMessages", defaultValue="false", required=false) Boolean allMessages,
 			@RequestParam(name="pageCount", defaultValue="0", required=false) Integer pageCount,
 			@RequestParam(name="pageSize", defaultValue="10", required=false) Integer pageSize) {

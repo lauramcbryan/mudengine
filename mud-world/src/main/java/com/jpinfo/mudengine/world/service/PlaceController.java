@@ -16,6 +16,7 @@ import com.jpinfo.mudengine.common.exception.EntityNotFoundException;
 import com.jpinfo.mudengine.common.place.Place;
 import com.jpinfo.mudengine.common.security.TokenService;
 import com.jpinfo.mudengine.common.service.PlaceService;
+import com.jpinfo.mudengine.common.utils.CommonConstants;
 import com.jpinfo.mudengine.world.client.BeingServiceClient;
 import com.jpinfo.mudengine.world.client.ItemServiceClient;
 import com.jpinfo.mudengine.world.model.MudPlace;
@@ -46,7 +47,7 @@ public class PlaceController implements PlaceService {
 	private PlaceClassRepository placeClassRepository;
 
 	@Override
-	public Place getPlace(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable Integer placeId) {
+	public Place getPlace(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable Integer placeId) {
 		
 		Place response = null;
 		
@@ -61,7 +62,7 @@ public class PlaceController implements PlaceService {
 
 	
 	@Override
-	public Place updatePlace(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable Integer placeId, @RequestBody Place requestPlace) {
+	public Place updatePlace(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable Integer placeId, @RequestBody Place requestPlace) {
 		
 		Place response = null;
 		
@@ -192,7 +193,7 @@ public class PlaceController implements PlaceService {
 
 
 	@Override
-	public void destroyPlace(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable Integer placeId) {
+	public void destroyPlace(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable Integer placeId) {
 		
 		MudPlace dbPlace = placeRepository
 				.findById(placeId)

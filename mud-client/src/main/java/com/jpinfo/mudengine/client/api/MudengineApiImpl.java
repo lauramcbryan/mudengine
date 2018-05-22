@@ -1,6 +1,8 @@
 package com.jpinfo.mudengine.client.api;
 
 import java.util.ArrayList;
+
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -15,10 +17,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
 import com.jpinfo.mudengine.client.exception.ClientException;
-import com.jpinfo.mudengine.client.utils.ClientHelper;
+import com.jpinfo.mudengine.client.utils.ApiErrorMessage;
 import com.jpinfo.mudengine.common.action.Action;
 import com.jpinfo.mudengine.common.being.Being;
 import com.jpinfo.mudengine.common.item.Item;
@@ -26,6 +29,7 @@ import com.jpinfo.mudengine.common.message.Message;
 import com.jpinfo.mudengine.common.place.Place;
 import com.jpinfo.mudengine.common.player.Player;
 import com.jpinfo.mudengine.common.player.Session;
+import com.jpinfo.mudengine.common.utils.CommonConstants;
 
 @Component
 public class MudengineApiImpl implements MudengineApi {
@@ -49,24 +53,16 @@ public class MudengineApiImpl implements MudengineApi {
 		Map<String, Object> urlVariables = new HashMap<String, Object>();
 		urlVariables.put("username", username);
 		
-		ResponseEntity<Player> responseGet = restTemplate.exchange(apiEndpoint + "/player/{username}", 
-				HttpMethod.GET, getEmptyHttpEntity(authToken), Player.class, urlVariables);
-		
-		switch(responseGet.getStatusCode()) {
+		try {
+			ResponseEntity<Player> response = 
+					restTemplate.exchange(apiEndpoint + "/player/{username}", 
+							HttpMethod.GET, getEmptyHttpEntity(authToken), Player.class, urlVariables);
 			
-			case OK: {
-				
-				result = responseGet.getBody();
-				break;
-			}
-			case NOT_FOUND: {
-
-				throw new ClientException("Player not found");
-				
-			}
-			default: {
-				throw new ClientException("Error trying to access the service");
-			}
+			result = response.getBody();
+			
+		} catch(RestClientResponseException e) {
+			
+			handleError(e, "Player");
 		}
 
 		return result;
@@ -80,19 +76,15 @@ public class MudengineApiImpl implements MudengineApi {
 		urlVariables.put("email", email);
 		urlVariables.put("locale", locale);
 		
-		ResponseEntity<Player> responseGet = restTemplate.exchange(
-				apiEndpoint + "/player/{username}?email={email}&locale={locale}", 
-				HttpMethod.GET, getEmptyHttpEntity(), Player.class, urlVariables);
-		
-		switch(responseGet.getStatusCode()) {
+		try {
 			
-			case BAD_REQUEST: {
-				
-				throw new ClientException(responseGet.getStatusCode().getReasonPhrase());
-			}
-			default: {
-				throw new ClientException("Error trying to access the service");
-			}
+			restTemplate.exchange(
+					apiEndpoint + "/player/{username}?email={email}&locale={locale}", 
+					HttpMethod.PUT, getEmptyHttpEntity(), Player.class, urlVariables);
+			
+		} catch(RestClientResponseException e) {
+			
+			handleError(e, "Player");
 		}
 	}
 
@@ -106,26 +98,16 @@ public class MudengineApiImpl implements MudengineApi {
 		
 		HttpEntity<Player> playerRequest = new HttpEntity<Player>(playerData, getAuthHeaders(authToken));
 		
-		ResponseEntity<Player> response = restTemplate.exchange(
-				apiEndpoint + "/player/{username}", 
-				HttpMethod.POST, playerRequest, Player.class, urlVariables);
-		
-		switch(response.getStatusCode()) {
-		
-			case OK: {
-				
-				result = response.getBody();
-				
-				break;
-			}
+		try {
+			ResponseEntity<Player> response = restTemplate.exchange(
+					apiEndpoint + "/player/{username}", 
+					HttpMethod.POST, playerRequest, Player.class, urlVariables);
 			
-			case BAD_REQUEST: {
-				
-				throw new ClientException(response.getStatusCode().getReasonPhrase());
-			}
-			default: {
-				throw new ClientException("Error trying to access the service");
-			}
+			result = response.getBody();
+			
+		} catch(RestClientResponseException e) {
+			
+			handleError(e, "Player");
 		}
 		
 		return result;
@@ -139,19 +121,13 @@ public class MudengineApiImpl implements MudengineApi {
 		urlVariables.put("activationCode", activationCode);
 		urlVariables.put("newPassword", newPassword);
 		
-		ResponseEntity<String> changePasswordResponse = restTemplate.exchange(
-				apiEndpoint + "/player/{username}/password?activationCode={activationCode}&newPassword={newPassword}", 
-				HttpMethod.POST, null, String.class, urlVariables);
-		
-		switch(changePasswordResponse.getStatusCode()) {
-		
-			case BAD_REQUEST: {
-				
-				throw new ClientException(changePasswordResponse.getStatusCode().getReasonPhrase());
-			}
-			default: {
-				throw new ClientException("Error trying to access the service");
-			}
+		try {
+			restTemplate.exchange(
+					apiEndpoint + "/player/{username}/password?activationCode={activationCode}&newPassword={newPassword}", 
+					HttpMethod.POST, null, String.class, urlVariables);
+			
+		} catch(RestClientResponseException e) {
+			handleError(e, "Player");
 		}
 	}
 
@@ -164,25 +140,17 @@ public class MudengineApiImpl implements MudengineApi {
 		urlVariables.put("username", username);
 		urlVariables.put("beingCode", beingCode);
 		
-		ResponseEntity<Session> response = restTemplate.exchange(
-				apiEndpoint + "/player/{username}/password?activationCode={activationCode}&newPassword={newPassword}", 
-				HttpMethod.POST, null, Session.class, urlVariables);
+		try {
 		
-		switch(response.getStatusCode()) {
-		
-			case OK: {
-				
-				result = response.getBody();
-				break;
-			}
-		
-			case BAD_REQUEST: {
-				
-				throw new ClientException(response.getStatusCode().getReasonPhrase());
-			}
-			default: {
-				throw new ClientException("Error trying to access the service");
-			}
+			ResponseEntity<Session> response = restTemplate.exchange(
+					apiEndpoint + "/player/{username}/password?activationCode={activationCode}&newPassword={newPassword}", 
+					HttpMethod.POST, null, Session.class, urlVariables);
+			
+			result = response.getBody();
+			
+		} catch(RestClientResponseException e) {
+			
+			handleError(e, "Being");
 		}
 
 		return result;
@@ -202,25 +170,16 @@ public class MudengineApiImpl implements MudengineApi {
 		urlVariables.put("worldName", worldName);
 		urlVariables.put("placeCode", placeCode);
 		
-		ResponseEntity<Session> response = restTemplate.exchange(
-				apiEndpoint + "/player/{username}/being?beingClass={beingClass}&beingName={beingName}&worldName={worldName}&placeCode={placeCode}", 
-				HttpMethod.PUT, getEmptyHttpEntity(authToken), Session.class, urlVariables);
+		try {
 		
-		switch(response.getStatusCode()) {
-		
-			case OK: {
-				
-				result = response.getBody();
-				break;
-			}
-		
-			case BAD_REQUEST: {
-				
-				throw new ClientException(response.getStatusCode().getReasonPhrase());
-			}
-			default: {
-				throw new ClientException("Error trying to access the service");
-			}
+			ResponseEntity<Session> response = restTemplate.exchange(
+					apiEndpoint + "/player/{username}/being?beingClass={beingClass}&beingName={beingName}&worldName={worldName}&placeCode={placeCode}", 
+					HttpMethod.PUT, getEmptyHttpEntity(authToken), Session.class, urlVariables);
+			
+			result = response.getBody();
+			
+		} catch(RestClientResponseException e) {
+			handleError(e, "Being Class");
 		}
 
 		return result;
@@ -236,25 +195,15 @@ public class MudengineApiImpl implements MudengineApi {
 		urlVariables.put("username", username);
 		urlVariables.put("beingCode", beingCode);
 		
-		ResponseEntity<Session> response = restTemplate.exchange(
-				apiEndpoint + "/{username}/session/being/{beingCode}", 
-				HttpMethod.DELETE, getEmptyHttpEntity(authToken), Session.class, urlVariables);
-
-		switch(response.getStatusCode()) {
-		
-			case OK: {
-				
-				result = response.getBody();
-				break;
-			}
-		
-			case BAD_REQUEST: {
-				
-				throw new ClientException(response.getStatusCode().getReasonPhrase());
-			}
-			default: {
-				throw new ClientException("Error trying to access the service");
-			}
+		try {
+			ResponseEntity<Session> response = restTemplate.exchange(
+					apiEndpoint + "/{username}/session/being/{beingCode}", 
+					HttpMethod.DELETE, getEmptyHttpEntity(authToken), Session.class, urlVariables);
+			
+			result = response.getBody();
+			
+		} catch(RestClientResponseException e) {
+			handleError(e, "Being");
 		}
 		
 		return result;
@@ -272,25 +221,16 @@ public class MudengineApiImpl implements MudengineApi {
 		urlVariables.put("clientType", clientType);
 		urlVariables.put("ipAddress", ipAddress);
 		
-		ResponseEntity<Session> response = restTemplate.exchange(
-				apiEndpoint + "/player/{username}/session?password={password}&clientType={clientType}&ipAddress={ipAddress}", 
-				HttpMethod.PUT, getEmptyHttpEntity(), Session.class, urlVariables);
+		try {
+		
+			ResponseEntity<Session> response = restTemplate.exchange(
+					apiEndpoint + "/player/{username}/session?password={password}&clientType={clientType}&ipAddress={ipAddress}", 
+					HttpMethod.PUT, getEmptyHttpEntity(), Session.class, urlVariables);
+			
+			result = response.getHeaders().getFirst(CommonConstants.AUTH_TOKEN_HEADER);
 
-		switch(response.getStatusCode()) {
-		
-			case OK: {
-				
-				result = response.getHeaders().getFirst(ClientHelper.HEADER_TOKEN);
-				break;
-			}
-		
-			case BAD_REQUEST: {
-				
-				throw new ClientException(response.getStatusCode().getReasonPhrase());
-			}
-			default: {
-				throw new ClientException("Error trying to access the service");
-			}
+		} catch(RestClientResponseException e) {
+			handleError(e, "Session");
 		}
 		
 		return result;
@@ -303,26 +243,16 @@ public class MudengineApiImpl implements MudengineApi {
 		
 		Map<String, Object> urlVariables = new HashMap<String, Object>();
 		urlVariables.put("username", username);
-		
-		ResponseEntity<Session> response = restTemplate.exchange(
-				apiEndpoint + "/player/{username}/session", 
-				HttpMethod.GET, getEmptyHttpEntity(authToken), Session.class, urlVariables);
 
-		switch(response.getStatusCode()) {
-		
-			case OK: {
-				
-				result = response.getBody();
-				break;
-			}
-		
-			case BAD_REQUEST: {
-				
-				throw new ClientException(response.getStatusCode().getReasonPhrase());
-			}
-			default: {
-				throw new ClientException("Error trying to access the service");
-			}
+		try {
+			ResponseEntity<Session> response = restTemplate.exchange(
+					apiEndpoint + "/player/{username}/session", 
+					HttpMethod.GET, getEmptyHttpEntity(authToken), Session.class, urlVariables);
+
+			result = response.getBody();
+			
+		} catch(RestClientResponseException e) {
+			handleError(e, "Session");
 		}
 		
 		return result;
@@ -345,25 +275,15 @@ public class MudengineApiImpl implements MudengineApi {
 		urlVariables.put("targetCode", targetCode);
 		urlVariables.put("targetType", targetType);
 		
-		ResponseEntity<Action> response = restTemplate.exchange(
-				apiEndpoint + "/action/{verb}?actorCode={actorCode}&mediatorCode={mediatorCode}&mediatorType={mediatorType}&targetCode={targetCoide}&targetType={targetType}", 
-				HttpMethod.PUT, getEmptyHttpEntity(), Action.class, urlVariables);
+		try {
+			ResponseEntity<Action> response = restTemplate.exchange(
+					apiEndpoint + "/action/{verb}?actorCode={actorCode}&mediatorCode={mediatorCode}&mediatorType={mediatorType}&targetCode={targetCoide}&targetType={targetType}", 
+					HttpMethod.PUT, getEmptyHttpEntity(), Action.class, urlVariables);
 
-		switch(response.getStatusCode()) {
-		
-			case OK: {
-				
-				result = response.getBody();
-				break;
-			}
-		
-			case BAD_REQUEST: {
-				
-				throw new ClientException(response.getStatusCode().getReasonPhrase());
-			}
-			default: {
-				throw new ClientException("Error trying to access the service");
-			}
+			result = response.getBody();
+			
+		} catch(RestClientResponseException e) {
+			handleError(e, "Command");
 		}
 		
 		return result;
@@ -376,25 +296,15 @@ public class MudengineApiImpl implements MudengineApi {
 		
 		Map<String, Object> urlVariables = new HashMap<String, Object>();
 		urlVariables.put("beingCode", beingCode);
-		
-		ResponseEntity<Being> responseGet = restTemplate.exchange(apiEndpoint + "/being/{beingCode}", 
-				HttpMethod.GET, getEmptyHttpEntity(authToken), Being.class, urlVariables);
-		
-		switch(responseGet.getStatusCode()) {
-			
-			case OK: {
-				
-				result = responseGet.getBody();
-				break;
-			}
-			case NOT_FOUND: {
 
-				throw new ClientException("Being not found");
-				
-			}
-			default: {
-				throw new ClientException("Error trying to access the service");
-			}
+		try {
+			ResponseEntity<Being> response = restTemplate.exchange(apiEndpoint + "/being/{beingCode}", 
+					HttpMethod.GET, getEmptyHttpEntity(authToken), Being.class, urlVariables);
+			
+			result = response.getBody();
+			
+		} catch(RestClientResponseException e) {
+			handleError(e, "Being");
 		}
 
 		return result;
@@ -407,25 +317,15 @@ public class MudengineApiImpl implements MudengineApi {
 		
 		Map<String, Object> urlVariables = new HashMap<String, Object>();
 		urlVariables.put("itemId", itemId);
-		
-		ResponseEntity<Item> responseGet = restTemplate.exchange(apiEndpoint + "/item/{itemId}", 
-				HttpMethod.GET, getEmptyHttpEntity(authToken), Item.class, urlVariables);
-		
-		switch(responseGet.getStatusCode()) {
-			
-			case OK: {
-				
-				result = responseGet.getBody();
-				break;
-			}
-			case NOT_FOUND: {
 
-				throw new ClientException("Item not found");
-				
-			}
-			default: {
-				throw new ClientException("Error trying to access the service");
-			}
+		try {
+			ResponseEntity<Item> response = restTemplate.exchange(apiEndpoint + "/item/{itemId}", 
+					HttpMethod.GET, getEmptyHttpEntity(authToken), Item.class, urlVariables);
+
+			result = response.getBody();
+			
+		} catch(RestClientResponseException e) {
+			handleError(e, "Item");
 		}
 
 		return result;
@@ -438,25 +338,15 @@ public class MudengineApiImpl implements MudengineApi {
 		
 		Map<String, Object> urlVariables = new HashMap<String, Object>();
 		urlVariables.put("placeId", placeId);
-		
-		ResponseEntity<Place> responseGet = restTemplate.exchange(apiEndpoint + "/place/{placeId}", 
-				HttpMethod.GET, getEmptyHttpEntity(authToken), Place.class, urlVariables);
-		
-		switch(responseGet.getStatusCode()) {
-			
-			case OK: {
-				
-				result = responseGet.getBody();
-				break;
-			}
-			case NOT_FOUND: {
 
-				throw new ClientException("Place not found");
-				
-			}
-			default: {
-				throw new ClientException("Error trying to access the service");
-			}
+		try {
+			ResponseEntity<Place> response = restTemplate.exchange(apiEndpoint + "/place/{placeId}", 
+					HttpMethod.GET, getEmptyHttpEntity(authToken), Place.class, urlVariables);
+			
+			result = response.getBody();
+			
+		} catch(RestClientResponseException e) {
+			handleError(e, "Place");
 		}
 			
 		return result;
@@ -468,16 +358,17 @@ public class MudengineApiImpl implements MudengineApi {
 		List<Message> returnList = new ArrayList<Message>();
 		
 		RestTemplate restTemplate = new RestTemplate();
-		
-		ResponseEntity<Message[]> responseRead = restTemplate.exchange(
-				apiEndpoint + "/message", 
-				HttpMethod.GET, getEmptyHttpEntity(authToken), 
-				Message[].class, new HashMap<String, Object>());
 
-		if (responseRead.getStatusCode().is2xxSuccessful()) {
+		try {
+			ResponseEntity<Message[]> responseRead = restTemplate.exchange(
+					apiEndpoint + "/message", 
+					HttpMethod.GET, getEmptyHttpEntity(authToken), 
+					Message[].class, new HashMap<String, Object>());
 			
-			// Returning all the messages received
 			returnList = (List<Message>)Arrays.asList(responseRead.getBody());
+
+		} catch(RestClientResponseException e) {
+			System.out.println(e.getResponseBodyAsString());
 		}
 		
 		return returnList;
@@ -486,7 +377,7 @@ public class MudengineApiImpl implements MudengineApi {
 	private HttpHeaders getAuthHeaders(String authToken) {
 		
 		HttpHeaders clientHeaders = new HttpHeaders();
-		clientHeaders.add(ClientHelper.HEADER_TOKEN, authToken);
+		clientHeaders.add(CommonConstants.AUTH_TOKEN_HEADER, authToken);
 		
 		return clientHeaders;
 	}
@@ -499,6 +390,39 @@ public class MudengineApiImpl implements MudengineApi {
 	private HttpEntity<Object> getEmptyHttpEntity() {
 		
 		return new HttpEntity<Object>(new HttpHeaders());
+	}
+	
+	private void handleError(RestClientResponseException exception, String entity) throws ClientException {
+
+		try {
+			ApiErrorMessage restError = ApiErrorMessage.build(exception.getResponseBodyAsString());
+			
+			switch(restError.getStatus()) {
+			
+				case 404: {
+					throw new ClientException(entity + "not found");
+				}
+				case 400: {
+					
+					throw new ClientException(restError.getMessage());
+				}			
+				case 403: {
+					
+					String errorMessage = restError.getMessage();
+					
+					throw new ClientException(errorMessage);
+					
+				}
+				default:
+					throw new ClientException("Error trying to access the service");
+			}
+		} catch(ClientException e) {
+			throw e;
+		} catch(Exception e) {
+			
+			e.printStackTrace();
+			throw new ClientException("Error trying to access the service");
+		}
 	}
 	
 }

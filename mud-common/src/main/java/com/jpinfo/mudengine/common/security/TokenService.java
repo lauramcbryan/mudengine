@@ -29,8 +29,6 @@ public class TokenService {
 	private static final String PLAYER_DATA = "playerData";
 	private static final String SESSION_DATA = "sessionData";
 
-	public static final String HEADER_TOKEN = "Auth";
-	
 	// 128bits hex key
 	private static final String SECRET = "a7ac498c7bba59e0eb7c647d2f0197f8";
 	

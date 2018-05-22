@@ -18,8 +18,6 @@ import org.springframework.integration.ip.tcp.connection.TcpConnection;
 
 public class ClientHelper {
 	
-	public static final String HEADER_TOKEN = "Auth";
-	
 	public static final String CLIENT_TYPE = "text/plain";
 	
 

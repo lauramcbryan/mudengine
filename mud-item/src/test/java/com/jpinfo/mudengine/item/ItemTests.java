@@ -20,6 +20,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import com.jpinfo.mudengine.common.item.Item;
 import com.jpinfo.mudengine.common.security.TokenService;
+import com.jpinfo.mudengine.common.utils.CommonConstants;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment=WebEnvironment.RANDOM_PORT)
@@ -56,7 +57,7 @@ public class ItemTests {
 	 */
 	private HttpHeaders getAuthHeaders() {
 		HttpHeaders authHeaders = new HttpHeaders();
-		authHeaders.add(TokenService.HEADER_TOKEN, TokenService.buildInternalToken());
+		authHeaders.add(CommonConstants.AUTH_TOKEN_HEADER, TokenService.buildInternalToken());
 		
 		return authHeaders;
 	}

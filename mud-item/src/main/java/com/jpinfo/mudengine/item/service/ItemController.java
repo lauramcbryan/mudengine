@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.jpinfo.mudengine.common.exception.EntityNotFoundException;
 import com.jpinfo.mudengine.common.exception.IllegalParameterException;
 import com.jpinfo.mudengine.common.item.Item;
-import com.jpinfo.mudengine.common.security.TokenService;
 import com.jpinfo.mudengine.common.service.ItemService;
+import com.jpinfo.mudengine.common.utils.CommonConstants;
 import com.jpinfo.mudengine.item.model.MudItem;
 import com.jpinfo.mudengine.item.model.MudItemAttr;
 import com.jpinfo.mudengine.item.model.MudItemClass;
@@ -34,7 +34,7 @@ public class ItemController implements ItemService {
 	ItemClassRepository itemClassRepository;
 
 	@Override
-	public Item getItem(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable Long itemId) {
+	public Item getItem(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable Long itemId) {
 		
 		Item response = null;
 		
@@ -48,7 +48,7 @@ public class ItemController implements ItemService {
 	}
 	
 	@Override
-	public Item updateItem(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable Long itemId, @RequestBody Item requestItem) {
+	public Item updateItem(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable Long itemId, @RequestBody Item requestItem) {
 		
 		Item response = null;
 		
@@ -162,7 +162,7 @@ public class ItemController implements ItemService {
 	}
 	
 	@Override
-	public void destroyItem(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable Long itemId) {
+	public void destroyItem(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable Long itemId) {
 
 		// Retrieving the database record
 		MudItem dbItem = itemRepository
@@ -173,7 +173,7 @@ public class ItemController implements ItemService {
 	}
 
 	@Override
-	public List<Item> getAllFromPlace(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable String worldName, @PathVariable Integer placeCode) {
+	public List<Item> getAllFromPlace(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable String worldName, @PathVariable Integer placeCode) {
 		
 		List<Item> responseList = new ArrayList<Item>();
 		
@@ -188,7 +188,7 @@ public class ItemController implements ItemService {
 	}
 
 	@Override
-	public List<Item> getAllFromBeing(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable Long owner) {
+	public List<Item> getAllFromBeing(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable Long owner) {
 		
 		List<Item> responseList = new ArrayList<Item>();
 		
@@ -202,7 +202,7 @@ public class ItemController implements ItemService {
 	}
 
 	@Override
-	public void destroyAllFromPlace(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable String worldName, @PathVariable Integer placeCode) {
+	public void destroyAllFromPlace(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable String worldName, @PathVariable Integer placeCode) {
 		
 		List<MudItem> dbResponse = itemRepository.findByCurWorldAndCurPlaceCode(worldName, placeCode);
 		
@@ -212,7 +212,7 @@ public class ItemController implements ItemService {
 	}
 
 	@Override
-	public void dropAllFromBeing(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable Long owner, @RequestParam String worldName, @RequestParam Integer placeCode) {
+	public void dropAllFromBeing(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable Long owner, @RequestParam String worldName, @RequestParam Integer placeCode) {
 		
 		List<MudItem> dbResponse = itemRepository.findByCurOwner(owner);
 

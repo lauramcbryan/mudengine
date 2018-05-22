@@ -21,6 +21,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import com.jpinfo.mudengine.common.place.Place;
 import com.jpinfo.mudengine.common.place.PlaceExit;
 import com.jpinfo.mudengine.common.security.TokenService;
+import com.jpinfo.mudengine.common.utils.CommonConstants;
 import com.jpinfo.mudengine.world.client.BeingServiceClient;
 import com.jpinfo.mudengine.world.client.ItemServiceClient;
 
@@ -64,7 +65,7 @@ public class PlaceTests {
 		
 		// Creating the authentication token
 		HttpHeaders authHeaders = new HttpHeaders();
-		authHeaders.add(TokenService.HEADER_TOKEN, TokenService.buildInternalToken());
+		authHeaders.add(CommonConstants.AUTH_TOKEN_HEADER, TokenService.buildInternalToken());
 		
 		HttpEntity<Object> authEntity = new HttpEntity<Object>(authHeaders);
 		

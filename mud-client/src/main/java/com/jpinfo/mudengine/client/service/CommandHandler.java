@@ -69,11 +69,12 @@ public class CommandHandler {
 			case CommandHandler.ACTIVATE_COMMAND: {
 				ClientHelper.sendMessage(client, "Activating account...");
 
+				String username = getParamValue(command, "username");
 				String activationCode = getParamValue(command, "activationCode");
 				String newPassword = getParamValue(command, "newPassword");
 
 				// Call activateAccount in PlayerService
-				api.setPlayerPassword(client.getPlayerData().get().getUsername(), activationCode, newPassword);
+				api.setPlayerPassword(username, activationCode, newPassword);
 				
 				ClientHelper.sendMessage(client, "Your account is activated. To create a session, use the <login> command");
 				
@@ -145,6 +146,7 @@ public class CommandHandler {
 				
 				// Updating the sessionData
 				client.setPlayerSession(api.getSession(authToken, username));
+				client.setPlayerData(api.getPlayerDetails(authToken, username));
 				
 				break;
 			}

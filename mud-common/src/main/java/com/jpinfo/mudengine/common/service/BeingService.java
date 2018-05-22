@@ -12,40 +12,40 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.jpinfo.mudengine.common.being.Being;
-import com.jpinfo.mudengine.common.security.TokenService;
+import com.jpinfo.mudengine.common.utils.CommonConstants;
 
 @RequestMapping("/being")
 public interface BeingService {
 
 	@RequestMapping(method=RequestMethod.GET, value="{beingCode}")
-	Being getBeing(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable("beingCode") Long beingCode);
+	Being getBeing(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable("beingCode") Long beingCode);
 
 	@RequestMapping(method=RequestMethod.POST, value="/{beingCode}")
-	Being updateBeing(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, 
+	Being updateBeing(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, 
 			@PathVariable("beingCode") Long beingCode, @RequestBody Being requestBeing);
 
 	@RequestMapping(method=RequestMethod.PUT)
-	ResponseEntity<Being> createBeing(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, 
+	ResponseEntity<Being> createBeing(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, 
 			@RequestParam("beingType") Integer beingType, @RequestParam("beingClass") String beingClass, 
 			@RequestParam("worldName") String worldName, @RequestParam("placeCode") Integer placeCode, 
 			@RequestParam("quantity") Optional<Integer> quantity, @RequestParam("playerId") Optional<Long> playerId,
 			@RequestParam("beingName") Optional<String> beingName);
 
 	@RequestMapping(method=RequestMethod.GET,  value="/player/{playerId}")
-	List<Being> getAllFromPlayer(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, 
+	List<Being> getAllFromPlayer(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, 
 			@PathVariable("playerId") Long playerId);
 	
 	@RequestMapping(method=RequestMethod.DELETE, value="/{beingCode}")
-	void destroyBeing(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable("beingCode") Long beingCode);
+	void destroyBeing(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable("beingCode") Long beingCode);
 
 	@RequestMapping(method=RequestMethod.GET,  value="/place/{worldName}/{placeCode}")
 	List<Being> getAllFromPlace(@PathVariable("worldName") String worldName, @PathVariable("placeCode") Integer placeCode);
 	
 	@RequestMapping(method=RequestMethod.DELETE, value="/place/{worldName}/{placeCode}")
-	void destroyAllFromPlace(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, 
+	void destroyAllFromPlace(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, 
 			@PathVariable("worldName") String worldName, @PathVariable("placeCode") Integer placeCode);
 	
 	@RequestMapping(method=RequestMethod.DELETE, value="/player/{playerId}")
-	void destroyAllFromPlayer(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable("playerId") Long playerId);
+	void destroyAllFromPlayer(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable("playerId") Long playerId);
 	
 }

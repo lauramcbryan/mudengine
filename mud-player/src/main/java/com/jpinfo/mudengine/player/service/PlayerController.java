@@ -24,6 +24,7 @@ import com.jpinfo.mudengine.common.player.Player;
 import com.jpinfo.mudengine.common.player.Session;
 import com.jpinfo.mudengine.common.security.TokenService;
 import com.jpinfo.mudengine.common.service.PlayerService;
+import com.jpinfo.mudengine.common.utils.CommonConstants;
 import com.jpinfo.mudengine.player.client.BeingServiceClient;
 import com.jpinfo.mudengine.player.model.MudPlayer;
 import com.jpinfo.mudengine.player.model.MudPlayerBeing;
@@ -46,7 +47,7 @@ public class PlayerController implements PlayerService {
 	private BeingServiceClient beingClient;
 
 	@Override
-	public Player getPlayerDetails(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable String username) {
+	public Player getPlayerDetails(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable String username) {
 		
 		Player response = null;
 		
@@ -78,6 +79,7 @@ public class PlayerController implements PlayerService {
 			newPlayer.setEmail(email);
 			newPlayer.setLocale(locale);
 			newPlayer.setStatus(Player.STATUS_PENDING);
+			newPlayer.setCreateDate(new Date());
 			
 			// Persist to have the playerId
 			MudPlayer createdPlayer = repository.save(newPlayer);
@@ -106,7 +108,7 @@ public class PlayerController implements PlayerService {
 	}
 
 	@Override
-	public ResponseEntity<Player> updatePlayerDetails(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable String username, @RequestBody Player playerData) {
+	public ResponseEntity<Player> updatePlayerDetails(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable String username, @RequestBody Player playerData) {
 		
 		ResponseEntity<Player> response = null;
 		
@@ -133,7 +135,7 @@ public class PlayerController implements PlayerService {
 				String token = TokenService.updateToken(authToken, Optional.of(changedPlayer), Optional.empty());
 				
 				HttpHeaders header = new HttpHeaders();
-				header.add(TokenService.HEADER_TOKEN, token);
+				header.add(CommonConstants.AUTH_TOKEN_HEADER, token);
 				
 				response = new ResponseEntity<Player>(changedPlayer, header, HttpStatus.ACCEPTED);
 				
@@ -167,7 +169,7 @@ public class PlayerController implements PlayerService {
 	}
 
 	@Override
-	public Session getActiveSession(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable String username) {
+	public Session getActiveSession(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable String username) {
 		
 		Session session = null;
 		
@@ -220,7 +222,7 @@ public class PlayerController implements PlayerService {
 						String token = TokenService.buildToken(username, playerData, sessionData);
 						
 						HttpHeaders header = new HttpHeaders();
-						header.add(TokenService.HEADER_TOKEN, token);
+						header.add(CommonConstants.AUTH_TOKEN_HEADER, token);
 						
 						response = new ResponseEntity<Session>(sessionData, header, HttpStatus.CREATED);
 						break;
@@ -296,7 +298,7 @@ public class PlayerController implements PlayerService {
 				String token = TokenService.updateToken(authToken, Optional.empty(), Optional.of(sessionData));
 				
 				HttpHeaders header = new HttpHeaders();
-				header.add(TokenService.HEADER_TOKEN, token);
+				header.add(CommonConstants.AUTH_TOKEN_HEADER, token);
 				
 				response = new ResponseEntity<Session>(sessionData, header, HttpStatus.ACCEPTED);
 				

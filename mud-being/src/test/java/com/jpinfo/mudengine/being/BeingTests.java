@@ -23,6 +23,7 @@ import com.jpinfo.mudengine.common.being.Being;
 import com.jpinfo.mudengine.common.player.Player;
 import com.jpinfo.mudengine.common.player.Session;
 import com.jpinfo.mudengine.common.security.TokenService;
+import com.jpinfo.mudengine.common.utils.CommonConstants;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment=WebEnvironment.RANDOM_PORT)
@@ -77,7 +78,7 @@ public class BeingTests {
 	 */
 	private HttpHeaders getInternalAuthHeaders() {
 		HttpHeaders authHeaders = new HttpHeaders();
-		authHeaders.add(TokenService.HEADER_TOKEN, TokenService.buildInternalToken());
+		authHeaders.add(CommonConstants.AUTH_TOKEN_HEADER, TokenService.buildInternalToken());
 		
 		return authHeaders;
 	}
@@ -96,7 +97,7 @@ public class BeingTests {
 		
 		String usToken = TokenService.buildToken(BeingTests.testUsername, playerData, sessionData);		
 		
-		authHeaders.add(TokenService.HEADER_TOKEN, usToken);
+		authHeaders.add(CommonConstants.AUTH_TOKEN_HEADER, usToken);
 		
 		return authHeaders;
 	}

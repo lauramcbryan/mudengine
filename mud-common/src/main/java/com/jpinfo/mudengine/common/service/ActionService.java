@@ -9,21 +9,21 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.jpinfo.mudengine.common.action.Action;
-import com.jpinfo.mudengine.common.security.TokenService;
+import com.jpinfo.mudengine.common.utils.CommonConstants;
 
 @RequestMapping("/action")
 public interface ActionService {
 
 	@RequestMapping(method=RequestMethod.GET, value="/actor/{actorCode}")
-	public Iterable<Action> getActiveActions(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, 
+	public Iterable<Action> getActiveActions(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, 
 			@PathVariable("actorCode") Long actorCode);
 	
 	@RequestMapping(method=RequestMethod.GET, value="{actionCode}")
-	public Action getAction(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, 
+	public Action getAction(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, 
 			@PathVariable("actionCode") Long actionCode);
 	
 	@RequestMapping(method=RequestMethod.PUT, value="/{verb}")
-	public Action insertCommand(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, 
+	public Action insertCommand(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, 
 			@PathVariable("verb") String verb,
 			@RequestParam("actorCode") Long actorCode,
 			@RequestParam("mediatorCode") Optional<String> mediatorCode, 
@@ -31,10 +31,10 @@ public interface ActionService {
 			@RequestParam("targetCode") String targetCode, @RequestParam("targetType") String targetType);
 
 	@RequestMapping(method=RequestMethod.DELETE, value="{actionCode}")
-	public void cancelAction(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, 
+	public void cancelAction(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, 
 			@PathVariable("actionCode") Long actionCode);
 	
 	@RequestMapping(method=RequestMethod.DELETE, value="/actor/{actorCode}")
-	public void cancelAllActionFromBeing(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, 
+	public void cancelAllActionFromBeing(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, 
 			@PathVariable("actorCode") Long actorCode);
 }

@@ -27,6 +27,7 @@ import com.jpinfo.mudengine.common.message.Message;
 import com.jpinfo.mudengine.common.player.Player;
 import com.jpinfo.mudengine.common.player.Session;
 import com.jpinfo.mudengine.common.security.TokenService;
+import com.jpinfo.mudengine.common.utils.CommonConstants;
 import com.jpinfo.mudengine.message.client.BeingServiceClient;
 
 import static org.mockito.BDDMockito.*;
@@ -115,7 +116,7 @@ public class MessageTests {
 		String usToken = getToken(MessageTests.TEST_BEING_CODE, MessageTests.TEST_LOCALE_US);		
 		
 		HttpHeaders usHeaders = new HttpHeaders();
-		usHeaders.add(TokenService.HEADER_TOKEN, usToken);
+		usHeaders.add(CommonConstants.AUTH_TOKEN_HEADER, usToken);
 		
 		HttpEntity<Object> usAuthEntity = new HttpEntity<Object>(usHeaders);
 
@@ -129,7 +130,7 @@ public class MessageTests {
 		String brToken = getToken(MessageTests.TEST_BEING_CODE, MessageTests.TEST_LOCALE_PT);		
 		
 		HttpHeaders brHeaders = new HttpHeaders();
-		brHeaders.add(TokenService.HEADER_TOKEN, brToken);
+		brHeaders.add(CommonConstants.AUTH_TOKEN_HEADER, brToken);
 		
 		HttpEntity<Object> brAuthEntity = new HttpEntity<Object>(brHeaders);
 
@@ -405,7 +406,7 @@ public class MessageTests {
 		String usToken = getToken(MessageTests.TEST_BEING_CODE_2, MessageTests.TEST_LOCALE_US);		
 			
 		HttpHeaders usHeaders = new HttpHeaders();
-		usHeaders.add(TokenService.HEADER_TOKEN, usToken);
+		usHeaders.add(CommonConstants.AUTH_TOKEN_HEADER, usToken);
 		
 		HttpEntity<Object> usAuthEntity = new HttpEntity<Object>(usHeaders);
 		
@@ -445,7 +446,7 @@ public class MessageTests {
 		String usToken = getToken(MessageTests.TEST_BEING_CODE_3, MessageTests.TEST_LOCALE_US);		
 		
 		HttpHeaders usHeaders = new HttpHeaders();
-		usHeaders.add(TokenService.HEADER_TOKEN, usToken);
+		usHeaders.add(CommonConstants.AUTH_TOKEN_HEADER, usToken);
 		
 		HttpEntity<Object> usAuthEntity = new HttpEntity<Object>(usHeaders);
 		
@@ -497,7 +498,7 @@ public class MessageTests {
 		String anotherBeingToken = getToken(MessageTests.TEST_BEING_CODE_3, MessageTests.TEST_LOCALE_US);		
 		
 		HttpHeaders anotherBeingHeaders = new HttpHeaders();
-		anotherBeingHeaders.add(TokenService.HEADER_TOKEN, anotherBeingToken);
+		anotherBeingHeaders.add(CommonConstants.AUTH_TOKEN_HEADER, anotherBeingToken);
 		
 		HttpEntity<Object> anotherBeingAuthEntity = new HttpEntity<Object>(anotherBeingHeaders);
 		
@@ -547,14 +548,14 @@ public class MessageTests {
 		String firstToken = getToken(MessageTests.TEST_BEING_CODE_5, MessageTests.TEST_LOCALE_US);		
 		
 		HttpHeaders firstHeaders = new HttpHeaders();
-		firstHeaders.add(TokenService.HEADER_TOKEN, firstToken);
+		firstHeaders.add(CommonConstants.AUTH_TOKEN_HEADER, firstToken);
 		
 		HttpEntity<Object> firstAuthEntity = new HttpEntity<Object>(firstHeaders);		
 
 		String secondToken = getToken(MessageTests.TEST_BEING_CODE_6, MessageTests.TEST_LOCALE_US);
 		
 		HttpHeaders secondHeaders = new HttpHeaders();
-		secondHeaders.add(TokenService.HEADER_TOKEN, secondToken);
+		secondHeaders.add(CommonConstants.AUTH_TOKEN_HEADER, secondToken);
 		
 		HttpEntity<Object> secondAuthEntity = new HttpEntity<Object>(secondHeaders);		
 		

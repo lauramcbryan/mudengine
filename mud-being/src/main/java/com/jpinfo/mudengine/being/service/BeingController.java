@@ -24,8 +24,8 @@ import com.jpinfo.mudengine.common.being.Being;
 import com.jpinfo.mudengine.common.exception.AccessDeniedException;
 import com.jpinfo.mudengine.common.exception.EntityNotFoundException;
 import com.jpinfo.mudengine.common.item.Item;
-import com.jpinfo.mudengine.common.security.TokenService;
 import com.jpinfo.mudengine.common.service.BeingService;
+import com.jpinfo.mudengine.common.utils.CommonConstants;
 
 @RestController
 public class BeingController implements BeingService {
@@ -40,7 +40,7 @@ public class BeingController implements BeingService {
 	private BeingClassRepository classRepository;
 
 	@Override
-	public Being getBeing(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable Long beingCode) {
+	public Being getBeing(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable Long beingCode) {
 		
 		Being response = null;
 		
@@ -58,7 +58,7 @@ public class BeingController implements BeingService {
 	}
 	
 	@Override
-	public Being updateBeing(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable Long beingCode, @RequestBody Being requestBeing) {
+	public Being updateBeing(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable Long beingCode, @RequestBody Being requestBeing) {
 		
 		Being response = null;
 		
@@ -107,7 +107,7 @@ public class BeingController implements BeingService {
 	}
 	
 	@Override
-	public ResponseEntity<Being> createBeing(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, 
+	public ResponseEntity<Being> createBeing(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, 
 			@RequestParam Integer beingType, @RequestParam String beingClass, @RequestParam String worldName, 
 			@RequestParam Integer placeCode, @RequestParam Optional<Integer> quantity, @RequestParam Optional<Long> playerId,
 			@RequestParam Optional<String> beingName) {
@@ -162,7 +162,7 @@ public class BeingController implements BeingService {
 	}
 	
 	@Override
-	public List<Being> getAllFromPlayer(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable Long playerId) {
+	public List<Being> getAllFromPlayer(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable Long playerId) {
 		
 		List<Being> response = null;
 		
@@ -197,7 +197,7 @@ public class BeingController implements BeingService {
 	}
 
 	@Override
-	public void destroyBeing(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable Long beingCode) {
+	public void destroyBeing(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable Long beingCode) {
 		
 		MudBeing dbBeing = repository.findById(beingCode)
 				.orElseThrow(() -> new EntityNotFoundException("Being entity not found"));
@@ -243,7 +243,7 @@ public class BeingController implements BeingService {
 	}
 
 	@Override
-	public void destroyAllFromPlace(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable String worldName, @PathVariable Integer placeCode) {
+	public void destroyAllFromPlace(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable String worldName, @PathVariable Integer placeCode) {
 		
 		List<MudBeing> lstFound = repository.findByCurWorldAndCurPlaceCode(worldName, placeCode);
 		
@@ -256,7 +256,7 @@ public class BeingController implements BeingService {
 	}
 	
 	@Override
-	public void destroyAllFromPlayer(@RequestHeader(TokenService.HEADER_TOKEN) String authToken, @PathVariable Long playerId) {
+	public void destroyAllFromPlayer(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable Long playerId) {
 		
 		List<MudBeing> lstFound = repository.findByPlayerId(playerId);
 		

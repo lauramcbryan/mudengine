@@ -25,6 +25,7 @@ import com.jpinfo.mudengine.common.being.BeingClass;
 import com.jpinfo.mudengine.common.player.Player;
 import com.jpinfo.mudengine.common.player.Session;
 import com.jpinfo.mudengine.common.security.TokenService;
+import com.jpinfo.mudengine.common.utils.CommonConstants;
 import com.jpinfo.mudengine.player.client.BeingServiceClient;
 import com.jpinfo.mudengine.player.model.MudPlayer;
 import com.jpinfo.mudengine.player.model.MudPlayerBeing;
@@ -103,7 +104,7 @@ public class PlayerTests {
 	 */
 	private HttpHeaders getInternalAuthHeaders() {
 		HttpHeaders authHeaders = new HttpHeaders();
-		authHeaders.add(TokenService.HEADER_TOKEN, TokenService.buildInternalToken());
+		authHeaders.add(CommonConstants.AUTH_TOKEN_HEADER, TokenService.buildInternalToken());
 		
 		return authHeaders;
 	}
@@ -124,7 +125,7 @@ public class PlayerTests {
 		
 		String usToken = TokenService.buildToken(userName, playerData, sessionData);		
 		
-		authHeaders.add(TokenService.HEADER_TOKEN, usToken);
+		authHeaders.add(CommonConstants.AUTH_TOKEN_HEADER, usToken);
 		
 		return authHeaders;
 	}
@@ -159,7 +160,7 @@ public class PlayerTests {
 		assertThat(sessionData.getClientType()).isEqualTo(PlayerTests.TEST_CLIENT_TYPE);
 		assertThat(sessionData.getIpAddress()).isEqualTo(PlayerTests.TEST_IP_ADDRESS);
 		
-		assertThat(createResponse.getHeaders().containsKey(TokenService.HEADER_TOKEN));
+		assertThat(createResponse.getHeaders().containsKey(CommonConstants.AUTH_TOKEN_HEADER));
 		
 		
 		// Get Session (anonymous)
@@ -174,7 +175,7 @@ public class PlayerTests {
 		
 		// Get Session (authenticated)
 		HttpHeaders requestHeaders = new HttpHeaders();
-		requestHeaders.add(TokenService.HEADER_TOKEN, createResponse.getHeaders().getFirst(TokenService.HEADER_TOKEN));
+		requestHeaders.add(CommonConstants.AUTH_TOKEN_HEADER, createResponse.getHeaders().getFirst(CommonConstants.AUTH_TOKEN_HEADER));
 		HttpEntity<Object> requestEntity = new HttpEntity<Object>(requestHeaders);
 		
 		ResponseEntity<Session> getResponse = restTemplate.exchange(
@@ -305,7 +306,7 @@ public class PlayerTests {
 				HttpMethod.PUT, null, Session.class, urlVariables);
 		
 		
-		assertThat(loginResponse.getHeaders().containsKey(TokenService.HEADER_TOKEN));
+		assertThat(loginResponse.getHeaders().containsKey(CommonConstants.AUTH_TOKEN_HEADER));
 		
 	}
 	
@@ -335,7 +336,7 @@ public class PlayerTests {
 		Map<String, Object> urlVariables = new HashMap<String, Object>();
 		
 		HttpHeaders requestHeaders = new HttpHeaders();
-		requestHeaders.add(TokenService.HEADER_TOKEN, TokenService.buildInternalToken());
+		requestHeaders.add(CommonConstants.AUTH_TOKEN_HEADER, TokenService.buildInternalToken());
 		HttpEntity<Object> authRequestEntity = new HttpEntity<Object>(requestHeaders);
 		
 		// *********** GET PLAYER (internal account) ********************
@@ -403,9 +404,9 @@ public class PlayerTests {
 		// Check if the return is successful
 		assertThat(selectResponse.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
 
-		assertThat(selectResponse.getHeaders().get(TokenService.HEADER_TOKEN)).isNotNull();
+		assertThat(selectResponse.getHeaders().get(CommonConstants.AUTH_TOKEN_HEADER)).isNotNull();
 
-		String updatedToken = selectResponse.getHeaders().getFirst(TokenService.HEADER_TOKEN);
+		String updatedToken = selectResponse.getHeaders().getFirst(CommonConstants.AUTH_TOKEN_HEADER);
 		
 		// Check if the beingCode is set in header token
 		assertThat(TokenService.getBeingCodeFromToken(updatedToken)).isEqualTo(PlayerTests.TEST_BEING_CODE);
@@ -430,9 +431,9 @@ public class PlayerTests {
 		// Check if the return is successful
 		assertThat(destroyResponse.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
 
-		assertThat(destroyResponse.getHeaders().get(TokenService.HEADER_TOKEN)).isNotNull();
+		assertThat(destroyResponse.getHeaders().get(CommonConstants.AUTH_TOKEN_HEADER)).isNotNull();
 
-		updatedToken = destroyResponse.getHeaders().getFirst(TokenService.HEADER_TOKEN);
+		updatedToken = destroyResponse.getHeaders().getFirst(CommonConstants.AUTH_TOKEN_HEADER);
 		
 		// Check if the beingCode isn't set in header token
 		assertThat(TokenService.getBeingCodeFromToken(updatedToken)).isNull();
