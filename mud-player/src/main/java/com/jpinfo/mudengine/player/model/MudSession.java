@@ -6,7 +6,7 @@ import javax.persistence.*;
 
 @Entity
 @Table(name="MUD_PLAYER_SESSION")
-@SequenceGenerator(name="mud_session_seq", sequenceName="mud_session_seq")
+@SequenceGenerator(name="mud_session_seq", sequenceName="mud_session_seq", allocationSize=1)
 public class MudSession {
 
 	@Id
@@ -29,7 +29,8 @@ public class MudSession {
 	private String clientType;
 	
 	private String ipAddress;
-	
+
+	@Column(nullable=true)
 	private Long beingCode;
 	
 	public MudSession() {
