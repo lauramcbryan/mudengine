@@ -24,6 +24,7 @@ import com.jpinfo.mudengine.client.exception.ClientException;
 import com.jpinfo.mudengine.client.utils.ApiErrorMessage;
 import com.jpinfo.mudengine.common.action.Action;
 import com.jpinfo.mudengine.common.being.Being;
+import com.jpinfo.mudengine.common.being.BeingClass;
 import com.jpinfo.mudengine.common.item.Item;
 import com.jpinfo.mudengine.common.message.Message;
 import com.jpinfo.mudengine.common.place.Place;
@@ -154,6 +155,30 @@ public class MudengineApiImpl implements MudengineApi {
 		}
 
 		return result;
+	}
+	
+	@Override
+	public List<BeingClass> getBeingClasses(String authToken) {
+
+		List<BeingClass> returnList = new ArrayList<BeingClass>();
+		
+		RestTemplate restTemplate = new RestTemplate();
+
+		try {
+			ResponseEntity<BeingClass[]> response = restTemplate.exchange(
+					apiEndpoint + "/being/class", 
+					HttpMethod.GET, getEmptyHttpEntity(authToken), 
+					BeingClass[].class, new HashMap<String, Object>());
+			
+			returnList = (List<BeingClass>)Arrays.asList(response.getBody());
+
+		} catch(RestClientResponseException e) {
+			System.out.println(e.getResponseBodyAsString());
+		}
+		
+		return returnList;
+		
+		
 	}
 
 	@Override
@@ -414,6 +439,7 @@ public class MudengineApiImpl implements MudengineApi {
 					
 				}
 				default:
+					exception.printStackTrace();
 					throw new ClientException("Error trying to access the service");
 			}
 		} catch(ClientException e) {

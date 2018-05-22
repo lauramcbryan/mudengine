@@ -1,5 +1,6 @@
 package com.jpinfo.mudengine.client.service;
 
+import java.util.List;
 import java.util.Optional;
 
 
@@ -14,6 +15,7 @@ import com.jpinfo.mudengine.client.model.CommandParamState;
 import com.jpinfo.mudengine.client.model.CommandState;
 import com.jpinfo.mudengine.client.model.VerbDictionary;
 import com.jpinfo.mudengine.client.utils.ClientHelper;
+import com.jpinfo.mudengine.common.being.BeingClass;
 import com.jpinfo.mudengine.common.player.Player;
 import com.jpinfo.mudengine.common.player.Session;
 
@@ -28,9 +30,9 @@ public class CommandHandler {
 	public static final String HELP_COMMAND = "help";
 	public static final String LOGIN_COMMAND = "login";
 	public static final String LOGOUT_COMMAND = "logout";
-	public static final String CREATEBEING_COMMAND = "create character";
-	public static final String SELECTBEING_COMMAND = "select character";
-	public static final String DELETEBEING_COMMAND = "delete character";
+	public static final String CREATEBEING_COMMAND = "create being";
+	public static final String SELECTBEING_COMMAND = "select being";
+	public static final String DELETEBEING_COMMAND = "delete being";
 	
 
 	@Autowired
@@ -145,8 +147,12 @@ public class CommandHandler {
 						ClientHelper.CLIENT_TYPE, client.getConnection().getHostAddress());
 				
 				// Updating the sessionData
+				client.setAuthToken(authToken);
 				client.setPlayerSession(api.getSession(authToken, username));
 				client.setPlayerData(api.getPlayerDetails(authToken, username));
+				
+				ClientHelper.sendMessage(client, "Logged in.  Welcome back " + username);
+				
 				
 				break;
 			}
@@ -183,12 +189,40 @@ public class CommandHandler {
 				String beingName  = getParamValue(command, "beingName");
 				String worldName = "aforgotten";
 				Integer placeCode = 1;
+
+				// If the being class is provided, create the being and set in player session
+				if (beingClass!=null) {
+					
+					Session changedSessionData = 
+							api.createBeing(client.getAuthToken(), client.getPlayerData().get().getUsername(), 
+									beingClass, beingName, worldName, placeCode);
+						
+						client.setPlayerSession(changedSessionData);
+				} else {
+					
+					// The being class is not provided, show the being class list
+					
+					List<BeingClass> beingClassList = api.getBeingClasses(client.getAuthToken());
+					
+					ClientHelper.sendMessage(client, "Available classes: \r\n");
+					
+					beingClassList.forEach(d -> {
+						
+						StringBuffer m = new StringBuffer();
+						
+						m.append(d.getBeingClass())
+							.append(" - ")
+							.append(d.getName());
+						
+						try {
+							ClientHelper.sendMessage(client, m.toString());
+						} catch(Exception e) {
+							// Proceed to the next one
+						}
+					});
+				}
 				
-				Session changedSessionData = 
-					api.createBeing(client.getAuthToken(), client.getPlayerData().get().getUsername(), 
-							beingClass, beingName, worldName, placeCode);
 				
-				client.setPlayerSession(changedSessionData);
 				
 				break;
 			}

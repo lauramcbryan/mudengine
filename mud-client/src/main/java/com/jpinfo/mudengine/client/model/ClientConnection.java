@@ -31,7 +31,6 @@ public class ClientConnection {
 		this.needGreetings = true;
 	}
 
-
 	public String getAuthToken() {
 		return authToken;
 	}
@@ -48,7 +47,7 @@ public class ClientConnection {
 
 
 	public void setPlayerData(Player playerData) {
-		this.playerData = Optional.of(playerData);
+		this.playerData = Optional.ofNullable(playerData);
 	}
 
 
@@ -58,7 +57,7 @@ public class ClientConnection {
 
 
 	public void setPlayerSession(Session playerSession) {
-		this.playerSession = Optional.of(playerSession);
+		this.playerSession = Optional.ofNullable(playerSession);
 	}
 
 

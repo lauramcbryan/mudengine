@@ -203,7 +203,17 @@ public class PlayerController implements PlayerService {
 				switch(dbPlayer.getStatus()) {
 				
 					case Player.STATUS_ACTIVE: {
+						
+						// Find all the active sessions and terminate them
+						List<MudSession> lstSessions = sessionRepository.findActiveSession(username);
+						
+						lstSessions.forEach(d -> {
+							
+							d.setSessionEnd(new Date());
+							sessionRepository.save(d);
+						});
 					
+						// Creates a new session
 						MudSession dbSession = new MudSession();
 						
 						dbSession.setPlayer(dbPlayer);
@@ -313,7 +323,7 @@ public class PlayerController implements PlayerService {
 	}
 	
 	@Override
-	public ResponseEntity<Session> createBeing(@RequestHeader String authToken, @PathVariable String username, @RequestParam String beingClass, @RequestParam String beingName,
+	public ResponseEntity<Session> createBeing(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable String username, @RequestParam String beingClass, @RequestParam String beingName,
 			@RequestParam String worldName, @RequestParam Integer placeCode) {
 		
 		ResponseEntity<Session> response = null;

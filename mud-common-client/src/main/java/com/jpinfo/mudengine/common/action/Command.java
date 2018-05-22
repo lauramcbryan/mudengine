@@ -58,7 +58,9 @@ public class Command {
 	}
 
 	public void setParameters(List<CommandParam> parameters) {
-		this.parameters = parameters;
+		
+		if (parameters!=null)
+			this.parameters = parameters;
 	}
 
 	public boolean isLogged() {

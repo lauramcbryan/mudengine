@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import com.jpinfo.mudengine.client.exception.ClientException;
 import com.jpinfo.mudengine.common.action.Action;
 import com.jpinfo.mudengine.common.being.Being;
+import com.jpinfo.mudengine.common.being.BeingClass;
 import com.jpinfo.mudengine.common.item.Item;
 import com.jpinfo.mudengine.common.message.Message;
 import com.jpinfo.mudengine.common.place.Place;
@@ -46,5 +47,7 @@ public interface MudengineApi {
 	Place getPlace(String authToken, Integer placeId) throws ClientException;
 	
 	List<Message> getMessages(String authToken);
+	
+	List<BeingClass> getBeingClasses(String authToken);
 	
 }
