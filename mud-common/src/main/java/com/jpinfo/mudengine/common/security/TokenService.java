@@ -78,7 +78,7 @@ public class TokenService {
 		
 		Authentication result = null;
 		
-		if (token!=null) {
+		if ((token!=null) && (!token.isEmpty())) {
 			
 			String username = TokenService.getUsernameFromToken(token);
 			
@@ -92,7 +92,7 @@ public class TokenService {
 		
 		String result = null;
 		
-		if (token!=null) {
+		if ((token!=null) && (!token.isEmpty())) {
 			
 			Jws<Claims> parsedToken = TokenService.parseToken(token);
 			
@@ -106,7 +106,7 @@ public class TokenService {
 		
 		Long result = null;
 		
-		if (token!=null) {
+		if ((token!=null) && (!token.isEmpty())) {
 			
 			Player player = getPlayerDataFromToken(token);
 			
@@ -121,7 +121,7 @@ public class TokenService {
 		
 		Long result = null;
 		
-		if (token!=null) {
+		if ((token!=null) && (!token.isEmpty())) {
 			
 			Session sessionData = getSessionDataFromToken(token);
 			
@@ -136,7 +136,7 @@ public class TokenService {
 		
 		String result = null;
 		
-		if (token!=null) {
+		if ((token!=null) && (!token.isEmpty())) {
 			
 			Player player = getPlayerDataFromToken(token);
 			
@@ -152,7 +152,7 @@ public class TokenService {
 		
 		Session result = null;
 		
-		if (token!=null) {
+		if ((token!=null) && (!token.isEmpty())) {
 			
 			Jws<Claims> parsedToken = TokenService.parseToken(token);
 			
@@ -170,7 +170,7 @@ public class TokenService {
 		
 		Player result = null;
 		
-		if (token!=null) {
+		if ((token!=null) && (!token.isEmpty())) {
 			
 			Jws<Claims> parsedToken = TokenService.parseToken(token);
 			
