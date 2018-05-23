@@ -30,7 +30,7 @@ public class MudClientService {
 		
 	
 	@ServiceActivator(inputChannel="plainRequestChannel")
-	public void handleCommand(@Header(name="ip_connectionId") String connectionId, String in) {
+	public String handleCommand(@Header(name="ip_connectionId") String connectionId, String in) {
 
 		// Retrieves the player attached to that connection
 		ClientConnection client = gateway.getActiveConnections().get(connectionId);
@@ -96,6 +96,8 @@ public class MudClientService {
 			
 		} // endif client!=null
 		
+		
+		return "#";
 		
 	}
 	
@@ -175,7 +177,7 @@ public class MudClientService {
 				client.setCurParamState(nextParam.get());
 				
 				// Asks for the value
-				ClientHelper.sendMessage(client, nextParam.get().getParameter().getInputMessage());
+				ClientHelper.sendRequestMessage(client, nextParam.get().getParameter().getInputMessage());
 			}
 		} // endif getCurCommand!=null
 		

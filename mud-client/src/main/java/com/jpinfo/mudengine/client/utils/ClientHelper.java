@@ -58,7 +58,7 @@ public class ClientHelper {
 		return response;
 	}
 	
-	public static void sendMessage(TcpConnection conn, String message) throws Exception {
+	private static void internalSendMessage(TcpConnection conn, String message) throws Exception {
 		
 		// Build the message to send over tcp connection		
 		org.springframework.messaging.Message<String> clientMessage = 
@@ -66,18 +66,19 @@ public class ClientHelper {
 					// .setHeader("headerName", "headerValue")
 					.build();
 		
-		
-		
 		conn.send(clientMessage);
 	}
 	
-	
 	public static void sendMessage(ClientConnection c, String message) throws Exception {
-		sendMessage(c.getConnection(), message);
+		internalSendMessage(c.getConnection(), message + "\r\n");
 	}
 	
 	public static void sendMessage(ClientConnection c, Message m) throws Exception {
 		sendMessage(c, ClientHelper.formatMessage(m));
+	}
+
+	public static void sendRequestMessage(ClientConnection c, String message) throws Exception {
+		internalSendMessage(c.getConnection(), message);
 	}
 	
 	public static void sendFile(ClientConnection c, String filename) throws Exception {
