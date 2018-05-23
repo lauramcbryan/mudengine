@@ -89,12 +89,12 @@ public class PlayerTests {
 		
 		ResponseEntity<Being> responseBeing = new ResponseEntity<Being>(createdBeing, HttpStatus.CREATED);
 		
-		given(this.beingClient.createBeing(anyString(), 
-				eq(Being.BEING_TYPE_PLAYER),
+		given(this.beingClient.createPlayerBeing(anyString(), 
+				eq(PlayerTests.TEST_PLAYER_ID),
 				eq(PlayerTests.TEST_BEING_CLASS),
 				eq(PlayerTests.TEST_WORLD_NAME),
 				eq(PlayerTests.TEST_PLACE_CODE),
-				any(), any(), eq(Optional.of(PlayerTests.TEST_BEING_NAME)))).willReturn(responseBeing);
+				eq(PlayerTests.TEST_BEING_NAME))).willReturn(responseBeing);
 	}
 	
 	/**

@@ -31,6 +31,7 @@ public class BeingTests {
 	
 	private static final Integer testBeingType = 1;
 	private static final String testBeingClass = "CLASSA";
+	private static final String testBeingName = "NAMEA";
 	private static final String testWorldName = "aforgotten";
 	private static final Integer testPlaceCode = 1;
 	private static final Integer testQuantity = 2;
@@ -48,6 +49,7 @@ public class BeingTests {
 
 	private static final Integer test2BeingType = 2;
 	private static final String test2BeingClass = "CLASSB";
+	private static final String test2BeingName = "NAMEB";
 	private static final String test2WorldName = "fake";
 	private static final Integer test2PlaceCode = 2;
 	private static final Integer test2Quantity = 3;
@@ -121,9 +123,10 @@ public class BeingTests {
 		urlVariables.put("worldName", BeingTests.testWorldName);
 		urlVariables.put("placeCode", BeingTests.testPlaceCode);
 		urlVariables.put("quantity", BeingTests.testQuantity);
+		urlVariables.put("beingName", BeingTests.testBeingName);
 
 		ResponseEntity<Being> responseCreate= restTemplate.exchange(
-				"/being/?beingType={beingType}&beingClass={beingClass}&worldName={worldName}&placeCode={placeCode}&quantity={quantity}", 
+				"/being/?beingType={beingType}&beingClass={beingClass}&worldName={worldName}&placeCode={placeCode}&quantity={quantity}&beingName={beingName}", 
 				HttpMethod.PUT, authEntity, Being.class, urlVariables);
 		
 		assertThat(responseCreate.getStatusCode()).isEqualTo(HttpStatus.CREATED);
@@ -177,6 +180,7 @@ public class BeingTests {
 		readBeing.setCurWorld(BeingTests.test2WorldName);
 		readBeing.setCurPlaceCode(BeingTests.test2PlaceCode);
 		readBeing.setQuantity(BeingTests.test2Quantity);
+		readBeing.setName(BeingTests.test2BeingName);
 		
 		urlVariables.clear();
 		urlVariables.put("beingCode", readBeing.getBeingCode());
@@ -196,6 +200,7 @@ public class BeingTests {
 		assertThat(updatedBeing.getCurWorld()).isEqualTo(BeingTests.test2WorldName);
 		assertThat(updatedBeing.getCurPlaceCode()).isEqualTo(BeingTests.test2PlaceCode);
 		assertThat(updatedBeing.getQuantity()).isEqualTo(BeingTests.test2Quantity);
+		assertThat(updatedBeing.getName()).isEqualTo(BeingTests.test2BeingName);
 
 		// Check attributes
 		assertThat(updatedBeing.getAttrs().get(BeingTests.testAttrA)).isNull();
@@ -232,14 +237,14 @@ public class BeingTests {
 		
 		// *********** CREATE **********
 		// =============================
-		urlVariables.put("beingType", BeingTests.testBeingType);
 		urlVariables.put("beingClass", BeingTests.testBeingClass);
 		urlVariables.put("worldName", BeingTests.testWorldName);
 		urlVariables.put("placeCode", BeingTests.testPlaceCode);
 		urlVariables.put("playerId", BeingTests.testPlayerId);
+		urlVariables.put("beingName", BeingTests.testBeingName);
 
 		ResponseEntity<Being> responseCreate= restTemplate.exchange(
-				"/being/?beingType={beingType}&beingClass={beingClass}&worldName={worldName}&placeCode={placeCode}&playerId={playerId}", 
+				"/being/player/{playerId}?beingClass={beingClass}&worldName={worldName}&placeCode={placeCode}&beingName={beingName}", 
 				HttpMethod.PUT, authEntity, Being.class, urlVariables);
 		
 		assertThat(responseCreate.getStatusCode()).isEqualTo(HttpStatus.CREATED);
@@ -249,14 +254,14 @@ public class BeingTests {
 		// *********** CREATE SECOND ***********
 		// =====================================
 		urlVariables.clear();
-		urlVariables.put("beingType", BeingTests.test2BeingType);
 		urlVariables.put("beingClass", BeingTests.test2BeingClass);
 		urlVariables.put("worldName", BeingTests.test2WorldName);
 		urlVariables.put("placeCode", BeingTests.test2PlaceCode);
 		urlVariables.put("playerId", BeingTests.testPlayerId);
+		urlVariables.put("beingName", BeingTests.testBeingName);
 		
 		responseCreate= restTemplate.exchange(
-				"/being/?beingType={beingType}&beingClass={beingClass}&worldName={worldName}&placeCode={placeCode}&playerId={playerId}", 
+				"/being/player/{playerId}?beingClass={beingClass}&worldName={worldName}&placeCode={placeCode}&beingName={beingName}", 
 				HttpMethod.PUT, authEntity, Being.class, urlVariables);
 		
 		assertThat(responseCreate.getStatusCode()).isEqualTo(HttpStatus.CREATED);
@@ -267,14 +272,14 @@ public class BeingTests {
 		// *********** CREATE ANOTHER ***********
 		// ======================================
 		urlVariables.clear();
-		urlVariables.put("beingType", BeingTests.test2BeingType);
 		urlVariables.put("beingClass", BeingTests.test2BeingClass);
 		urlVariables.put("worldName", BeingTests.test2WorldName);
 		urlVariables.put("placeCode", BeingTests.test2PlaceCode);
 		urlVariables.put("playerId", BeingTests.test2PlayerId);
+		urlVariables.put("beingName", BeingTests.testBeingName);
 		
 		responseCreate= restTemplate.exchange(
-				"/being/?beingType={beingType}&beingClass={beingClass}&worldName={worldName}&placeCode={placeCode}&playerId={playerId}", 
+				"/being/player/{playerId}?beingClass={beingClass}&worldName={worldName}&placeCode={placeCode}&beingName={beingName}", 
 				HttpMethod.PUT, authEntity, Being.class, urlVariables);
 		
 		assertThat(responseCreate.getStatusCode()).isEqualTo(HttpStatus.CREATED);
@@ -357,9 +362,11 @@ public class BeingTests {
 		urlVariables.put("beingClass", BeingTests.testBeingClass);
 		urlVariables.put("worldName", BeingTests.test3WorldName);
 		urlVariables.put("placeCode", BeingTests.test3PlaceCode);
+		urlVariables.put("quantity", 999);
+		urlVariables.put("beingName", "");
 
 		ResponseEntity<Being> responseCreate= restTemplate.exchange(
-				"/being/?beingType={beingType}&beingClass={beingClass}&worldName={worldName}&placeCode={placeCode}", 
+				"/being/?beingType={beingType}&beingClass={beingClass}&worldName={worldName}&placeCode={placeCode}&quantity={quantity}&beingName={beingName}", 
 				HttpMethod.PUT, authEntity, Being.class, urlVariables);
 		
 		assertThat(responseCreate.getStatusCode()).isEqualTo(HttpStatus.CREATED);
@@ -372,9 +379,11 @@ public class BeingTests {
 		urlVariables.put("beingClass", BeingTests.testBeingClass);
 		urlVariables.put("worldName", BeingTests.test3WorldName);
 		urlVariables.put("placeCode", BeingTests.test3PlaceCode);
+		urlVariables.put("quantity", 999);
+		urlVariables.put("beingName", "");
 		
 		responseCreate= restTemplate.exchange(
-				"/being/?beingType={beingType}&beingClass={beingClass}&worldName={worldName}&placeCode={placeCode}", 
+				"/being/?beingType={beingType}&beingClass={beingClass}&worldName={worldName}&placeCode={placeCode}&quantity={quantity}&beingName={beingName}", 
 				HttpMethod.PUT, authEntity, Being.class, urlVariables);
 		
 		assertThat(responseCreate.getStatusCode()).isEqualTo(HttpStatus.CREATED);
@@ -387,9 +396,11 @@ public class BeingTests {
 		urlVariables.put("beingClass", BeingTests.test2BeingClass);
 		urlVariables.put("worldName", BeingTests.test4WorldName);
 		urlVariables.put("placeCode", BeingTests.test4PlaceCode);
+		urlVariables.put("quantity", 999);
+		urlVariables.put("beingName", "");
 		
 		responseCreate= restTemplate.exchange(
-				"/being/?beingType={beingType}&beingClass={beingClass}&worldName={worldName}&placeCode={placeCode}", 
+				"/being/?beingType={beingType}&beingClass={beingClass}&worldName={worldName}&placeCode={placeCode}&quantity={quantity}&beingName={beingName}", 
 				HttpMethod.PUT, authEntity, Being.class, urlVariables);
 		
 		assertThat(responseCreate.getStatusCode()).isEqualTo(HttpStatus.CREATED);
@@ -473,14 +484,14 @@ public class BeingTests {
 		
 		// *********** CREATE **********
 		// =============================
-		urlVariables.put("beingType", BeingTests.testBeingType);
 		urlVariables.put("beingClass", BeingTests.testBeingClass);
 		urlVariables.put("worldName", BeingTests.testWorldName);
 		urlVariables.put("placeCode", BeingTests.testPlaceCode);
 		urlVariables.put("playerId", BeingTests.test3PlayerId);
+		urlVariables.put("beingName", "");
 
 		ResponseEntity<Being> responseCreate= restTemplate.exchange(
-				"/being/?beingType={beingType}&beingClass={beingClass}&worldName={worldName}&placeCode={placeCode}&playerId={playerId}", 
+				"/being/player/{playerId}?beingClass={beingClass}&worldName={worldName}&placeCode={placeCode}&beingName={beingName}", 
 				HttpMethod.PUT, authEntity, Being.class, urlVariables);
 		
 		assertThat(responseCreate.getStatusCode()).isEqualTo(HttpStatus.CREATED);
@@ -492,14 +503,14 @@ public class BeingTests {
 		// *********** CREATE SECOND ***********
 		// =====================================
 		urlVariables.clear();
-		urlVariables.put("beingType", BeingTests.test2BeingType);
 		urlVariables.put("beingClass", BeingTests.test2BeingClass);
 		urlVariables.put("worldName", BeingTests.testWorldName);
 		urlVariables.put("placeCode", BeingTests.testPlaceCode);
 		urlVariables.put("playerId", BeingTests.test4PlayerId);
+		urlVariables.put("beingName", "");
 		
 		responseCreate= restTemplate.exchange(
-				"/being/?beingType={beingType}&beingClass={beingClass}&worldName={worldName}&placeCode={placeCode}&playerId={playerId}", 
+				"/being/player/{playerId}?beingClass={beingClass}&worldName={worldName}&placeCode={placeCode}&beingName={beingName}", 
 				HttpMethod.PUT, authEntity, Being.class, urlVariables);
 		
 		assertThat(responseCreate.getStatusCode()).isEqualTo(HttpStatus.CREATED);

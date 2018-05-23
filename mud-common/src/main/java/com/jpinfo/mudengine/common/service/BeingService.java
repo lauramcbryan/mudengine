@@ -1,7 +1,6 @@
 package com.jpinfo.mudengine.common.service;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,9 +27,14 @@ public interface BeingService {
 	ResponseEntity<Being> createBeing(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, 
 			@RequestParam("beingType") Integer beingType, @RequestParam("beingClass") String beingClass, 
 			@RequestParam("worldName") String worldName, @RequestParam("placeCode") Integer placeCode, 
-			@RequestParam("quantity") Optional<Integer> quantity, @RequestParam("playerId") Optional<Long> playerId,
-			@RequestParam("beingName") Optional<String> beingName);
+			@RequestParam("quantity") Integer quantity, @RequestParam("beingName") String beingName);
 
+	@RequestMapping(method=RequestMethod.PUT, value="/player/{playerId}")
+	ResponseEntity<Being> createPlayerBeing(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken,
+			@PathVariable("playerId") Long playerId, @RequestParam("beingClass") String beingClass, 
+			@RequestParam("worldName") String worldName, @RequestParam("placeCode") Integer placeCode, 
+			@RequestParam("beingName") String beingName);
+	
 	@RequestMapping(method=RequestMethod.GET,  value="/player/{playerId}")
 	List<Being> getAllFromPlayer(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, 
 			@PathVariable("playerId") Long playerId);

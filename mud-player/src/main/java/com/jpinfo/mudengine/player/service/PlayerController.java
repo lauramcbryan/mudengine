@@ -336,11 +336,9 @@ public class PlayerController implements PlayerService {
 				
 				// Create the being
 				ResponseEntity<Being> beingResponse = 
-					this.beingClient.createBeing(authToken, 
-							Being.BEING_TYPE_PLAYER, beingClass, 
-							worldName, placeCode, 
-							Optional.empty(), Optional.of(dbPlayer.getPlayerId()),
-							Optional.of(beingName));
+					this.beingClient.createPlayerBeing(authToken,
+							dbPlayer.getPlayerId(), beingClass, 
+							worldName, placeCode, beingName);
 
 				if (beingResponse.getStatusCode().equals(HttpStatus.CREATED)) {
 					

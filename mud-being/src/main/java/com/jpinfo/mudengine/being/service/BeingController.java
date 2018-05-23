@@ -1,8 +1,8 @@
 package com.jpinfo.mudengine.being.service;
 
 import java.util.ArrayList;
+
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -109,54 +109,85 @@ public class BeingController implements BeingService {
 	@Override
 	public ResponseEntity<Being> createBeing(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, 
 			@RequestParam Integer beingType, @RequestParam String beingClass, @RequestParam String worldName, 
-			@RequestParam Integer placeCode, @RequestParam Optional<Integer> quantity, @RequestParam Optional<Long> playerId,
-			@RequestParam Optional<String> beingName) {
+			@RequestParam Integer placeCode, @RequestParam Integer quantity,
+			@RequestParam String beingName) {
 		
 		ResponseEntity<Being> entityResponse = null; 
 
 		// Checking the playerId against the authenticated playerId
-		if ((!playerId.isPresent()) || BeingHelper.canAccess(authToken, playerId.get())) {
+		MudBeing dbBeing = new MudBeing();
 		
-			MudBeing dbBeing = new MudBeing();
-			
-			MudBeingClass dbBeingClass = classRepository
-					.findById(beingClass)
-					.orElseThrow(() -> new EntityNotFoundException("Being Class not found"));
-	
-			dbBeing.setBeingType(beingType);
-			dbBeing.setBeingClass(dbBeingClass);
-			dbBeing.setCurPlaceCode(placeCode);
-			dbBeing.setCurWorld(worldName);
-			
-			if (beingName.isPresent())
-				dbBeing.setName(beingName.get());
-			
-			if (quantity.isPresent())
-				dbBeing.setQuantity(quantity.get());
-			else
-				dbBeing.setQuantity(1);
-	
-			if (playerId.isPresent())
-				dbBeing.setPlayerId(playerId.get());
-			
-			// Saving the entity (to have the beingCode)
-			dbBeing = repository.save(dbBeing);
+		MudBeingClass dbBeingClass = classRepository
+				.findById(beingClass)
+				.orElseThrow(() -> new EntityNotFoundException("Being Class not found"));
+
+		dbBeing.setBeingType(beingType);
+		dbBeing.setBeingClass(dbBeingClass);
+		dbBeing.setCurPlaceCode(placeCode);
+		dbBeing.setCurWorld(worldName);
+		
+		if ((beingName!=null) && (!beingName.trim().isEmpty()))
+			dbBeing.setName(beingName);
+		
+		if (quantity!=null)
+			dbBeing.setQuantity(quantity);
+		else
+			dbBeing.setQuantity(1);
+		
+		// Saving the entity (to have the beingCode)
+		dbBeing = repository.save(dbBeing);
 			
 			
-			// 2. attributes  (from class)
-			// 3. skills  (from class)	
-			dbBeing = BeingHelper.updateBeingClass(dbBeing, null, dbBeingClass);
+		// 2. attributes  (from class)
+		// 3. skills  (from class)	
+		dbBeing = BeingHelper.updateBeingClass(dbBeing, null, dbBeingClass);
+		
+		dbBeing = repository.save(dbBeing);
+		
+		// Convert to the response
+		Being response = BeingHelper.buildBeing(dbBeing, true);
+		
+		entityResponse = new ResponseEntity<Being>(response, HttpStatus.CREATED);
+		
+		return entityResponse;
+	}
+
+	@Override
+	public ResponseEntity<Being> createPlayerBeing(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken,
+			@PathVariable Long playerId, @RequestParam String beingClass, 
+			@RequestParam String worldName, @RequestParam Integer placeCode, @RequestParam String beingName) {
+		
+		ResponseEntity<Being> entityResponse = null; 
+
+		// Checking the playerId against the authenticated playerId
+		MudBeing dbBeing = new MudBeing();
+		
+		MudBeingClass dbBeingClass = classRepository
+				.findById(beingClass)
+				.orElseThrow(() -> new EntityNotFoundException("Being Class not found"));
+
+		dbBeing.setBeingType(Being.BEING_TYPE_PLAYER);
+		dbBeing.setBeingClass(dbBeingClass);
+		dbBeing.setCurPlaceCode(placeCode);
+		dbBeing.setCurWorld(worldName);
+		dbBeing.setPlayerId(playerId);
+		dbBeing.setName(beingName);
+		dbBeing.setQuantity(1);
+		
+		// Saving the entity (to have the beingCode)
+		dbBeing = repository.save(dbBeing);
 			
-			dbBeing = repository.save(dbBeing);
 			
-			// Convert to the response
-			Being response = BeingHelper.buildBeing(dbBeing, true);
-			
-			entityResponse = new ResponseEntity<Being>(response, HttpStatus.CREATED);
-			
-		} else {
-			throw new AccessDeniedException("Cannot create beings for another player");
-		}
+		// 2. attributes  (from class)
+		// 3. skills  (from class)	
+		dbBeing = BeingHelper.updateBeingClass(dbBeing, null, dbBeingClass);
+		
+		dbBeing = repository.save(dbBeing);
+		
+		// Convert to the response
+		Being response = BeingHelper.buildBeing(dbBeing, true);
+		
+		entityResponse = new ResponseEntity<Being>(response, HttpStatus.CREATED);
 		
 		return entityResponse;
 	}
