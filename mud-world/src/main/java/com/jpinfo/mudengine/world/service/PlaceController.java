@@ -1,6 +1,7 @@
 package com.jpinfo.mudengine.world.service;
 
 import java.util.Optional;
+
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -28,6 +29,8 @@ import com.jpinfo.mudengine.world.repository.PlaceExitRepository;
 import com.jpinfo.mudengine.world.repository.PlaceRepository;
 import com.jpinfo.mudengine.world.util.WorldHelper;
 
+import io.swagger.annotations.*;
+
 @RestController
 public class PlaceController implements PlaceService {
 	
@@ -47,7 +50,10 @@ public class PlaceController implements PlaceService {
 	private PlaceClassRepository placeClassRepository;
 
 	@Override
-	public Place getPlace(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable Integer placeId) {
+	@ApiOperation(value="Returns information about a place")
+	public Place getPlace(
+			@ApiParam(value="Authentication token", allowEmptyValue=false, required=true) @RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, 
+			@PathVariable Integer placeId) {
 		
 		Place response = null;
 		
