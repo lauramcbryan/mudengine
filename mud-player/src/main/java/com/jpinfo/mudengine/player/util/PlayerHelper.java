@@ -24,9 +24,9 @@ public class PlayerHelper {
 				
 				PlayerBeing newBeing = new PlayerBeing();
 				newBeing.setBeingCode(curBeing.getId().getBeingCode());
-				newBeing.setBeingName(newBeing.getBeingName());
-				newBeing.setBeingClass(newBeing.getBeingClass());
-				newBeing.setLastPlayed(newBeing.getLastPlayed());
+				newBeing.setBeingName(curBeing.getBeingName());
+				newBeing.setBeingClass(curBeing.getBeingClass());
+				newBeing.setLastPlayed(curBeing.getLastPlayed());
 				
 				response.getBeingList().add(newBeing);
 			}			

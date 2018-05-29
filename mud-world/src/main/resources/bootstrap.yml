@@ -23,6 +23,11 @@ management:
     env:
       enabled: true
 
+feign:
+  client:
+    readTimeout: 10000
+    connectionTimeout: 5000
+
 ---
 
 spring:
