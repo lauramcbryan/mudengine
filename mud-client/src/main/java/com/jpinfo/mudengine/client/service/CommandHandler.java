@@ -32,7 +32,7 @@ public class CommandHandler {
 	public static final String LOGOUT_COMMAND = "logout";
 	public static final String CREATEBEING_COMMAND = "create being";
 	public static final String SELECTBEING_COMMAND = "select being";
-	public static final String DELETEBEING_COMMAND = "delete being";
+	public static final String DELETEBEING_COMMAND = "destroy being";
 	
 
 	@Autowired
@@ -234,7 +234,7 @@ public class CommandHandler {
 
 				// if the user provided a beingId, assume it.
 				// If not, show the being list for that player
-				Long beingCode =Long.valueOf(getParamValue(command, "beingCode"));
+				Long beingCode =getParamValue(command, "beingCode", Long.class);
 				
 				if (beingCode!=null) {
 					
@@ -261,7 +261,7 @@ public class CommandHandler {
 
 				// if the user provided a beingId, assume it.
 				// If not, show the being list for that player
-				Long beingCode =Long.valueOf(getParamValue(command, "beingCode"));
+				Long beingCode =getParamValue(command, "beingCode", Long.class);
 				
 				if (beingCode!=null) {
 					
@@ -321,6 +321,24 @@ public class CommandHandler {
 				targetCode, targetType);
 	}
 	
+
+	private <T> T getParamValue(CommandState command, String key, Class<T> returnClass) throws ClientException  {
+		
+		String paramValue = getParamValue(command, key);
+		
+		if (paramValue!=null) {
+			try {
+				return returnClass.getConstructor(String.class).newInstance(paramValue);
+			} catch (Exception e) {
+				
+				throw new ClientException("System error retrieving parameter values.");
+			}
+		}
+		
+		
+		return null;
+		
+	}	
 	
 	private String getParamValue(CommandState command, String key) {
 

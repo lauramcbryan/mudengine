@@ -222,7 +222,7 @@ public class MudengineApiImpl implements MudengineApi {
 		
 		try {
 			ResponseEntity<Session> response = restTemplate.exchange(
-					apiEndpoint + "/{username}/session/being/{beingCode}", 
+					apiEndpoint + "/player/{username}/being/{beingCode}", 
 					HttpMethod.DELETE, getEmptyHttpEntity(authToken), Session.class, urlVariables);
 			
 			result = response.getBody();
@@ -425,7 +425,7 @@ public class MudengineApiImpl implements MudengineApi {
 			switch(restError.getStatus()) {
 			
 				case 404: {
-					throw new ClientException(entity + "not found");
+					throw new ClientException(entity + " not found");
 				}
 				case 400: {
 					
