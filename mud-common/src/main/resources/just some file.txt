@@ -1,1 +1,1 @@
-... with some text to avoid Git to kill the entire folder.
+... with some other text to avoid Git to kill the entire folder.

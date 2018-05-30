@@ -144,8 +144,8 @@ public class MudengineApiImpl implements MudengineApi {
 		try {
 		
 			ResponseEntity<Session> response = restTemplate.exchange(
-					apiEndpoint + "/player/{username}/password?activationCode={activationCode}&newPassword={newPassword}", 
-					HttpMethod.POST, null, Session.class, urlVariables);
+					apiEndpoint + "/player/{username}/session/being/{beingCode}", 
+					HttpMethod.POST, getEmptyHttpEntity(authToken), Session.class, urlVariables);
 			
 			result = response.getBody();
 			
