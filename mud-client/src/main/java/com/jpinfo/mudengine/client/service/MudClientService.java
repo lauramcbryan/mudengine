@@ -59,6 +59,8 @@ public class MudClientService {
 							.append(";");
 					});
 					
+					msg.append("\r\nClient Token: ").append(client.getAuthToken());
+					
 					System.out.println(msg.toString());
 
 					

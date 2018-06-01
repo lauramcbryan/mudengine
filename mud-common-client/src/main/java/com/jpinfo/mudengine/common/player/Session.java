@@ -29,8 +29,13 @@ public class Session implements java.io.Serializable {
 		
 		this.sessionId = new Long(String.valueOf(map.get("sessionId")));
 		this.playerId = new Long(String.valueOf(map.get("playerId")));
-		this.sessionStart = (Date)map.get("sessionStart");
-		this.sessionEnd = (Date)map.get("sessionEnd");;
+		
+		if (map.get("sessionStart")!=null)
+			this.sessionStart = new Date((Long)map.get("sessionStart"));
+		
+		if (map.get("sessionEnd")!=null)
+			this.sessionEnd = new Date((Long)map.get("sessionEnd"));
+		
 		this.ipAddress = (String)map.get("ipAddress");
 		this.clientType = (String)map.get("clientType");
 		

@@ -52,6 +52,7 @@ public class PlayerHelper {
 		response.setPlayerId(dbSession.getPlayer().getPlayerId());
 		response.setClientType(dbSession.getClientType());
 		response.setIpAddress(dbSession.getIpAddress());
+		response.setBeingCode(dbSession.getBeingCode());
 		
 		return response;
 	}

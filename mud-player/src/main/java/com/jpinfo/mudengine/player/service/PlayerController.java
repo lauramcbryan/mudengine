@@ -264,7 +264,7 @@ public class PlayerController implements PlayerService {
 	}
 
 	@Override
-	public ResponseEntity<Session> setActiveBeing(@RequestHeader String authToken, @PathVariable String username, @PathVariable Long beingCode) {
+	public ResponseEntity<Session> setActiveBeing(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable String username, @PathVariable Long beingCode) {
 		
 		return updateBeingSession(authToken, username, Optional.of(beingCode));
 	}
@@ -377,7 +377,7 @@ public class PlayerController implements PlayerService {
 	}
 
 	@Override
-	public ResponseEntity<Session> destroyBeing(String authToken, String username, Long beingCode) {
+	public ResponseEntity<Session> destroyBeing(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable String username, @PathVariable Long beingCode) {
 		
 		ResponseEntity<Session> response = null;
 		
