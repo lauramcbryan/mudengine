@@ -1,4 +1,4 @@
-package com.jpinfo.mudengine.client.utils;
+package com.jpinfo.mudengine.common.utils;
 
 import java.io.IOException;
 import java.util.Date;

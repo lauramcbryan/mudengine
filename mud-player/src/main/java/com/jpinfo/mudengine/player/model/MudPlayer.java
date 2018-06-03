@@ -37,7 +37,7 @@ public class MudPlayer implements java.io.Serializable {
 	
 	private Integer status;
 	
-	@OneToMany(mappedBy="id.playerId", cascade=CascadeType.ALL)
+	@OneToMany(mappedBy="id.playerId", cascade=CascadeType.ALL, orphanRemoval=true)
 	private List<MudPlayerBeing> beingList;
 	
 	public MudPlayer() {

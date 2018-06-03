@@ -5,7 +5,7 @@
 
 	<groupId>com.jpinfo.mudengine</groupId>
 	<artifactId>mud-client</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 
 	<name>mud-client</name>
 	<description>Client application for MUD Engine</description>

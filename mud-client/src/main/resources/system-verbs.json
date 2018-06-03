@@ -156,7 +156,7 @@
 					"name": "beingClass",
 					"inputMessage": "Please enter the being class",
 					"type": "anyString",
-					"required": true
+					"required": false
 				},
 				{
 					"name": "beingName",
@@ -193,6 +193,20 @@
 					"required": false
 				}
 			]
-		}
+		},
+		{
+			"verb": "whoami",
+			"category": "SYSTEM",
+			"description": "Shows information about you",
+			"usage": "whoami",
+			"parameters": null
+		},
+		{
+			"verb": "whereami",
+			"category": "SYSTEM",
+			"description": "Shows information about the current place",
+			"usage": "whereami",
+			"parameters": null
+		}		
 	]
 }

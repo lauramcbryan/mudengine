@@ -28,6 +28,8 @@ public class Player implements java.io.Serializable {
 	
 	private Integer status;
 	
+	private String strStatus;
+	
 	private List<PlayerBeing> beingList;
 
 	public Player() {
@@ -92,4 +94,14 @@ public class Player implements java.io.Serializable {
 	public void setBeingList(List<PlayerBeing> beingList) {
 		this.beingList = beingList;
 	}
+
+	public String getStrStatus() {
+		return strStatus;
+	}
+
+	public void setStrStatus(String strStatus) {
+		this.strStatus = strStatus;
+	}
+	
+	
 }

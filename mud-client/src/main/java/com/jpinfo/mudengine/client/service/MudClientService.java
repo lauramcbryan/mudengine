@@ -98,9 +98,7 @@ public class MudClientService {
 			
 		} // endif client!=null
 		
-		
-		return "#";
-		
+		return "$ ";
 	}
 	
 	protected void updateClientState(ClientConnection client, String enteredValue) throws Exception {

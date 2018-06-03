@@ -55,12 +55,12 @@ public interface PlayerService {
 	ResponseEntity<Session> setActiveBeing(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable("username") String username, @PathVariable("beingCode") Long beingCode);
 
 	@RequestMapping(method=RequestMethod.PUT, value="/{username}/being")
-	ResponseEntity<Session> createBeing(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable("username") String username, 
+	ResponseEntity<Player> createBeing(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable("username") String username, 
 			@RequestParam("beingClass") String beingClass, @RequestParam("beingName") String beingName, 
 			@RequestParam("worldName") String worldName, @RequestParam("placeCode") Integer placeCode);
 	
 	@RequestMapping(method=RequestMethod.DELETE, value="/{username}/being/{beingCode}")
-	ResponseEntity<Session> destroyBeing(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable("username") String username, @PathVariable("beingCode") Long beingCode);
+	ResponseEntity<Player> destroyBeing(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable("username") String username, @PathVariable("beingCode") Long beingCode);
 	
 	@RequestMapping(method=RequestMethod.PUT, value="/{username}/session")
 	ResponseEntity<Session> createSession(@PathVariable("username") String username, @RequestParam("password") String password, 

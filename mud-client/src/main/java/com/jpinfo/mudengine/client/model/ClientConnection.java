@@ -2,27 +2,30 @@ package com.jpinfo.mudengine.client.model;
 
 import java.util.Optional;
 
+
 import org.springframework.integration.ip.tcp.connection.TcpConnection;
 
 import com.jpinfo.mudengine.common.action.Command;
 import com.jpinfo.mudengine.common.action.CommandParam;
+import com.jpinfo.mudengine.common.being.Being;
+import com.jpinfo.mudengine.common.place.Place;
 import com.jpinfo.mudengine.common.player.Player;
-import com.jpinfo.mudengine.common.player.Session;
 
 public class ClientConnection {
 
 	private Optional<Player> playerData;
-
-	private Optional<Session> playerSession;
 	
 	private String authToken;
+	
+	private Being activeBeing;
+	
+	private Place curPlace;
 	
 	private boolean needGreetings;
 	
 	private TcpConnection connection;
 	
 	private CommandState curCommandState;
-	
 	private CommandParamState curParamState;
 	
 	
@@ -48,16 +51,6 @@ public class ClientConnection {
 
 	public void setPlayerData(Player playerData) {
 		this.playerData = Optional.ofNullable(playerData);
-	}
-
-
-	public Optional<Session> getPlayerSession() {
-		return playerSession;
-	}
-
-
-	public void setPlayerSession(Session playerSession) {
-		this.playerSession = Optional.ofNullable(playerSession);
 	}
 
 
@@ -108,9 +101,34 @@ public class ClientConnection {
 	public boolean isLogged() {
 		return this.playerData!=null;
 	}
-	
+
 	public boolean hasBeingSelected() {
 		
-		return (this.playerSession.isPresent() ? this.playerSession.get().getBeingCode()!=null: false);
+		return this.activeBeing!=null;
+	}
+	
+	public Optional<Long> getActiveBeingCode() {
+		
+		if (this.activeBeing!=null) {
+			return Optional.of(this.activeBeing.getBeingCode());
+		} else {
+			return Optional.empty();
+		}
+	}
+
+	public Being getActiveBeing() {
+		return activeBeing;
+	}
+
+	public void setActiveBeing(Being activeBeing) {
+		this.activeBeing = activeBeing;
+	}
+
+	public Place getCurPlace() {
+		return curPlace;
+	}
+
+	public void setCurPlace(Place curPlace) {
+		this.curPlace = curPlace;
 	}
 }

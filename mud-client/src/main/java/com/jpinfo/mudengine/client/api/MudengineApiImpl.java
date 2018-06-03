@@ -21,7 +21,6 @@ import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
 import com.jpinfo.mudengine.client.exception.ClientException;
-import com.jpinfo.mudengine.client.utils.ApiErrorMessage;
 import com.jpinfo.mudengine.common.action.Action;
 import com.jpinfo.mudengine.common.being.Being;
 import com.jpinfo.mudengine.common.being.BeingClass;
@@ -30,6 +29,7 @@ import com.jpinfo.mudengine.common.message.Message;
 import com.jpinfo.mudengine.common.place.Place;
 import com.jpinfo.mudengine.common.player.Player;
 import com.jpinfo.mudengine.common.player.Session;
+import com.jpinfo.mudengine.common.utils.ApiErrorMessage;
 import com.jpinfo.mudengine.common.utils.CommonConstants;
 
 @Component
@@ -90,9 +90,9 @@ public class MudengineApiImpl implements MudengineApi {
 	}
 
 	@Override
-	public Player updatePlayerDetails(String authToken, Player playerData) throws ClientException {
+	public ApiResult updatePlayerDetails(String authToken, Player playerData) throws ClientException {
 		
-		Player result = null;
+		ApiResult result = null;
 		
 		Map<String, Object> urlVariables = new HashMap<String, Object>();
 		urlVariables.put("username", playerData.getUsername());
@@ -104,7 +104,9 @@ public class MudengineApiImpl implements MudengineApi {
 					apiEndpoint + "/player/{username}", 
 					HttpMethod.POST, playerRequest, Player.class, urlVariables);
 			
-			result = response.getBody();
+			result = new ApiResult(
+					response.getHeaders().getFirst(CommonConstants.AUTH_TOKEN_HEADER),
+					response.getBody());
 			
 		} catch(RestClientResponseException e) {
 			
@@ -133,9 +135,9 @@ public class MudengineApiImpl implements MudengineApi {
 	}
 
 	@Override
-	public Session setActiveBeing(String authToken, String username, Long beingCode) throws ClientException {
+	public String setActiveBeing(String authToken, String username, Long beingCode) throws ClientException {
 		
-		Session result = null;
+		String result = null;
 		
 		Map<String, Object> urlVariables = new HashMap<String, Object>();
 		urlVariables.put("username", username);
@@ -147,7 +149,7 @@ public class MudengineApiImpl implements MudengineApi {
 					apiEndpoint + "/player/{username}/session/being/{beingCode}", 
 					HttpMethod.POST, getEmptyHttpEntity(authToken), Session.class, urlVariables);
 			
-			result = response.getBody();
+			result = response.getHeaders().getFirst(CommonConstants.AUTH_TOKEN_HEADER);
 			
 		} catch(RestClientResponseException e) {
 			
@@ -182,10 +184,10 @@ public class MudengineApiImpl implements MudengineApi {
 	}
 
 	@Override
-	public Session createBeing(String authToken, String username, String beingClass, String beingName, String worldName,
+	public ApiResult createBeing(String authToken, String username, String beingClass, String beingName, String worldName,
 			Integer placeCode) throws ClientException {
 		
-		Session result = null;
+		ApiResult result = null;
 
 		Map<String, Object> urlVariables = new HashMap<String, Object>();
 		
@@ -197,11 +199,13 @@ public class MudengineApiImpl implements MudengineApi {
 		
 		try {
 		
-			ResponseEntity<Session> response = restTemplate.exchange(
+			ResponseEntity<Player> response = restTemplate.exchange(
 					apiEndpoint + "/player/{username}/being?beingClass={beingClass}&beingName={beingName}&worldName={worldName}&placeCode={placeCode}", 
-					HttpMethod.PUT, getEmptyHttpEntity(authToken), Session.class, urlVariables);
+					HttpMethod.PUT, getEmptyHttpEntity(authToken), Player.class, urlVariables);
 			
-			result = response.getBody();
+			result = new ApiResult(
+					response.getHeaders().getFirst(CommonConstants.AUTH_TOKEN_HEADER),
+					response.getBody());
 			
 		} catch(RestClientResponseException e) {
 			handleError(e, "Being Class");
@@ -211,9 +215,9 @@ public class MudengineApiImpl implements MudengineApi {
 	}
 
 	@Override
-	public Session destroyBeing(String authToken, String username, Long beingCode) throws ClientException {
+	public ApiResult destroyBeing(String authToken, String username, Long beingCode) throws ClientException {
 		
-		Session result = null;
+		ApiResult result = null;
 		
 		Map<String, Object> urlVariables = new HashMap<String, Object>();
 		
@@ -221,11 +225,13 @@ public class MudengineApiImpl implements MudengineApi {
 		urlVariables.put("beingCode", beingCode);
 		
 		try {
-			ResponseEntity<Session> response = restTemplate.exchange(
+			ResponseEntity<Player> response = restTemplate.exchange(
 					apiEndpoint + "/player/{username}/being/{beingCode}", 
-					HttpMethod.DELETE, getEmptyHttpEntity(authToken), Session.class, urlVariables);
+					HttpMethod.DELETE, getEmptyHttpEntity(authToken), Player.class, urlVariables);
 			
-			result = response.getBody();
+			result = new ApiResult(
+					response.getHeaders().getFirst(CommonConstants.AUTH_TOKEN_HEADER),
+					response.getBody());
 			
 		} catch(RestClientResponseException e) {
 			handleError(e, "Being");
@@ -259,29 +265,6 @@ public class MudengineApiImpl implements MudengineApi {
 		}
 		
 		return result;
-	}
-	
-	@Override
-	public Session getSession(String authToken, String username) throws ClientException {
-
-		Session result = null;
-		
-		Map<String, Object> urlVariables = new HashMap<String, Object>();
-		urlVariables.put("username", username);
-
-		try {
-			ResponseEntity<Session> response = restTemplate.exchange(
-					apiEndpoint + "/player/{username}/session", 
-					HttpMethod.GET, getEmptyHttpEntity(authToken), Session.class, urlVariables);
-
-			result = response.getBody();
-			
-		} catch(RestClientResponseException e) {
-			handleError(e, "Session");
-		}
-		
-		return result;
-		
 	}
 
 	@Override
@@ -424,19 +407,10 @@ public class MudengineApiImpl implements MudengineApi {
 			
 			switch(restError.getStatus()) {
 			
+				case 400:
+				case 403:
 				case 404: {
-					throw new ClientException(entity + " not found");
-				}
-				case 400: {
-					
 					throw new ClientException(restError.getMessage());
-				}			
-				case 403: {
-					
-					String errorMessage = restError.getMessage();
-					
-					throw new ClientException(errorMessage);
-					
 				}
 				default:
 					exception.printStackTrace();

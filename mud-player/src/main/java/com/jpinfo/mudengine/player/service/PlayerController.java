@@ -53,13 +53,11 @@ public class PlayerController implements PlayerService {
 		
 		if (canAccess(authToken, username)) {
 		
-			MudPlayer dbPlayer = repository.findByUsername(username);
+			MudPlayer dbPlayer = repository.findByUsername(username)
+					.orElseThrow(() -> new EntityNotFoundException("Player entity not found"));
 		
-			if (dbPlayer!=null) {
-				response = PlayerHelper.buildPlayer(dbPlayer);
-			} else {
-				throw new EntityNotFoundException("Player entity not found");
-			}
+			response = PlayerHelper.buildPlayer(dbPlayer);
+			
 		} else {
 			throw new IllegalParameterException("No access to that username");
 		}
@@ -73,6 +71,7 @@ public class PlayerController implements PlayerService {
 		ResponseEntity<Player> response = null;
 
 		try {
+			
 			MudPlayer newPlayer = new MudPlayer();
 			newPlayer.setUsername(username);
 			newPlayer.setPassword(PlayerHelper.generatePassword());
@@ -114,32 +113,26 @@ public class PlayerController implements PlayerService {
 		
 		if (canAccess(authToken, username)) {
 		
-			MudPlayer dbPlayer = repository.findByUsername(username);
+			MudPlayer dbPlayer = repository.findByUsername(username)
+					.orElseThrow(() -> new EntityNotFoundException("Player entity not found"));
 			
-			if (dbPlayer!=null) {
+			dbPlayer.setLocale(playerData.getLocale());
+			dbPlayer.setUsername(playerData.getUsername());
 			
-				dbPlayer.setLocale(playerData.getLocale());
-				dbPlayer.setUsername(playerData.getUsername());
+			// If the user is changing the email, the account status goes to PENDING
+			if (!dbPlayer.getEmail().equals(playerData.getEmail())) {
+				dbPlayer.setEmail(playerData.getEmail());
+				dbPlayer.setStatus(Player.STATUS_PENDING);
+			}
+			
+			MudPlayer changedDbPlayer = repository.save(dbPlayer);
+			
+			Player changedPlayer = PlayerHelper.buildPlayer(changedDbPlayer);
+			
+			// Update the authToken
+			HttpHeaders header = PlayerHelper.updateAuthHeaders(authToken, changedPlayer, null);
+			response = new ResponseEntity<Player>(changedPlayer, header, HttpStatus.ACCEPTED);
 				
-				// If the user is changing the email, the account status goes to PENDING
-				if (!dbPlayer.getEmail().equals(playerData.getEmail())) {
-					dbPlayer.setEmail(playerData.getEmail());
-					dbPlayer.setStatus(Player.STATUS_PENDING);
-				}
-				
-				MudPlayer changedDbPlayer = repository.save(dbPlayer);
-				
-				Player changedPlayer = PlayerHelper.buildPlayer(changedDbPlayer);
-				
-				// Update the authToken
-				String token = TokenService.updateToken(authToken, Optional.of(changedPlayer), Optional.empty());
-				
-				HttpHeaders header = new HttpHeaders();
-				header.add(CommonConstants.AUTH_TOKEN_HEADER, token);
-				
-				response = new ResponseEntity<Player>(changedPlayer, header, HttpStatus.ACCEPTED);
-				
-			} else throw new EntityNotFoundException("Player entity not found");
 		} else {
 			throw new IllegalParameterException("No access to that username");
 		}
@@ -150,22 +143,19 @@ public class PlayerController implements PlayerService {
 	@Override
 	public void setPlayerPassword(@PathVariable String username, @RequestParam String activationCode, @RequestParam String newPassword) {
 		
-		MudPlayer dbPlayer = repository.findByUsername(username);
+		MudPlayer dbPlayer = repository.findByUsername(username)
+				.orElseThrow(() -> new EntityNotFoundException("Player entity not found"));
 		
-		if (dbPlayer!=null) {
+		if (dbPlayer.getPassword().equals(activationCode)) {
 			
-			if (dbPlayer.getPassword().equals(activationCode)) {
-				
-				dbPlayer.setPassword(newPassword);
-				dbPlayer.setStatus(Player.STATUS_ACTIVE);
-				
-				repository.save(dbPlayer);
-				
-			} else {
-				throw new IllegalParameterException("Activation Code doesn't match");
-			}
-		} else throw new EntityNotFoundException("Player entity not found");
-		
+			dbPlayer.setPassword(newPassword);
+			dbPlayer.setStatus(Player.STATUS_ACTIVE);
+			
+			repository.save(dbPlayer);
+			
+		} else {
+			throw new IllegalParameterException("Activation Code doesn't match");
+		}
 	}
 
 	@Override
@@ -194,62 +184,52 @@ public class PlayerController implements PlayerService {
 		
 		ResponseEntity<Session> response = null;
 		
-		MudPlayer dbPlayer = repository.findByUsername(username);
+		MudPlayer dbPlayer = repository.findByUsernameAndPassword(username, password)
+				.orElseThrow(() -> new IllegalParameterException("Username/password invalid"));
 		
-		if (dbPlayer!=null) {
-			
-			if (dbPlayer.getPassword().equals(password)) {
+		switch(dbPlayer.getStatus()) {
+		
+			case Player.STATUS_ACTIVE: {
 				
-				switch(dbPlayer.getStatus()) {
+				// Find all the active sessions and terminate them
+				List<MudSession> lstSessions = sessionRepository.findActiveSession(username);
 				
-					case Player.STATUS_ACTIVE: {
-						
-						// Find all the active sessions and terminate them
-						List<MudSession> lstSessions = sessionRepository.findActiveSession(username);
-						
-						lstSessions.forEach(d -> {
-							
-							d.setSessionEnd(new Date());
-							sessionRepository.save(d);
-						});
+				lstSessions.forEach(d -> {
 					
-						// Creates a new session
-						MudSession dbSession = new MudSession();
-						
-						dbSession.setPlayer(dbPlayer);
-						dbSession.setSessionStart(new Date());
-						dbSession.setClientType(clientType);
-						dbSession.setIpAddress(ipAddress);
-						
-						MudSession createdDbSession = sessionRepository.save(dbSession);
-						
-						Session sessionData = PlayerHelper.buildSession(createdDbSession);
-						
-						Player playerData = PlayerHelper.buildPlayer(dbPlayer);
-						
-						
-						// Build the jwts token
-						String token = TokenService.buildToken(username, playerData, sessionData);
-						
-						HttpHeaders header = new HttpHeaders();
-						header.add(CommonConstants.AUTH_TOKEN_HEADER, token);
-						
-						response = new ResponseEntity<Session>(sessionData, header, HttpStatus.CREATED);
-						break;
-					}
-					case Player.STATUS_PENDING: {
-						throw new IllegalParameterException("You must first change your password");
-					}
-					default: {
-						throw new IllegalParameterException("You cannot login at this moment.  Contact the system administrator");
-					}
-				}
+					d.setSessionEnd(new Date());
+					sessionRepository.save(d);
+				});
+			
+				// Creates a new session
+				MudSession dbSession = new MudSession();
 				
-			} else {
-				throw new IllegalParameterException("Username/password invalid");
+				dbSession.setPlayer(dbPlayer);
+				dbSession.setSessionStart(new Date());
+				dbSession.setClientType(clientType);
+				dbSession.setIpAddress(ipAddress);
+				
+				MudSession createdDbSession = sessionRepository.save(dbSession);
+				
+				Session sessionData = PlayerHelper.buildSession(createdDbSession);
+				
+				Player playerData = PlayerHelper.buildPlayer(dbPlayer);
+				
+				
+				// Build the jwts token
+				String token = TokenService.buildToken(username, playerData, sessionData);
+				
+				HttpHeaders header = new HttpHeaders();
+				header.add(CommonConstants.AUTH_TOKEN_HEADER, token);
+				
+				response = new ResponseEntity<Session>(sessionData, header, HttpStatus.CREATED);
+				break;
 			}
-		} else {
-			throw new IllegalParameterException("Username/password invalid");
+			case Player.STATUS_PENDING: {
+				throw new IllegalParameterException("You must first change your password");
+			}
+			default: {
+				throw new IllegalParameterException("You cannot login at this moment.  Contact the system administrator");
+			}
 		}
 		
 		return response;
@@ -283,33 +263,35 @@ public class PlayerController implements PlayerService {
 				// Get the first session data found
 				MudSession dbSession = lstSessions.get(0);
 				
-				// Set the beingCode
-				dbSession.setBeingCode(beingCode.get());
+				// Erases the beingCode
+				dbSession.setBeingCode(null);
 				
-				if (beingCode.isPresent()) {
+				beingCode.ifPresent(d -> {
 
-					// Find the being record for this player
-					for(MudPlayerBeing curBeing: dbSession.getPlayer().getBeingList()) {
-						
-						if (curBeing.getId().getBeingCode().equals(beingCode.get())) {
-							
+					// Find the being record for this player					
+					dbSession.getPlayer().getBeingList().stream()
+						.filter(e -> e.getId().getBeingCode().equals(beingCode.get()))
+						.findFirst()
+						.ifPresent(f -> {
 							// Update the last time played
-							curBeing.setLastPlayed(new Date(System.currentTimeMillis()));
-						}
-					}
-				}
+							f.setLastPlayed(new Date(System.currentTimeMillis()));
+							
+							// Set the beingCode in the session object
+							dbSession.setBeingCode(beingCode.get());
+					});
+				});
 				
 				sessionRepository.save(dbSession);
 								
-				// Update the JWT Token
+				// Retrieves the Session object
 				Session sessionData = PlayerHelper.buildSession(dbSession);
 				
+				// Retrieves the player object
+				Player playerData = PlayerHelper.buildPlayer(dbSession.getPlayer());
+				
+				
 				// Update the authToken
-				String token = TokenService.updateToken(authToken, Optional.empty(), Optional.of(sessionData));
-				
-				HttpHeaders header = new HttpHeaders();
-				header.add(CommonConstants.AUTH_TOKEN_HEADER, token);
-				
+				HttpHeaders header = PlayerHelper.updateAuthHeaders(authToken, playerData, sessionData);
 				response = new ResponseEntity<Session>(sessionData, header, HttpStatus.ACCEPTED);
 				
 			} else {
@@ -323,52 +305,48 @@ public class PlayerController implements PlayerService {
 	}
 	
 	@Override
-	public ResponseEntity<Session> createBeing(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable String username, @RequestParam String beingClass, @RequestParam String beingName,
+	public ResponseEntity<Player> createBeing(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable String username, @RequestParam String beingClass, @RequestParam String beingName,
 			@RequestParam String worldName, @RequestParam Integer placeCode) {
 		
-		ResponseEntity<Session> response = null;
+		ResponseEntity<Player> response = null;
 		
 		if (canAccess(authToken, username)) {
 			
-			MudPlayer dbPlayer = repository.findByUsername(username);
+			MudPlayer dbPlayer = repository.findByUsername(username)
+					.orElseThrow(() -> new EntityNotFoundException("Player not found"));
 			
-			if (dbPlayer!=null) {
-				
-				// Create the being
-				ResponseEntity<Being> beingResponse = 
-					this.beingClient.createPlayerBeing(authToken,
-							dbPlayer.getPlayerId(), beingClass, 
-							worldName, placeCode, beingName);
+			// Create the being
+			ResponseEntity<Being> beingResponse = 
+				this.beingClient.createPlayerBeing(authToken,
+						dbPlayer.getPlayerId(), beingClass, 
+						worldName, placeCode, beingName);
+			
+			Being being = beingResponse.getBody();
 
-				if (beingResponse.getStatusCode().equals(HttpStatus.CREATED)) {
-					
-					Being being = beingResponse.getBody();
+			// Update the dbPlayer entity
+			MudPlayerBeing dbBeing = new MudPlayerBeing();
+			MudPlayerBeingPK pk = new MudPlayerBeingPK();
+			dbBeing.setId(pk);
+			
+			pk.setPlayerId(dbPlayer.getPlayerId());
+			pk.setBeingCode(being.getBeingCode());
+			
+			dbBeing.setBeingName(beingName);
+			dbBeing.setBeingClass(being.getBeingClass().getName());
+			dbBeing.setLastPlayed(new Date(System.currentTimeMillis()));
+			
+			// Update the dbPlayer being list
+			dbPlayer.getBeingList().add(dbBeing);
+			
+			// Save the dbPlayer
+			MudPlayer updatedPlayerData = repository.save(dbPlayer);
+			
+			Player playerData = PlayerHelper.buildPlayer(updatedPlayerData);
 
-					// Update the dbPlayer entity
-					MudPlayerBeing dbBeing = new MudPlayerBeing();
-					MudPlayerBeingPK pk = new MudPlayerBeingPK();
-					dbBeing.setId(pk);
-					
-					pk.setPlayerId(dbPlayer.getPlayerId());
-					pk.setBeingCode(being.getBeingCode());
-					
-					dbBeing.setBeingName(beingName);
-					dbBeing.setBeingClass(being.getBeingClass().getName());
-					dbBeing.setLastPlayed(new Date(System.currentTimeMillis()));
-					
-					// Update the dbPlayer entity
-					dbPlayer.getBeingList().add(dbBeing);
-					
-					// Save the dbPlayer
-					repository.save(dbPlayer);
-					
-				} else {
-					throw new IllegalParameterException("Couldn't create the being: " + beingResponse.getStatusCode().getReasonPhrase());					
-				}
-			}
-			else {
-				throw new EntityNotFoundException("Player not found");
-			}
+			// Assembling the response
+			HttpHeaders header = PlayerHelper.updateAuthHeaders(authToken, playerData, null);
+			response = new ResponseEntity<Player>(playerData, header, HttpStatus.ACCEPTED);
+			
 		} else {
 			throw new IllegalParameterException("No access to that username");
 		}
@@ -377,29 +355,61 @@ public class PlayerController implements PlayerService {
 	}
 
 	@Override
-	public ResponseEntity<Session> destroyBeing(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable String username, @PathVariable Long beingCode) {
+	public ResponseEntity<Player> destroyBeing(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable String username, @PathVariable Long beingCode) {
 		
-		ResponseEntity<Session> response = null;
+		ResponseEntity<Player> response = null;
 		
 		if (canAccess(authToken, username)) {
+			
+			// Find the player data
+			Optional<MudPlayer> dbPlayer = repository.findByUsername(username);
+			
+			dbPlayer.ifPresent(d -> {
+				
+				// Check if the selected being exists and it's associated to the player
+				d.getBeingList().stream()
+					.filter(e -> e.getId().getBeingCode().equals(beingCode))
+					.findFirst()
+					.orElseThrow(() -> new IllegalParameterException("Being Unknown"));
+				
+				// Remove selected being from the list
+				d.getBeingList().removeIf(e -> e.getId().getBeingCode().equals(beingCode));
 
-			// Destroy the selected being
-			beingClient.destroyBeing(authToken, beingCode);
+				// Destroy the selected being at being service
+				beingClient.destroyBeing(authToken, beingCode);
+				
+				// Update the playerData
+				repository.save(d);
+				
+				// If the being is the currenly selected
+				if (TokenService.getBeingCodeFromToken(authToken).equals(beingCode)) {
+					
+					// Clear the beingCode from the token
+					updateBeingSession(authToken, username, Optional.empty());
+				}
+				
+				
+			});
 			
-			// If the being is the currenly selected
-			if (TokenService.getBeingCodeFromToken(authToken).equals(beingCode)) {
-				
-				// Clear the beingCode from the token
-				response = updateBeingSession(authToken, username, Optional.empty());
-				
-			} else {
-				
-				// Just echoes the current session back
-				response = new ResponseEntity<Session>(
-						TokenService.getSessionDataFromToken(authToken), 
-						null, HttpStatus.ACCEPTED);
-			}
+			// Get the session data
+			Session sessionData = getActiveSession(authToken, username);
+
+			// Get the player info again
+			Player playerData = getPlayerDetails(authToken, username);
+
+			// Update the authToken
+			String token = TokenService.updateToken(authToken, 
+					Optional.of(playerData), 
+					Optional.of(sessionData));
 			
+
+			// Assembling the response
+			HttpHeaders header = new HttpHeaders();
+			header.add(CommonConstants.AUTH_TOKEN_HEADER, token);
+			
+			response = new ResponseEntity<Player>(
+					playerData, 
+					header, HttpStatus.ACCEPTED);
 			
 		} else {
 			throw new IllegalParameterException("No access to that username");
