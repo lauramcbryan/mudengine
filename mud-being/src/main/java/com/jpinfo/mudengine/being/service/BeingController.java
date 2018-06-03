@@ -23,6 +23,7 @@ import com.jpinfo.mudengine.being.utils.BeingHelper;
 import com.jpinfo.mudengine.common.being.Being;
 import com.jpinfo.mudengine.common.exception.AccessDeniedException;
 import com.jpinfo.mudengine.common.exception.EntityNotFoundException;
+import com.jpinfo.mudengine.common.exception.IllegalParameterException;
 import com.jpinfo.mudengine.common.item.Item;
 import com.jpinfo.mudengine.common.service.BeingService;
 import com.jpinfo.mudengine.common.utils.CommonConstants;
@@ -114,7 +115,6 @@ public class BeingController implements BeingService {
 		
 		ResponseEntity<Being> entityResponse = null; 
 
-		// Checking the playerId against the authenticated playerId
 		MudBeing dbBeing = new MudBeing();
 		
 		MudBeingClass dbBeingClass = classRepository
@@ -157,7 +157,12 @@ public class BeingController implements BeingService {
 			@PathVariable Long playerId, @RequestParam String beingClass, 
 			@RequestParam String worldName, @RequestParam Integer placeCode, @RequestParam String beingName) {
 		
-		ResponseEntity<Being> entityResponse = null; 
+		ResponseEntity<Being> entityResponse = null;
+
+		// Checking the name's availability
+		if ((beingName!=null) && (repository.findByName(beingName).isPresent())) {
+			throw new IllegalParameterException("Being name already in use");
+		}
 
 		// Checking the playerId against the authenticated playerId
 		MudBeing dbBeing = new MudBeing();

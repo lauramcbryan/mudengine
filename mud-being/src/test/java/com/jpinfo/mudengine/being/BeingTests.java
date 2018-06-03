@@ -56,16 +56,22 @@ public class BeingTests {
 	
 	private static final Long testPlayerId = 1L;
 	private static final Long test2PlayerId = 2L;
-	private static final Long test3PlayerId = 3L;
+	//private static final Long test3PlayerId = 3L;
 	private static final Long test4PlayerId = 4L;
+	private static final Long test5PlayerId = 5L;
 		
 	private static final String testUsername = "test";
 	
 	private static final String test3WorldName = "fake";
 	private static final Integer test3PlaceCode = 3;
+	private static final String test3BeingName = "NAMEC";
 	
 	private static final String test4WorldName = "fake";
 	private static final Integer test4PlaceCode = 4;
+	private static final String test4BeingName = "NAMED";
+	
+	
+	private static final String test5BeingName = "NAMEE";
 	
 	@MockBean
 	private ItemServiceClient mockItem;
@@ -258,7 +264,7 @@ public class BeingTests {
 		urlVariables.put("worldName", BeingTests.test2WorldName);
 		urlVariables.put("placeCode", BeingTests.test2PlaceCode);
 		urlVariables.put("playerId", BeingTests.testPlayerId);
-		urlVariables.put("beingName", BeingTests.testBeingName);
+		urlVariables.put("beingName", BeingTests.test2BeingName);
 		
 		responseCreate= restTemplate.exchange(
 				"/being/player/{playerId}?beingClass={beingClass}&worldName={worldName}&placeCode={placeCode}&beingName={beingName}", 
@@ -273,10 +279,10 @@ public class BeingTests {
 		// ======================================
 		urlVariables.clear();
 		urlVariables.put("beingClass", BeingTests.test2BeingClass);
-		urlVariables.put("worldName", BeingTests.test2WorldName);
-		urlVariables.put("placeCode", BeingTests.test2PlaceCode);
+		urlVariables.put("worldName", BeingTests.test3WorldName);
+		urlVariables.put("placeCode", BeingTests.test3PlaceCode);
 		urlVariables.put("playerId", BeingTests.test2PlayerId);
-		urlVariables.put("beingName", BeingTests.testBeingName);
+		urlVariables.put("beingName", BeingTests.test3BeingName);
 		
 		responseCreate= restTemplate.exchange(
 				"/being/player/{playerId}?beingClass={beingClass}&worldName={worldName}&placeCode={placeCode}&beingName={beingName}", 
@@ -487,8 +493,8 @@ public class BeingTests {
 		urlVariables.put("beingClass", BeingTests.testBeingClass);
 		urlVariables.put("worldName", BeingTests.testWorldName);
 		urlVariables.put("placeCode", BeingTests.testPlaceCode);
-		urlVariables.put("playerId", BeingTests.test3PlayerId);
-		urlVariables.put("beingName", "");
+		urlVariables.put("playerId", BeingTests.test4PlayerId);
+		urlVariables.put("beingName", BeingTests.test4BeingName);
 
 		ResponseEntity<Being> responseCreate= restTemplate.exchange(
 				"/being/player/{playerId}?beingClass={beingClass}&worldName={worldName}&placeCode={placeCode}&beingName={beingName}", 
@@ -503,11 +509,11 @@ public class BeingTests {
 		// *********** CREATE SECOND ***********
 		// =====================================
 		urlVariables.clear();
-		urlVariables.put("beingClass", BeingTests.test2BeingClass);
+		urlVariables.put("beingClass", BeingTests.testBeingClass);
 		urlVariables.put("worldName", BeingTests.testWorldName);
 		urlVariables.put("placeCode", BeingTests.testPlaceCode);
-		urlVariables.put("playerId", BeingTests.test4PlayerId);
-		urlVariables.put("beingName", "");
+		urlVariables.put("playerId", BeingTests.test5PlayerId);
+		urlVariables.put("beingName", BeingTests.test5BeingName);
 		
 		responseCreate= restTemplate.exchange(
 				"/being/player/{playerId}?beingClass={beingClass}&worldName={worldName}&placeCode={placeCode}&beingName={beingName}", 
@@ -518,8 +524,8 @@ public class BeingTests {
 		
 		Being secondBeing = responseCreate.getBody();
 		
-		// Creating a security token for playerId 3
-		HttpHeaders authHeaders = getAuthHeaders(BeingTests.test3PlayerId);
+		// Creating a security token for playerId 4
+		HttpHeaders authHeaders = getAuthHeaders(BeingTests.test4PlayerId);
 		
 		HttpEntity<Object> playerOneAuthEntity = new HttpEntity<Object>(authHeaders);
 		
