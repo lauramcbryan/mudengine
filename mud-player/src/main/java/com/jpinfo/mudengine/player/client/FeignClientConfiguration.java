@@ -20,4 +20,9 @@ public class FeignClientConfiguration {
 		return new Options(connectionTimeout, readTimeout);
 		
 	}
+	
+	@Bean
+	public FeignClientErrorDecoder errorDecoder() {
+		return new FeignClientErrorDecoder();
+	}
 }

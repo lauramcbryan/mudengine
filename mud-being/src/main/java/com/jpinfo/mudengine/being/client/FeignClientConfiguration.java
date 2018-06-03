@@ -1,6 +1,7 @@
 package com.jpinfo.mudengine.being.client;
 
 import org.springframework.beans.factory.annotation.Value;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -19,5 +20,10 @@ public class FeignClientConfiguration {
 	public Options options() {
 		return new Options(connectionTimeout, readTimeout);
 		
+	}
+	
+	@Bean
+	public FeignClientErrorDecoder errorDecoder() {
+		return new FeignClientErrorDecoder();
 	}
 }

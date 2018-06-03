@@ -1,4 +1,4 @@
-package com.jpinfo.mudengine.world.client;
+package com.jpinfo.mudengine.message.client;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
