@@ -17,7 +17,7 @@ services:
       - CONSUL_HOST=http://jeremias
       - CONSUL_PORT=8500
       - VAULT_ADDR=http://jeremias:8200
-      - VAULT_TOKEN=bbaf37fa-10a3-fc4f-c0da-1af913255b4c
+      - VAULT_TOKEN=62c0b35b-203f-72ec-3539-0a3698a0587c
       - SPRING_PROFILES_ACTIVE=qa
     networks:
       - app_net
@@ -38,7 +38,7 @@ services:
       - CONSUL_HOST=http://jeremias
       - CONSUL_PORT=8500
       - VAULT_ADDR=http://jeremias:8200
-      - VAULT_TOKEN=bbaf37fa-10a3-fc4f-c0da-1af913255b4c
+      - VAULT_TOKEN=62c0b35b-203f-72ec-3539-0a3698a0587c
       - SPRING_PROFILES_ACTIVE=qa
     networks:
       - app_net
@@ -59,7 +59,7 @@ services:
       - CONSUL_HOST=http://jeremias
       - CONSUL_PORT=8500
       - VAULT_ADDR=http://jeremias:8200
-      - VAULT_TOKEN=bbaf37fa-10a3-fc4f-c0da-1af913255b4c
+      - VAULT_TOKEN=62c0b35b-203f-72ec-3539-0a3698a0587c
       - SPRING_PROFILES_ACTIVE=qa
     networks:
       - app_net
@@ -80,7 +80,7 @@ services:
       - CONSUL_HOST=http://jeremias
       - CONSUL_PORT=8500
       - VAULT_ADDR=http://jeremias:8200
-      - VAULT_TOKEN=bbaf37fa-10a3-fc4f-c0da-1af913255b4c
+      - VAULT_TOKEN=62c0b35b-203f-72ec-3539-0a3698a0587c
       - SPRING_PROFILES_ACTIVE=qa
     networks:
       - app_net
@@ -101,7 +101,7 @@ services:
       - CONSUL_HOST=http://jeremias
       - CONSUL_PORT=8500
       - VAULT_ADDR=http://jeremias:8200
-      - VAULT_TOKEN=bbaf37fa-10a3-fc4f-c0da-1af913255b4c
+      - VAULT_TOKEN=62c0b35b-203f-72ec-3539-0a3698a0587c
       - SPRING_PROFILES_ACTIVE=qa
     networks:
       - app_net
@@ -122,7 +122,7 @@ services:
       - CONSUL_HOST=http://jeremias
       - CONSUL_PORT=8500
       - VAULT_ADDR=http://jeremias:8200
-      - VAULT_TOKEN=bbaf37fa-10a3-fc4f-c0da-1af913255b4c
+      - VAULT_TOKEN=62c0b35b-203f-72ec-3539-0a3698a0587c
       - SPRING_PROFILES_ACTIVE=qa
     networks:
       - app_net
