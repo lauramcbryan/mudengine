@@ -8,16 +8,16 @@ services:
       replicas: 1
       resources:
         limits:
-          memory: 256M
+          memory: 512M
         reservations:
-          memory: 128M
+          memory: 256M
     environment:
       - EXPOSED_PORT=8082    
       - EXPOSED_HOST=jeremias
       - CONSUL_HOST=http://jeremias
       - CONSUL_PORT=8500
       - VAULT_ADDR=http://jeremias:8200
-      - VAULT_TOKEN=b7f25df0-c544-b12c-19c0-0140d8c34f08
+      - VAULT_TOKEN=bbaf37fa-10a3-fc4f-c0da-1af913255b4c
       - SPRING_PROFILES_ACTIVE=qa
     networks:
       - app_net
@@ -29,16 +29,16 @@ services:
       replicas: 1
       resources:
         limits:
-          memory: 256M
+          memory: 512M
         reservations:
-          memory: 128M
+          memory: 256M
     environment:
       - EXPOSED_PORT=8084
       - EXPOSED_HOST=jeremias
       - CONSUL_HOST=http://jeremias
       - CONSUL_PORT=8500
       - VAULT_ADDR=http://jeremias:8200
-      - VAULT_TOKEN=b7f25df0-c544-b12c-19c0-0140d8c34f08
+      - VAULT_TOKEN=bbaf37fa-10a3-fc4f-c0da-1af913255b4c
       - SPRING_PROFILES_ACTIVE=qa
     networks:
       - app_net
@@ -50,16 +50,16 @@ services:
       replicas: 1
       resources:
         limits:
-          memory: 256M
+          memory: 512M
         reservations:
-          memory: 128M      
+          memory: 256M      
     environment:
       - EXPOSED_PORT=8086
       - EXPOSED_HOST=jeremias
       - CONSUL_HOST=http://jeremias
       - CONSUL_PORT=8500
       - VAULT_ADDR=http://jeremias:8200
-      - VAULT_TOKEN=b7f25df0-c544-b12c-19c0-0140d8c34f08
+      - VAULT_TOKEN=bbaf37fa-10a3-fc4f-c0da-1af913255b4c
       - SPRING_PROFILES_ACTIVE=qa
     networks:
       - app_net
@@ -71,16 +71,16 @@ services:
       replicas: 1
       resources:
         limits:
-          memory: 256M
+          memory: 512M
         reservations:
-          memory: 128M
+          memory: 256M
     environment:
       - EXPOSED_PORT=8088
       - EXPOSED_HOST=jeremias
       - CONSUL_HOST=http://jeremias
       - CONSUL_PORT=8500
       - VAULT_ADDR=http://jeremias:8200
-      - VAULT_TOKEN=b7f25df0-c544-b12c-19c0-0140d8c34f08
+      - VAULT_TOKEN=bbaf37fa-10a3-fc4f-c0da-1af913255b4c
       - SPRING_PROFILES_ACTIVE=qa
     networks:
       - app_net
@@ -90,9 +90,9 @@ services:
       replicas: 1
       resources:
         limits:
-          memory: 256M
+          memory: 512M
         reservations:
-          memory: 128M
+          memory: 256M
     ports:
       - 8090:8080
     environment:
@@ -101,7 +101,7 @@ services:
       - CONSUL_HOST=http://jeremias
       - CONSUL_PORT=8500
       - VAULT_ADDR=http://jeremias:8200
-      - VAULT_TOKEN=b7f25df0-c544-b12c-19c0-0140d8c34f08
+      - VAULT_TOKEN=bbaf37fa-10a3-fc4f-c0da-1af913255b4c
       - SPRING_PROFILES_ACTIVE=qa
     networks:
       - app_net
@@ -111,9 +111,9 @@ services:
       replicas: 1
       resources:
         limits:
-          memory: 256M
+          memory: 512M
         reservations:
-          memory: 128M
+          memory: 256M
     ports:
       - 8092:8080
     environment:
@@ -122,7 +122,7 @@ services:
       - CONSUL_HOST=http://jeremias
       - CONSUL_PORT=8500
       - VAULT_ADDR=http://jeremias:8200
-      - VAULT_TOKEN=b7f25df0-c544-b12c-19c0-0140d8c34f08
+      - VAULT_TOKEN=bbaf37fa-10a3-fc4f-c0da-1af913255b4c
       - SPRING_PROFILES_ACTIVE=qa
     networks:
       - app_net
@@ -132,9 +132,9 @@ services:
       replicas: 1
       resources:
         limits:
-          memory: 256M
+          memory: 512M
         reservations:
-          memory: 128M
+          memory: 256M
     ports:
       - 8080:8080
     environment:
