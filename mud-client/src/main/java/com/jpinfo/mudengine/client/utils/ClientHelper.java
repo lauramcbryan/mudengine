@@ -1,6 +1,7 @@
 package com.jpinfo.mudengine.client.utils;
 
 import java.io.BufferedReader;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
@@ -26,10 +27,11 @@ import com.jpinfo.mudengine.common.place.PlaceExit;
 import com.jpinfo.mudengine.common.player.Player;
 
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.integration.ip.tcp.connection.TcpConnection;
 
 
 public class ClientHelper {
+	
+	public static final String DEFAULT_LOCALE = "en-US";
 	
 	public static final String CLIENT_TYPE = "text/plain";
 	public static final String CRLF = "\r\n";
@@ -132,15 +134,17 @@ public class ClientHelper {
 		return response;
 	}
 	
-	private static void internalSendMessage(TcpConnection conn, String message) throws Exception {
+	private static void internalSendMessage(ClientConnection c, String message) throws Exception {
+		
+		String effectiveMessage = c.getLocalizedMessage(message);
 		
 		// Build the message to send over tcp connection		
 		org.springframework.messaging.Message<String> clientMessage = 
-				MessageBuilder.withPayload(message)
+				MessageBuilder.withPayload(effectiveMessage)
 					// .setHeader("headerName", "headerValue")
 					.build();
 		
-		conn.send(clientMessage);
+		c.getConnection().send(clientMessage);
 	}
 	
 	/**
@@ -151,7 +155,7 @@ public class ClientHelper {
 	 * @throws Exception
 	 */
 	public static void sendMessage(ClientConnection c, String message) throws Exception {
-		internalSendMessage(c.getConnection(), message + "\r\n");
+		internalSendMessage(c, c.getLocalizedMessage(message) + "\r\n");
 	}
 	
 	/**
@@ -171,7 +175,7 @@ public class ClientHelper {
 	 * @throws Exception
 	 */
 	public static void sendRequestMessage(ClientConnection c, String message) throws Exception {
-		internalSendMessage(c.getConnection(), message);
+		internalSendMessage(c, c.getLocalizedMessage(message));
 	}
 
 	/**
@@ -244,12 +248,12 @@ public class ClientHelper {
 	 * @param client
 	 * @throws Exception
 	 */
-	public static String listAvailableBeings(Player playerData, Optional<Long> selectedBeing) {
+	public static String listAvailableBeings(ClientConnection c, Player playerData, Optional<Long> selectedBeing) {
 		
 		StringBuffer m = new StringBuffer(); 
 		
 		m
-			.append("Available beings:")
+			.append(c.getLocalizedMessage(LocalizedMessages.COMMAND_SELECT_AVAILABLE))
 		.append(ClientHelper.CRLF);
 		
 		playerData.getBeingList().stream()
@@ -264,12 +268,13 @@ public class ClientHelper {
 					.append(" (")
 					.append(d.getBeingClass())
 					.append(") ")
-					.append((selectedBeing.isPresent() && d.getBeingCode().equals(selectedBeing.get()) ? "<ACTIVE>":""))
+					.append((selectedBeing.isPresent() && d.getBeingCode().equals(selectedBeing.get()) ? 
+							c.getLocalizedMessage(LocalizedMessages.COMMAND_SELECT_ACTIVE):""))
 					;
 		});
 		
 		if (playerData.getBeingList().isEmpty()) {
-			m.append("\r\n--- None \r\n");
+			m.append("\r\n--- "+ c.getLocalizedMessage(LocalizedMessages.NONE_MESSAGE) +" \r\n");
 		}
 		
 		return m.toString();
@@ -287,7 +292,7 @@ public class ClientHelper {
 		StringBuffer m = new StringBuffer();
 		
 		m
-			.append("Available classes: ")
+			.append(client.getLocalizedMessage(LocalizedMessages.COMMAND_CREATE_AVAILABLE))
 			.append(ClientHelper.CRLF);
 		
 		beingClassList.forEach(d -> {
@@ -303,7 +308,7 @@ public class ClientHelper {
 		});
 		
 		if (beingClassList.isEmpty()) {
-			m.append("--- None");
+			m.append("--- "+ client.getLocalizedMessage(LocalizedMessages.NONE_MESSAGE));
 		}
 		
 		return m.toString();
@@ -327,12 +332,12 @@ public class ClientHelper {
 	 * @param playerData
 	 * @return
 	 */
-	public static String returnFormattedPlayerData(Player playerData, Optional<Long> activeBeingCode) {
+	public static String returnFormattedPlayerData(ClientConnection c, Player playerData, Optional<Long> activeBeingCode) {
 		
 		StringBuffer m = new StringBuffer();
 		
 		m
-			.append("Player:")
+			.append(c.getLocalizedMessage(LocalizedMessages.COMMAND_WHOAMI_PLAYER))
 		.append(ClientHelper.CRLF);
 		
 		m
@@ -341,18 +346,18 @@ public class ClientHelper {
 	
 		m
 			.append(ClientHelper.BOX_LEFT)
-				.append(ClientHelper.padString("Username: "+ playerData.getUsername(), 36))
+				.append(ClientHelper.padString(c.getLocalizedMessage(LocalizedMessages.COMMAND_WHOAMI_USERNAME) + playerData.getUsername(), 36))
 			.append(ClientHelper.BOX_CENTER)
-				.append(ClientHelper.padString("Status: "+ playerData.getStrStatus(), 36))
+				.append(ClientHelper.padString(c.getLocalizedMessage(LocalizedMessages.COMMAND_WHOAMI_STATUS) + playerData.getStrStatus(), 36))
 			.append(ClientHelper.BOX_RIGHT)
 		.append(ClientHelper.CRLF);
 
 	
 		m
 			.append(ClientHelper.BOX_LEFT)
-				.append(ClientHelper.padString("Email: "+ playerData.getEmail(), 36))
+				.append(ClientHelper.padString(c.getLocalizedMessage(LocalizedMessages.COMMAND_WHOAMI_EMAIL)+ playerData.getEmail(), 36))
 			.append(ClientHelper.BOX_CENTER)
-				.append(ClientHelper.padString("Locale: "+ playerData.getLocale(), 36))
+				.append(ClientHelper.padString(c.getLocalizedMessage(LocalizedMessages.COMMAND_WHOAMI_LOCALE)+ playerData.getLocale(), 36))
 			.append(ClientHelper.BOX_RIGHT)
 		.append(ClientHelper.CRLF);
 
@@ -362,7 +367,7 @@ public class ClientHelper {
 	
 		m
 			.append(ClientHelper.BOX_LEFT)
-				.append(ClientHelper.padString("Available beings:", 75))
+				.append(ClientHelper.padString(c.getLocalizedMessage(LocalizedMessages.COMMAND_SELECT_AVAILABLE), 75))
 			.append(ClientHelper.BOX_RIGHT)
 		.append(ClientHelper.CRLF);
 	
@@ -376,7 +381,8 @@ public class ClientHelper {
 										d.getBeingCode()+ " - "+ 
 										d.getBeingName()+ 
 										" (" + d.getBeingClass() + ")" +
-										(activeBeingCode.isPresent() && d.getBeingCode().equals(activeBeingCode.get()) ? " <ACTIVE>": "") 
+										(activeBeingCode.isPresent() && d.getBeingCode().equals(activeBeingCode.get()) ?
+												c.getLocalizedMessage(LocalizedMessages.COMMAND_SELECT_ACTIVE): "") 
 									, 70))
 					.append(ClientHelper.BOX_RIGHT)
 				.append(ClientHelper.CRLF);
@@ -385,7 +391,7 @@ public class ClientHelper {
 		if (playerData.getBeingList().isEmpty()) {
 			m
 				.append(ClientHelper.BOX_LEFT)
-					.append(ClientHelper.padString("\tNone", 70))
+					.append(ClientHelper.padString("\t" + c.getLocalizedMessage(LocalizedMessages.NONE_MESSAGE), 70))
 				.append(ClientHelper.BOX_RIGHT)
 			.append(ClientHelper.CRLF);
 		}
@@ -416,12 +422,12 @@ public class ClientHelper {
 	 * @param activeBeing
 	 * @return
 	 */
-	public static String returnFormattedBeingData(Being activeBeing) {
+	public static String returnFormattedBeingData(ClientConnection c, Being activeBeing) {
 
 		StringBuffer m = new StringBuffer();
 
 		m
-			.append("Being:")
+			.append(c.getLocalizedMessage(LocalizedMessages.COMMAND_WHOAMI_BEING))
 		.append(ClientHelper.CRLF);
 		
 		m
@@ -430,9 +436,9 @@ public class ClientHelper {
 	
 		m
 			.append(ClientHelper.BOX_LEFT)
-				.append(ClientHelper.padString("Name: "+ activeBeing.getName(), 36))
+				.append(ClientHelper.padString(c.getLocalizedMessage(LocalizedMessages.COMMAND_WHOAMI_NAME)+ activeBeing.getName(), 36))
 			.append(ClientHelper.BOX_CENTER)
-				.append(ClientHelper.padString("Class: "+ activeBeing.getBeingClassCode(), 36))
+				.append(ClientHelper.padString(c.getLocalizedMessage(LocalizedMessages.COMMAND_WHOAMI_CLASS)+ activeBeing.getBeingClassCode(), 36))
 			.append(ClientHelper.BOX_RIGHT)
 		.append(ClientHelper.CRLF);
 	
@@ -442,7 +448,7 @@ public class ClientHelper {
 		
 		m
 			.append(ClientHelper.BOX_LEFT)
-				.append(ClientHelper.padString("Attrs:", 75))
+				.append(ClientHelper.padString(c.getLocalizedMessage(LocalizedMessages.COMMAND_WHOAMI_ATTRS), 75))
 			.append(ClientHelper.BOX_RIGHT)
 		.append(ClientHelper.CRLF);
 		
@@ -509,7 +515,7 @@ public class ClientHelper {
 		
 		m
 			.append(ClientHelper.BOX_LEFT)
-				.append(ClientHelper.padString("Skills:", 75))
+				.append(ClientHelper.padString(c.getLocalizedMessage(LocalizedMessages.COMMAND_WHOAMI_SKILLS), 75))
 			.append(ClientHelper.BOX_RIGHT)
 			.append(ClientHelper.CRLF);
 	
@@ -591,13 +597,13 @@ public class ClientHelper {
 	 * @param currentPlace
 	 * @return
 	 */
-	public static String returnFormattedPlaceData(Place currentPlace) {
+	public static String returnFormattedPlaceData(ClientConnection c, Place currentPlace) {
 		
 		StringBuffer m = new StringBuffer();
 
 		m
 			.append(ClientHelper.CRLF)
-			.append("Place: ")
+			.append(c.getLocalizedMessage(LocalizedMessages.COMMAND_WHEREAMI_START))
 			.append(currentPlace.getPlaceClass().getName());
 		
 		
@@ -628,7 +634,7 @@ public class ClientHelper {
 		m
 		.append(ClientHelper.CRLF)
 		.append(ClientHelper.BOX_LEFT)
-			.append(ClientHelper.padString("Exits:", 75))
+			.append(ClientHelper.padString(c.getLocalizedMessage(LocalizedMessages.COMMAND_WHEREAMI_EXITS), 75))
 		.append(ClientHelper.BOX_RIGHT);
 		
 		for(String curDirection: currentPlace.getExits().keySet()) {

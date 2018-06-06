@@ -14,8 +14,9 @@ import com.jpinfo.mudengine.client.api.MudengineApi;
 import com.jpinfo.mudengine.client.exception.ClientException;
 import com.jpinfo.mudengine.client.model.ClientConnection;
 import com.jpinfo.mudengine.client.model.CommandState;
-import com.jpinfo.mudengine.client.model.VerbDictionary;
+import com.jpinfo.mudengine.client.model.VerbDictionaries;
 import com.jpinfo.mudengine.client.utils.ClientHelper;
+import com.jpinfo.mudengine.client.utils.LocalizedMessages;
 import com.jpinfo.mudengine.common.being.Being;
 import com.jpinfo.mudengine.common.being.BeingClass;
 import com.jpinfo.mudengine.common.player.Player;
@@ -23,24 +24,25 @@ import com.jpinfo.mudengine.common.player.Player;
 @Component
 public class CommandHandler {
 	
-	public static final String REGISTER_COMMAND = "register";
-	public static final String CHANGEPROF_COMMAND = "change profile";
-	public static final String ACTIVATE_COMMAND = "activate account";
-	public static final String PASSWORD_COMMAND = "change password";
-	public static final String QUIT_COMMAND = "quit";
-	public static final String HELP_COMMAND = "help";
-	public static final String LOGIN_COMMAND = "login";
-	public static final String LOGOUT_COMMAND = "logout";
-	public static final String CREATEBEING_COMMAND = "create being";
-	public static final String SELECTBEING_COMMAND = "select being";
-	public static final String DELETEBEING_COMMAND = "destroy being";
+	public static final int REGISTER_COMMAND = 1;
+	public static final int CHANGEPROF_COMMAND = 2;
+	public static final int ACTIVATE_COMMAND = 3;
+	public static final int PASSWORD_COMMAND = 4;
+	public static final int QUIT_COMMAND = 5;
+	public static final int HELP_COMMAND = 6;
+	public static final int LOGIN_COMMAND = 7;
+	public static final int LOGOUT_COMMAND = 8;
+	public static final int CREATEBEING_COMMAND = 9;
+	public static final int SELECTBEING_COMMAND = 10;
+	public static final int DELETEBEING_COMMAND = 11;
 	
-	public static final String WHOAMI_COMMAND = "whoami";
-	public static final String WHEREAMI_COMMAND = "whereami";
+	public static final int WHOAMI_COMMAND = 12;
+	public static final int WHEREAMI_COMMAND = 13;
+	public static final int LOCALE_COMMAND = 14;
 	
 
 	@Autowired
-	private VerbDictionary verbDictionary;
+	private VerbDictionaries verbDictionaries;
 	
 	@Autowired
 	private TcpNetServerConnectionFactory connFactory;
@@ -66,12 +68,12 @@ public class CommandHandler {
 		String locale = ClientHelper.getParamValue(command, "locale");
 		
 
-		ClientHelper.sendMessage(client, "Registering account...");
+		ClientHelper.sendMessage(client, LocalizedMessages.COMMAND_REGISTER_START);
 		
 		// Call register in PlayerService
 		api.registerPlayer(username, email, locale);
 
-		ClientHelper.sendMessage(client, "Account registered.  Now you must activate your account.\r\nPlease check your email for the activation code");
+		ClientHelper.sendMessage(client, LocalizedMessages.COMMAND_REGISTER_OK);
 	}
 	
 	/**
@@ -85,7 +87,7 @@ public class CommandHandler {
 
 		Player playerData = 
 				client.getPlayerData()
-					.orElseThrow(()-> new ClientException("You must be logged to issue this command" ));
+					.orElseThrow(()-> new ClientException(LocalizedMessages.COMMAND_ONLY_LOGGED));
 
 		
 		String oldPassword = ClientHelper.getParamValue(command, "oldPassword");
@@ -94,7 +96,7 @@ public class CommandHandler {
 		// Call setPassword in PlayerService
 		api.setPlayerPassword(playerData.getUsername(), oldPassword, newPassword);
 		
-		ClientHelper.sendMessage(client, "Password changed.");
+		ClientHelper.sendMessage(client, LocalizedMessages.COMMAND_PASSWORD_OK);
 		
 	}
 	
@@ -107,7 +109,7 @@ public class CommandHandler {
 	 */
 	private void handleActivateCommand(ClientConnection client, CommandState command) throws Exception {
 
-		ClientHelper.sendMessage(client, "Activating account...");
+		ClientHelper.sendMessage(client, LocalizedMessages.COMMAND_ACTIVATE_START);
 
 		String username = ClientHelper.getParamValue(command, "username");
 		String activationCode = ClientHelper.getParamValue(command, "activationCode");
@@ -116,7 +118,7 @@ public class CommandHandler {
 		// Call activateAccount in PlayerService
 		api.setPlayerPassword(username, activationCode, newPassword);
 		
-		ClientHelper.sendMessage(client, "Your account is activated. To create a session, use the <login> command");
+		ClientHelper.sendMessage(client, LocalizedMessages.COMMAND_ACTIVATE_OK);
 	}
 
 	/**
@@ -129,9 +131,11 @@ public class CommandHandler {
 	 */
 	private void handleHelpCommand(ClientConnection client, CommandState command) throws Exception {
 
-		ClientHelper.sendMessage(client,  "\r\nAvailable commands:\r\n ");
+		ClientHelper.sendMessage(client, LocalizedMessages.COMMAND_HELP_START);
 		
-		verbDictionary.getDictionary().stream().forEach(d-> {
+		verbDictionaries
+			.getDictionary(client.getLocale())
+				.getCommandList().stream().forEach(d-> {
 			
 			if (!d.isLogged() || client.isLogged()) {
 				
@@ -140,7 +144,7 @@ public class CommandHandler {
 					.append(d.getVerb())
 					.append(" -> ")
 					.append(d.getDescription())
-					.append("\r\nUsage: ")
+					.append(client.getLocalizedMessage(LocalizedMessages.COMMAND_HELP_USAGE))
 					.append(d.getUsage())
 					.append("\r\n");
 				
@@ -173,9 +177,25 @@ public class CommandHandler {
 		// Updating the authToken
 		client.setAuthToken(authToken);
 
+		// Login information
 		client.setPlayerData(api.getPlayerDetails(authToken, username));
 		
-		ClientHelper.sendMessage(client, "Logged in.  Welcome back " + username);
+		ClientHelper.sendMessage(client, client.getLocalizedMessage(LocalizedMessages.COMMAND_LOGIN_OK) + username);
+	}
+	
+	/**
+	 * Closes the session (doesn't close the connection).
+	 * 
+	 * @param client
+	 * @param command
+	 * @throws Exception
+	 */
+	private void handleLogoutCommand(ClientConnection client, CommandState command) throws Exception {
+
+		client.clearState();
+		
+		ClientHelper.sendMessage(client, LocalizedMessages.COMMAND_LOGOUT_OK);
+		
 	}
 	
 	/**
@@ -192,7 +212,7 @@ public class CommandHandler {
 	private void handleChangeProfileCommand(ClientConnection client, CommandState command) throws Exception {
 		Player playerData = 
 				client.getPlayerData()
-					.orElseThrow(()-> new ClientException("You must be logged to issue this command" ));
+					.orElseThrow(()-> new ClientException(LocalizedMessages.COMMAND_ONLY_LOGGED));
 
 		playerData.setEmail(ClientHelper.getParamValue(command, "email"));
 		playerData.setLocale(ClientHelper.getParamValue(command, "locale"));
@@ -232,7 +252,7 @@ public class CommandHandler {
 			
 			// Shows up the being list again
 			ClientHelper.sendMessage(client, 
-					ClientHelper.listAvailableBeings(apiResult.getUpdatedPlayerData(), client.getActiveBeingCode())
+					ClientHelper.listAvailableBeings(client, apiResult.getUpdatedPlayerData(), client.getActiveBeingCode())
 				);
 			
 		} else {
@@ -258,7 +278,7 @@ public class CommandHandler {
 		
 		Player playerData = 
 				client.getPlayerData()
-					.orElseThrow(()-> new ClientException("You must be logged to issue this command" ));
+					.orElseThrow(()-> new ClientException(LocalizedMessages.COMMAND_ONLY_LOGGED));
 
 		Long beingCode =ClientHelper.getParamValue(command, "beingCode", Long.class);
 		
@@ -270,7 +290,7 @@ public class CommandHandler {
 			if (playerData.getBeingList().stream()
 				.noneMatch(d-> d.getBeingCode().equals(beingCode))) {
 				
-				throw new ClientException("being unknown");
+				throw new ClientException(LocalizedMessages.COMMAND_UNKNOWN_BEING);
 			}
 			
 			// Set the being as active
@@ -292,17 +312,17 @@ public class CommandHandler {
 			
 			// Show being information
 			ClientHelper.sendMessage(client, 
-					ClientHelper.returnFormattedBeingData(selectedBeing));
+					ClientHelper.returnFormattedBeingData(client, selectedBeing));
 			
 			// Show place information
 			ClientHelper.sendMessage(client, 
-					ClientHelper.returnFormattedPlaceData(client.getCurPlace()));
+					ClientHelper.returnFormattedPlaceData(client, client.getCurPlace().get()));
 			
 		} else {
 			
 			// No beingCode provided, show me the available beings
 			ClientHelper.sendMessage(client, 
-				ClientHelper.listAvailableBeings(playerData, client.getActiveBeingCode())
+				ClientHelper.listAvailableBeings(client, playerData, client.getActiveBeingCode())
 			);
 			
 		}
@@ -320,7 +340,7 @@ public class CommandHandler {
 
 		Player playerData = 
 				client.getPlayerData()
-					.orElseThrow(()-> new ClientException("You must be logged to issue this command" ));
+					.orElseThrow(()-> new ClientException(LocalizedMessages.COMMAND_ONLY_LOGGED ));
 
 		Long beingCode =ClientHelper.getParamValue(command, "beingCode", Long.class);
 		
@@ -332,17 +352,22 @@ public class CommandHandler {
 			if (playerData.getBeingList().stream()
 				.noneMatch(d-> d.getBeingCode().equals(beingCode))) {
 				
-				throw new ClientException("being unknown");
+				throw new ClientException(LocalizedMessages.COMMAND_UNKNOWN_BEING);
 			}
 			
 			// Destroy the being and update the authToken
 			ApiResult apiResult = api.destroyBeing(client.getAuthToken(), playerData.getUsername(), beingCode);
 			
 			// If the currently active beingCode is the same destroyed, erase it
-			if ((client.hasBeingSelected()) && (client.getActiveBeing().getBeingCode().equals(beingCode))) {
-				client.setActiveBeing(null);
-				client.setCurPlace(null);
-			}
+			client.getActiveBeing().ifPresent(d -> {
+
+				// If the currently active beingCode is the same destroyed, erase it				
+				if (d.getBeingCode().equals(beingCode)) {
+					client.clearBeingInformation();
+				}
+				
+				
+			});
 			
 			// Refresh playerData
 			client.setPlayerData(apiResult.getUpdatedPlayerData());
@@ -352,45 +377,65 @@ public class CommandHandler {
 		
 		// Shows the being available list
 		ClientHelper.sendMessage(client,
-				ClientHelper.listAvailableBeings(client.getPlayerData().get(), client.getActiveBeingCode())
+				ClientHelper.listAvailableBeings(client, client.getPlayerData().get(), client.getActiveBeingCode())
 			);
 		
 	}
 	
+	/**
+	 * Returns information about the player logged (and active being, if it exists)
+	 * 
+	 * @param client
+	 * @param command
+	 * @throws Exception
+	 */
 	private void handleWhoAmICommand(ClientConnection client, CommandState command) throws Exception {
 		
 		Player playerData = 
 				client.getPlayerData()
-					.orElseThrow(()-> new ClientException("You must be logged to issue this command" ));
+					.orElseThrow(()-> new ClientException(LocalizedMessages.COMMAND_ONLY_LOGGED ));
+		
 
 		// Shows up player information
 		ClientHelper.sendMessage(client, 
-				ClientHelper.returnFormattedPlayerData(playerData, client.getActiveBeingCode()));
+				ClientHelper.returnFormattedPlayerData(client, playerData, client.getActiveBeingCode()));
 
 		// If there's an active being
-		if (client.hasBeingSelected()) {
-		
-			Being activeBeing = client.getActiveBeing();
+		if (client.getActiveBeing().isPresent()) {
 			
-			// Shows up being information
+			// Shows up being information			
 			ClientHelper.sendMessage(client, 
-					ClientHelper.returnFormattedBeingData(activeBeing));
+					ClientHelper.returnFormattedBeingData(client, client.getActiveBeing().get()));
 		}
 	}
 	
+	/**
+	 * Returns information about the current place of active being.
+	 * 
+	 * @param client
+	 * @param command
+	 * @throws Exception
+	 */
 	private void handleWhereAmICommand(ClientConnection client, CommandState command) throws Exception {
 		
-		if (!client.isLogged()) {
-			throw new ClientException("You must be logged to issue this command");
+		if (client.getCurPlace().isPresent()) {
+			
+			ClientHelper.sendMessage(client, 
+					ClientHelper.returnFormattedPlaceData(client, client.getCurPlace().get()));
+			
+		} else {
+			throw new ClientException(LocalizedMessages.COMMAND_NO_BEING);
 		}
 		
-		if (!client.hasBeingSelected()) {
-			throw new ClientException("You must have an active being to issue this command");
-		}
-		
-		ClientHelper.sendMessage(client, 
-				ClientHelper.returnFormattedPlaceData(client.getCurPlace()));
 	}
+	
+	private void handleLocaleCommand(ClientConnection client, CommandState command) throws Exception {
+		
+		client.setLocale(ClientHelper.getParamValue(command, "locale"));
+		
+		ClientHelper.sendMessage(client, LocalizedMessages.COMMAND_LOCALE_OK);
+	}
+	
 
 	/**
 	 * Main method for handling all SYSTEM commands.
@@ -405,7 +450,7 @@ public class CommandHandler {
 
 		try {
 		
-			switch(command.getCommand().getVerb()) {
+			switch(command.getCommand().getCommandId()) {
 			
 				case CommandHandler.REGISTER_COMMAND: {
 					handleRegisterCommand(client, command);
@@ -436,14 +481,7 @@ public class CommandHandler {
 					break;
 				}
 				case CommandHandler.LOGOUT_COMMAND: {
-					
-					client.setAuthToken(null);
-					client.setPlayerData(null);
-					client.setActiveBeing(null);
-					client.setCurPlace(null);
-					
-					ClientHelper.sendMessage(client, "Your session was terminated");
-					
+					handleLogoutCommand(client, command);
 					break;
 				}
 				case CommandHandler.CHANGEPROF_COMMAND: {
@@ -470,9 +508,13 @@ public class CommandHandler {
 					handleWhereAmICommand(client, command);
 					break;
 				}
+				case CommandHandler.LOCALE_COMMAND: {
+					handleLocaleCommand(client, command);
+					break;
+				}
 				
 				default: {
-					ClientHelper.sendMessage(client, "Unsupported command" );
+					ClientHelper.sendMessage(client, LocalizedMessages.COMMAND_NOT_SUPPORTED);
 				}
 			}
 		} finally {
@@ -492,10 +534,10 @@ public class CommandHandler {
 	public void handleGameCommand(ClientConnection client, CommandState command) throws Exception {
 
 		if (!client.hasBeingSelected()) {
-			throw new ClientException("You must be logged to issue this command" );
+			throw new ClientException(LocalizedMessages.COMMAND_ONLY_LOGGED );
 		}
 		
-		Long actorCode = client.getActiveBeing().getBeingCode();
+		Long actorCode = client.getActiveBeing().get().getBeingCode();
 		String verb = command.getCommand().getVerb();
 
 		String mediatorCode = ClientHelper.getParamValue(command, "mediatorCode");

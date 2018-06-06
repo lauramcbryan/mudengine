@@ -7,6 +7,8 @@ public class Command {
 
 	public static enum enumCategory {GAME, SYSTEM};
 	
+	private Integer commandId;
+	
 	private String verb;
 	private String description;
 	private String usage;
@@ -70,4 +72,13 @@ public class Command {
 	public void setLogged(boolean logged) {
 		this.logged = logged;
 	}
+
+	public Integer getCommandId() {
+		return commandId;
+	}
+
+	public void setCommandId(Integer commandId) {
+		this.commandId = commandId;
+	}
+	
 }

@@ -22,6 +22,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.jpinfo.mudengine.client.exception.ClientException;
 import com.jpinfo.mudengine.common.action.Action;
+import com.jpinfo.mudengine.common.action.Command;
 import com.jpinfo.mudengine.common.being.Being;
 import com.jpinfo.mudengine.common.being.BeingClass;
 import com.jpinfo.mudengine.common.item.Item;
@@ -414,15 +415,22 @@ public class MudengineApiImpl implements MudengineApi {
 				}
 				default:
 					exception.printStackTrace();
-					throw new ClientException("Error trying to access the service");
+					throw new ClientException("api.error.message");
 			}
 		} catch(ClientException e) {
 			throw e;
 		} catch(Exception e) {
 			
 			e.printStackTrace();
-			throw new ClientException("Error trying to access the service");
+			throw new ClientException("api.error.message");
 		}
+	}
+
+	@Override
+	public List<Command> getGameCommandList(String locale) {
+		
+		// TODO Auto-generated method stub
+		return new ArrayList<Command>();
 	}
 	
 }

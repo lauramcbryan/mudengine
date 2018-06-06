@@ -12,8 +12,9 @@ import com.jpinfo.mudengine.client.exception.ClientException;
 import com.jpinfo.mudengine.client.model.ClientConnection;
 import com.jpinfo.mudengine.client.model.CommandParamState;
 import com.jpinfo.mudengine.client.model.CommandState;
-import com.jpinfo.mudengine.client.model.VerbDictionary;
+import com.jpinfo.mudengine.client.model.VerbDictionaries;
 import com.jpinfo.mudengine.client.utils.ClientHelper;
+import com.jpinfo.mudengine.client.utils.LocalizedMessages;
 import com.jpinfo.mudengine.common.action.Command;
 
 @MessageEndpoint
@@ -23,7 +24,7 @@ public class MudClientService {
 	private MudClientGateway gateway;
 	
 	@Autowired
-	private VerbDictionary verbDictionary;
+	private VerbDictionaries verbDictionaries;
 	
 	@Autowired
 	private CommandHandler handler;
@@ -59,7 +60,7 @@ public class MudClientService {
 							.append(";");
 					});
 					
-					msg.append("\r\nClient Token: ").append(client.getAuthToken());
+					msg.append(ClientHelper.CRLF + "Client Token: ").append(client.getAuthToken());
 					
 					System.out.println(msg.toString());
 
@@ -89,7 +90,7 @@ public class MudClientService {
 				
 				try {
 					e.printStackTrace();					
-					ClientHelper.sendMessage(client, "There was an error processing your input.  Please try again.");
+					ClientHelper.sendMessage(client, LocalizedMessages.GENERAL_ERROR_MESSAGE);
 				} catch(Exception ex) {
 					ex.printStackTrace();					
 				}
@@ -98,7 +99,28 @@ public class MudClientService {
 			
 		} // endif client!=null
 		
-		return "$ ";
+		// If it's waiting an input
+		if (client.getCurCommandState()!=null) {
+			
+			// return just the input prompt
+			return " ";
+			
+		} else {
+			
+			// Full Prompt
+			String username = (client.isLogged() ? 
+					client.getPlayerData().get().getUsername() : 
+						client.getLocalizedMessage(LocalizedMessages.ANONYMOUS_MESSAGE));
+			
+			String beingName = (client.hasBeingSelected() ? 
+					client.getActiveBeing().get().getName(): 
+						client.getLocalizedMessage(LocalizedMessages.NO_BEING_MESSAGE));
+			
+			
+			return username + "@" + beingName + ":$ ";
+		}
+		
+		
 	}
 	
 	protected void updateClientState(ClientConnection client, String enteredValue) throws Exception {
@@ -118,10 +140,12 @@ public class MudClientService {
 			
 			// if found the command, assign.
 			// otherwise, respond with error
-			CommandState choosenCommand = verbDictionary.getCommand(enteredValue);
+			CommandState choosenCommand = verbDictionaries
+					.getDictionary(client.getLocale())
+						.getCommand(enteredValue);
 			
 			if ((choosenCommand.getCommand().isLogged()) && (!client.isLogged())) {
-				throw new ClientException("You must be logged to issue this command.");
+				throw new ClientException(LocalizedMessages.COMMAND_ONLY_LOGGED);
 			}
 			
 			// Set the current command
@@ -147,7 +171,7 @@ public class MudClientService {
 				client.getCurParamState().setEnteredValue(enteredValue);
 				
 				if (!client.getCurParamState().isValid()) {
-					ClientHelper.sendMessage(client, "The value entered is invalid.");
+					ClientHelper.sendMessage(client, LocalizedMessages.COMMAND_INVALID_PARAMETER);
 				}
 			} 
 			else {

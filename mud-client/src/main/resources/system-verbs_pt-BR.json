@@ -1,0 +1,246 @@
+{
+	"commandList": [
+		{
+			"commandId": 1,		
+			"verb": "registre",
+			"category": "SYSTEM",
+			"logged": false,
+			"description": "Cria uma conta no sistema.",
+			"usage": "registre [<nome-de-usuario> [<email> [<linguagem>] ] ]",
+			"parameters": [
+				{
+					"name": "username",
+					"inputMessage": "Indique o nome do usuário",
+					"type": "anyString",
+					"required": true
+				},
+				{
+					"name": "email",
+					"inputMessage": "Indique o email",
+					"type": "email",
+					"required": true
+				},
+				{
+					"name": "locale",
+					"inputMessage": "Escolha a linguagem",
+					"type": "anyString",
+					"required": false,
+					"domainValues": [
+						"en-US",
+						"pt-BR"
+					],
+					"defaultValue": "en-US"
+				}
+			]
+		},
+		{
+			"commandId": 2,		
+			"verb": "mudar perfil",
+			"category": "SYSTEM",
+			"description": "Mudar perfil do sistema.",
+			"usage": "mudar perfil [<email> [<linguagem>] ]",
+			"parameters": [
+				{
+					"name": "email",
+					"inputMessage": "Indique o email",
+					"type": "email",
+					"required": true
+				},
+				{
+					"name": "locale",
+					"inputMessage": "Escolha a linguagem",
+					"type": "anyString",
+					"required": false,
+					"domainValues": [
+						"en-US",
+						"pt-BR"
+					],
+					"defaultValue": "en-US"
+				}
+			]
+		},
+		{
+			"commandId": 3,		
+			"verb": "ativar conta",
+			"category": "SYSTEM",
+			"logged": false,			
+			"description": "Ativa uma conta criada pelo comando 'registrar'.",
+			"usage": "ativar conta [<código> [<nova-senha>] ]",
+			"parameters": [
+				{
+					"name": "username",
+					"inputMessage": "Indique o nome do usuário",
+					"type": "anyString",
+					"required": true
+				},
+				{
+					"name": "activationCode",
+					"inputMessage": "Digite o código de ativação recebido",
+					"type": "anyString",
+					"required": true
+				},
+				{
+					"name": "newPassword",
+					"inputMessage": "Escolha uma nova senha",
+					"type": "anyString",
+					"required": true
+				}
+			]
+		},
+		{
+			"commandId": 4,		
+			"verb": "mudar senha",
+			"category": "SYSTEM",		
+			"description": "Mudar senha do usuário",
+			"usage": "mudar senha [<senha-antiga> [<senha-nova>] ]",
+			"parameters": [
+				{
+					"name": "oldPassword",
+					"inputMessage": "Digite a senha antiga",
+					"type": "anyString",
+					"required": true
+				},
+				{
+					"name": "newPassword",
+					"inputMessage": "Digite a nova senha",
+					"type": "anyString",
+					"required": true
+				}
+			]
+		},
+		{
+			"commandId": 5,		
+			"verb": "quit",
+			"description": "Fecha a conexão.",
+			"logged": false,
+			"usage": "quit",
+			"category": "SYSTEM"
+		},
+		{
+			"commandId": 6,		
+			"verb": "ajuda",
+			"description": "Mostra a lista de comandos",
+			"logged": false,
+			"usage": "help",
+			"category": "SYSTEM"
+		},		
+		{
+			"commandId": 7,		
+			"verb": "login",
+			"category": "SYSTEM",
+			"description": "Autentica a conta",
+			"logged": false,			
+			"usage": "login [<nome-usuario> [<senha>] ]",
+			"parameters": [
+				{
+					"name": "username",
+					"inputMessage": "Por favor, digite o nome do usuário",
+					"type": "anyString",
+					"required": true
+				},
+				{
+					"name": "password",
+					"inputMessage": "Digite a senha",
+					"type": "anyString",
+					"required": true
+				}
+			]
+		},		
+		{
+			"commandId": 8,		
+			"verb": "logout",
+			"category": "SYSTEM",
+			"description": "Encerra a sessão",
+			"usage": "logout",
+			"parameters": null
+		},		
+		{
+			"commandId": 9,		
+			"verb": "criar ser",
+			"category": "SYSTEM",
+			"description": "Cria um novo ser",
+			"usage": "criar ser <classe> <nome>",
+			"parameters": [
+				{
+					"name": "beingClass",
+					"inputMessage": "Por favor escolha uma classe",
+					"type": "anyString",
+					"required": false
+				},
+				{
+					"name": "beingName",
+					"inputMessage": "Escolha o nome do ser",
+					"type": "anyString",
+					"required": true
+				}
+			]
+		},
+		{
+			"commandId": 10,		
+			"verb": "selecionar ser",
+			"category": "SYSTEM",
+			"description": "Seleciona um ser já existente",
+			"usage": "selecione ser <codigo-do-ser>",
+			"parameters": [
+				{
+					"name": "beingCode",
+					"inputMessage": "Entre o código do ser",
+					"type": "anyNumber",
+					"required": false
+				}
+			]
+		},
+		{
+			"commandId": 11,		
+			"verb": "destruir ser",
+			"category": "SYSTEM",
+			"description": "Destrói um ser pré-existente",
+			"usage": "destruir ser <beingCode>",
+			"parameters": [
+				{
+					"name": "beingCode",
+					"inputMessage": "Entre o código do ser",
+					"type": "anyNumber",
+					"required": false
+				}
+			]
+		},
+		{
+			"commandId": 12,		
+			"verb": "quem sou eu",
+			"category": "SYSTEM",
+			"description": "Mostra informação do jogador",
+			"usage": "whoami",
+			"parameters": null
+		},
+		{
+			"commandId": 13,		
+			"verb": "onde estou",
+			"category": "SYSTEM",
+			"description": "Mostra informação sobre o local atual do ser",
+			"usage": "whereami",
+			"parameters": null
+		},
+		{
+			"commandId": 14,		
+			"verb": "mudar linguagem",
+			"category": "SYSTEM",
+			"logged": false,			
+			"description": "Muda a linguagem do sistema",
+			"usage": "mudar linguagem <nova-linguagem>",
+			"parameters": [
+				{
+					"name": "locale",
+					"inputMessage": "Escolha a linguagem",
+					"type": "anyString",
+					"required": false,
+					"domainValues": [
+						"en-US",
+						"pt-BR"
+					],
+					"defaultValue": "en-US"
+				}
+			]
+		}
+	]
+}

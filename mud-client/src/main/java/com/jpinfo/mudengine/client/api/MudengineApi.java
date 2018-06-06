@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.jpinfo.mudengine.client.exception.ClientException;
 import com.jpinfo.mudengine.common.action.Action;
+import com.jpinfo.mudengine.common.action.Command;
 import com.jpinfo.mudengine.common.being.Being;
 import com.jpinfo.mudengine.common.being.BeingClass;
 import com.jpinfo.mudengine.common.item.Item;
@@ -46,5 +47,7 @@ public interface MudengineApi {
 	List<Message> getMessages(String authToken);
 	
 	List<BeingClass> getBeingClasses(String authToken);
+	
+	List<Command> getGameCommandList(String locale);
 	
 }
