@@ -9,7 +9,7 @@ public class ActionClass {
 	public static final int ACTION_CLASS_SIMPLE = 0;
 	public static final int ACTION_CLASS_CONTINUOUS = 1;
 
-	private String actionClassCode;
+	private Integer actionClassCode;
 	
 	private String verb;
 	
@@ -29,11 +29,11 @@ public class ActionClass {
 		this.effectList = new TreeSet<ActionClassEffect>();
 	}
 
-	public String getActionClassCode() {
+	public Integer getActionClassCode() {
 		return actionClassCode;
 	}
 
-	public void setActionClassCode(String actionClassCode) {
+	public void setActionClassCode(Integer actionClassCode) {
 		this.actionClassCode = actionClassCode;
 	}
 

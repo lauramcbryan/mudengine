@@ -427,10 +427,25 @@ public class MudengineApiImpl implements MudengineApi {
 	}
 
 	@Override
-	public List<Command> getGameCommandList(String locale) {
+	public List<Command> getGameCommandList(String locale) throws ClientException {
 		
-		// TODO Auto-generated method stub
-		return new ArrayList<Command>();
+		List<Command> returnList = new ArrayList<Command>();
+
+		Map<String, Object> urlVariables = new HashMap<String, Object>();
+		urlVariables.put("locale", locale);
+
+		try {
+			ResponseEntity<Command[]> response = restTemplate.exchange(
+					apiEndpoint + "/action/class/commands/{locale}", 
+					HttpMethod.GET, getEmptyHttpEntity(), Command[].class, urlVariables);
+			
+			returnList = Arrays.asList(response.getBody());
+			
+		} catch(RestClientResponseException e) {
+			handleError(e, "Command");
+		}
+
+		return returnList;
 	}
 	
 }

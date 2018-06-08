@@ -9,7 +9,7 @@ public class Action {
 	
 	private Long actorCode;
 
-	private String actionClassCode;
+	private Integer actionClassCode;
 	
 	private String mediatorCode;
 
@@ -59,11 +59,11 @@ public class Action {
 
 
 
-	public String getActionClassCode() {
+	public Integer getActionClassCode() {
 		return actionClassCode;
 	}
 
-	public void setActionClassCode(String actionCode) {
+	public void setActionClassCode(Integer actionCode) {
 		this.actionClassCode = actionCode;
 	}
 

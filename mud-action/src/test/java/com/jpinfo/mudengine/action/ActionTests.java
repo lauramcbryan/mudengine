@@ -129,7 +129,7 @@ public class ActionTests {
 		
 		Action walkAction = new Action();
 		walkAction.setActorCode(1L);
-		walkAction.setActionClassCode("WALKDIR");
+		walkAction.setActionClassCode(1);   // WALKDIR
 		walkAction.setTargetCode("NORTH");
 		walkAction.setTargetType(EnumTargetType.DIRECTION);
 
@@ -157,7 +157,7 @@ public class ActionTests {
 		
 		Action lookAction = new Action();
 		lookAction.setActorCode(1L);
-		lookAction.setActionClassCode("LOOKPLACE");
+		lookAction.setActionClassCode(2);  // LOOKPLACE
 		lookAction.setTargetCode("1");
 		lookAction.setTargetType(EnumTargetType.PLACE);
 
@@ -181,7 +181,7 @@ public class ActionTests {
 		
 		Action lookAction = new Action();
 		lookAction.setActorCode(1L);
-		lookAction.setActionClassCode("LOOKBEING");
+		lookAction.setActionClassCode(3);   //LOOKBEING
 		lookAction.setTargetCode("2");
 		lookAction.setTargetType(EnumTargetType.BEING);
 

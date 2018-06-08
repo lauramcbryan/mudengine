@@ -4,7 +4,6 @@ import org.springframework.data.repository.CrudRepository;
 
 import com.jpinfo.mudengine.action.model.MudActionClass;
 
-public interface MudActionClassRepository extends CrudRepository<MudActionClass, String> {
+public interface MudActionClassRepository extends CrudRepository<MudActionClass, Integer> {
 
-	public MudActionClass findByVerbAndMediatorTypeAndTargetType(String verb, String mediatorType, String targetType);
 }

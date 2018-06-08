@@ -22,13 +22,12 @@ public interface ActionService {
 	public Action getAction(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, 
 			@PathVariable("actionCode") Long actionCode);
 	
-	@RequestMapping(method=RequestMethod.PUT, value="/{verb}")
+	@RequestMapping(method=RequestMethod.PUT, value="/{commandId}")
 	public Action insertCommand(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, 
-			@PathVariable("verb") String verb,
+			@PathVariable("commandId") Integer commandId,
 			@RequestParam("actorCode") Long actorCode,
 			@RequestParam("mediatorCode") Optional<String> mediatorCode, 
-			@RequestParam("mediatorType") Optional<String> mediatorType,
-			@RequestParam("targetCode") String targetCode, @RequestParam("targetType") String targetType);
+			@RequestParam("targetCode") String targetCode);
 
 	@RequestMapping(method=RequestMethod.DELETE, value="{actionCode}")
 	public void cancelAction(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, 

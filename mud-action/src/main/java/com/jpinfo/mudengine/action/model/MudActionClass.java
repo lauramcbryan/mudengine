@@ -10,17 +10,7 @@ public class MudActionClass {
 
 	@Id
 	@Column(name="ACTION_CLASS_CODE")
-	private String actionClassCode;
-	
-	@Column
-	private String verb;
-	
-	@Column(name="MEDIATOR_TYPE")
-	private String mediatorType;  // {BEING, ITEM, PLACE, DIRECTION, MESSAGE}
-	
-	@Column(name="TARGET_TYPE")
-	private String targetType;  // {BEING, ITEM, PLACE, DIRECTION, MESSAGE}
-	
+	private Integer actionClassCode;
 	
 	@Column(name="ACTION_TYPE")
 	private Integer actionType;    // 0 = SIMPLE, 1 = CONTINUOUS (effects every turn)
@@ -41,11 +31,11 @@ public class MudActionClass {
 		
 	}
 	
-	public String getActionClassCode() {
+	public Integer getActionClassCode() {
 		return actionClassCode;
 	}
 
-	public void setActionClassCode(String actionClassCode) {
+	public void setActionClassCode(Integer actionClassCode) {
 		this.actionClassCode = actionClassCode;
 	}
 
@@ -57,10 +47,6 @@ public class MudActionClass {
 		return effectList;
 	}
 
-
-	public String getVerb() {
-		return verb;
-	}
 
 	public Integer getActionType() {
 		return actionType;
@@ -84,25 +70,5 @@ public class MudActionClass {
 
 	public void setNroTurnsExpr(String nroTurnsExpr) {
 		this.nroTurnsExpr = nroTurnsExpr;
-	}
-
-	public void setVerb(String verb) {
-		this.verb = verb;
-	}
-
-	public String getMediatorType() {
-		return mediatorType;
-	}
-
-	public void setMediatorType(String mediatorType) {
-		this.mediatorType = mediatorType;
-	}
-
-	public String getTargetType() {
-		return targetType;
-	}
-
-	public void setTargetType(String targetType) {
-		this.targetType = targetType;
 	}
 }

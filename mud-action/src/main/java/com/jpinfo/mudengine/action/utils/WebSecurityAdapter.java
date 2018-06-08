@@ -21,7 +21,9 @@ public class WebSecurityAdapter extends WebSecurityConfigurerAdapter {
 		// Bypassing frame options security in order to be able to use H2 Console
 		http.headers().frameOptions().disable();
 
-		http.authorizeRequests().antMatchers("/action/*").authenticated();
+		http.authorizeRequests()
+			.antMatchers("/action/class/*").permitAll()
+			.antMatchers("/action/*").authenticated();
 		http.addFilterBefore(new CommonSecurityFilter(), UsernamePasswordAuthenticationFilter.class);
 	}
 }

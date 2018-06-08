@@ -48,6 +48,6 @@ public interface MudengineApi {
 	
 	List<BeingClass> getBeingClasses(String authToken);
 	
-	List<Command> getGameCommandList(String locale);
+	List<Command> getGameCommandList(String locale) throws ClientException;
 	
 }

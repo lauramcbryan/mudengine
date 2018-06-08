@@ -1,13 +1,19 @@
 package com.jpinfo.mudengine.action.utils;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import com.jpinfo.mudengine.action.model.MudAction;
 import com.jpinfo.mudengine.action.model.MudActionClass;
+import com.jpinfo.mudengine.action.model.MudActionClassCommand;
 import com.jpinfo.mudengine.action.model.MudActionClassEffect;
 import com.jpinfo.mudengine.action.model.MudActionClassPrereq;
 import com.jpinfo.mudengine.common.action.Action;
 import com.jpinfo.mudengine.common.action.ActionClass;
 import com.jpinfo.mudengine.common.action.ActionClassEffect;
 import com.jpinfo.mudengine.common.action.ActionClassPrereq;
+import com.jpinfo.mudengine.common.action.Command;
+import com.jpinfo.mudengine.common.action.CommandParam;
 import com.jpinfo.mudengine.common.action.Action.EnumTargetType;
 
 public class ActionHelper {
@@ -40,7 +46,6 @@ public class ActionHelper {
 		result.setActionType(a.getActionType());
 		result.setNroTurnsExpr(a.getNroTurnsExpr());
 		result.setSuccessRateExpr(a.getSuccessRateExpr());
-		result.setVerb(a.getVerb());
 		
 		for(MudActionClassPrereq curPrereq: a.getPrereqList()) {
 			
@@ -63,6 +68,46 @@ public class ActionHelper {
 			
 			result.getEffectList().add(newEffect);
 		}
+		
+		return result;
+	}
+	
+	public static Command buildCommand(MudActionClassCommand dbCommand) {
+		
+		Command result = new Command();
+		
+		result.setCommandId(dbCommand.getCommandId());
+		result.setCategory(Command.enumCategory.GAME);
+		result.setDescription(dbCommand.getDescription());
+		result.setLogged(true);
+		result.setUsage(dbCommand.getUsage());
+		result.setVerb(dbCommand.getVerb());
+		
+		result.setParameters(new ArrayList<CommandParam>());
+		
+		dbCommand.getParameterList().forEach(d -> {
+			
+			CommandParam newParam = new CommandParam();
+			
+			newParam.setName(d.getPk().getName());
+			newParam.setRequired(d.isRequired());
+			newParam.setType(CommandParam.enumParamTypes.valueOf(d.getType()));
+			newParam.setDefaultValue(d.getDefaultValue());
+			
+			if (d.getDomainValues()!=null) {
+				
+				String[] arrDomainValues = d.getDomainValues().split(", ");
+				
+				newParam.setDomainValues(
+						Arrays.asList(arrDomainValues)
+					);
+			}
+			
+			newParam.setInputMessage(d.getInputMessage());
+			
+			result.getParameters().add(newParam);
+			
+		});
 		
 		return result;
 	}

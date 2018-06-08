@@ -21,7 +21,7 @@ public class MudAction {
 	private Long actorCode;
 
 	@Column(name="ACTION_CLASS_CODE")
-	private String actionClassCode;
+	private Integer actionClassCode;
 	
 	@Column(name="MEDIATOR_CODE")
 	private String mediatorCode;
@@ -52,11 +52,11 @@ public class MudAction {
 		
 	}
 
-	public String getActionClassCode() {
+	public Integer getActionClassCode() {
 		return actionClassCode;
 	}
 
-	public void setActionClassCode(String actionClassCode) {
+	public void setActionClassCode(Integer actionClassCode) {
 		this.actionClassCode = actionClassCode;
 	}
 

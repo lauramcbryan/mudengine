@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 
 
+
 import java.util.List;
 import java.util.Optional;
 
@@ -21,8 +22,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.jpinfo.mudengine.action.model.MudAction;
-import com.jpinfo.mudengine.action.model.MudActionClass;
-import com.jpinfo.mudengine.action.repository.MudActionClassRepository;
+import com.jpinfo.mudengine.action.model.MudActionClassCommand;
+import com.jpinfo.mudengine.action.repository.MudActionClassCommandRepository;
 import com.jpinfo.mudengine.action.repository.MudActionRepository;
 import com.jpinfo.mudengine.action.utils.ActionHelper;
 import com.jpinfo.mudengine.action.utils.ActionTestResult;
@@ -37,9 +38,8 @@ public class ActionController implements ActionService {
 
 	@Autowired
 	private MudActionRepository repository;
-	
-	@Autowired
-	private MudActionClassRepository classRepository;
+		
+	private MudActionClassCommandRepository commandRepository;
 	
 	@Autowired
 	private ActionHandler handler;
@@ -77,91 +77,93 @@ public class ActionController implements ActionService {
 	
 	@Override
 	public Action insertCommand(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, 
-			@PathVariable("verb") String verb, 
-			@RequestParam("actorCode") Long actorCode, 
+			@PathVariable("commandId") Integer commandId,
+			@RequestParam("actorCode") Long actorCode,
 			@RequestParam("mediatorCode") Optional<String> mediatorCode, 
-			@RequestParam("mediatorType") Optional<String> mediatorType,
-			@RequestParam("targetCode") String targetCode, @RequestParam("targetType") String targetType)
+			@RequestParam("targetCode") String targetCode)
 	{
 		
 		Action response = null;
 		
 		MudAction dbAction = new MudAction();
 		
-		MudActionClass dbActionClass = classRepository.findByVerbAndMediatorTypeAndTargetType(verb, mediatorType.get(), targetType);
+		MudActionClassCommand command = commandRepository.findById(commandId)
+				.orElseThrow(() -> new EntityNotFoundException("Command not recognized"));
+
 		
-		if (dbActionClass!=null) {
-			dbAction.setActorCode(actorCode);
-			dbAction.setIssuerCode(actorCode);
-			dbAction.setActionClassCode(dbActionClass.getActionClassCode());
-			dbAction.setMediatorCode(null);
-			dbAction.setTargetCode(targetCode);
-			dbAction.setTargetType(Action.EnumTargetType.valueOf(targetType));
-			dbAction.setCurrState(Action.EnumActionState.NOT_STARTED);
-			
-			// Save the new command; obtain an actionId
-			dbAction = repository.save(dbAction);
-			
-			response = ActionHelper.buildAction(dbAction);
-		} else {
-			throw new EntityNotFoundException("Verb " + verb + " not recognized.");
-		}
+		dbAction.setActorCode(actorCode);
+		dbAction.setIssuerCode(actorCode);
+		dbAction.setActionClassCode(command.getActionClassCode());
+		dbAction.setMediatorType(command.getMediatorType());
+		dbAction.setTargetType(command.getTargetType());
 		
+		
+		if (mediatorCode.isPresent())
+			dbAction.setMediatorCode(mediatorCode.get());
+		
+		dbAction.setTargetCode(targetCode);
+		dbAction.setCurrState(Action.EnumActionState.NOT_STARTED);
+		
+		
+		// Save the new command; obtain an actionId
+		dbAction = repository.save(dbAction);
+		
+		response = ActionHelper.buildAction(dbAction);
 		
 		return response;
 	}
 	
 	
-	@RequestMapping(value="/test/{verb}", method=RequestMethod.GET)
-	public ActionTestResult testExpression(@PathVariable("verb") String verb, 
+	@RequestMapping(value="/test/{commandId}", method=RequestMethod.GET)
+	public ActionTestResult testExpression(
+			@PathVariable("commandId") Integer commandId, 
 			@RequestParam("actorCode") Long actorCode, 
 			@RequestParam("mediatorCode") Optional<String> mediatorCode, 
-			@RequestParam("mediatorType") Optional<String> mediatorType,
-			@RequestParam("targetCode") String targetCode, 
-			@RequestParam("targetType") String targetType,
+			@RequestParam("targetCode") String targetCode,
 			@RequestParam("expression") Optional<String> expression) {
 		
 		ActionTestResult result = new ActionTestResult();
 		
 		// mount an Action
 		Action action = new Action();
+
+		MudActionClassCommand command = commandRepository.findById(commandId)
+				.orElseThrow(() -> new EntityNotFoundException("Command not recognized"));
 		
-		MudActionClass dbActionClass = classRepository.findByVerbAndMediatorTypeAndTargetType(verb, mediatorCode.get(), targetType);
 		
-		if (dbActionClass!=null) {
+		action.setActorCode(actorCode);
+		action.setIssuerCode(actorCode);
+		action.setActionClassCode(command.getActionClassCode());
+		action.setMediatorType(Action.EnumTargetType.valueOf(command.getMediatorType()));
+		action.setTargetType(Action.EnumTargetType.valueOf(command.getTargetType()));
 		
-			action.setIssuerCode(actorCode);
-			action.setActorCode(actorCode);
-			action.setTargetCode(targetCode);
-			action.setTargetType(Action.EnumTargetType.valueOf(targetType));
-			action.setActionClassCode(dbActionClass.getActionClassCode());
+		
+		if (mediatorCode.isPresent())
+			action.setMediatorCode(mediatorCode.get());
+		
+		action.setTargetCode(targetCode);
+		action.setCurState(Action.EnumActionState.NOT_STARTED);
+		
+		// mount an ActionInfo
+		result.setTestData(handler.buildActionInfo(action));
+		
+		if (expression.isPresent()) {
 			
-			action.setTargetType(Action.EnumTargetType.valueOf(targetType));
-			action.setCurState(Action.EnumActionState.NOT_STARTED);
-			
-			// mount an ActionInfo
-			result.setTestData(handler.buildActionInfo(action));
-			
-			if (expression.isPresent()) {
-				
-				try {
-					ExpressionParser parser = new SpelExpressionParser();
-					EvaluationContext context = new StandardEvaluationContext(result.getTestData());
-					context.setVariable("action", result.getTestData());
-	
-					// Running successRate expressions
-					Expression curExpression = parser.parseExpression(expression.get());
-	
-					result.setResult(curExpression.getValue(context));
-				} catch(Exception e) {
-					result.setResult(e);
-				}
-				
+			try {
+				ExpressionParser parser = new SpelExpressionParser();
+				EvaluationContext context = new StandardEvaluationContext(result.getTestData());
+				context.setVariable("action", result.getTestData());
+
+				// Running successRate expressions
+				Expression curExpression = parser.parseExpression(expression.get());
+
+				result.setResult(curExpression.getValue(context));
+			} catch(Exception e) {
+				result.setResult(e);
 			}
 			
-		} else {
-			throw new EntityNotFoundException("Verb " + verb + " not recognized.");
 		}
+			
 		
 		return result;
 	}
