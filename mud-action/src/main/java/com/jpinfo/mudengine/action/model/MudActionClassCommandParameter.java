@@ -3,10 +3,12 @@ package com.jpinfo.mudengine.action.model;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.Table;
 
 import com.jpinfo.mudengine.action.model.pk.MudActionClassCommandParameterPK;
 
-@Entity(name="MUD_ACTION_CLASS_CMD_PARAMETER")
+@Entity
+@Table(name="MUD_ACTION_CLASS_CMD_PARAMETER")
 public class MudActionClassCommandParameter {
 
 	@EmbeddedId

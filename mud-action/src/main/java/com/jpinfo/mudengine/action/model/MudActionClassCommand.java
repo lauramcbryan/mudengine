@@ -6,8 +6,10 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
 
-@Entity(name="MUD_ACTION_CLASS_CMD")
+@Entity
+@Table(name="MUD_ACTION_CLASS_CMD")
 public class MudActionClassCommand {
 
 	@Id
@@ -33,7 +35,7 @@ public class MudActionClassCommand {
 	private String locale;
 	
 	
-	@OneToMany(mappedBy="commandId")
+	@OneToMany(mappedBy="pk.commandId", orphanRemoval=true)
 	private Set<MudActionClassCommandParameter> parameterList;
 	
 	
