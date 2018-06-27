@@ -2,6 +2,9 @@ package com.jpinfo.mudengine.item.model;
 
 import java.io.Serializable;
 import javax.persistence.*;
+
+import lombok.Data;
+
 import java.util.*;
 
 
@@ -12,7 +15,9 @@ import java.util.*;
 @Entity
 @Table(name="mud_item")
 @SequenceGenerator(name = "mud_item_seq", sequenceName="mud_item_seq", allocationSize=1)
+@Data
 public class MudItem implements Serializable {
+	
 	private static final long serialVersionUID = 1L;
 
 	@Id
@@ -43,57 +48,4 @@ public class MudItem implements Serializable {
 	public MudItem() {
 		this.attrs = new ArrayList<MudItemAttr>();
 	}
-
-	public Long getItemCode() {
-		return this.itemCode;
-	}
-
-	public void setItemCode(Long itemCode) {
-		this.itemCode = itemCode;
-	}
-
-	public MudItemClass getItemClass() {
-		return itemClass;
-	}
-
-	public void setItemClass(MudItemClass itemClass) {
-		this.itemClass = itemClass;
-	}
-
-	public List<MudItemAttr> getAttrs() {
-		return this.attrs;
-	}
-
-	public String getCurWorld() {
-		return curWorld;
-	}
-
-	public void setCurWorld(String curWorld) {
-		this.curWorld = curWorld;
-	}
-
-	public Integer getCurPlaceCode() {
-		return curPlaceCode;
-	}
-
-	public void setCurPlaceCode(Integer curPlaceCode) {
-		this.curPlaceCode = curPlaceCode;
-	}
-
-	public Integer getQuantity() {
-		return quantity;
-	}
-
-	public void setQuantity(Integer quantity) {
-		this.quantity = quantity;
-	}
-
-	public Long getCurOwner() {
-		return curOwner;
-	}
-
-	public void setCurOwner(Long currentOwner) {
-		this.curOwner = currentOwner;
-	}
-
 }

@@ -49,14 +49,14 @@ public class BeingHelper {
 		for(MudBeingAttr curAttr: dbBeing.getAttrs()) {
 			
 			// Calculating the attribute effective value
-			int effectiveAttrValue = BeingHelper.calcEffectiveAttr(curAttr.getId().getAttrCode(), curAttr.getValue(), dbBeing);
+			int effectiveAttrValue = BeingHelper.calcEffectiveAttr(curAttr.getId().getAttrCode(), curAttr.getAttrValue(), dbBeing);
 			
 			response.getAttrs().put(curAttr.getId().getAttrCode(), effectiveAttrValue);
 		}
 		
 		for(MudBeingSkill curSkill: dbBeing.getSkills()) {
 			
-			int effectiveSkillValue = BeingHelper.calcEffectiveSkill(curSkill.getId().getSkillCode(), curSkill.getValue(), dbBeing);
+			int effectiveSkillValue = BeingHelper.calcEffectiveSkill(curSkill.getId().getSkillCode(), curSkill.getSkillValue(), dbBeing);
 			
 			response.getSkills().put(curSkill.getId().getSkillCode(), effectiveSkillValue);
 		}
@@ -69,11 +69,11 @@ public class BeingHelper {
 			List<BeingSkillModifier> skillModifierList = new ArrayList<BeingSkillModifier>();
 			
 			for(MudBeingAttr curAttr: dbBeing.getAttrs()) {
-				baseAttrMap.put(curAttr.getId().getAttrCode(), curAttr.getValue());
+				baseAttrMap.put(curAttr.getId().getAttrCode(), curAttr.getAttrValue());
 			}
 			
 			for(MudBeingSkill curSkill: dbBeing.getSkills()) {
-				baseSkillMap.put(curSkill.getId().getSkillCode(), curSkill.getValue());
+				baseSkillMap.put(curSkill.getId().getSkillCode(), curSkill.getSkillValue());
 			}
 			
 		
@@ -212,7 +212,7 @@ public class BeingHelper {
 		dbAttrPK.setBeingCode(beingCode);
 		
 		dbAttr.setId(dbAttrPK);
-		dbAttr.setValue(attrValue);
+		dbAttr.setAttrValue(attrValue);
 		
 		return dbAttr;
 	}
@@ -226,7 +226,7 @@ public class BeingHelper {
 		dbSkillPK.setBeingCode(beingCode);
 		
 		dbSkill.setId(dbSkillPK);
-		dbSkill.setValue(skillValue);
+		dbSkill.setSkillValue(skillValue);
 		
 		return dbSkill;
 	}
@@ -260,7 +260,7 @@ public class BeingHelper {
 				newSkillPK.setBeingCode(dbBeing.getBeingCode());
 				
 				newSkill.setId(newSkillPK);
-				newSkill.setValue(requestBeing.getSkills().get(curSkill));
+				newSkill.setSkillValue(requestBeing.getSkills().get(curSkill));
 				
 				skillsList.add(newSkill);
 			}

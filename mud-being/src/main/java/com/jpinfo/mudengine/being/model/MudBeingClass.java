@@ -2,6 +2,10 @@ package com.jpinfo.mudengine.being.model;
 
 import java.io.Serializable;
 import javax.persistence.*;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
 import java.util.List;
 
 
@@ -11,7 +15,10 @@ import java.util.List;
  */
 @Entity
 @Table(name="mud_being_class")
+@Data
+@EqualsAndHashCode(of= {"beingClassCode"})
 public class MudBeingClass implements Serializable {
+	
 	private static final long serialVersionUID = 1L;
 
 	@Id
@@ -37,61 +44,4 @@ public class MudBeingClass implements Serializable {
 	
 	@OneToMany(mappedBy="id.beingClassCode", cascade=CascadeType.ALL, orphanRemoval=true)
 	private List<MudBeingClassSlot> slots;
-
-	public MudBeingClass() {
-	}
-
-	public String getBeingClassCode() {
-		return this.beingClassCode;
-	}
-
-	public void setBeingClass(String beingClassCode) {
-		this.beingClassCode = beingClassCode;
-	}
-
-	public String getDescription() {
-		return this.description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-	public String getName() {
-		return this.name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public Integer getSize() {
-		return this.size;
-	}
-
-	public void setSize(Integer size) {
-		this.size = size;
-	}
-
-	public Integer getWeightCapacity() {
-		return this.weightCapacity;
-	}
-
-	public void setWeightCapacity(Integer weightCapacity) {
-		this.weightCapacity = weightCapacity;
-	}
-
-	public List<MudBeingClassAttr> getAttributes() {
-		return this.attributes;
-	}
-
-	public List<MudBeingClassSkill> getSkills() {
-		return this.skills;
-	}
-
-	public List<MudBeingClassSlot> getSlots() {
-		return slots;
-	}
-	
-	
 }

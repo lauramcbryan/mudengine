@@ -5,6 +5,8 @@ import javax.persistence.*;
 
 import com.jpinfo.mudengine.being.model.pk.BeingClassAttrPK;
 
+import lombok.Data;
+
 
 /**
  * The persistent class for the mud_being_class_attr database table.
@@ -12,7 +14,9 @@ import com.jpinfo.mudengine.being.model.pk.BeingClassAttrPK;
  */
 @Entity
 @Table(name="mud_being_class_attr")
+@Data
 public class MudBeingClassAttr implements Serializable {
+	
 	private static final long serialVersionUID = 1L;
 
 	@EmbeddedId
@@ -20,23 +24,4 @@ public class MudBeingClassAttr implements Serializable {
 
 	@Column(name="attr_value")
 	private Integer attrValue;
-
-	public MudBeingClassAttr() {
-	}
-
-	public BeingClassAttrPK getId() {
-		return this.id;
-	}
-
-	public void setId(BeingClassAttrPK id) {
-		this.id = id;
-	}
-
-	public Integer getAttrValue() {
-		return this.attrValue;
-	}
-
-	public void setAttrValue(Integer attrValue) {
-		this.attrValue = attrValue;
-	}
 }

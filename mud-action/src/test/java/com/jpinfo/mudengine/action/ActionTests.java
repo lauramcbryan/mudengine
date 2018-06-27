@@ -53,7 +53,7 @@ public class ActionTests {
 	public void contextLoads() {
 	}
 	
-	public Being getBeingOne() {
+	private Being getBeingOne() {
 		Being beingOne = new Being();
 		
 		beingOne.setBeingType(1);
@@ -73,7 +73,7 @@ public class ActionTests {
 		return beingOne;
 	}
 	
-	public Being getBeingTwo() {
+	private Being getBeingTwo() {
 		Being beingTwo = new Being();
 		
 		beingTwo.setBeingType(1);
@@ -94,7 +94,7 @@ public class ActionTests {
 		return beingTwo;
 	}	
 
-	public Place getPlaceOne() {
+	private Place getPlaceOne() {
 		Place placeOne = new Place();
 		placeOne.setPlaceCode(ActionTests.START_PLACE_CODE);
 		placeOne.setPlaceClassCode("PLAIN");
@@ -114,7 +114,7 @@ public class ActionTests {
 		return placeOne;
 	}
 
-	public void setupMocks() {
+	private void setupMocks() {
 		
 		given(beingClient.getBeing(anyString(), eq(1L))).willReturn(getBeingOne());
 		given(beingClient.getBeing(anyString(), eq(2L))).willReturn(getBeingTwo());

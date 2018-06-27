@@ -4,8 +4,11 @@ import javax.persistence.*;
 
 import com.jpinfo.mudengine.message.model.pk.MudMessageLocalePK;
 
+import lombok.Data;
+
 @Entity
 @Table(name="MUD_MESSAGE_LOCALE")
+@Data
 public class MudMessageLocale {
 	
 	@EmbeddedId
@@ -13,21 +16,4 @@ public class MudMessageLocale {
 	
 	@Column(name="MESSAGE_TEXT")
 	private String messageText;
-
-	public MudMessageLocalePK getPk() {
-		return pk;
-	}
-
-	public void setPk(MudMessageLocalePK pk) {
-		this.pk = pk;
-	}
-
-	public String getMessageText() {
-		return messageText;
-	}
-
-	public void setMessageText(String messageText) {
-		this.messageText = messageText;
-	}
-	
 }

@@ -5,6 +5,8 @@ import javax.persistence.*;
 
 import com.jpinfo.mudengine.being.model.pk.MudBeingAttrModifierPK;
 
+import lombok.Data;
+
 
 /**
  * The persistent class for the mud_being_attr database table.
@@ -12,41 +14,17 @@ import com.jpinfo.mudengine.being.model.pk.MudBeingAttrModifierPK;
  */
 @Entity
 @Table(name="mud_being_attr_modifier")
+@Data
 public class MudBeingAttrModifier implements Serializable {
+	
 	private static final long serialVersionUID = 1L;
 
 	@EmbeddedId
 	private MudBeingAttrModifierPK id;
 
 	@Column(name="attr_offset")
-	private float attrOffset;
+	private float offset;
 
 	@Column(name="end_turn")
 	private Integer endTurn;
-
-	public MudBeingAttrModifier() {
-	}
-
-	public Integer getEndTurn() {
-		return endTurn;
-	}
-	public void setEndTurn(Integer endTurn) {
-		this.endTurn = endTurn;
-	}
-
-	public MudBeingAttrModifierPK getId() {
-		return this.id;
-	}
-
-	public void setId(MudBeingAttrModifierPK id) {
-		this.id = id;
-	}
-
-	public float getOffset() {
-		return this.attrOffset;
-	}
-
-	public void setOffset(float attrOffset) {
-		this.attrOffset = attrOffset;
-	}
 }

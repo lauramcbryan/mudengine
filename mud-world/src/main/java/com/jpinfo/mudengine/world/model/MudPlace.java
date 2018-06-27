@@ -2,11 +2,14 @@ package com.jpinfo.mudengine.world.model;
 
 import javax.persistence.*;
 
+import lombok.Data;
+
 import java.util.*;
 
 @Entity
 @Table(name="MUD_PLACE")
 @SequenceGenerator(name = "mud_place_seq", sequenceName="mud_place_seq", allocationSize=1)
+@Data
 public class MudPlace {
 	
 	@Id
@@ -29,34 +32,4 @@ public class MudPlace {
 		this.exits = new HashSet<MudPlaceExit>();
 		this.attrs = new HashSet<MudPlaceAttr>();
 	}
-
-	public Integer getPlaceCode() {
-		return placeCode;
-	}
-
-	public void setPlaceCode(Integer placeCode) {
-		this.placeCode = placeCode;
-	}
-
-	public MudPlaceClass getPlaceClass() {
-		return placeClass;
-	}
-
-	public void setPlaceClass(MudPlaceClass placeClass) {
-		this.placeClass = placeClass;
-	}
-
-	public Set<MudPlaceExit> getExits() {
-		return exits;
-	}
-
-	public Set<MudPlaceAttr> getAttrs() {
-		return attrs;
-	}
-
-	public void setAttrs(Set<MudPlaceAttr> attrs) {
-		this.attrs = attrs;
-	}
-	
-	
 }

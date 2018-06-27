@@ -3,6 +3,8 @@ package com.jpinfo.mudengine.item.model;
 import java.io.Serializable;
 import javax.persistence.*;
 
+import lombok.Data;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,6 +15,7 @@ import java.util.List;
  */
 @Entity
 @Table(name="mud_item_class")
+@Data
 public class MudItemClass implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -32,41 +35,5 @@ public class MudItemClass implements Serializable {
 
 	public MudItemClass() {
 		this.attrs = new ArrayList<MudItemClassAttr>();
-	}
-
-	public String getItemClass() {
-		return this.itemClass;
-	}
-
-	public void setItemClass(String itemClass) {
-		this.itemClass = itemClass;
-	}
-
-	public float getSize() {
-		return this.size;
-	}
-
-	public void setSize(float size) {
-		this.size = size;
-	}
-
-	public float getWeight() {
-		return this.weight;
-	}
-
-	public void setWeight(float weight) {
-		this.weight = weight;
-	}
-
-	public List<MudItemClassAttr> getAttrs() {
-		return this.attrs;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
 	}
 }

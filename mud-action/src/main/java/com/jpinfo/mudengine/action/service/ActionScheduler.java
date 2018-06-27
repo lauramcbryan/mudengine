@@ -74,7 +74,7 @@ public class ActionScheduler {
 					
 					handler.updateAction(getCurrentTurn(), curAction, fullState);
 					
-					curRunningAction.setCurrState(curAction.getCurState());
+					curRunningAction.setCurrStateEnum(curAction.getCurState());
 					curRunningAction.setEndTurn(curAction.getEndTurn());
 					
 					// Update changed entities
@@ -84,7 +84,7 @@ public class ActionScheduler {
 					sendMessages(fullState);
 					
 				} catch(EntityNotFoundException e) {
-					curRunningAction.setCurrState(EnumActionState.CANCELLED);
+					curRunningAction.setCurrStateEnum(EnumActionState.CANCELLED);
 					curRunningAction.setEndTurn(getCurrentTurn());
 				}
 				
@@ -111,7 +111,7 @@ public class ActionScheduler {
 					
 					handler.updateAction(getCurrentTurn(), curAction, fullState);
 
-					curPendingAction.setCurrState(curAction.getCurState());
+					curPendingAction.setCurrStateEnum(curAction.getCurState());
 					curPendingAction.setStartTurn(curAction.getStartTurn());
 					curPendingAction.setEndTurn(curAction.getEndTurn());
 					
@@ -119,7 +119,7 @@ public class ActionScheduler {
 					sendMessages(fullState);
 					
 				} catch(EntityNotFoundException e) {
-					curPendingAction.setCurrState(EnumActionState.CANCELLED);
+					curPendingAction.setCurrStateEnum(EnumActionState.CANCELLED);
 					curPendingAction.setEndTurn(getCurrentTurn());
 				}
 				

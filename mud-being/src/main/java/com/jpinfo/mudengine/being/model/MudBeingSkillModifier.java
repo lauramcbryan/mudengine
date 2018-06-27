@@ -5,6 +5,8 @@ import javax.persistence.*;
 
 import com.jpinfo.mudengine.being.model.pk.MudBeingSkillModifierPK;
 
+import lombok.Data;
+
 
 /**
  * The persistent class for the mud_being_skills database table.
@@ -12,6 +14,7 @@ import com.jpinfo.mudengine.being.model.pk.MudBeingSkillModifierPK;
  */
 @Entity
 @Table(name="mud_being_skill_modifier")
+@Data
 public class MudBeingSkillModifier implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -19,38 +22,8 @@ public class MudBeingSkillModifier implements Serializable {
 	private MudBeingSkillModifierPK id;
 
 	@Column(name="skill_offset")
-	private float skillOffset;
+	private float offset;
 	
 	@Column(name="end_turn")
 	private Integer endTurn;
-	
-
-	public MudBeingSkillModifier() {
-	}
-
-	public MudBeingSkillModifierPK getId() {
-		return this.id;
-	}
-
-	public void setId(MudBeingSkillModifierPK id) {
-		this.id = id;
-	}
-
-	public float getOffset() {
-		return this.skillOffset;
-	}
-
-	public void setOffset(float skillOffset) {
-		this.skillOffset = skillOffset;
-	}
-
-	public Integer getEndTurn() {
-		return endTurn;
-	}
-
-	public void setEndTurn(Integer endTurn) {
-		this.endTurn = endTurn;
-	}
-
-	
 }

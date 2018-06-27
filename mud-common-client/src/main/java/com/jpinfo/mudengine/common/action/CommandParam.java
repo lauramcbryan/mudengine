@@ -3,7 +3,9 @@ package com.jpinfo.mudengine.common.action;
 import java.util.Collections;
 import java.util.List;
 
+import lombok.Data;
 
+@Data
 public class CommandParam {
 
 	public static enum enumParamTypes { anyString, email, anyNumber};
@@ -20,17 +22,6 @@ public class CommandParam {
 	public CommandParam() {
 		this.domainValues = Collections.emptyList();
 	}
-
-
-	public String getName() {
-		return name;
-	}
-
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
 
 	public String getInputMessage() {
 		
@@ -61,50 +52,5 @@ public class CommandParam {
 		
 		return msg.toString();
 
-	}
-
-
-	public void setInputMessage(String inputMessage) {
-		this.inputMessage = inputMessage;
-	}
-
-
-	public enumParamTypes getType() {
-		return type;
-	}
-
-
-	public void setType(enumParamTypes type) {
-		this.type = type;
-	}
-
-
-	public boolean isRequired() {
-		return required;
-	}
-
-
-	public void setRequired(boolean required) {
-		this.required = required;
-	}
-
-
-	public List<String> getDomainValues() {
-		return domainValues;
-	}
-
-
-	public void setDomainValues(List<String> domainValues) {
-		this.domainValues = domainValues;
-	}
-
-
-	public String getDefaultValue() {
-		return defaultValue;
-	}
-
-
-	public void setDefaultValue(String defaultValue) {
-		this.defaultValue = defaultValue;
 	}
 }

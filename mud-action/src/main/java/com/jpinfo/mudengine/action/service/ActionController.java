@@ -22,8 +22,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.jpinfo.mudengine.action.model.MudAction;
+import com.jpinfo.mudengine.action.model.MudActionClass;
 import com.jpinfo.mudengine.action.model.MudActionClassCommand;
 import com.jpinfo.mudengine.action.repository.MudActionClassCommandRepository;
+import com.jpinfo.mudengine.action.repository.MudActionClassRepository;
 import com.jpinfo.mudengine.action.repository.MudActionRepository;
 import com.jpinfo.mudengine.action.utils.ActionHelper;
 import com.jpinfo.mudengine.action.utils.ActionTestResult;
@@ -39,7 +41,11 @@ public class ActionController implements ActionService {
 	@Autowired
 	private MudActionRepository repository;
 		
+	@Autowired
 	private MudActionClassCommandRepository commandRepository;
+	
+	@Autowired
+	private MudActionClassRepository classRepository;
 	
 	@Autowired
 	private ActionHandler handler;
@@ -89,20 +95,24 @@ public class ActionController implements ActionService {
 		
 		MudActionClassCommand command = commandRepository.findById(commandId)
 				.orElseThrow(() -> new EntityNotFoundException("Command not recognized"));
+		
+		MudActionClass actionClass = 
+				classRepository.findById(command.getActionClassCode())
+					.orElseThrow(() -> new EntityNotFoundException("Action class not recognized"));
 
 		
 		dbAction.setActorCode(actorCode);
 		dbAction.setIssuerCode(actorCode);
 		dbAction.setActionClassCode(command.getActionClassCode());
-		dbAction.setMediatorType(command.getMediatorType());
-		dbAction.setTargetType(command.getTargetType());
+		dbAction.setMediatorType(actionClass.getMediatorType());
+		dbAction.setTargetType(actionClass.getTargetType());
 		
 		
 		if (mediatorCode.isPresent())
 			dbAction.setMediatorCode(mediatorCode.get());
 		
 		dbAction.setTargetCode(targetCode);
-		dbAction.setCurrState(Action.EnumActionState.NOT_STARTED);
+		dbAction.setCurrStateEnum(Action.EnumActionState.NOT_STARTED);
 		
 		
 		// Save the new command; obtain an actionId
@@ -129,13 +139,17 @@ public class ActionController implements ActionService {
 
 		MudActionClassCommand command = commandRepository.findById(commandId)
 				.orElseThrow(() -> new EntityNotFoundException("Command not recognized"));
+
+		MudActionClass actionClass = 
+				classRepository.findById(command.getActionClassCode())
+					.orElseThrow(() -> new EntityNotFoundException("Action class not recognized"));
 		
 		
 		action.setActorCode(actorCode);
 		action.setIssuerCode(actorCode);
 		action.setActionClassCode(command.getActionClassCode());
-		action.setMediatorType(Action.EnumTargetType.valueOf(command.getMediatorType()));
-		action.setTargetType(Action.EnumTargetType.valueOf(command.getTargetType()));
+		action.setMediatorType(Action.EnumTargetType.valueOf(actionClass.getMediatorType()));
+		action.setTargetType(Action.EnumTargetType.valueOf(actionClass.getTargetType()));
 		
 		
 		if (mediatorCode.isPresent())
@@ -175,7 +189,7 @@ public class ActionController implements ActionService {
 		
 		if (dbAction!=null) {
 			
-			dbAction.setCurrState(Action.EnumActionState.CANCELLED);
+			dbAction.setCurrStateEnum(Action.EnumActionState.CANCELLED);
 			
 			repository.save(dbAction);
 		}
@@ -188,7 +202,7 @@ public class ActionController implements ActionService {
 		
 		for(MudAction curAction: dbActionList) {
 			
-			curAction.setCurrState(Action.EnumActionState.CANCELLED);
+			curAction.setCurrStateEnum(Action.EnumActionState.CANCELLED);
 			
 			repository.save(curAction);
 		}

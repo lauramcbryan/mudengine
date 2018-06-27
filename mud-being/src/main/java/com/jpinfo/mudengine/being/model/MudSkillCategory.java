@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 import javax.persistence.*;
 
+import lombok.Data;
+
 
 /**
  * The persistent class for the mud_skill_category database table.
@@ -11,6 +13,7 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name="mud_skill_category")
+@Data
 public class MudSkillCategory implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -23,42 +26,5 @@ public class MudSkillCategory implements Serializable {
 	private String name;
 
 	@Column(name="attr_code_based")
-	private String attrBasedOn;
-
-	public MudSkillCategory() {
-	}
-
-	public String getCategoryCode() {
-		return this.categoryCode;
-	}
-
-	public void setCategoryCode(String categoryCode) {
-		this.categoryCode = categoryCode;
-	}
-
-	public String getDescription() {
-		return this.description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-	public String getName() {
-		return this.name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getAttrBasedOn() {
-		return attrBasedOn;
-	}
-
-	public void setAttrBasedOn(String attrBasedOn) {
-		this.attrBasedOn = attrBasedOn;
-	}
-	
-	
+	private String attrBasedOn;	
 }

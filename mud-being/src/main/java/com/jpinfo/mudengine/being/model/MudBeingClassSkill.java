@@ -5,6 +5,8 @@ import javax.persistence.*;
 
 import com.jpinfo.mudengine.being.model.pk.BeingClassSkillPK;
 
+import lombok.Data;
+
 
 /**
  * The persistent class for the mud_being_class_skills database table.
@@ -12,6 +14,7 @@ import com.jpinfo.mudengine.being.model.pk.BeingClassSkillPK;
  */
 @Entity
 @Table(name="mud_being_class_skill")
+@Data
 public class MudBeingClassSkill implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -20,24 +23,4 @@ public class MudBeingClassSkill implements Serializable {
 
 	@Column(name="skill_value")
 	private Integer skillValue;
-
-	public MudBeingClassSkill() {
-	}
-
-	public BeingClassSkillPK getId() {
-		return this.id;
-	}
-
-	public void setId(BeingClassSkillPK id) {
-		this.id = id;
-	}
-
-	public Integer getSkillValue() {
-		return this.skillValue;
-	}
-
-	public void setSkillValue(Integer skillValue) {
-		this.skillValue = skillValue;
-	}
-
 }

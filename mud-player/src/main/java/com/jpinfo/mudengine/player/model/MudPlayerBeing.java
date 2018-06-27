@@ -6,8 +6,11 @@ import javax.persistence.*;
 
 import com.jpinfo.mudengine.player.model.pk.MudPlayerBeingPK;
 
+import lombok.Data;
+
 @Entity
 @Table(name="MUD_PLAYER_BEING")
+@Data
 public class MudPlayerBeing {
 
 	@EmbeddedId
@@ -18,36 +21,4 @@ public class MudPlayerBeing {
 	private String beingClass;
 	
 	private Date lastPlayed;
-
-	public MudPlayerBeingPK getId() {
-		return id;
-	}
-
-	public void setId(MudPlayerBeingPK id) {
-		this.id = id;
-	}
-
-	public String getBeingName() {
-		return beingName;
-	}
-
-	public void setBeingName(String beingName) {
-		this.beingName = beingName;
-	}
-
-	public String getBeingClass() {
-		return beingClass;
-	}
-
-	public void setBeingClass(String beingClass) {
-		this.beingClass = beingClass;
-	}
-
-	public Date getLastPlayed() {
-		return lastPlayed;
-	}
-
-	public void setLastPlayed(Date lastPlayed) {
-		this.lastPlayed = lastPlayed;
-	}	
 }

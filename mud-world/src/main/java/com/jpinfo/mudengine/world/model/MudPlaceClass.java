@@ -4,8 +4,11 @@ import java.util.Set;
 
 import javax.persistence.*;
 
+import lombok.Data;
+
 @Entity
 @Table(name="MUD_PLACE_CLASS")
+@Data
 public class MudPlaceClass {
 
 	@Id
@@ -38,85 +41,4 @@ public class MudPlaceClass {
 	
 	@Column(name="DEMISE_CLASS_CODE", length = 20)
 	private String demisePlaceClassCode;
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-	public Integer getSizeCapacity() {
-		return sizeCapacity;
-	}
-
-	public void setSizeCapacity(Integer sizeCapacity) {
-		this.sizeCapacity = sizeCapacity;
-	}
-
-	public Integer getWeightCapacity() {
-		return weightCapacity;
-	}
-
-	public void setWeightCapacity(Integer weightCapacity) {
-		this.weightCapacity = weightCapacity;
-	}
-
-	public String getPlaceClassCode() {
-		return placeClassCode;
-	}
-
-	public void setPlaceClassCode(String placeClassCode) {
-		this.placeClassCode = placeClassCode;
-	}
-
-	public String getParentClassCode() {
-		return parentClassCode;
-	}
-
-	public void setParentClassCode(String parentClassCode) {
-		this.parentClassCode = parentClassCode;
-	}
-
-	public Integer getBuildCost() {
-		return buildCost;
-	}
-
-	public void setBuildCost(Integer buildCost) {
-		this.buildCost = buildCost;
-	}
-
-	public Integer getBuildEffort() {
-		return buildEffort;
-	}
-
-	public void setBuildEffort(Integer buildEffort) {
-		this.buildEffort = buildEffort;
-	}
-
-	public String getDemisePlaceClassCode() {
-		return demisePlaceClassCode;
-	}
-
-	public void setDemisePlaceClassCode(String demisePlaceClassCode) {
-		this.demisePlaceClassCode = demisePlaceClassCode;
-	}
-
-	public Set<MudPlaceClassAttr> getAttrs() {
-		return attrs;
-	}
-
-	public void setAttrs(Set<MudPlaceClassAttr> attrs) {
-		this.attrs = attrs;
-	}
-	
 }

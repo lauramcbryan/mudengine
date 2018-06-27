@@ -90,7 +90,7 @@ public class ActionHelper {
 			CommandParam newParam = new CommandParam();
 			
 			newParam.setName(d.getPk().getName());
-			newParam.setRequired(d.isRequired());
+			newParam.setRequired(((Integer)1).equals(d.getRequired()));
 			newParam.setType(CommandParam.enumParamTypes.valueOf(d.getType()));
 			newParam.setDefaultValue(d.getDefaultValue());
 			

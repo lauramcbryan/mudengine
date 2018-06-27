@@ -7,8 +7,11 @@ import javax.persistence.Table;
 
 import com.jpinfo.mudengine.message.model.pk.MudMessageParmPK;
 
+import lombok.Data;
+
 @Entity
 @Table(name="MUD_MESSAGE_PARM")
+@Data
 public class MudMessageParm {
 	
 	@EmbeddedId
@@ -16,20 +19,4 @@ public class MudMessageParm {
 
 	@Column(name="VALUE")
 	private String value;
-
-	public MudMessageParmPK getId() {
-		return id;
-	}
-
-	public void setId(MudMessageParmPK id) {
-		this.id = id;
-	}
-
-	public String getValue() {
-		return value;
-	}
-
-	public void setValue(String value) {
-		this.value = value;
-	}
 }

@@ -4,9 +4,12 @@ import javax.persistence.*;
 
 import com.jpinfo.mudengine.common.action.Action;
 
+import lombok.Data;
+
 @Entity
 @Table(name="MUD_ACTION")
 @SequenceGenerator(name="MUD_ACTION_SEQ", sequenceName="MUD_ACTION_SEQ", allocationSize=1)
+@Data
 public class MudAction {
 	
 	@Id
@@ -51,118 +54,20 @@ public class MudAction {
 		this.currState = 0;
 		
 	}
-
-	public Integer getActionClassCode() {
-		return actionClassCode;
-	}
-
-	public void setActionClassCode(Integer actionClassCode) {
-		this.actionClassCode = actionClassCode;
-	}
-
-	public String getMediatorCode() {
-		return mediatorCode;
-	}
-
-	public void setMediatorCode(String mediatorCode) {
-		this.mediatorCode = mediatorCode;
-	}
-	
-	public String getMediatorType() {
-		return mediatorType;
-	}
-
-	public void setMediatorType(String mediatorType) {
-		this.mediatorType = mediatorType;
-	}
-
-	public String getTargetCode() {
-		return targetCode;
-	}
-
-	public void setTargetCode(String targetCode) {
-		this.targetCode = targetCode;
-	}
-
-	public String getTargetType() {
-		return targetType;
-	}
-	
-	public void setTargetType(String targetType) {
-		this.targetType = targetType;
-	}
 	
 	public Action.EnumTargetType getTargetTypeEnum() {
 		return Action.EnumTargetType.valueOf(this.targetType);
 	}
 	
-	public void setTargetType(Action.EnumTargetType enumTargetType) {
+	public void setTargetTypeEnum(Action.EnumTargetType enumTargetType) {
 		this.targetType = enumTargetType.toString();
 	}
-
-	public Long getActionId() {
-		return actionId;
-	}
-
-	public void setActionId(Long actionId) {
-		this.actionId = actionId;
-	}
-
 	
-
-	public Long getIssuerCode() {
-		return issuerCode;
-	}
-
-	public void setIssuerCode(Long issuerCode) {
-		this.issuerCode = issuerCode;
-	}
-
-	public Long getActorCode() {
-		return actorCode;
-	}
-
-	public void setActorCode(Long actorCode) {
-		this.actorCode = actorCode;
-	}
-
-	public Long getStartTurn() {
-		return startTurn;
-	}
-
-	public void setStartTurn(Long startTurn) {
-		this.startTurn = startTurn;
-	}
-
-	public Long getEndTurn() {
-		return endTurn;
-	}
-
-	public void setEndTurn(Long endTurn) {
-		this.endTurn = endTurn;
-	}
-
-	public Integer getCurrState() {
-		return currState;
-	}
-
-	public void setCurrState(Integer currState) {
-		this.currState = currState;
-	}
-	
-	public void setCurrState(Action.EnumActionState enumState) {
+	public void setCurrStateEnum(Action.EnumActionState enumState) {
 		this.currState = enumState.ordinal();
 	}
 	
 	public Action.EnumActionState getCurrStateEnum() {
 		return Action.EnumActionState.values()[this.currState];
-	}
-
-	public Float getSuccessRate() {
-		return successRate;
-	}
-
-	public void setSuccessRate(Float successRate) {
-		this.successRate = successRate;
 	}
 }

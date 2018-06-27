@@ -4,9 +4,12 @@ import java.util.Date;
 
 import javax.persistence.*;
 
+import lombok.Data;
+
 @Entity
 @Table(name="MUD_PLAYER_SESSION")
 @SequenceGenerator(name="mud_session_seq", sequenceName="mud_session_seq", allocationSize=1)
+@Data
 public class MudSession {
 
 	@Id
@@ -31,73 +34,5 @@ public class MudSession {
 	private String ipAddress;
 
 	@Column(nullable=true)
-	private Long beingCode;
-	
-	public MudSession() {
-		
-	}
-
-	public Long getSessionId() {
-		return sessionId;
-	}
-
-	public void setSessionId(Long sessionId) {
-		this.sessionId = sessionId;
-	}
-
-	public Date getSessionStart() {
-		return sessionStart;
-	}
-
-	public void setSessionStart(Date sessionStart) {
-		this.sessionStart = sessionStart;
-	}
-
-	public Date getSessionEnd() {
-		return sessionEnd;
-	}
-
-	public void setSessionEnd(Date sessionEnd) {
-		this.sessionEnd = sessionEnd;
-	}
-
-	public MudPlayer getPlayer() {
-		return player;
-	}
-
-	public void setPlayer(MudPlayer player) {
-		this.player = player;
-	}
-
-	public Long getPlayerId() {
-		return playerId;
-	}
-
-	public void setPlayerId(Long playerId) {
-		this.playerId = playerId;
-	}
-
-	public String getClientType() {
-		return clientType;
-	}
-
-	public void setClientType(String clientType) {
-		this.clientType = clientType;
-	}
-
-	public String getIpAddress() {
-		return ipAddress;
-	}
-
-	public void setIpAddress(String ipAddress) {
-		this.ipAddress = ipAddress;
-	}
-
-	public Long getBeingCode() {
-		return beingCode;
-	}
-
-	public void setBeingCode(Long beingCode) {
-		this.beingCode = beingCode;
-	}
+	private Long beingCode;	
 }

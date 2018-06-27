@@ -1,6 +1,8 @@
 package com.jpinfo.mudengine.common.action;
 
+import lombok.Data;
 
+@Data
 public class ActionClassEffect implements Comparable<ActionClassEffect> {
 
 	private Integer evalOrder;
@@ -9,34 +11,7 @@ public class ActionClassEffect implements Comparable<ActionClassEffect> {
 
 	private String messageExpression;
 	
-	public Integer getEvalOrder() {
-		return evalOrder;
-	}
-
-	public void setEvalOrder(Integer evalOrder) {
-		this.evalOrder = evalOrder;
-	}
-
-	public String getExpression() {
-		return expression;
-	}
-
-	public void setExpression(String expression) {
-		this.expression = expression;
-	}
-
-	public String getMessageExpression() {
-		return messageExpression;
-	}
-
-	public void setMessageExpression(String messageExpression) {
-		this.messageExpression = messageExpression;
-	}
-
 	public int compareTo(ActionClassEffect other) {
 		return this.evalOrder.compareTo(other.evalOrder);
 	}
-	
-	
-
 }
