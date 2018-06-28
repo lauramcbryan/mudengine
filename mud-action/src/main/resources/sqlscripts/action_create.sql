@@ -13,7 +13,7 @@ CREATE TABLE MUDENGINE_ACTION.MUD_ACTION_CLASS (
 );
 
 CREATE TABLE MUDENGINE_ACTION.MUD_ACTION_CLASS_PREREQ (
-		ACTION_CLASS_CODE	varchar(15) not null,
+		ACTION_CLASS_CODE	integer not null,
 		EVAL_ORDER			integer not null,
 		CHECK_EXPRESSION	varchar(200) not null,
 		FAIL_EXPRESSION		varchar(200),
@@ -22,7 +22,7 @@ CREATE TABLE MUDENGINE_ACTION.MUD_ACTION_CLASS_PREREQ (
 );
 
 CREATE TABLE MUDENGINE_ACTION.MUD_ACTION_CLASS_EFFECT (
-		ACTION_CLASS_CODE	varchar(15) not null,
+		ACTION_CLASS_CODE	integer not null,
 		EVAL_ORDER			integer not null,
 		EFFECT_EXPRESSION	varchar(200) not null,
 		MESSAGE_EXPRESSION	varchar(200),
@@ -57,7 +57,7 @@ CREATE TABLE MUDENGINE_ACTION.MUD_ACTION (
 		ACTION_UID			bigint not null,
 		ISSUER_CODE			bigint not null,
 		ACTOR_CODE			bigint not null,		
-		ACTION_CLASS_CODE	varchar(15) not null,
+		ACTION_CLASS_CODE	integer not null,
 		MEDIATOR_CODE		varchar(200),
 		MEDIATOR_TYPE		varchar(20),
 		TARGET_CODE			varchar(20) not null,
