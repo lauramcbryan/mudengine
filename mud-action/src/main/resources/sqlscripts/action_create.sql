@@ -44,6 +44,7 @@ CREATE TABLE MUDENGINE_ACTION.MUD_ACTION_CLASS_CMD (
 CREATE TABLE MUDENGINE_ACTION.MUD_ACTION_CLASS_CMD_PARAMETER (
 	    COMMAND_ID			integer not null,
 		NAME				varchar(20) not null,	    
+		TYPE				varchar(20) not null,
 		INPUT_MESSAGE		varchar(40) not null,
 		REQUIRED			integer not null default 0,
 		DEFAULT_VALUE		varchar(40),

@@ -24,21 +24,21 @@ import com.jpinfo.mudengine.common.player.Player;
 @Component
 public class CommandHandler {
 	
-	public static final int REGISTER_COMMAND = 1;
-	public static final int CHANGEPROF_COMMAND = 2;
-	public static final int ACTIVATE_COMMAND = 3;
-	public static final int PASSWORD_COMMAND = 4;
-	public static final int QUIT_COMMAND = 5;
-	public static final int HELP_COMMAND = 6;
-	public static final int LOGIN_COMMAND = 7;
-	public static final int LOGOUT_COMMAND = 8;
-	public static final int CREATEBEING_COMMAND = 9;
-	public static final int SELECTBEING_COMMAND = 10;
-	public static final int DELETEBEING_COMMAND = 11;
+	public static final int REGISTER_COMMAND = 901;
+	public static final int CHANGEPROF_COMMAND = 902;
+	public static final int ACTIVATE_COMMAND = 903;
+	public static final int PASSWORD_COMMAND = 904;
+	public static final int QUIT_COMMAND = 905;
+	public static final int HELP_COMMAND = 906;
+	public static final int LOGIN_COMMAND = 907;
+	public static final int LOGOUT_COMMAND = 908;
+	public static final int CREATEBEING_COMMAND = 909;
+	public static final int SELECTBEING_COMMAND = 910;
+	public static final int DELETEBEING_COMMAND = 911;
 	
-	public static final int WHOAMI_COMMAND = 12;
-	public static final int WHEREAMI_COMMAND = 13;
-	public static final int LOCALE_COMMAND = 14;
+	public static final int WHOAMI_COMMAND = 912;
+	public static final int WHEREAMI_COMMAND = 913;
+	public static final int LOCALE_COMMAND = 914;
 	
 
 	@Autowired
@@ -538,18 +538,13 @@ public class CommandHandler {
 		}
 		
 		Long actorCode = client.getActiveBeing().get().getBeingCode();
-		String verb = command.getCommand().getVerb();
-
 		String mediatorCode = ClientHelper.getParamValue(command, "mediatorCode");
-		String mediatorType = ClientHelper.getParamValue(command, "mediatorType");
-		
 		String targetCode = ClientHelper.getParamValue(command, "targetCode");
-		String targetType = ClientHelper.getParamValue(command, "targetType");
-
+		Integer commandId = command.getCommand().getCommandId();
+		
 		
 		// Perform the call to the API gateway
-		api.insertCommand(client.getAuthToken(), verb, actorCode, 
-				Optional.of(mediatorCode), Optional.of(mediatorType), 
-				targetCode, targetType);
+		api.insertCommand(client.getAuthToken(), commandId, actorCode, 
+				Optional.ofNullable(mediatorCode), targetCode);
 	}
 }

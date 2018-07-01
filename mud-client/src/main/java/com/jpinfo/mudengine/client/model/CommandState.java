@@ -17,12 +17,15 @@ public class CommandState {
 		this.command = c;
 		this.paramStateList = new ArrayList<CommandParamState>();
 		
-		c.getParameters().forEach(d -> {
-			
-			CommandParamState paramState = new CommandParamState(d);
-			
-			paramStateList.add(paramState);
-		});
+		if (c.getParameters()!=null) {
+		
+			c.getParameters().forEach(d -> {
+				
+				CommandParamState paramState = new CommandParamState(d);
+				
+				paramStateList.add(paramState);
+			});
+		}
 	}
 
 	public Command getCommand() {

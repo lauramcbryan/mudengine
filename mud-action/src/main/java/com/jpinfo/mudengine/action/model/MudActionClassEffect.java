@@ -16,7 +16,7 @@ public class MudActionClassEffect implements java.io.Serializable {
 
 	@Id
 	@Column(name="ACTION_CLASS_CODE")
-	private String actionClassCode;
+	private Integer actionClassCode;
 	
 	@Id
 	@Column

@@ -269,25 +269,27 @@ public class MudengineApiImpl implements MudengineApi {
 	}
 
 	@Override
-	public Action insertCommand(String authToken, String verb, Long actorCode, Optional<String> mediatorCode,
-			Optional<String> mediatorType, String targetCode, String targetType) throws ClientException {
+	public Action insertCommand(String authToken, Integer commandId, Long actorCode, Optional<String> mediatorCode,
+			String targetCode) throws ClientException {
 		
 		Action result = null;
 		
 		Map<String, Object> urlVariables = new HashMap<String, Object>();
 		
+		urlVariables.put("commandId", commandId);
 		urlVariables.put("actorCode", actorCode);
-		
 		mediatorCode.ifPresent(d -> urlVariables.put("mediatorCode", d));
-		mediatorType.ifPresent(d -> urlVariables.put("mediatorType", d));
-		
 		urlVariables.put("targetCode", targetCode);
-		urlVariables.put("targetType", targetType);
 		
 		try {
+			
+			StringBuffer url = new StringBuffer("/action/{commandId}?actorCode={actorCode}&targetCode={targetCode}");
+			
+			mediatorCode.ifPresent(d -> url.append("&mediatorCode={mediatorCode}"));
+			
 			ResponseEntity<Action> response = restTemplate.exchange(
-					apiEndpoint + "/action/{verb}?actorCode={actorCode}&mediatorCode={mediatorCode}&mediatorType={mediatorType}&targetCode={targetCoide}&targetType={targetType}", 
-					HttpMethod.PUT, getEmptyHttpEntity(), Action.class, urlVariables);
+					apiEndpoint + url, 
+					HttpMethod.PUT, getEmptyHttpEntity(authToken), Action.class, urlVariables);
 
 			result = response.getBody();
 			

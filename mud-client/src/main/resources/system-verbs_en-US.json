@@ -1,7 +1,7 @@
 {
 	"commandList": [
 		{
-			"commandId": 1,
+			"commandId": 901,
 			"verb": "register",
 			"category": "SYSTEM",
 			"logged": false,
@@ -34,7 +34,7 @@
 			]
 		},
 		{
-			"commandId": 2,		
+			"commandId": 902,		
 			"verb": "change profile",
 			"category": "SYSTEM",
 			"description": "Changes profile details.",
@@ -60,7 +60,7 @@
 			]
 		},
 		{
-			"commandId": 3,		
+			"commandId": 903,		
 			"verb": "activate account",
 			"category": "SYSTEM",
 			"logged": false,			
@@ -88,7 +88,7 @@
 			]
 		},
 		{
-			"commandId": 4,		
+			"commandId": 904,		
 			"verb": "change password",
 			"category": "SYSTEM",		
 			"description": "Change user password",
@@ -109,7 +109,7 @@
 			]
 		},
 		{
-			"commandId": 5,		
+			"commandId": 905,		
 			"verb": "quit",
 			"description": "Closes the connection.",
 			"logged": false,			
@@ -117,7 +117,7 @@
 			"category": "SYSTEM"
 		},
 		{
-			"commandId": 6,		
+			"commandId": 906,		
 			"verb": "help",
 			"description": "Display the command list",
 			"logged": false,			
@@ -125,7 +125,7 @@
 			"category": "SYSTEM"
 		},		
 		{
-			"commandId": 7,		
+			"commandId": 907,		
 			"verb": "login",
 			"category": "SYSTEM",
 			"description": "Authenticate the account",
@@ -147,7 +147,7 @@
 			]
 		},		
 		{
-			"commandId": 8,		
+			"commandId": 908,		
 			"verb": "logout",
 			"category": "SYSTEM",
 			"description": "Finishes a session",
@@ -155,7 +155,7 @@
 			"parameters": null
 		},		
 		{
-			"commandId": 9,		
+			"commandId": 909,		
 			"verb": "create being",
 			"category": "SYSTEM",
 			"description": "Creates a new being",
@@ -176,7 +176,7 @@
 			]
 		},
 		{
-			"commandId": 10,		
+			"commandId": 910,		
 			"verb": "select being",
 			"category": "SYSTEM",
 			"description": "Selects an existing being",
@@ -191,7 +191,7 @@
 			]
 		},
 		{
-			"commandId": 11,		
+			"commandId": 911,		
 			"verb": "destroy being",
 			"category": "SYSTEM",
 			"description": "Destroy an existing being",
@@ -206,7 +206,7 @@
 			]
 		},
 		{
-			"commandId": 12,		
+			"commandId": 912,		
 			"verb": "whoami",
 			"category": "SYSTEM",
 			"description": "Shows information about you",
@@ -214,7 +214,7 @@
 			"parameters": null
 		},
 		{
-			"commandId": 13,		
+			"commandId": 913,		
 			"verb": "whereami",
 			"category": "SYSTEM",
 			"description": "Shows information about the current place",
@@ -222,7 +222,7 @@
 			"parameters": null
 		},
 		{
-			"commandId": 14,		
+			"commandId": 914,		
 			"verb": "change locale",
 			"category": "SYSTEM",
 			"logged": false,			

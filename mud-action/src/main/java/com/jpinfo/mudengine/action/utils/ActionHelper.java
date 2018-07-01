@@ -30,7 +30,9 @@ public class ActionHelper {
 		state.setActorCode(a.getActorCode());
 		
 		state.setMediatorCode(a.getMediatorCode());
-		state.setMediatorType(EnumTargetType.valueOf(a.getMediatorType()));
+		
+		if (a.getMediatorType()!=null)
+			state.setMediatorType(EnumTargetType.valueOf(a.getMediatorType()));
 		
 		state.setTargetCode(a.getTargetCode());
 		state.setTargetType(a.getTargetTypeEnum());

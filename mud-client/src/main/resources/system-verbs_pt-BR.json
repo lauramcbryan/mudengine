@@ -1,7 +1,7 @@
 {
 	"commandList": [
 		{
-			"commandId": 1,		
+			"commandId": 901,		
 			"verb": "registre",
 			"category": "SYSTEM",
 			"logged": false,
@@ -34,7 +34,7 @@
 			]
 		},
 		{
-			"commandId": 2,		
+			"commandId": 902,		
 			"verb": "mudar perfil",
 			"category": "SYSTEM",
 			"description": "Mudar perfil do sistema.",
@@ -60,7 +60,7 @@
 			]
 		},
 		{
-			"commandId": 3,		
+			"commandId": 903,		
 			"verb": "ativar conta",
 			"category": "SYSTEM",
 			"logged": false,			
@@ -88,7 +88,7 @@
 			]
 		},
 		{
-			"commandId": 4,		
+			"commandId": 904,		
 			"verb": "mudar senha",
 			"category": "SYSTEM",		
 			"description": "Mudar senha do usuário",
@@ -109,7 +109,7 @@
 			]
 		},
 		{
-			"commandId": 5,		
+			"commandId": 905,		
 			"verb": "quit",
 			"description": "Fecha a conexão.",
 			"logged": false,
@@ -117,7 +117,7 @@
 			"category": "SYSTEM"
 		},
 		{
-			"commandId": 6,		
+			"commandId": 906,		
 			"verb": "ajuda",
 			"description": "Mostra a lista de comandos",
 			"logged": false,
@@ -125,7 +125,7 @@
 			"category": "SYSTEM"
 		},		
 		{
-			"commandId": 7,		
+			"commandId": 907,		
 			"verb": "login",
 			"category": "SYSTEM",
 			"description": "Autentica a conta",
@@ -147,7 +147,7 @@
 			]
 		},		
 		{
-			"commandId": 8,		
+			"commandId": 908,		
 			"verb": "logout",
 			"category": "SYSTEM",
 			"description": "Encerra a sessão",
@@ -155,7 +155,7 @@
 			"parameters": null
 		},		
 		{
-			"commandId": 9,		
+			"commandId": 909,		
 			"verb": "criar ser",
 			"category": "SYSTEM",
 			"description": "Cria um novo ser",
@@ -176,7 +176,7 @@
 			]
 		},
 		{
-			"commandId": 10,		
+			"commandId": 910,		
 			"verb": "selecionar ser",
 			"category": "SYSTEM",
 			"description": "Seleciona um ser já existente",
@@ -191,7 +191,7 @@
 			]
 		},
 		{
-			"commandId": 11,		
+			"commandId": 911,		
 			"verb": "destruir ser",
 			"category": "SYSTEM",
 			"description": "Destrói um ser pré-existente",
@@ -206,7 +206,7 @@
 			]
 		},
 		{
-			"commandId": 12,		
+			"commandId": 912,		
 			"verb": "quem sou eu",
 			"category": "SYSTEM",
 			"description": "Mostra informação do jogador",
@@ -214,7 +214,7 @@
 			"parameters": null
 		},
 		{
-			"commandId": 13,		
+			"commandId": 913,		
 			"verb": "onde estou",
 			"category": "SYSTEM",
 			"description": "Mostra informação sobre o local atual do ser",
@@ -222,7 +222,7 @@
 			"parameters": null
 		},
 		{
-			"commandId": 14,		
+			"commandId": 914,		
 			"verb": "mudar linguagem",
 			"category": "SYSTEM",
 			"logged": false,			
