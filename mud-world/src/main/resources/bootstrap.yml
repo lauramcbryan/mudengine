@@ -27,6 +27,9 @@ feign:
   client:
     readTimeout: 10000
     connectionTimeout: 5000
+    
+token:
+  secret: a7ac498c7bba59e0eb7c647d2f0197f8    
 
 ---
 

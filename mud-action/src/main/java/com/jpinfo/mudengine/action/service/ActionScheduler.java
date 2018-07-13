@@ -49,6 +49,9 @@ public class ActionScheduler {
 	@Autowired
 	private ActionHandler handler;
 	
+	@Autowired
+	private TokenService tokenService;
+	
 	@Profile("!default")
 	@Scheduled(fixedRate=10000)
 	public void updateActions() {
@@ -56,7 +59,7 @@ public class ActionScheduler {
 		System.out.println("ActionScheduler.  Turn=" + ActionScheduler.currentTurn);
 		
 		// List of processed actors in this iteraction
-		List<Long> processedActors = new ArrayList<Long>();
+		List<Long> processedActors = new ArrayList<>();
 		
 		// Get the list of running actions and update them.
 		List<MudAction> runningActions = repository.findRunningActions(getCurrentTurn());
@@ -135,7 +138,7 @@ public class ActionScheduler {
 	
 	private void updateEntities(ActionInfo fullState) {
 		
-		String authToken = TokenService.buildInternalToken();
+		String authToken = tokenService.buildInternalToken();
 
 		// Update the actor
 		beingService.updateBeing(authToken, 
@@ -191,7 +194,7 @@ public class ActionScheduler {
 	
 	private void sendMessages(ActionInfo fullState) {
 		
-		String authToken = TokenService.buildInternalToken();
+		String authToken = tokenService.buildInternalToken();
 		
 		for(ActionMessage curActorMessage : fullState.getActor().getMessages()) {
 			

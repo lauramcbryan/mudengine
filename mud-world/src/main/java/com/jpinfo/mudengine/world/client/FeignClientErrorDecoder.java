@@ -21,7 +21,7 @@ public class FeignClientErrorDecoder implements ErrorDecoder {
 			
 			// Read the response body
 			BufferedReader reader = new BufferedReader(response.body().asReader());
-			StringBuffer errorMessage = new StringBuffer(); 
+			StringBuilder errorMessage = new StringBuilder(); 
 			
 			while (reader.ready()) {
 				errorMessage.append(reader.readLine());

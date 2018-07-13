@@ -43,6 +43,9 @@ public class MessageController implements MessageService {
 	
 	@Autowired
 	private MudMessageLocaleRepository localeRepository;
+	
+	@Autowired
+	private TokenService tokenService;
 
 	@Override
 	public void putMessage(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, 
@@ -110,15 +113,15 @@ public class MessageController implements MessageService {
 			@RequestParam(name="pageCount", defaultValue="0", required=false) Integer pageCount,
 			@RequestParam(name="pageSize", defaultValue="10", required=false) Integer pageSize) {
 		
-		List<Message> result = new ArrayList<Message>();
+		List<Message> result = new ArrayList<>();
 		
 		PageRequest page = PageRequest.of(pageCount, pageSize, Sort.Direction.DESC, "insertDate");
 		
 		// Obtaining the caller locale
-		String callerLocale = TokenService.getLocaleFromToken(authToken);
+		String callerLocale = tokenService.getLocaleFromToken(authToken);
 		
 		// Obtaining the beingCode
-		Long beingCode = TokenService.getBeingCodeFromToken(authToken);
+		Long beingCode = tokenService.getBeingCodeFromToken(authToken);
 		
 		if (beingCode!=null) {
 			Page<MudMessage> lstMessage = null;
@@ -151,7 +154,7 @@ public class MessageController implements MessageService {
 	private Message buildMessage(MudMessage a, String callerLocale) {
 		
 		Message result = new Message();
-		List<Object> parmsList = new ArrayList<Object>();
+		List<Object> parmsList = new ArrayList<>();
 		String actualMessage = a.getMessageKey();
 		
 		// Verify if the messageKey is a string table entry
@@ -173,10 +176,10 @@ public class MessageController implements MessageService {
 		for(MudMessageParm curParm: a.getParms()) {
 
 			// Verify if the param value is a string table entry
-			if (MessageHelper.isLocalizedKey(curParm.getValue().toString())) {
+			if (MessageHelper.isLocalizedKey(curParm.getValue())) {
 
 				MudMessageLocalePK pk = new MudMessageLocalePK();
-				pk.setMessageKey(MessageHelper.getLocalizedKey(curParm.getValue().toString()));
+				pk.setMessageKey(MessageHelper.getLocalizedKey(curParm.getValue()));
 				pk.setLocale(callerLocale);
 			
 				Optional<MudMessageLocale> dbLocalizedMessage = localeRepository.findById(pk);
@@ -187,11 +190,11 @@ public class MessageController implements MessageService {
 					parmsList.add("Value key " + pk.getMessageKey() + " not found in " + callerLocale + " locale");
 				}
 			} else {
-				parmsList.add(curParm.getValue().toString());
+				parmsList.add(curParm.getValue());
 			}
 		}
 		
-		if (parmsList.size()>0) {
+		if (!parmsList.isEmpty()) {
 			// Format the message
 			actualMessage = String.format(actualMessage, parmsList.toArray());			
 		}

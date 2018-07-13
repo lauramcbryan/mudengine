@@ -45,6 +45,9 @@ public class PlayerController implements PlayerService {
 	
 	@Autowired
 	private BeingServiceClient beingClient;
+	
+	@Autowired
+	private TokenService tokenService;
 
 	@Override
 	public Player getPlayerDetails(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable String username) {
@@ -83,7 +86,7 @@ public class PlayerController implements PlayerService {
 			// Persist to have the playerId
 			MudPlayer createdPlayer = repository.save(newPlayer);
 			
-			response = new ResponseEntity<Player>(PlayerHelper.buildPlayer(createdPlayer), HttpStatus.CREATED);
+			response = new ResponseEntity<>(PlayerHelper.buildPlayer(createdPlayer), HttpStatus.CREATED);
 			
 			// TODO: Send the password by email
 			
@@ -130,8 +133,8 @@ public class PlayerController implements PlayerService {
 			Player changedPlayer = PlayerHelper.buildPlayer(changedDbPlayer);
 			
 			// Update the authToken
-			HttpHeaders header = PlayerHelper.updateAuthHeaders(authToken, changedPlayer, null);
-			response = new ResponseEntity<Player>(changedPlayer, header, HttpStatus.ACCEPTED);
+			HttpHeaders header = updateAuthHeaders(authToken, changedPlayer, null);
+			response = new ResponseEntity<>(changedPlayer, header, HttpStatus.ACCEPTED);
 				
 		} else {
 			throw new IllegalParameterException("No access to that username");
@@ -216,12 +219,12 @@ public class PlayerController implements PlayerService {
 				
 				
 				// Build the jwts token
-				String token = TokenService.buildToken(username, playerData, sessionData);
+				String token = tokenService.buildToken(username, playerData, sessionData);
 				
 				HttpHeaders header = new HttpHeaders();
 				header.add(CommonConstants.AUTH_TOKEN_HEADER, token);
 				
-				response = new ResponseEntity<Session>(sessionData, header, HttpStatus.CREATED);
+				response = new ResponseEntity<>(sessionData, header, HttpStatus.CREATED);
 				break;
 			}
 			case Player.STATUS_PENDING: {
@@ -237,7 +240,7 @@ public class PlayerController implements PlayerService {
 	
 	private boolean canAccess(String authToken, String username) {
 		
-		String authUserName = TokenService.getUsernameFromToken(authToken);
+		String authUserName = tokenService.getUsernameFromToken(authToken);
 		
 		return ((username.equals(authUserName)) || (TokenService.INTERNAL_ACCOUNT.equals(authUserName)));
 		
@@ -266,7 +269,7 @@ public class PlayerController implements PlayerService {
 				// Erases the beingCode
 				dbSession.setBeingCode(null);
 				
-				beingCode.ifPresent(d -> {
+				beingCode.ifPresent(d -> 
 
 					// Find the being record for this player					
 					dbSession.getPlayer().getBeingList().stream()
@@ -278,8 +281,7 @@ public class PlayerController implements PlayerService {
 							
 							// Set the beingCode in the session object
 							dbSession.setBeingCode(beingCode.get());
-					});
-				});
+					}));
 				
 				sessionRepository.save(dbSession);
 								
@@ -291,8 +293,8 @@ public class PlayerController implements PlayerService {
 				
 				
 				// Update the authToken
-				HttpHeaders header = PlayerHelper.updateAuthHeaders(authToken, playerData, sessionData);
-				response = new ResponseEntity<Session>(sessionData, header, HttpStatus.ACCEPTED);
+				HttpHeaders header = updateAuthHeaders(authToken, playerData, sessionData);
+				response = new ResponseEntity<>(sessionData, header, HttpStatus.ACCEPTED);
 				
 			} else {
 				throw new EntityNotFoundException("Session not found");
@@ -344,8 +346,8 @@ public class PlayerController implements PlayerService {
 			Player playerData = PlayerHelper.buildPlayer(updatedPlayerData);
 
 			// Assembling the response
-			HttpHeaders header = PlayerHelper.updateAuthHeaders(authToken, playerData, null);
-			response = new ResponseEntity<Player>(playerData, header, HttpStatus.ACCEPTED);
+			HttpHeaders header = updateAuthHeaders(authToken, playerData, null);
+			response = new ResponseEntity<>(playerData, header, HttpStatus.ACCEPTED);
 			
 		} else {
 			throw new IllegalParameterException("No access to that username");
@@ -367,10 +369,12 @@ public class PlayerController implements PlayerService {
 			dbPlayer.ifPresent(d -> {
 				
 				// Check if the selected being exists and it's associated to the player
-				d.getBeingList().stream()
-					.filter(e -> e.getId().getBeingCode().equals(beingCode))
-					.findFirst()
-					.orElseThrow(() -> new IllegalParameterException("Being Unknown"));
+				if (d.getBeingList().stream()
+						.noneMatch(e -> 
+							e.getId().getBeingCode().equals(beingCode))) {
+					
+					throw new IllegalParameterException("Being Unknown");
+				}
 				
 				// Remove selected being from the list
 				d.getBeingList().removeIf(e -> e.getId().getBeingCode().equals(beingCode));
@@ -382,7 +386,7 @@ public class PlayerController implements PlayerService {
 				repository.save(d);
 				
 				// If the being is the currenly selected
-				if (TokenService.getBeingCodeFromToken(authToken).equals(beingCode)) {
+				if (tokenService.getBeingCodeFromToken(authToken).equals(beingCode)) {
 					
 					// Clear the beingCode from the token
 					updateBeingSession(authToken, username, Optional.empty());
@@ -398,7 +402,7 @@ public class PlayerController implements PlayerService {
 			Player playerData = getPlayerDetails(authToken, username);
 
 			// Update the authToken
-			String token = TokenService.updateToken(authToken, 
+			String token = tokenService.updateToken(authToken, 
 					Optional.of(playerData), 
 					Optional.of(sessionData));
 			
@@ -407,7 +411,7 @@ public class PlayerController implements PlayerService {
 			HttpHeaders header = new HttpHeaders();
 			header.add(CommonConstants.AUTH_TOKEN_HEADER, token);
 			
-			response = new ResponseEntity<Player>(
+			response = new ResponseEntity<>(
 					playerData, 
 					header, HttpStatus.ACCEPTED);
 			
@@ -417,4 +421,20 @@ public class PlayerController implements PlayerService {
 		
 		return response;
 	}
+	
+	private HttpHeaders updateAuthHeaders(String originalToken, Player playerData, Session sessionData ) {
+		
+		// Update the authToken
+		String token = tokenService.updateToken(originalToken, 
+				Optional.ofNullable(playerData), 
+				Optional.ofNullable(sessionData));
+		
+
+		// Assembling the response
+		HttpHeaders header = new HttpHeaders();
+		header.add(CommonConstants.AUTH_TOKEN_HEADER, token);
+
+		
+		return header;
+	}	
 }

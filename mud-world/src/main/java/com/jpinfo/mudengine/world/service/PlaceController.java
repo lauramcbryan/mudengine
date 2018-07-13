@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.jpinfo.mudengine.common.exception.EntityNotFoundException;
+import com.jpinfo.mudengine.common.exception.IllegalParameterException;
 import com.jpinfo.mudengine.common.place.Place;
-import com.jpinfo.mudengine.common.security.TokenService;
 import com.jpinfo.mudengine.common.service.PlaceService;
 import com.jpinfo.mudengine.common.utils.CommonConstants;
 import com.jpinfo.mudengine.world.client.BeingServiceClient;
@@ -76,125 +76,120 @@ public class PlaceController implements PlaceService {
 				.findById(placeId)
 				.orElseThrow(() -> new EntityNotFoundException("Place entity not found"));
 		
-		// Check if the current HP of the place is lower than zero
-		Integer currentHP = requestPlace.getAttrs().get(WorldHelper.PLACE_HP_ATTR);
-		Integer nextHP = currentHP;
+		// Check current place health
+		// First, we obtain the maxHP for this place
+		// if this value is different from zero, it means that this is a place that can be destroyed
+		Integer maxHP = 
+				dbPlace.getAttrs().stream()
+					.filter(d-> d.getId().getAttrCode().equals(WorldHelper.PLACE_MAX_HP_ATTR))
+					.mapToInt(MudPlaceAttr::getAttrValue)
+					.findFirst()
+					.orElse(0);
 		
-		if (currentHP!=null) {
+		// Retrieve the current HP of the place.  That value came from the request
+		Integer currentHP = requestPlace.getAttrs().getOrDefault(WorldHelper.PLACE_HP_ATTR, 0);
+		
+		// If the currentPlace has an HP and it is exhausted		
+		boolean placeDestroyed = (maxHP!=0) && (currentHP <0);
+		
+		if (placeDestroyed) {
 			
-			if (currentHP < 0) {
-				
-				dbPlace.setPlaceCode(null);
-				response = WorldHelper.buildPlace(dbPlace);
+			// destroy the place
+			destroyPlace(authToken, placeId);
+			
+		} else if ((maxHP!=0) && (currentHP > maxHP)) {
+			
+			// Adjusts the currentHP to the maximum
+			requestPlace.getAttrs().put(WorldHelper.PLACE_HP_ATTR, maxHP);
+		}
+		
+		if (!placeDestroyed) {
+			
+			// if placeClass is changed, update the attributes of changed place
+			if (!dbPlace.getPlaceClass().getPlaceClassCode().equals(requestPlace.getPlaceClassCode())) {
 	
-				// destroy the place
-				destroyPlace(authToken, placeId);
-				
+				// change placeClass			
+				internalUpdateClass(dbPlace, requestPlace.getPlaceClassCode());
 				
 			} else {
-
-				// Getting the current MAX HP from the place
-				Optional<MudPlaceAttr> maxHPAttr = 
-					dbPlace.getAttrs().stream()
-						.filter(d-> d.getId().getAttrCode().equals(WorldHelper.PLACE_MAX_HP_ATTR))
-						.findFirst();
 				
-				if (maxHPAttr.isPresent()) {
+				// Looking for attributes to remove
+				Set<MudPlaceAttr> filteredSet =
+					dbPlace.getAttrs().stream()
+						// Filtering all database attributes...
+						.filter(db -> requestPlace.getAttrs().keySet().stream()
+								// ... that isn't in the request
+								.noneMatch(req -> req.equals(db.getId().getAttrCode())))
+						.collect(Collectors.toSet());
+	
+				
+				dbPlace.getAttrs().removeAll(filteredSet);
 					
-					// If HP is greater than MAX_HP, adjust it						
-					if (maxHPAttr.get().getAttrValue() < nextHP) {
+	
+				// Looking for attributes to add
+				for(String curAttr: requestPlace.getAttrs().keySet()) {
+					
+					Integer curValue = requestPlace.getAttrs().get(curAttr);
+					
+					// Looking for existing attribute in db record list
+					Optional<MudPlaceAttr> foundAttr = 
+						dbPlace.getAttrs().stream()
+							.filter(a -> a.getId().getAttrCode().equals(curAttr))
+							.findFirst();
+	
+					// If the value exists in db record
+					if (foundAttr.isPresent()) {
 						
-						nextHP = maxHPAttr.get().getAttrValue();
+						// Updates the value of existing attribute
+						foundAttr.get().setAttrValue(curValue);
+					} else {
 						
+						// Creates a new attribute
+						dbPlace.getAttrs().add(
+								WorldHelper.buildPlaceAttr(dbPlace.getPlaceCode(), curAttr, curValue)
+								);
 					}
 				}
 				
-
-				// Update the hp attr
-				Optional<MudPlaceAttr> hpAttr = 
-					dbPlace.getAttrs().stream()
-						.filter(d-> d.getId().getAttrCode().equals(WorldHelper.PLACE_HP_ATTR))
-						.findFirst();
-				
-				if (hpAttr.isPresent()) {
-					hpAttr.get().setAttrValue(nextHP);
-				} else {
-					dbPlace.getAttrs().add(
-							WorldHelper.buildPlaceAttr(dbPlace.getPlaceCode(), WorldHelper.PLACE_HP_ATTR, nextHP)
-							);
-				}
-
 			}
+			
+			// 4. exits
+			dbPlace = WorldHelper.updatePlaceExits(dbPlace, requestPlace);
+	
+			
+			MudPlace updatedPlace = placeRepository.save(dbPlace);
+			
+			response = WorldHelper.buildPlace(updatedPlace);
 		}
-			
-		// Looking for attributes to remove
-		Set<MudPlaceAttr> filteredSet =
-			dbPlace.getAttrs().stream()
-				// Filtering all database attributes...
-				.filter(db -> requestPlace.getAttrs().keySet().stream()
-						// ... that isn't in the request
-						.noneMatch(req -> req.equals(db.getId().getAttrCode())))
-				.collect(Collectors.toSet());
-
-		
-		dbPlace.getAttrs().removeAll(filteredSet);
-			
-		// Looking for attributes to add
-		for(String curAttr: requestPlace.getAttrs().keySet()) {
-			
-			Integer curValue = requestPlace.getAttrs().get(curAttr);
-
-			// Looking for existing attribute in db record list
-			Optional<MudPlaceAttr> foundAttr = 
-				dbPlace.getAttrs().stream()
-					.filter(a -> a.getId().getAttrCode().equals(curAttr))
-					.findFirst();
-
-			if (foundAttr.isPresent()) {
-				
-				// Updates the value of existing attribute
-				foundAttr.get().setAttrValue(curValue);
-			} else {
-				
-				// Creates a new attribute
-				dbPlace.getAttrs().add(
-						WorldHelper.buildPlaceAttr(dbPlace.getPlaceCode(), curAttr, curValue)
-						);
-			}
-		}
-			
-		// if placeClass is changed, update the attributes of changed place
-		if (!dbPlace.getPlaceClass().getPlaceClassCode().equals(requestPlace.getPlaceClassCode())) {
-			
-			// change placeClass
-			MudPlaceClass placeClass = placeClassRepository
-					.findById(requestPlace.getPlaceClassCode())
-					.orElseThrow(() -> new EntityNotFoundException("Place class entity not found"));
-			
-			dbPlace = WorldHelper.changePlaceAttrs(dbPlace, dbPlace.getPlaceClass(), placeClass);
-			dbPlace.setPlaceClass(placeClass);
-			
-			// Find all exits pointing to this place
-			Iterable<MudPlaceExit> exitList = placeExitRepository.findByTargetPlaceCode(dbPlace.getPlaceCode());
-			
-			// Update them all
-			for(MudPlaceExit curExit: exitList) {
-				
-				curExit.setName(placeClass.getName());
-				placeExitRepository.save(curExit);
-			}
-		}
-			
-			
-		// 4. exits
-		dbPlace = WorldHelper.updatePlaceExits(dbPlace, requestPlace);
-
-		
-		MudPlace updatedPlace = placeRepository.save(dbPlace);
-		
-		response = WorldHelper.buildPlace(updatedPlace);
 		
 		return response;
+	}
+	
+	
+	private MudPlace internalUpdateClass(MudPlace original, String newPlaceClassCode) {
+		
+		MudPlaceClass placeClass = placeClassRepository
+				.findById(newPlaceClassCode)
+				.orElseThrow(() -> new EntityNotFoundException("Place class entity not found"));
+		
+
+		original = WorldHelper.changePlaceAttrs(original, original.getPlaceClass(), placeClass);
+		original.setPlaceClass(placeClass);
+
+		// Find all exits pointing to this place
+		Iterable<MudPlaceExit> exitList = placeExitRepository.findByTargetPlaceCode(original.getPlaceCode());
+		
+		// Update them all
+		exitList.forEach(curExit -> {
+			curExit.setName(placeClass.getName());
+			placeExitRepository.save(curExit);
+			
+		});
+
+		// Update the main place
+		placeRepository.save(original);
+		
+		return original;
 	}
 
 
@@ -205,41 +200,16 @@ public class PlaceController implements PlaceService {
 				.findById(placeId)
 				.orElseThrow(() -> new EntityNotFoundException("Place entity not found"));
 
-		MudPlace updatedPlace = null;
-			
 		// If exists a demise place class for this location
 		if (dbPlace.getPlaceClass().getDemisePlaceClassCode()!=null) {
-			
-			Optional<MudPlaceClass> placeClass = placeClassRepository
-					.findById(dbPlace.getPlaceClass().getDemisePlaceClassCode());
-			
-			if (placeClass.isPresent()) {
-				
-				MudPlaceClass d = placeClass.get();
 
-				dbPlace = WorldHelper.changePlaceAttrs(dbPlace, dbPlace.getPlaceClass(), d);
-				dbPlace.setPlaceClass(d);
-
-				// Find all exits pointing to this place
-				Iterable<MudPlaceExit> exitList = placeExitRepository.findByTargetPlaceCode(dbPlace.getPlaceCode());
-				
-				// Update them all
-				exitList.forEach(curExit -> {
-					curExit.setName(d.getName());
-					placeExitRepository.save(curExit);
-					
-				});
-
-				// Update the main place
-				updatedPlace = placeRepository.save(dbPlace);
-			}
+			// Change the placeClass to the demised one
+			internalUpdateClass(dbPlace, dbPlace.getPlaceClass().getDemisePlaceClassCode());
 			
 		} else {
 			
 			// Destroy the place
 			placeRepository.delete(dbPlace);
-			
-			String internalToken = TokenService.buildInternalToken();
 			
 			try {
 			
@@ -247,21 +217,18 @@ public class PlaceController implements PlaceService {
 				// THAT MUST GOES FIRST!!!
 				// This call will drop all items belonging to beings into the place
 				// TODO: solve the worldName
-				beingService.destroyAllFromPlace(internalToken, "aforgotten", placeId);
+				beingService.destroyAllFromPlace(authToken, "aforgotten", placeId);
 				
 				// Remove all items from the place
 				// (That will include items dropped from beings above)
 				// TODO: solve the worldName
-				itemService.destroyAllFromPlace(internalToken, "aforgotten", placeId);
+				itemService.destroyAllFromPlace(authToken, "aforgotten", placeId);
 				
 			} catch(Exception e) {
 				
 				// Any exception on these calls will be disregarded
-				e.printStackTrace(System.err);
+				// TODO: Log this exception
 			}
-			
-			updatedPlace = dbPlace;
-			updatedPlace.setPlaceCode(null);
 		}
 	}
 
@@ -288,7 +255,7 @@ public class PlaceController implements PlaceService {
 		if (targetDbPlace.getExits().stream()
 			.anyMatch(d -> d.getPk().getDirection().equals(correspondingDirection))) {
 			
-			throw new RuntimeException("Target place already has a corresponding exit");
+			throw new IllegalParameterException("Target place already has a corresponding exit");
 		}
 		
 		MudPlace newPlace = new MudPlace();
@@ -326,7 +293,7 @@ public class PlaceController implements PlaceService {
 		
 		response = WorldHelper.buildPlace(dbPlace);
 		
-		return new ResponseEntity<Place>(response, HttpStatus.CREATED);
+		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}	
 	
 }

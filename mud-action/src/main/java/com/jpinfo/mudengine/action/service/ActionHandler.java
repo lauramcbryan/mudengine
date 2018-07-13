@@ -46,6 +46,9 @@ public class ActionHandler {
 	@Autowired
 	private ItemServiceClient itemService;
 	
+	@Autowired
+	private TokenService tokenService;
+	
 
 	public void updateAction(Long currentTurn, Action curAction, ActionInfo fullActionState) {
 
@@ -85,7 +88,7 @@ public class ActionHandler {
 						}
 
 						// Reapply effects
-						fullActionState = calculateEffect(fullActionState);
+						calculateEffect(fullActionState);
 						
 						// As it is a instant action, it goes straight to COMPLETED status
 						futureState = Action.EnumActionState.COMPLETED;
@@ -125,7 +128,7 @@ public class ActionHandler {
 					}
 
 					// Reapply effects
-					fullActionState = calculateEffect(fullActionState);
+					calculateEffect(fullActionState);
 				}
 
 				// if reach end_turn, complete it
@@ -239,7 +242,7 @@ public class ActionHandler {
 		return (nroTurns + currentTurn);
 	}
 	
-	public ActionInfo buildActionInfo(Action a) throws EntityNotFoundException {
+	public ActionInfo buildActionInfo(Action a) {
 		
 		ActionInfo result = new ActionInfo();
 		
@@ -254,7 +257,8 @@ public class ActionHandler {
 		result.setActionClass(ActionHelper.buildActionClass(dbActionClass));
 
 		// Preparing the token to internally call the services to compose the ActionInfo
-		String token = TokenService.buildInternalToken();
+		String token = tokenService.buildInternalToken();
+		
 
 		
 		//Actor

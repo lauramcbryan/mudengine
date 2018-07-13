@@ -8,9 +8,11 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.apache.tomcat.util.codec.binary.Base64;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.stereotype.Component;
 
 import com.jpinfo.mudengine.common.player.Player;
 import com.jpinfo.mudengine.common.player.Session;
@@ -21,6 +23,7 @@ import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
+@Component
 public class TokenService {
 	
 	private static final long TOKEN_TTL = 3600000;  // 1 hour
@@ -29,16 +32,17 @@ public class TokenService {
 	private static final String PLAYER_DATA = "playerData";
 	private static final String SESSION_DATA = "sessionData";
 
-	// 128bits hex key
-	private static final String SECRET = "a7ac498c7bba59e0eb7c647d2f0197f8";
-	
 	
 	public static final String INTERNAL_ACCOUNT = "Internal";
 	public static final Long INTERNAL_PLAYER_ID = Long.MAX_VALUE;
 	public static final Long INTERNAL_BEING_CODE = Long.MAX_VALUE;
 	public static final String INTERNAL_LOCALE= "en_US";
 
-	public static String buildToken(String userName, Player playerData, Session session) {
+	// 128bits hex key	
+	@Value("${token.secret}")
+	private String tokenSecret;
+
+	public String buildToken(String userName, Player playerData, Session session) {
 
 		String token = null;
 		
@@ -53,7 +57,7 @@ public class TokenService {
 			builder.claim(TokenService.SESSION_DATA, session);
 		
 		builder.setExpiration(new Date(System.currentTimeMillis() + TokenService.TOKEN_TTL));
-		builder.signWith(SignatureAlgorithm.HS256, TokenService.SECRET);
+		builder.signWith(SignatureAlgorithm.HS256, tokenSecret);
 		
 		token = builder.compact();
 		
@@ -61,26 +65,26 @@ public class TokenService {
 		
 	}
 
-	public static String updateToken(String token, Optional<Player> playerData, Optional<Session> sessionData) {
+	public String updateToken(String token, Optional<Player> playerData, Optional<Session> sessionData) {
 	
-		Jws<Claims> parsedToken = TokenService.parseToken(token);
+		Jws<Claims> parsedToken = parseToken(token);
 		
-		Session oldSession = TokenService.getSessionDataFromToken(token);
-		Player oldPlayer = TokenService.getPlayerDataFromToken(token);
+		Session oldSession = getSessionDataFromToken(token);
+		Player oldPlayer = getPlayerDataFromToken(token);
 		
-		return TokenService.buildToken(parsedToken.getBody().getSubject(),
+		return buildToken(parsedToken.getBody().getSubject(),
 				(playerData.isPresent() ? playerData.get() : oldPlayer),
 				(sessionData.isPresent() ? sessionData.get(): oldSession)
 				);
 	}
 	
-	public static Authentication getAuthenticationFromToken(String token) {
+	public Authentication getAuthenticationFromToken(String token) {
 		
 		Authentication result = null;
 		
 		if ((token!=null) && (!token.isEmpty())) {
 			
-			String username = TokenService.getUsernameFromToken(token);
+			String username = getUsernameFromToken(token);
 			
 			result = new UsernamePasswordAuthenticationToken(username, null, Collections.<GrantedAuthority>emptyList());
 		}
@@ -88,13 +92,13 @@ public class TokenService {
 		return result;
 	}
 	
-	public static String getUsernameFromToken(String token) {
+	public String getUsernameFromToken(String token) {
 		
 		String result = null;
 		
 		if ((token!=null) && (!token.isEmpty())) {
 			
-			Jws<Claims> parsedToken = TokenService.parseToken(token);
+			Jws<Claims> parsedToken = parseToken(token);
 			
 			result = parsedToken.getBody().getSubject();
 		}
@@ -102,7 +106,7 @@ public class TokenService {
 		return result;
 	}
 	
-	public static Long getPlayerIdFromToken(String token) {
+	public Long getPlayerIdFromToken(String token) {
 		
 		Long result = null;
 		
@@ -117,7 +121,7 @@ public class TokenService {
 		return result;
 	}
 
-	public static Long getBeingCodeFromToken(String token) {
+	public Long getBeingCodeFromToken(String token) {
 		
 		Long result = null;
 		
@@ -132,7 +136,7 @@ public class TokenService {
 		return result;
 	}
 
-	public static String getLocaleFromToken(String token) {
+	public String getLocaleFromToken(String token) {
 		
 		String result = null;
 		
@@ -148,13 +152,13 @@ public class TokenService {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static Session getSessionDataFromToken(String token) {
+	public Session getSessionDataFromToken(String token) {
 		
 		Session result = null;
 		
 		if ((token!=null) && (!token.isEmpty())) {
 			
-			Jws<Claims> parsedToken = TokenService.parseToken(token);
+			Jws<Claims> parsedToken = parseToken(token);
 			
 			if (parsedToken.getBody().containsKey(TokenService.SESSION_DATA)) {
 				
@@ -166,13 +170,13 @@ public class TokenService {
 	}	
 	
 	@SuppressWarnings("unchecked")
-	public static Player getPlayerDataFromToken(String token) {
+	public Player getPlayerDataFromToken(String token) {
 		
 		Player result = null;
 		
 		if ((token!=null) && (!token.isEmpty())) {
 			
-			Jws<Claims> parsedToken = TokenService.parseToken(token);
+			Jws<Claims> parsedToken = parseToken(token);
 			
 			if (parsedToken.getBody().containsKey(TokenService.PLAYER_DATA)) {
 				
@@ -183,17 +187,7 @@ public class TokenService {
 		return result;
 	}
 	
-	private static Jws<Claims> parseToken(String token) {
-		
-		String decodedToken = new String(Base64.decodeBase64(token));
-		
-		Jws<Claims> parsedToken = Jwts.parser().setSigningKey(TokenService.SECRET).parseClaimsJws(decodedToken);
-		
-		return parsedToken;
-		
-	}
-	
-	public static String buildInternalToken() {
+	public String buildInternalToken() {
 		
 		Player playerData = new Player();
 		playerData.setPlayerId(TokenService.INTERNAL_PLAYER_ID);
@@ -207,29 +201,11 @@ public class TokenService {
 		return buildToken(TokenService.INTERNAL_ACCOUNT, playerData, sessionData);
 	}
 	
-	public static void main(String[] args) {
+	private Jws<Claims> parseToken(String token) {
 		
-		String internalToken = TokenService.buildInternalToken();
-		System.out.println("internal = " + internalToken);
+		String decodedToken = new String(Base64.decodeBase64(token));
 		
-		System.out.println("playerData= " + TokenService.getPlayerIdFromToken(internalToken));
-		
-		
-		Player playerData = new Player();
-		playerData.setUsername(TokenService.INTERNAL_ACCOUNT);
-		playerData.setPlayerId(4L);
-		playerData.setLocale(TokenService.INTERNAL_LOCALE);
-		
-		Session sessionData = new Session();
-		sessionData.setSessionId(1234L);
-		sessionData.setPlayerId(4L);
-		
-		String usToken = TokenService.buildToken("username", playerData, sessionData);
-		
-		System.out.println("playerId=" + TokenService.getPlayerDataFromToken(usToken));
-		
-		System.out.println("sessionData=" + TokenService.getSessionDataFromToken(usToken));
-		
+		return Jwts.parser().setSigningKey(tokenSecret).parseClaimsJws(decodedToken);
 		
 	}
 }

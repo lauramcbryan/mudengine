@@ -79,6 +79,9 @@ public class BeingTests {
 	@Autowired
 	private TestRestTemplate restTemplate;
 	
+	@Autowired
+	private TokenService tokenService;
+	
 	/**
 	 * Create the internal authentication token
 	 * and put it in a HttpHeader
@@ -86,7 +89,7 @@ public class BeingTests {
 	 */
 	private HttpHeaders getInternalAuthHeaders() {
 		HttpHeaders authHeaders = new HttpHeaders();
-		authHeaders.add(CommonConstants.AUTH_TOKEN_HEADER, TokenService.buildInternalToken());
+		authHeaders.add(CommonConstants.AUTH_TOKEN_HEADER, tokenService.buildInternalToken());
 		
 		return authHeaders;
 	}
@@ -103,7 +106,7 @@ public class BeingTests {
 		sessionData.setPlayerId(playerId);
 		sessionData.setSessionId(Long.MAX_VALUE);
 		
-		String usToken = TokenService.buildToken(BeingTests.testUsername, playerData, sessionData);		
+		String usToken = tokenService.buildToken(BeingTests.testUsername, playerData, sessionData);		
 		
 		authHeaders.add(CommonConstants.AUTH_TOKEN_HEADER, usToken);
 		

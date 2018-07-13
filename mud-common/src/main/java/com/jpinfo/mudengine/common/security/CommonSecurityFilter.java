@@ -10,8 +10,10 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.GenericFilterBean;
 
 import com.jpinfo.mudengine.common.utils.CommonConstants;
@@ -19,8 +21,11 @@ import com.jpinfo.mudengine.common.utils.CommonConstants;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 
+@Component
 public class CommonSecurityFilter extends GenericFilterBean {
 
+	@Autowired
+	private TokenService tokenService;
 
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain)
 			throws IOException, ServletException {
@@ -30,7 +35,7 @@ public class CommonSecurityFilter extends GenericFilterBean {
 		
 		try {
 		
-			Authentication authenticatedUser = TokenService.getAuthenticationFromToken(
+			Authentication authenticatedUser = tokenService.getAuthenticationFromToken(
 					httpRequest.getHeader(CommonConstants.AUTH_TOKEN_HEADER));
 			
 			if (authenticatedUser!=null) {

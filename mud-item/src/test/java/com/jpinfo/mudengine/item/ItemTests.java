@@ -29,6 +29,9 @@ public class ItemTests {
 	@Autowired
 	private TestRestTemplate restTemplate;
 	
+	@Autowired
+	private TokenService tokenService;
+	
 	private static final String testItemClass = "TEST";
 	private static final String testItemClassAttr1 = "TSTA1";
 	private static final String testItemClassAttr2 = "TSTA2";
@@ -57,7 +60,7 @@ public class ItemTests {
 	 */
 	private HttpHeaders getAuthHeaders() {
 		HttpHeaders authHeaders = new HttpHeaders();
-		authHeaders.add(CommonConstants.AUTH_TOKEN_HEADER, TokenService.buildInternalToken());
+		authHeaders.add(CommonConstants.AUTH_TOKEN_HEADER, tokenService.buildInternalToken());
 		
 		return authHeaders;
 	}
@@ -133,7 +136,7 @@ public class ItemTests {
 		ResponseEntity<Item> updateResponse = restTemplate.exchange(
 				"/item/{itemId}", HttpMethod.POST, updateRequest, Item.class, urlVariables);
 
-		assertThat(updateResponse.getStatusCode().is2xxSuccessful());
+		assertThat(updateResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(updateResponse.getBody()).isNotNull();
 
 		Item updateItem = updateResponse.getBody();
@@ -161,14 +164,14 @@ public class ItemTests {
 				"/item/{itemId}", HttpMethod.DELETE, authEntity, Item.class, urlVariables);
 		
 
-		assertThat(deleteResponse.getStatusCode().is2xxSuccessful());
+		assertThat(deleteResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
 		
 		
 		// Read after delete
 		ResponseEntity<Item> readAfterDeleteResponse = restTemplate.exchange(
 				"/item/{itemId}", HttpMethod.GET, authEntity, Item.class, urlVariables);
 		
-		assertThat(readAfterDeleteResponse.getStatusCode().is4xxClientError());
+		assertThat(readAfterDeleteResponse.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
 	}
 
 	@Test
@@ -284,7 +287,7 @@ public class ItemTests {
 		ResponseEntity<Item[]> readPlaceResponse = restTemplate.exchange(
 				"/item/being/{owner}", HttpMethod.GET, authEntity, Item[].class, urlVariables);
 		
-		assertThat(readPlaceResponse.getStatusCode().is2xxSuccessful());
+		assertThat(readPlaceResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(readPlaceResponse.getBody()).isNotNull();
 		assertThat(readPlaceResponse.getBody().length).isEqualTo(2);
 		

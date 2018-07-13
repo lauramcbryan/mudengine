@@ -32,6 +32,9 @@ public class PlaceTests {
 	@Autowired
 	private TestRestTemplate restTemplate;
 	
+	@Autowired
+	private TokenService tokenUtils;
+	
 	@MockBean
 	private ItemServiceClient mockItem;
 	
@@ -65,7 +68,7 @@ public class PlaceTests {
 		
 		// Creating the authentication token
 		HttpHeaders authHeaders = new HttpHeaders();
-		authHeaders.add(CommonConstants.AUTH_TOKEN_HEADER, TokenService.buildInternalToken());
+		authHeaders.add(CommonConstants.AUTH_TOKEN_HEADER, tokenUtils.buildInternalToken());
 		
 		HttpEntity<Object> authEntity = new HttpEntity<Object>(authHeaders);
 		
@@ -94,7 +97,7 @@ public class PlaceTests {
 		ResponseEntity<Place> responseGet = restTemplate.exchange("/place/{placeId}", 
 				HttpMethod.GET, authEntity, Place.class, urlVariables);
 		
-		assertThat(responseGet.getStatusCode().is2xxSuccessful());
+		assertThat(responseGet.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertValues(responseGet, PlaceTests.testPlaceClass);
 		assertTestPlaceClassValues(responseGet.getBody());
 		
@@ -110,7 +113,7 @@ public class PlaceTests {
 		ResponseEntity<Place> responseUpdate = restTemplate.exchange(
 				"/place/{placeId}", HttpMethod.POST, request, Place.class, urlVariables);
 		
-		assertThat(responseUpdate.getStatusCode().is2xxSuccessful());
+		assertThat(responseUpdate.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertValues(responseUpdate, PlaceTests.changedPlaceClass);
 		assertThat(responseUpdate.getBody().getAttrs().get(PlaceTests.extraPlaceAttr)).isNotNull();
 		assertChangedPlaceClassValues(responseUpdate.getBody());
@@ -120,14 +123,14 @@ public class PlaceTests {
 		ResponseEntity<Place> responseFirstDelete = restTemplate.exchange(
 				"/place/{placeId}", HttpMethod.DELETE, authEntity, Place.class, urlVariables);
 		
-		assertThat(responseFirstDelete.getStatusCode().is2xxSuccessful());
+		assertThat(responseFirstDelete.getStatusCode()).isEqualTo(HttpStatus.OK);
 		
 		// Querying the deleted object
 		ResponseEntity<Place> responseAfterFirstDelete = restTemplate.exchange(
 				"/place/{placeId}", HttpMethod.GET, authEntity, Place.class, urlVariables);
 		
 		// Must revert to first placeClass (changedPlaceClass demise placeClass)
-		assertThat(responseAfterFirstDelete.getStatusCode().is2xxSuccessful());
+		assertThat(responseAfterFirstDelete.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertValues(responseAfterFirstDelete, PlaceTests.testPlaceClass);
 		assertTestPlaceClassValues(responseAfterFirstDelete.getBody());
 		
@@ -135,7 +138,7 @@ public class PlaceTests {
 		ResponseEntity<Place> responseSecondDelete = restTemplate.exchange(
 				"/place/{placeId}", HttpMethod.DELETE, authEntity, Place.class, urlVariables);
 		
-		assertThat(responseSecondDelete.getStatusCode().is2xxSuccessful());
+		assertThat(responseSecondDelete.getStatusCode()).isEqualTo(HttpStatus.OK);
 		
 		// Querying again
 		ResponseEntity<Place> responseAfterSecondDelete = restTemplate.exchange(

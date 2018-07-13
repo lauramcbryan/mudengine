@@ -93,6 +93,9 @@ public class MessageTests {
 	
 	@Autowired
 	private TestRestTemplate restTemplate;
+	
+	@Autowired
+	private TokenService tokenService;
 
 	
 	public String getToken(Long beingCode, String locale) {
@@ -106,7 +109,7 @@ public class MessageTests {
 		sessionData.setBeingCode(beingCode);
 		sessionData.setPlayerId(MessageTests.TEST_PLAYER_ID);
 		
-		String usToken = TokenService.buildToken(MessageTests.TEST_USERNAME, playerData, sessionData);
+		String usToken = tokenService.buildToken(MessageTests.TEST_USERNAME, playerData, sessionData);
 		
 		return usToken;
 	}

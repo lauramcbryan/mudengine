@@ -74,7 +74,9 @@ public class PlayerTests {
 	
 	@MockBean
 	private BeingServiceClient beingClient;
-	
+
+	@Autowired
+	private TokenService tokenService;
 
 	private void setupMocks() {
 		
@@ -103,7 +105,7 @@ public class PlayerTests {
 	 */
 	private HttpHeaders getInternalAuthHeaders() {
 		HttpHeaders authHeaders = new HttpHeaders();
-		authHeaders.add(CommonConstants.AUTH_TOKEN_HEADER, TokenService.buildInternalToken());
+		authHeaders.add(CommonConstants.AUTH_TOKEN_HEADER, tokenService.buildInternalToken());
 		
 		return authHeaders;
 	}
@@ -122,7 +124,7 @@ public class PlayerTests {
 		//sessionData.setBeingCode(beingCode);
 
 		
-		String usToken = TokenService.buildToken(userName, playerData, sessionData);		
+		String usToken = tokenService.buildToken(userName, playerData, sessionData);		
 		
 		authHeaders.add(CommonConstants.AUTH_TOKEN_HEADER, usToken);
 		
@@ -159,7 +161,7 @@ public class PlayerTests {
 		assertThat(sessionData.getClientType()).isEqualTo(PlayerTests.TEST_CLIENT_TYPE);
 		assertThat(sessionData.getIpAddress()).isEqualTo(PlayerTests.TEST_IP_ADDRESS);
 		
-		assertThat(createResponse.getHeaders().containsKey(CommonConstants.AUTH_TOKEN_HEADER));
+		assertThat(createResponse.getHeaders().containsKey(CommonConstants.AUTH_TOKEN_HEADER)).isTrue();
 		
 		
 		// Get Session (anonymous)
@@ -305,7 +307,7 @@ public class PlayerTests {
 				HttpMethod.PUT, null, Session.class, urlVariables);
 		
 		
-		assertThat(loginResponse.getHeaders().containsKey(CommonConstants.AUTH_TOKEN_HEADER));
+		assertThat(loginResponse.getHeaders().containsKey(CommonConstants.AUTH_TOKEN_HEADER)).isTrue();
 		
 	}
 	
@@ -335,7 +337,7 @@ public class PlayerTests {
 		Map<String, Object> urlVariables = new HashMap<String, Object>();
 		
 		HttpHeaders requestHeaders = new HttpHeaders();
-		requestHeaders.add(CommonConstants.AUTH_TOKEN_HEADER, TokenService.buildInternalToken());
+		requestHeaders.add(CommonConstants.AUTH_TOKEN_HEADER, tokenService.buildInternalToken());
 		HttpEntity<Object> authRequestEntity = new HttpEntity<Object>(requestHeaders);
 		
 		// *********** GET PLAYER (internal account) ********************
@@ -408,7 +410,7 @@ public class PlayerTests {
 		String updatedToken = selectResponse.getHeaders().getFirst(CommonConstants.AUTH_TOKEN_HEADER);
 		
 		// Check if the beingCode is set in header token
-		assertThat(TokenService.getBeingCodeFromToken(updatedToken)).isEqualTo(PlayerTests.TEST_BEING_CODE);
+		assertThat(tokenService.getBeingCodeFromToken(updatedToken)).isEqualTo(PlayerTests.TEST_BEING_CODE);
 		
 		// Check if the beingCode is set in session object
 		assertThat(selectResponse.getBody().getBeingCode()).isEqualTo(PlayerTests.TEST_BEING_CODE);
@@ -435,7 +437,7 @@ public class PlayerTests {
 		updatedToken = destroyResponse.getHeaders().getFirst(CommonConstants.AUTH_TOKEN_HEADER);
 		
 		// Check if the beingCode isn't set in header token
-		assertThat(TokenService.getBeingCodeFromToken(updatedToken)).isNull();
+		assertThat(tokenService.getBeingCodeFromToken(updatedToken)).isNull();
 		
 		// Check if the beingCode is set in session object
 		assertThat(destroyResponse.getBody().getBeingCode()).isNull();

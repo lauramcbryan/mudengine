@@ -24,12 +24,13 @@ import com.jpinfo.mudengine.being.model.pk.MudBeingSlotPK;
 import com.jpinfo.mudengine.common.being.Being;
 import com.jpinfo.mudengine.common.being.BeingAttrModifier;
 import com.jpinfo.mudengine.common.being.BeingSkillModifier;
-import com.jpinfo.mudengine.common.security.TokenService;
 
 public class BeingHelper {
 	
 	private static final long ONE_WEEK = (7 * 24 * 60 * 1000);
 
+	
+	private BeingHelper() {}
 	
 	public static Being buildBeing(MudBeing dbBeing, boolean fullResponse) {
 		
@@ -63,10 +64,10 @@ public class BeingHelper {
 		
 		if (fullResponse) {
 			
-			Map<String, Integer> baseAttrMap = new HashMap<String, Integer>();
-			Map<String, Integer> baseSkillMap = new HashMap<String, Integer>();
-			List<BeingAttrModifier> attrModifierList = new ArrayList<BeingAttrModifier>();
-			List<BeingSkillModifier> skillModifierList = new ArrayList<BeingSkillModifier>();
+			Map<String, Integer> baseAttrMap = new HashMap<>();
+			Map<String, Integer> baseSkillMap = new HashMap<>();
+			List<BeingAttrModifier> attrModifierList = new ArrayList<>();
+			List<BeingSkillModifier> skillModifierList = new ArrayList<>();
 			
 			for(MudBeingAttr curAttr: dbBeing.getAttrs()) {
 				baseAttrMap.put(curAttr.getId().getAttrCode(), curAttr.getAttrValue());
@@ -249,7 +250,7 @@ public class BeingHelper {
 		
 		if (requestBeing.getSkills()!=null) {
 			
-			List<MudBeingSkill> skillsList = new ArrayList<MudBeingSkill>();
+			List<MudBeingSkill> skillsList = new ArrayList<>();
 			
 			for(String curSkill: requestBeing.getSkills().keySet()) {
 				
@@ -276,7 +277,7 @@ public class BeingHelper {
 		
 		if (requestBeing.getAttrModifiers()!=null) {
 			
-			List<MudBeingAttrModifier> attrList = new ArrayList<MudBeingAttrModifier>();
+			List<MudBeingAttrModifier> attrList = new ArrayList<>();
 			
 			for(BeingAttrModifier curAttrModifier: requestBeing.getAttrModifiers()) {
 				
@@ -307,7 +308,7 @@ public class BeingHelper {
 		
 		if (requestBeing.getSkillModifiers()!=null) {
 			
-			List<MudBeingSkillModifier> skillList = new ArrayList<MudBeingSkillModifier>();
+			List<MudBeingSkillModifier> skillList = new ArrayList<>();
 			
 			for(BeingSkillModifier curSkillModifier: requestBeing.getSkillModifiers()) {
 				
@@ -362,15 +363,6 @@ public class BeingHelper {
 		}
 		
 		return Math.round(response);
-		
-	}
-	
-	
-	public static boolean canAccess(String authToken, Long playerId) {
-		
-		Long authPlayerId = TokenService.getPlayerIdFromToken(authToken);
-		
-		return ((playerId==null) || (playerId.equals(authPlayerId)) || (TokenService.INTERNAL_PLAYER_ID.equals(authPlayerId)));
 		
 	}
 	
