@@ -1,5 +1,6 @@
 package com.jpinfo.mudengine.world.util;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -12,6 +13,8 @@ import com.jpinfo.mudengine.common.security.CommonSecurityFilter;
 @EnableWebSecurity
 public class WebSecurityAdapter extends WebSecurityConfigurerAdapter {
 	
+	@Autowired
+	private CommonSecurityFilter securityFilter;
 	
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
@@ -23,7 +26,7 @@ public class WebSecurityAdapter extends WebSecurityConfigurerAdapter {
 		http.headers().frameOptions().disable();
 		
 		http.authorizeRequests().antMatchers("/place/*").authenticated();
-		http.addFilterBefore(new CommonSecurityFilter(), UsernamePasswordAuthenticationFilter.class);
+		http.addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class);
 	}
 
 }

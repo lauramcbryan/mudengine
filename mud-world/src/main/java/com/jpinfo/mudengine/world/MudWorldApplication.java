@@ -13,7 +13,10 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages= {
+		"com.jpinfo.mudengine.world",
+		"com.jpinfo.mudengine.common"
+})
 @EnableDiscoveryClient
 @EnableFeignClients
 @EnableSwagger2
