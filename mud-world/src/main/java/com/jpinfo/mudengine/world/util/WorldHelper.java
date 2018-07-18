@@ -18,7 +18,9 @@ import com.jpinfo.mudengine.world.model.pk.PlaceExitPK;
 public class WorldHelper {
 	
 	public static final String PLACE_HP_ATTR = "HP";
-	public static final String PLACE_MAX_HP_ATTR = "MAX_HP";
+	public static final String PLACE_MAX_HP_ATTR = "MAXHP";
+	
+	private WorldHelper() { }
 
 	public static Place buildPlace(MudPlace originalDbPlace) {
 		
@@ -31,18 +33,18 @@ public class WorldHelper {
 		result.setPlaceClass(WorldHelper.buildPlaceClass(originalDbPlace.getPlaceClass()));
 
 		// Map the database list with the exits in a map
-		originalDbPlace.getExits().forEach(d -> {
+		originalDbPlace.getExits().forEach(d -> 
 			result.getExits().put(
 					d.getPk().getDirection(), 
-					WorldHelper.buildPlaceExits(d));
-		});
+					WorldHelper.buildPlaceExits(d))
+		);
 
-		originalDbPlace.getAttrs().forEach(d -> {
+		originalDbPlace.getAttrs().forEach(d -> 
 			result.getAttrs().put(
 					d.getId().getAttrCode(), 
-					d.getAttrValue());
+					d.getAttrValue())
 			
-		});
+		);
 		
 		
 		return result;
@@ -62,9 +64,9 @@ public class WorldHelper {
 		response.setBuildEffort(a.getBuildEffort());
 		response.setBuildCost(a.getBuildCost());
 		
-		a.getAttrs().stream().forEach(d -> {
-			response.getAttrs().put(d.getId().getAttrCode(), d.getAttrValue());
-		});
+		a.getAttrs().stream().forEach(d -> 
+			response.getAttrs().put(d.getId().getAttrCode(), d.getAttrValue())
+		);
 		
 		return response;
 	}
@@ -103,7 +105,7 @@ public class WorldHelper {
 		// 4. exits		
 		if (requestPlace.getExits()!=null) {
 			
-			Set<MudPlaceExit> newExits = new HashSet<MudPlaceExit>();
+			Set<MudPlaceExit> newExits = new HashSet<>();
 			
 			requestPlace.getExits().keySet().stream()
 				.forEach(curDirection -> {
@@ -170,26 +172,5 @@ public class WorldHelper {
 		
 		return PlaceExit.DIRECTIONS.get(newpos);
 	}
-	
-	public static MudPlace changePlaceAttrs(MudPlace dbPlace, MudPlaceClass previousPlaceClass, MudPlaceClass placeClass) {
-		
-		if (previousPlaceClass!=null) {
-			
-			previousPlaceClass.getAttrs().stream()
-				.forEach(curClassAttr -> {
-					MudPlaceAttr oldAttr = WorldHelper.buildPlaceAttr(dbPlace.getPlaceCode(), curClassAttr);
-					dbPlace.getAttrs().remove(oldAttr);
-			});
-			
-		}
-		
-		placeClass.getAttrs().stream()
-			.forEach(curClassAttr -> {
-				MudPlaceAttr newAttr = WorldHelper.buildPlaceAttr(dbPlace.getPlaceCode(), curClassAttr);
-				dbPlace.getAttrs().add(newAttr);
-		});
 
-		return dbPlace;
-	}
-	
 }
