@@ -14,7 +14,7 @@ public class ActionInfo extends Action {
 	
 	private Item mediator;
 	
-	// {BEING, ITEM, PLACE}
+	// Possible values: {BEING, ITEM, PLACE}
 	private ActionTarget target;
 	
 	private Double successRate;

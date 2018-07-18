@@ -2,6 +2,8 @@ package com.jpinfo.mudengine.message.utils;
 
 public class MessageHelper {
 	
+	private MessageHelper() { }
+	
 	public static boolean isLocalizedKey(String messageKey) {
 
 		return messageKey.startsWith("{str:");

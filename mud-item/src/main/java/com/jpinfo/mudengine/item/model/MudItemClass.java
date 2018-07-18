@@ -34,6 +34,6 @@ public class MudItemClass implements Serializable {
 	private List<MudItemClassAttr> attrs;
 
 	public MudItemClass() {
-		this.attrs = new ArrayList<MudItemClassAttr>();
+		this.attrs = new ArrayList<>();
 	}
 }

@@ -29,23 +29,21 @@ public class BeingClassController implements BeingClassService {
 				.findById(id)
 				.orElseThrow(() -> new EntityNotFoundException("Item class entity not found"));
 		
-		BeingClass result = BeingClassHelper.buildBeingClass(found);
-		
 	
-		return result;
+		return BeingClassHelper.buildBeingClass(found);
 	}
 
 	@Override
 	public List<BeingClass> listAllAvailable() {
 		
-		List<BeingClass> resultList = new ArrayList<BeingClass>();
+		List<BeingClass> resultList = new ArrayList<>();
 		
 		Iterable<MudBeingClass> dbList = repository.findAll();
 		
 		
-		dbList.forEach(d -> {
-			resultList.add(BeingClassHelper.buildBeingClass(d));
-		});
+		dbList.forEach(d -> 
+			resultList.add(BeingClassHelper.buildBeingClass(d))
+		);
 		
 		return resultList;
 	}

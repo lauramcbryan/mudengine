@@ -9,6 +9,8 @@ import com.jpinfo.mudengine.item.model.MudItemClassAttr;
 import com.jpinfo.mudengine.item.model.pk.MudItemAttrPK;
 
 public class ItemHelper {
+	
+	private ItemHelper() { }
 
 	public static Item buildItem(MudItem dbItem) {
 		

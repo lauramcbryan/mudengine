@@ -66,10 +66,10 @@ public class MudBeing implements Serializable {
 	private Integer quantity;
 
 	public MudBeing() {
-		this.attrs = new ArrayList<MudBeingAttr>();
-		this.skills = new ArrayList<MudBeingSkill>();
-		this.attrModifiers = new ArrayList<MudBeingAttrModifier>();
-		this.skillModifiers = new ArrayList<MudBeingSkillModifier>();
-		this.equipment = new ArrayList<MudBeingSlot>();
+		this.attrs = new ArrayList<>();
+		this.skills = new ArrayList<>();
+		this.attrModifiers = new ArrayList<>();
+		this.skillModifiers = new ArrayList<>();
+		this.equipment = new ArrayList<>();
 	}
 }

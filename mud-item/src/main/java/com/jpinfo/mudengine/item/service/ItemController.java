@@ -158,7 +158,7 @@ public class ItemController implements ItemService {
 			throw new IllegalParameterException("At least owner or place must be set in request");
 		}
 		
-		return new ResponseEntity<Item>(response, HttpStatus.CREATED);
+		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
 	
 	@Override
@@ -175,14 +175,14 @@ public class ItemController implements ItemService {
 	@Override
 	public List<Item> getAllFromPlace(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable String worldName, @PathVariable Integer placeCode) {
 		
-		List<Item> responseList = new ArrayList<Item>();
+		List<Item> responseList = new ArrayList<>();
 		
 		List<MudItem> dbResponse = itemRepository.findByCurWorldAndCurPlaceCode(worldName, placeCode);
 		
 		
-		dbResponse.stream().forEach(d-> {
-			responseList.add(ItemHelper.buildItem(d));
-		});
+		dbResponse.stream().forEach(d-> 
+			responseList.add(ItemHelper.buildItem(d))
+		);
 		
 		return responseList;
 	}
@@ -190,13 +190,13 @@ public class ItemController implements ItemService {
 	@Override
 	public List<Item> getAllFromBeing(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable Long owner) {
 		
-		List<Item> responseList = new ArrayList<Item>();
+		List<Item> responseList = new ArrayList<>();
 		
 		List<MudItem> dbResponse = itemRepository.findByCurOwner(owner);
 		
-		dbResponse.stream().forEach(d-> {
-			responseList.add(ItemHelper.buildItem(d));
-		});
+		dbResponse.stream().forEach(d-> 
+			responseList.add(ItemHelper.buildItem(d))
+		);
 		
 		return responseList;
 	}
@@ -206,9 +206,9 @@ public class ItemController implements ItemService {
 		
 		List<MudItem> dbResponse = itemRepository.findByCurWorldAndCurPlaceCode(worldName, placeCode);
 		
-		dbResponse.stream().forEach(d-> {
-			itemRepository.delete(d);
-		});
+		dbResponse.stream().forEach(d-> 
+			itemRepository.delete(d)
+		);
 	}
 
 	@Override

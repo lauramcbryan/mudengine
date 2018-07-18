@@ -1,5 +1,6 @@
 package com.jpinfo.mudengine.player.model;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.*;
@@ -11,7 +12,9 @@ import lombok.Data;
 @Entity
 @Table(name="MUD_PLAYER_BEING")
 @Data
-public class MudPlayerBeing {
+public class MudPlayerBeing implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	@EmbeddedId
 	private MudPlayerBeingPK id;

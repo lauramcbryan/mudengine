@@ -6,6 +6,8 @@ import com.jpinfo.mudengine.being.model.MudBeingClassSkill;
 import com.jpinfo.mudengine.common.being.BeingClass;
 
 public class BeingClassHelper {
+	
+	private BeingClassHelper() { }
 
 	public static BeingClass buildBeingClass(MudBeingClass a) {
 		

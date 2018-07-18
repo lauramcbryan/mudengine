@@ -52,6 +52,6 @@ public class MudMessage {
 	
 	
 	public MudMessage() {
-		this.parms = new HashSet<MudMessageParm>();
+		this.parms = new HashSet<>();
 	}
 }
