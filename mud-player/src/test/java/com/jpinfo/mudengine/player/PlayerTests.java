@@ -23,6 +23,7 @@ import com.jpinfo.mudengine.common.being.Being;
 import com.jpinfo.mudengine.common.being.BeingClass;
 import com.jpinfo.mudengine.common.player.Player;
 import com.jpinfo.mudengine.common.player.Session;
+import com.jpinfo.mudengine.common.security.MudUserDetails;
 import com.jpinfo.mudengine.common.security.TokenService;
 import com.jpinfo.mudengine.common.utils.CommonConstants;
 import com.jpinfo.mudengine.player.client.BeingServiceClient;
@@ -124,7 +125,9 @@ public class PlayerTests {
 		//sessionData.setBeingCode(beingCode);
 
 		
-		String usToken = tokenService.buildToken(userName, playerData, sessionData);		
+		String usToken = tokenService.buildToken(userName, 
+				Optional.of(playerData), 
+				Optional.of(sessionData));		
 		
 		authHeaders.add(CommonConstants.AUTH_TOKEN_HEADER, usToken);
 		
@@ -408,9 +411,12 @@ public class PlayerTests {
 		assertThat(selectResponse.getHeaders().get(CommonConstants.AUTH_TOKEN_HEADER)).isNotNull();
 
 		String updatedToken = selectResponse.getHeaders().getFirst(CommonConstants.AUTH_TOKEN_HEADER);
+
+		MudUserDetails uDetails = (MudUserDetails)
+				tokenService.getAuthenticationFromToken(updatedToken).getDetails();
 		
 		// Check if the beingCode is set in header token
-		assertThat(tokenService.getBeingCodeFromToken(updatedToken)).isEqualTo(PlayerTests.TEST_BEING_CODE);
+		assertThat(uDetails.getSessionData().get().getBeingCode()).isEqualTo(PlayerTests.TEST_BEING_CODE);
 		
 		// Check if the beingCode is set in session object
 		assertThat(selectResponse.getBody().getBeingCode()).isEqualTo(PlayerTests.TEST_BEING_CODE);
@@ -436,11 +442,20 @@ public class PlayerTests {
 
 		updatedToken = destroyResponse.getHeaders().getFirst(CommonConstants.AUTH_TOKEN_HEADER);
 		
+		MudUserDetails uDetails2 = (MudUserDetails)
+				tokenService.getAuthenticationFromToken(updatedToken).getDetails();
+		
+		
 		// Check if the beingCode isn't set in header token
-		assertThat(tokenService.getBeingCodeFromToken(updatedToken)).isNull();
+		assertThat(uDetails2.getSessionData().get().getBeingCode()).isNull();
 		
 		// Check if the beingCode is set in session object
 		assertThat(destroyResponse.getBody().getBeingCode()).isNull();
+		
+		// Check if the being is no longer in beingList
+		assertThat(uDetails2.getPlayerData().get().getBeingList().stream()
+			.noneMatch(d -> d.getBeingCode().equals(PlayerTests.TEST_BEING_CODE))
+		).isTrue();
 		
 	}
 }

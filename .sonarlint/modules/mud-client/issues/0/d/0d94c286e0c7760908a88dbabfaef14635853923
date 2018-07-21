@@ -1,0 +1,17 @@
+
+bsquid:S3655r"7Call "Optional#isPresent()" before accessing the value.(¡­°äúÿÿÿÿHˆRMAJORZBUG
+e
+squid:S106A"9Replace this use of System.out or System.err by a logger.(”ûÄÖH†RMAJORZ
+CODE_SMELL
+Xsquid:S1148\"#Use a logger to log this exception.(€ÉÔ…ıÿÿÿÿH‚RMINORZVULNERABILITY
+Ssquid:S1148_"#Use a logger to log this exception.(Ç’ÇêHƒRMINORZVULNERABILITY
+ƒsquid:S3776£"RRefactor this method to reduce its Cognitive Complexity from 23 to the 15 allowed.(æô²Hÿ~RCRITICALZ
+CODE_SMELL
+‡squid:S3776""RRefactor this method to reduce its Cognitive Complexity from 27 to the 15 allowed.(şâĞ…şÿÿÿÿHş~RCRITICALZ
+CODE_SMELL
+Xsquid:S16028",Remove useless curly braces around statement(©õß}H…RMINORZ
+CODE_SMELL
+bsquid:S3655n"7Call "Optional#isPresent()" before accessing the value.(ÁÇ¶ÜøÿÿÿÿH‰RMAJORZBUG
+Ssquid:S1148V"#Use a logger to log this exception.(Ç’ÇêH„RMINORZVULNERABILITY
+Œsquid:S11491"_Replace the synchronized class "StringBuffer" by an unsynchronized one such as "StringBuilder".(‚´Ó÷H‡RMAJORZ
+CODE_SMELL

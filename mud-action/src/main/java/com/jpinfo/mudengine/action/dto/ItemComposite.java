@@ -17,7 +17,7 @@ public class ItemComposite implements ActionTarget {
 	public ItemComposite(Item innerItem) {
 		this.innerItem = innerItem;
 		
-		this.messages = new ArrayList<ActionMessage>();
+		this.messages = new ArrayList<>();
 	}
 
 

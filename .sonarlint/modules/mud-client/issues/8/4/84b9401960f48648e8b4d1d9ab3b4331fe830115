@@ -1,0 +1,29 @@
+
+ˆsquid:S2068‚"U'Password' detected in this expression, review this potentially hardcoded credential.(‡¶¸ëHò}RBLOCKERZVULNERABILITY
+squid:S1149œ"_Replace the synchronized class "StringBuffer" by an unsynchronized one such as "StringBuilder".(«¤ÌõHÛ}RMAJORZ
+CODE_SMELL
+`squid:S1199›"-Extract this nested code block into a method.(±üíøÿÿÿÿHõ}RMINORZ
+CODE_SMELL
+Usquid:S1905®"'Remove this unnecessary cast to "List".(üÍ†íHæ}RMINORZ
+CODE_SMELL
+~squid:S11928"IDefine a constant instead of duplicating this literal "username" 8 times.(ØÊ±ãøÿÿÿÿHä}RCRITICALZ
+CODE_SMELL
+{squid:S1192‘"JDefine a constant instead of duplicating this literal "beingCode" 3 times.(º•âÃHà}RCRITICALZ
+CODE_SMELL
+Ysquid:S1148¦"#Use a logger to log this exception.(€ÉÔ…ıÿÿÿÿHî}RMINORZVULNERABILITY
+|squid:S1192C"GDefine a constant instead of duplicating this literal "Player" 4 times.(ÅœÉ÷ÿÿÿÿÿHè}RCRITICALZ
+CODE_SMELL
+f
+squid:S106±"9Replace this use of System.out or System.err by a logger.(œÖé¤Hß}RMAJORZ
+CODE_SMELL
+`squid:S1172’"-Remove this unused method parameter "entity".(›•šæøÿÿÿÿHñ}RMAJORZ
+CODE_SMELL
+Tsquid:S1148Ÿ"#Use a logger to log this exception.(òçøìHÜ}RMINORZVULNERABILITY
+squid:S2068"U'password' detected in this expression, review this potentially hardcoded credential.(ı¯ÏÆùÿÿÿÿHé}RBLOCKERZVULNERABILITY
+|squid:S1192"FDefine a constant instead of duplicating this literal "Being" 3 times.(ÙÔªòûÿÿÿÿHê}RCRITICALZ
+CODE_SMELL
+Usquid:S1905÷"'Remove this unnecessary cast to "List".(ğÈËşHŞ}RMINORZ
+CODE_SMELL
+f
+squid:S106ú"9Replace this use of System.out or System.err by a logger.(œÖé¤HÚ}RMAJORZ
+CODE_SMELL

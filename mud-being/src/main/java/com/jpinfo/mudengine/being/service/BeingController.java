@@ -4,9 +4,12 @@ import java.util.ArrayList;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -25,12 +28,15 @@ import com.jpinfo.mudengine.common.exception.AccessDeniedException;
 import com.jpinfo.mudengine.common.exception.EntityNotFoundException;
 import com.jpinfo.mudengine.common.exception.IllegalParameterException;
 import com.jpinfo.mudengine.common.item.Item;
+import com.jpinfo.mudengine.common.security.MudUserDetails;
 import com.jpinfo.mudengine.common.security.TokenService;
 import com.jpinfo.mudengine.common.service.BeingService;
 import com.jpinfo.mudengine.common.utils.CommonConstants;
 
 @RestController
 public class BeingController implements BeingService {
+	
+	private static final Logger log = LoggerFactory.getLogger(BeingController.class);
 	
 	@Autowired
 	private ItemServiceClient itemService;
@@ -40,9 +46,6 @@ public class BeingController implements BeingService {
 	
 	@Autowired
 	private BeingClassRepository classRepository;
-	
-	@Autowired
-	private TokenService tokenService;
 
 	@Override
 	public Being getBeing(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable Long beingCode) {
@@ -53,7 +56,7 @@ public class BeingController implements BeingService {
 				.findById(beingCode)
 				.orElseThrow(() -> new EntityNotFoundException("Being entity not found"));
 		
-		boolean fullResponse = canAccess(authToken, dbBeing.getPlayerId());
+		boolean fullResponse = canAccess(dbBeing.getPlayerId());
 		
 		response = BeingHelper.buildBeing(dbBeing, fullResponse);
 		
@@ -69,7 +72,7 @@ public class BeingController implements BeingService {
 				.findById(beingCode)
 				.orElseThrow(() -> new EntityNotFoundException("Being entity not found"));
 		
-		if (canAccess(authToken, dbBeing.getPlayerId())) {
+		if (canAccess(dbBeing.getPlayerId())) {
 	
 			// Basic data
 			dbBeing.setName(requestBeing.getName());
@@ -204,7 +207,7 @@ public class BeingController implements BeingService {
 		
 		List<Being> response = null;
 		
-		if (canAccess(authToken, playerId)) {
+		if (canAccess(playerId)) {
 		
 			List<MudBeing> lstFound = repository.findByPlayerId(playerId);
 			
@@ -240,7 +243,7 @@ public class BeingController implements BeingService {
 		MudBeing dbBeing = repository.findById(beingCode)
 				.orElseThrow(() -> new EntityNotFoundException("Being entity not found"));
 		
-		if (canAccess(authToken, dbBeing.getPlayerId())) {
+		if (canAccess(dbBeing.getPlayerId())) {
 			
 			try {
 		
@@ -250,7 +253,7 @@ public class BeingController implements BeingService {
 				
 				// as this is a *should have* feature, errors at this point
 				// are being disregarded and just logged.
-				e.printStackTrace(System.err);
+				log.error("Error while cascaging destroyBeing to dropAllFromBeing", e);
 				
 			}
 			
@@ -306,11 +309,21 @@ public class BeingController implements BeingService {
 		}
 	}
 	
-	private boolean canAccess(String authToken, Long playerId) {
+	private boolean canAccess(Long playerId) {
 		
-		Long authPlayerId = tokenService.getPlayerIdFromToken(authToken);
+		MudUserDetails uDetails = (MudUserDetails)SecurityContextHolder.getContext().getAuthentication().getDetails();
 		
-		return ((playerId==null) || (playerId.equals(authPlayerId)) || (TokenService.INTERNAL_PLAYER_ID.equals(authPlayerId)));
+		boolean allowed = false;
+		
+		if (uDetails.getPlayerData().isPresent()) {
+			
+			Long authPlayerId = uDetails.getPlayerData().get().getPlayerId();
+			
+			allowed = authPlayerId.equals(playerId) || authPlayerId.equals(TokenService.INTERNAL_PLAYER_ID); 
+			
+		}
+		
+		return allowed;
 		
 	}
 }

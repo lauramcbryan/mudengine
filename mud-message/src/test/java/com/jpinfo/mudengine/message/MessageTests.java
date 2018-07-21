@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -109,7 +110,9 @@ public class MessageTests {
 		sessionData.setBeingCode(beingCode);
 		sessionData.setPlayerId(MessageTests.TEST_PLAYER_ID);
 		
-		String usToken = tokenService.buildToken(MessageTests.TEST_USERNAME, playerData, sessionData);
+		String usToken = tokenService.buildToken(MessageTests.TEST_USERNAME, 
+				Optional.of(playerData), 
+				Optional.of(sessionData));
 		
 		return usToken;
 	}
@@ -173,7 +176,7 @@ public class MessageTests {
 		
 		assertThat(resultMessage.getSenderCode()).isNull();
 		assertThat(resultMessage.getSenderName()).isNull();
-		assertThat(resultMessage.getMessage()).isEqualTo(MessageTests.TEST_MESSAGE_1);
+		assertThat(resultMessage.getContent()).isEqualTo(MessageTests.TEST_MESSAGE_1);
 	}
 
 	@Test
@@ -236,7 +239,7 @@ public class MessageTests {
 		
 		assertThat(usResultMessage.getSenderCode()).isNull();
 		assertThat(usResultMessage.getSenderName()).isNull();
-		assertThat(usResultMessage.getMessage()).isEqualTo(MessageTests.TEST_MESSAGE_2_RESULT_US);
+		assertThat(usResultMessage.getContent()).isEqualTo(MessageTests.TEST_MESSAGE_2_RESULT_US);
 
 		
 	}
@@ -269,7 +272,7 @@ public class MessageTests {
 		
 		assertThat(brResultMessage.getSenderCode()).isNull();
 		assertThat(brResultMessage.getSenderName()).isNull();
-		assertThat(brResultMessage.getMessage()).isEqualTo(MessageTests.TEST_MESSAGE_2_RESULT_BR);
+		assertThat(brResultMessage.getContent()).isEqualTo(MessageTests.TEST_MESSAGE_2_RESULT_BR);
 	
 	}
 
@@ -303,7 +306,7 @@ public class MessageTests {
 		
 		assertThat(resultMessage.getSenderCode()).isNull();
 		assertThat(resultMessage.getSenderName()).isNull();
-		assertThat(resultMessage.getMessage()).isEqualTo(MessageTests.TEST_MESSAGE_3_RESULT);
+		assertThat(resultMessage.getContent()).isEqualTo(MessageTests.TEST_MESSAGE_3_RESULT);
 
 	}
 	
@@ -336,7 +339,7 @@ public class MessageTests {
 		
 		assertThat(resultMessage.getSenderCode()).isNull();
 		assertThat(resultMessage.getSenderName()).isNull();
-		assertThat(resultMessage.getMessage()).isEqualTo(MessageTests.TEST_MESSAGE_4_RESULT);	
+		assertThat(resultMessage.getContent()).isEqualTo(MessageTests.TEST_MESSAGE_4_RESULT);	
 	}
 
 	@Test
@@ -368,7 +371,7 @@ public class MessageTests {
 		
 		assertThat(resultMessage.getSenderCode()).isNull();
 		assertThat(resultMessage.getSenderName()).isNull();
-		assertThat(resultMessage.getMessage()).isEqualTo(MessageTests.TEST_MESSAGE_5_RESULT_US);	
+		assertThat(resultMessage.getContent()).isEqualTo(MessageTests.TEST_MESSAGE_5_RESULT_US);	
 	}
 
 	@Test
@@ -400,7 +403,7 @@ public class MessageTests {
 		
 		assertThat(resultMessage.getSenderCode()).isNull();
 		assertThat(resultMessage.getSenderName()).isNull();
-		assertThat(resultMessage.getMessage()).isEqualTo(MessageTests.TEST_MESSAGE_5_RESULT_BR);	
+		assertThat(resultMessage.getContent()).isEqualTo(MessageTests.TEST_MESSAGE_5_RESULT_BR);	
 	}
 
 	@Test

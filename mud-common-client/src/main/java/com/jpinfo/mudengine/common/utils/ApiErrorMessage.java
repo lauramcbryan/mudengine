@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.Date;
 
 
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -23,14 +22,11 @@ public class ApiErrorMessage {
 	
 	private String path;
 	
-	public static ApiErrorMessage build(String jsonError) throws JsonParseException, IOException {
+	public static ApiErrorMessage build(String jsonError) throws IOException {
 		
 		ObjectMapper jsonMapper = new ObjectMapper();
 		
-		ApiErrorMessage result = 
-					jsonMapper.readValue(jsonError, 
-							new TypeReference<ApiErrorMessage>() {});
-
-		return result;
+		return jsonMapper.readValue(jsonError, 
+				new TypeReference<ApiErrorMessage>() {});
 	}
 }

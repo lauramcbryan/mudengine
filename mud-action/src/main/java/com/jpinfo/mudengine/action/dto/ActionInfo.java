@@ -14,14 +14,10 @@ public class ActionInfo extends Action {
 	
 	private Item mediator;
 	
-	// Possible values: {BEING, ITEM, PLACE}
 	private ActionTarget target;
 	
 	private Double successRate;
 	
-	
-	public ActionInfo() {
-	}
 	
 	public BeingComposite getActor() {
 		return actor;

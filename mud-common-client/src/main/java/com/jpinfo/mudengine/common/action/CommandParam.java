@@ -8,7 +8,7 @@ import lombok.Data;
 @Data
 public class CommandParam {
 
-	public static enum enumParamTypes { anyString, email, anyNumber};
+	public enum enumParamTypes { ANY_STRING, EMAIL, ANY_NUMBER}
 
 	private String name;
 	private String inputMessage;
@@ -25,7 +25,7 @@ public class CommandParam {
 
 	public String getInputMessage() {
 		
-		StringBuffer msg = new StringBuffer();
+		StringBuilder msg = new StringBuilder();
 		
 		msg.append(this.inputMessage);
 		

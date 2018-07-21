@@ -5,8 +5,8 @@ import lombok.Data;
 @Data
 public class Action {
 	
-	public enum EnumActionState {NOT_STARTED, STARTED, COMPLETED, CANCELLED, REFUSED};
-	public enum EnumTargetType {BEING, ITEM, PLACE, DIRECTION};
+	public enum EnumActionState {NOT_STARTED, STARTED, COMPLETED, CANCELLED, REFUSED}
+	public enum EnumTargetType {BEING, ITEM, PLACE, DIRECTION}
 	
 	private Long issuerCode;
 	
@@ -16,11 +16,11 @@ public class Action {
 	
 	private String mediatorCode;
 
-	private EnumTargetType mediatorType;  // {BEING, ITEM, PLACE, DIRECTION, MESSAGE}
+	private EnumTargetType mediatorType;
 
 	private String targetCode;
 
-	private EnumTargetType targetType;  // {BEING, ITEM, PLACE, DIRECTION, MESSAGE}
+	private EnumTargetType targetType;
 	
 	private Long actionId;
 	

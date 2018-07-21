@@ -52,7 +52,7 @@ public class MudengineApiImpl implements MudengineApi {
 		
 		Player result = null;
 		
-		Map<String, Object> urlVariables = new HashMap<String, Object>();
+		Map<String, Object> urlVariables = new HashMap<>();
 		urlVariables.put("username", username);
 		
 		try {
@@ -73,7 +73,7 @@ public class MudengineApiImpl implements MudengineApi {
 	@Override
 	public void registerPlayer(String username, String email, String locale) throws ClientException {
 		
-		Map<String, Object> urlVariables = new HashMap<String, Object>();
+		Map<String, Object> urlVariables = new HashMap<>();
 		urlVariables.put("username", username);
 		urlVariables.put("email", email);
 		urlVariables.put("locale", locale);
@@ -95,10 +95,10 @@ public class MudengineApiImpl implements MudengineApi {
 		
 		ApiResult result = null;
 		
-		Map<String, Object> urlVariables = new HashMap<String, Object>();
+		Map<String, Object> urlVariables = new HashMap<>();
 		urlVariables.put("username", playerData.getUsername());
 		
-		HttpEntity<Player> playerRequest = new HttpEntity<Player>(playerData, getAuthHeaders(authToken));
+		HttpEntity<Player> playerRequest = new HttpEntity<>(playerData, getAuthHeaders(authToken));
 		
 		try {
 			ResponseEntity<Player> response = restTemplate.exchange(
@@ -120,7 +120,7 @@ public class MudengineApiImpl implements MudengineApi {
 	@Override
 	public void setPlayerPassword(String username, String activationCode, String newPassword) throws ClientException {
 		
-		Map<String, Object> urlVariables = new HashMap<String, Object>();
+		Map<String, Object> urlVariables = new HashMap<>();
 		urlVariables.put("username", username);
 		urlVariables.put("activationCode", activationCode);
 		urlVariables.put("newPassword", newPassword);
@@ -140,7 +140,7 @@ public class MudengineApiImpl implements MudengineApi {
 		
 		String result = null;
 		
-		Map<String, Object> urlVariables = new HashMap<String, Object>();
+		Map<String, Object> urlVariables = new HashMap<>();
 		urlVariables.put("username", username);
 		urlVariables.put("beingCode", beingCode);
 		
@@ -163,10 +163,8 @@ public class MudengineApiImpl implements MudengineApi {
 	@Override
 	public List<BeingClass> getBeingClasses(String authToken) {
 
-		List<BeingClass> returnList = new ArrayList<BeingClass>();
+		List<BeingClass> returnList = new ArrayList<>();
 		
-		RestTemplate restTemplate = new RestTemplate();
-
 		try {
 			ResponseEntity<BeingClass[]> response = restTemplate.exchange(
 					apiEndpoint + "/being/class", 
@@ -190,7 +188,7 @@ public class MudengineApiImpl implements MudengineApi {
 		
 		ApiResult result = null;
 
-		Map<String, Object> urlVariables = new HashMap<String, Object>();
+		Map<String, Object> urlVariables = new HashMap<>();
 		
 		urlVariables.put("username", username);
 		urlVariables.put("beingClass", beingClass);
@@ -220,7 +218,7 @@ public class MudengineApiImpl implements MudengineApi {
 		
 		ApiResult result = null;
 		
-		Map<String, Object> urlVariables = new HashMap<String, Object>();
+		Map<String, Object> urlVariables = new HashMap<>();
 		
 		urlVariables.put("username", username);
 		urlVariables.put("beingCode", beingCode);
@@ -246,7 +244,7 @@ public class MudengineApiImpl implements MudengineApi {
 		
 		String result = null;
 		
-		Map<String, Object> urlVariables = new HashMap<String, Object>();
+		Map<String, Object> urlVariables = new HashMap<>();
 		
 		urlVariables.put("username", username);
 		urlVariables.put("password", password);
@@ -274,7 +272,7 @@ public class MudengineApiImpl implements MudengineApi {
 		
 		Action result = null;
 		
-		Map<String, Object> urlVariables = new HashMap<String, Object>();
+		Map<String, Object> urlVariables = new HashMap<>();
 		
 		urlVariables.put("commandId", commandId);
 		urlVariables.put("actorCode", actorCode);
@@ -283,7 +281,7 @@ public class MudengineApiImpl implements MudengineApi {
 		
 		try {
 			
-			StringBuffer url = new StringBuffer("/action/{commandId}?actorCode={actorCode}&targetCode={targetCode}");
+			StringBuilder url = new StringBuilder("/action/{commandId}?actorCode={actorCode}&targetCode={targetCode}");
 			
 			mediatorCode.ifPresent(d -> url.append("&mediatorCode={mediatorCode}"));
 			
@@ -305,7 +303,7 @@ public class MudengineApiImpl implements MudengineApi {
 		
 		Being result = null;
 		
-		Map<String, Object> urlVariables = new HashMap<String, Object>();
+		Map<String, Object> urlVariables = new HashMap<>();
 		urlVariables.put("beingCode", beingCode);
 
 		try {
@@ -326,7 +324,7 @@ public class MudengineApiImpl implements MudengineApi {
 		
 		Item result = null;
 		
-		Map<String, Object> urlVariables = new HashMap<String, Object>();
+		Map<String, Object> urlVariables = new HashMap<>();
 		urlVariables.put("itemId", itemId);
 
 		try {
@@ -347,7 +345,7 @@ public class MudengineApiImpl implements MudengineApi {
 		
 		Place result = null;
 		
-		Map<String, Object> urlVariables = new HashMap<String, Object>();
+		Map<String, Object> urlVariables = new HashMap<>();
 		urlVariables.put("placeId", placeId);
 
 		try {
@@ -366,17 +364,15 @@ public class MudengineApiImpl implements MudengineApi {
 	@Override
 	public List<Message> getMessages(String authToken) {
 
-		List<Message> returnList = new ArrayList<Message>();
+		List<Message> returnList = new ArrayList<>();
 		
-		RestTemplate restTemplate = new RestTemplate();
-
 		try {
 			ResponseEntity<Message[]> responseRead = restTemplate.exchange(
 					apiEndpoint + "/message", 
 					HttpMethod.GET, getEmptyHttpEntity(authToken), 
 					Message[].class, new HashMap<String, Object>());
 			
-			returnList = (List<Message>)Arrays.asList(responseRead.getBody());
+			returnList = Arrays.asList(responseRead.getBody());
 
 		} catch(RestClientResponseException e) {
 			System.out.println(e.getResponseBodyAsString());
@@ -395,12 +391,12 @@ public class MudengineApiImpl implements MudengineApi {
 	
 	private HttpEntity<Object> getEmptyHttpEntity(String authToken) {
 		
-		return new HttpEntity<Object>(getAuthHeaders(authToken));
+		return new HttpEntity<>(getAuthHeaders(authToken));
 	}
 	
 	private HttpEntity<Object> getEmptyHttpEntity() {
 		
-		return new HttpEntity<Object>(new HttpHeaders());
+		return new HttpEntity<>(new HttpHeaders());
 	}
 	
 	private void handleError(RestClientResponseException exception, String entity) throws ClientException {
@@ -431,9 +427,9 @@ public class MudengineApiImpl implements MudengineApi {
 	@Override
 	public List<Command> getGameCommandList(String locale) throws ClientException {
 		
-		List<Command> returnList = new ArrayList<Command>();
+		List<Command> returnList = new ArrayList<>();
 
-		Map<String, Object> urlVariables = new HashMap<String, Object>();
+		Map<String, Object> urlVariables = new HashMap<>();
 		urlVariables.put("locale", locale);
 
 		try {

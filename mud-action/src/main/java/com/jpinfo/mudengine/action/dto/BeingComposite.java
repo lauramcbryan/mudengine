@@ -23,13 +23,13 @@ public class BeingComposite implements ActionTarget  {
 	private List<ActionMessage> messages;
 	
 	public BeingComposite() {
-		this.messages = new ArrayList<ActionMessage>();		
+		this.messages = new ArrayList<>();		
 	}
 	
 	public BeingComposite(Being simpleBeing) {
 		this.being = simpleBeing;
 		
-		this.messages = new ArrayList<ActionMessage>();
+		this.messages = new ArrayList<>();
 	}
 
 	public List<Item> getItems() {

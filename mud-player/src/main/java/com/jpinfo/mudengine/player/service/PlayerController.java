@@ -11,6 +11,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -22,6 +23,7 @@ import com.jpinfo.mudengine.common.exception.EntityNotFoundException;
 import com.jpinfo.mudengine.common.exception.IllegalParameterException;
 import com.jpinfo.mudengine.common.player.Player;
 import com.jpinfo.mudengine.common.player.Session;
+import com.jpinfo.mudengine.common.security.MudUserDetails;
 import com.jpinfo.mudengine.common.security.TokenService;
 import com.jpinfo.mudengine.common.service.PlayerService;
 import com.jpinfo.mudengine.common.utils.CommonConstants;
@@ -54,7 +56,7 @@ public class PlayerController implements PlayerService {
 		
 		Player response = null;
 		
-		if (canAccess(authToken, username)) {
+		if (canAccess(username)) {
 		
 			MudPlayer dbPlayer = repository.findByUsername(username)
 					.orElseThrow(() -> new EntityNotFoundException("Player entity not found"));
@@ -114,7 +116,7 @@ public class PlayerController implements PlayerService {
 		
 		ResponseEntity<Player> response = null;
 		
-		if (canAccess(authToken, username)) {
+		if (canAccess(username)) {
 		
 			MudPlayer dbPlayer = repository.findByUsername(username)
 					.orElseThrow(() -> new EntityNotFoundException("Player entity not found"));
@@ -166,7 +168,7 @@ public class PlayerController implements PlayerService {
 		
 		Session session = null;
 		
-		if (canAccess(authToken, username)) {
+		if (canAccess(username)) {
 		
 			List<MudSession> lstSessions = sessionRepository.findActiveSession(username);
 			
@@ -219,7 +221,9 @@ public class PlayerController implements PlayerService {
 				
 				
 				// Build the jwts token
-				String token = tokenService.buildToken(username, playerData, sessionData);
+				String token = tokenService.buildToken(username, 
+						Optional.of(playerData), 
+						Optional.of(sessionData));
 				
 				HttpHeaders header = new HttpHeaders();
 				header.add(CommonConstants.AUTH_TOKEN_HEADER, token);
@@ -238,9 +242,9 @@ public class PlayerController implements PlayerService {
 		return response;
 	}
 	
-	private boolean canAccess(String authToken, String username) {
+	private boolean canAccess(String username) {
 		
-		String authUserName = tokenService.getUsernameFromToken(authToken);
+		String authUserName = (String)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		
 		return ((username.equals(authUserName)) || (TokenService.INTERNAL_ACCOUNT.equals(authUserName)));
 		
@@ -257,7 +261,7 @@ public class PlayerController implements PlayerService {
 		
 		ResponseEntity<Session> response = null;
 		
-		if (canAccess(authToken, username)) {
+		if (canAccess(username)) {
 		
 			List<MudSession> lstSessions = sessionRepository.findActiveSession(username);
 			
@@ -273,7 +277,7 @@ public class PlayerController implements PlayerService {
 
 					// Find the being record for this player					
 					dbSession.getPlayer().getBeingList().stream()
-						.filter(e -> e.getId().getBeingCode().equals(beingCode.get()))
+						.filter(e -> e.getId().getBeingCode().equals(d))
 						.findFirst()
 						.ifPresent(f -> {
 							// Update the last time played
@@ -312,7 +316,7 @@ public class PlayerController implements PlayerService {
 		
 		ResponseEntity<Player> response = null;
 		
-		if (canAccess(authToken, username)) {
+		if (canAccess(username)) {
 			
 			MudPlayer dbPlayer = repository.findByUsername(username)
 					.orElseThrow(() -> new EntityNotFoundException("Player not found"));
@@ -361,7 +365,7 @@ public class PlayerController implements PlayerService {
 		
 		ResponseEntity<Player> response = null;
 		
-		if (canAccess(authToken, username)) {
+		if (canAccess(username)) {
 			
 			// Find the player data
 			Optional<MudPlayer> dbPlayer = repository.findByUsername(username);
@@ -386,13 +390,16 @@ public class PlayerController implements PlayerService {
 				repository.save(d);
 				
 				// If the being is the currenly selected
-				if (tokenService.getBeingCodeFromToken(authToken).equals(beingCode)) {
+				MudUserDetails uDetails = (MudUserDetails)SecurityContextHolder.getContext().getAuthentication().getDetails();
+				
+				
+				uDetails.getSessionData().ifPresent(e -> {
 					
-					// Clear the beingCode from the token
-					updateBeingSession(authToken, username, Optional.empty());
-				}
-				
-				
+					if (beingCode.equals(e.getBeingCode())) {
+						// Clear the beingCode from the token
+						updateBeingSession(authToken, username, Optional.empty());						
+					}
+				});
 			});
 			
 			// Get the session data

@@ -24,9 +24,9 @@ public class PlaceComposite implements ActionTarget {
 	public PlaceComposite(Place simplePlace) {
 		
 		this.place = simplePlace;
-		this.messages = new ArrayList<ActionMessage>();
-		this.beings = new ArrayList<Being>();
-		this.items = new ArrayList<Item>();
+		this.messages = new ArrayList<>();
+		this.beings = new ArrayList<>();
+		this.items = new ArrayList<>();
 	}
 
 	public List<Item> getItems() {

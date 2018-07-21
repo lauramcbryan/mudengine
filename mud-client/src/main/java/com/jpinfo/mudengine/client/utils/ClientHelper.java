@@ -72,7 +72,7 @@ public class ClientHelper {
 		List<String> resultList = new ArrayList<String>();
 
 		// Starts with the full sample
-		StringBuffer str = new StringBuffer(original);
+		StringBuilder str = new StringBuilder(original);
 		
 		// while the sample length is bigger than desiredWidth
 		// cut slices to feed the result list
@@ -100,7 +100,7 @@ public class ClientHelper {
 	
 	public static String padString(String original, int desiredLength) {
 		
-		StringBuffer result = new StringBuffer(original);
+		StringBuilder result = new StringBuilder(original);
 
 		// if the original string is bigger than the desired
 		if (result.length()>desiredLength) {
@@ -126,9 +126,9 @@ public class ClientHelper {
 		String response = null;
 		
 		if (m.getSenderCode()!=null) {
-			response = String.format("[%s] %s: %s", m.getMessageDate(), m.getSenderName(), m.getMessage());
+			response = String.format("[%s] %s: %s", m.getMessageDate(), m.getSenderName(), m.getContent());
 		} else {
-			response = String.format("[%s]: %s", m.getMessageDate(), m.getMessage());
+			response = String.format("[%s]: %s", m.getMessageDate(), m.getContent());
 		}
 		
 		return response;
@@ -250,7 +250,7 @@ public class ClientHelper {
 	 */
 	public static String listAvailableBeings(ClientConnection c, Player playerData, Optional<Long> selectedBeing) {
 		
-		StringBuffer m = new StringBuffer(); 
+		StringBuilder m = new StringBuilder(); 
 		
 		m
 			.append(c.getLocalizedMessage(LocalizedMessages.COMMAND_SELECT_AVAILABLE))
@@ -289,7 +289,7 @@ public class ClientHelper {
 	 */
 	public static String listAvailableBeingClasses(ClientConnection client, List<BeingClass> beingClassList) {
 		
-		StringBuffer m = new StringBuffer();
+		StringBuilder m = new StringBuilder();
 		
 		m
 			.append(client.getLocalizedMessage(LocalizedMessages.COMMAND_CREATE_AVAILABLE))
@@ -298,7 +298,7 @@ public class ClientHelper {
 		beingClassList.forEach(d -> {
 			
 			m.append(ClientHelper.CRLF)
-				.append(d.getBeingClass())
+				.append(d.getBeingClassCode())
 				.append(" - ")
 				.append(d.getName())
 				.append(ClientHelper.CRLF)
@@ -334,7 +334,7 @@ public class ClientHelper {
 	 */
 	public static String returnFormattedPlayerData(ClientConnection c, Player playerData, Optional<Long> activeBeingCode) {
 		
-		StringBuffer m = new StringBuffer();
+		StringBuilder m = new StringBuilder();
 		
 		m
 			.append(c.getLocalizedMessage(LocalizedMessages.COMMAND_WHOAMI_PLAYER))
@@ -424,7 +424,7 @@ public class ClientHelper {
 	 */
 	public static String returnFormattedBeingData(ClientConnection c, Being activeBeing) {
 
-		StringBuffer m = new StringBuffer();
+		StringBuilder m = new StringBuilder();
 
 		m
 			.append(c.getLocalizedMessage(LocalizedMessages.COMMAND_WHOAMI_BEING))
@@ -545,7 +545,7 @@ public class ClientHelper {
 			}
 	
 			// Assembly the line
-			StringBuffer skillLine = new StringBuffer() 
+			StringBuilder skillLine = new StringBuilder() 
 				.append(curSkillKey)
 				.append(" lvl ")
 				.append(ClientHelper.padString(curSkillValue, 2))
@@ -599,7 +599,7 @@ public class ClientHelper {
 	 */
 	public static String returnFormattedPlaceData(ClientConnection c, Place currentPlace) {
 		
-		StringBuffer m = new StringBuffer();
+		StringBuilder m = new StringBuilder();
 
 		m
 			.append(ClientHelper.CRLF)

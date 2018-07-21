@@ -3,7 +3,6 @@
   <groupId>com.jpinfo.mudengine</groupId>
   <artifactId>mud-common</artifactId>
   <version>1.0.0</version>
-  <name>Shared project between mudengine services</name>
   <description>Shared project between mudengine services</description>
   
 	<properties>

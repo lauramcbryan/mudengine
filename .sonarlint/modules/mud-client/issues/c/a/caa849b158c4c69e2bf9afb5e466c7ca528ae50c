@@ -1,0 +1,5 @@
+
+ˆsquid:S2293"YReplace the type specification in this constructor call with the diamond operator ("<>").(†ÅœšÿÿÿÿÿRMINORZ
+CODE_SMELL
+‹squid:S1488*"aImmediately return this expression instead of assigning it to the temporary variable "nextParam".(µï‘ÚRMINORZ
+CODE_SMELL

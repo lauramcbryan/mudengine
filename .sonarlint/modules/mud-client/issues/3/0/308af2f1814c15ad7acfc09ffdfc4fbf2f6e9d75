@@ -1,0 +1,57 @@
+
+asquid:S1172¦".Remove this unused method parameter "command".(Å¶ŸÚüÿÿÿÿHé~RMAJORZ
+CODE_SMELL
+`squid:S1199Ï"-Extract this nested code block into a method.(İ‚®ÔøÿÿÿÿHÖ~RMINORZ
+CODE_SMELL
+`squid:S1199‡"-Extract this nested code block into a method.(Î—­ŠşÿÿÿÿHğ~RMINORZ
+CODE_SMELL
+]squid:S3655ÿ"7Call "Optional#isPresent()" before accessing the value.(Ï³×HØ~RMAJORZBUG
+|squid:S1192D"GDefine a constant instead of duplicating this literal "locale" 3 times.(˜¹½ûÿÿÿÿHÙ~RCRITICALZ
+CODE_SMELL
+[squid:S1199æ"-Extract this nested code block into a method.(ÉÉàæHŞ~RMINORZ
+CODE_SMELL
+[squid:S1199ö"-Extract this nested code block into a method.(¯ïıïHè~RMINORZ
+CODE_SMELL
+^squid:S3655Â"7Call "Optional#isPresent()" before accessing the value.(¿Î ‘HÒ~RMAJORZBUG
+csquid:S3655›"7Call "Optional#isPresent()" before accessing the value.(Üæ±±úÿÿÿÿHß~RMAJORZBUG
+`squid:S1199ş"-Extract this nested code block into a method.(•¾Á¡şÿÿÿÿHì~RMINORZ
+CODE_SMELL
+Zsquid:S1199Ô"-Extract this nested code block into a method.(ÒÒH×~RMINORZ
+CODE_SMELL
+ysquid:S1192B"IDefine a constant instead of duplicating this literal "username" 3 times.(õÆöHá~RCRITICALZ
+CODE_SMELL
+`squid:S1199ê"-Extract this nested code block into a method.(ÚÕ¬‚ùÿÿÿÿHà~RMINORZ
+CODE_SMELL
+[squid:S1199‚"-Extract this nested code block into a method.(ìï’­Hï~RMINORZ
+CODE_SMELL
+^squid:S3655Ÿ"7Call "Optional#isPresent()" before accessing the value.(˜µ“ãHã~RMAJORZBUG
+~squid:CommentedOutCodeLineÜ"<This block of commented-out lines of code should be removed.(ßÇ¸ÿÿÿÿÿHÔ~RMAJORZ
+CODE_SMELL
+\squid:S1172‹".Remove this unused method parameter "command".(øâòHå~RMAJORZ
+CODE_SMELL
+usquid:S00112™"FDefine and throw a dedicated exception instead of using a generic one.(Õ±ˆ’Hâ~RMAJORZ
+CODE_SMELL
+`squid:S1199ú"-Extract this nested code block into a method.(È×åÁúÿÿÿÿHë~RMINORZ
+CODE_SMELL
+\squid:S1172Á".Remove this unused method parameter "command".(µÚ˜ÌHê~RMAJORZ
+CODE_SMELL
+usquid:S00112Ô"FDefine and throw a dedicated exception instead of using a generic one.(†¾HÜ~RMAJORZ
+CODE_SMELL
+`squid:S1199Ø"-Extract this nested code block into a method.(°«†©şÿÿÿÿHÚ~RMINORZ
+CODE_SMELL
+`squid:S1199ò"-Extract this nested code block into a method.(‚äºÙüÿÿÿÿHç~RMINORZ
+CODE_SMELL
+[squid:S1199Ê"-Extract this nested code block into a method.(Õˆ×HÕ~RMINORZ
+CODE_SMELL
+[squid:S1199î"-Extract this nested code block into a method.(’“àÈHæ~RMINORZ
+CODE_SMELL
+jsquid:S3655ø"7Call "Optional#isPresent()" before accessing the value.(´ÛÑçıÿÿÿÿ8ŠÈÈË,Hü~RMAJORZBUG
+[squid:S1199â"-Extract this nested code block into a method.(´¶ŸİHİ~RMINORZ
+CODE_SMELL
+\squid:S1172„".Remove this unused method parameter "command".(¦£©øHÓ~RMAJORZ
+CODE_SMELL
+squid:S1149"_Replace the synchronized class "StringBuffer" by an unsynchronized one such as "StringBuilder".(‚´Ó÷Hî~RMAJORZ
+CODE_SMELL
+`squid:S1199Ş"-Extract this nested code block into a method.(†ìÏ¥úÿÿÿÿHÛ~RMINORZ
+CODE_SMELL
+^squid:S3655«"7Call "Optional#isPresent()" before accessing the value.(¿Î ‘Hí~RMAJORZBUG

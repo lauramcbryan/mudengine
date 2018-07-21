@@ -171,7 +171,7 @@ public class ItemTests {
 		ResponseEntity<Item> readAfterDeleteResponse = restTemplate.exchange(
 				"/item/{itemId}", HttpMethod.GET, authEntity, Item.class, urlVariables);
 		
-		assertThat(readAfterDeleteResponse.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+		assertThat(readAfterDeleteResponse.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
 	}
 
 	@Test

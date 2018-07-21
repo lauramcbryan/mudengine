@@ -11,5 +11,5 @@ public class Message {
 	
 	private String senderName;
 	
-	private String message;
+	private String content;
 }

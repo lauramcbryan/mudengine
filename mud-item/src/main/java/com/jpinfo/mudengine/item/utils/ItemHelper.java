@@ -36,7 +36,7 @@ public class ItemHelper {
 		
 		ItemClass result = new ItemClass();
 		
-		result.setItemClass(a.getItemClass());
+		result.setItemClassCode(a.getItemClass());
 		result.setSize(a.getSize());
 		result.setWeight(a.getWeight());
 		result.setDescription(a.getDescription());

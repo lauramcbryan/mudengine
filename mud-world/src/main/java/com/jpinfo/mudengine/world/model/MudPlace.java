@@ -29,7 +29,7 @@ public class MudPlace {
 	
 	
 	public MudPlace() {
-		this.exits = new HashSet<MudPlaceExit>();
-		this.attrs = new HashSet<MudPlaceAttr>();
+		this.exits = new HashSet<>();
+		this.attrs = new HashSet<>();
 	}
 }

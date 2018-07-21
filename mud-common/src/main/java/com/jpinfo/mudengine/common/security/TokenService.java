@@ -42,7 +42,7 @@ public class TokenService {
 	@Value("${token.secret}")
 	private String tokenSecret;
 
-	public String buildToken(String userName, Player playerData, Session session) {
+	public String buildToken(String userName, Optional<Player> playerData, Optional<Session> session) {
 
 		String token = null;
 		
@@ -50,11 +50,11 @@ public class TokenService {
 		
 		builder.setSubject(userName);
 		
-		if (playerData!=null)
-			builder.claim(TokenService.PLAYER_DATA, playerData);
+		if (playerData.isPresent())
+			builder.claim(TokenService.PLAYER_DATA, playerData.get());
 		
-		if (session!=null)
-			builder.claim(TokenService.SESSION_DATA, session);
+		if (session.isPresent())
+			builder.claim(TokenService.SESSION_DATA, session.get());
 		
 		builder.setExpiration(new Date(System.currentTimeMillis() + TokenService.TOKEN_TTL));
 		builder.signWith(SignatureAlgorithm.HS256, tokenSecret);
@@ -67,121 +67,49 @@ public class TokenService {
 
 	public String updateToken(String token, Optional<Player> playerData, Optional<Session> sessionData) {
 	
-		Jws<Claims> parsedToken = parseToken(token);
-		
-		Session oldSession = getSessionDataFromToken(token);
-		Player oldPlayer = getPlayerDataFromToken(token);
-		
-		return buildToken(parsedToken.getBody().getSubject(),
-				(playerData.isPresent() ? playerData.get() : oldPlayer),
-				(sessionData.isPresent() ? sessionData.get(): oldSession)
-				);
-	}
-	
-	public Authentication getAuthenticationFromToken(String token) {
-		
-		Authentication result = null;
-		
-		if ((token!=null) && (!token.isEmpty())) {
-			
-			String username = getUsernameFromToken(token);
-			
-			result = new UsernamePasswordAuthenticationToken(username, null, Collections.<GrantedAuthority>emptyList());
-		}
-		
-		return result;
-	}
-	
-	public String getUsernameFromToken(String token) {
-		
-		String result = null;
-		
-		if ((token!=null) && (!token.isEmpty())) {
-			
-			Jws<Claims> parsedToken = parseToken(token);
-			
-			result = parsedToken.getBody().getSubject();
-		}
-		
-		return result;
-	}
-	
-	public Long getPlayerIdFromToken(String token) {
-		
-		Long result = null;
-		
-		if ((token!=null) && (!token.isEmpty())) {
-			
-			Player player = getPlayerDataFromToken(token);
-			
-			if (player!=null)
-				result = player.getPlayerId();
-		}
-		
-		return result;
-	}
-
-	public Long getBeingCodeFromToken(String token) {
-		
-		Long result = null;
-		
-		if ((token!=null) && (!token.isEmpty())) {
-			
-			Session sessionData = getSessionDataFromToken(token);
-			
-			if (sessionData!=null)
-				result = sessionData.getBeingCode();
-		}
-		
-		return result;
-	}
-
-	public String getLocaleFromToken(String token) {
-		
-		String result = null;
-		
-		if ((token!=null) && (!token.isEmpty())) {
-			
-			Player player = getPlayerDataFromToken(token);
-			
-			if (player!=null)
-				result = player.getLocale();
-		}
-		
-		return result;
+		Authentication auth = getAuthenticationFromToken(token);
+		return buildToken(auth.getPrincipal().toString(), playerData, sessionData);
 	}
 	
 	@SuppressWarnings("unchecked")
-	public Session getSessionDataFromToken(String token) {
+	public Authentication getAuthenticationFromToken(String token) {
 		
-		Session result = null;
+		UsernamePasswordAuthenticationToken result = null;
 		
 		if ((token!=null) && (!token.isEmpty())) {
 			
+			// Parse the token
 			Jws<Claims> parsedToken = parseToken(token);
+			
+			// Retrieving the username
+			String username = parsedToken.getBody().getSubject();
+			
+			// Retrieving session information if available
+			Session sessionInfo = null;
 			
 			if (parsedToken.getBody().containsKey(TokenService.SESSION_DATA)) {
 				
-				result = new Session((Map<String, Object>)parsedToken.getBody().get(TokenService.SESSION_DATA));
+				sessionInfo = new Session((Map<String, Object>)parsedToken.getBody().get(TokenService.SESSION_DATA));
 			}
-		}
-		
-		return result;
-	}	
-	
-	@SuppressWarnings("unchecked")
-	public Player getPlayerDataFromToken(String token) {
-		
-		Player result = null;
-		
-		if ((token!=null) && (!token.isEmpty())) {
 			
-			Jws<Claims> parsedToken = parseToken(token);
+			// Retrieving player information if available
+			Player playerData = null;
 			
 			if (parsedToken.getBody().containsKey(TokenService.PLAYER_DATA)) {
 				
-				result = new Player((Map<String, Object>)parsedToken.getBody().get(TokenService.PLAYER_DATA));
+				playerData= new Player((Map<String, Object>)parsedToken.getBody().get(TokenService.PLAYER_DATA));
 			}
+
+			// Creating the authentication object
+			result = new UsernamePasswordAuthenticationToken(username, token, Collections.<GrantedAuthority>emptyList());
+
+			// Setting the userDetails
+			result.setDetails(new MudUserDetails(
+					Optional.ofNullable(sessionInfo), 
+					Optional.ofNullable(playerData)
+					)
+				);
+
 		}
 		
 		return result;
@@ -198,7 +126,10 @@ public class TokenService {
 		sessionData.setPlayerId(TokenService.INTERNAL_PLAYER_ID);
 		sessionData.setBeingCode(TokenService.INTERNAL_BEING_CODE);
 		
-		return buildToken(TokenService.INTERNAL_ACCOUNT, playerData, sessionData);
+		return buildToken(TokenService.INTERNAL_ACCOUNT, 
+				Optional.of(playerData), 
+				Optional.of(sessionData)
+				);
 	}
 	
 	private Jws<Claims> parseToken(String token) {

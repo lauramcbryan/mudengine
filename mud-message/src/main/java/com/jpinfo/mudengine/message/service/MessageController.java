@@ -2,6 +2,7 @@ package com.jpinfo.mudengine.message.service;
 
 import java.text.DateFormat;
 
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -19,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.jpinfo.mudengine.common.being.Being;
 import com.jpinfo.mudengine.common.exception.IllegalParameterException;
 import com.jpinfo.mudengine.common.message.Message;
-import com.jpinfo.mudengine.common.security.TokenService;
+import com.jpinfo.mudengine.common.security.MudUserDetails;
 import com.jpinfo.mudengine.common.service.MessageService;
 import com.jpinfo.mudengine.common.utils.CommonConstants;
 import com.jpinfo.mudengine.message.client.BeingServiceClient;
@@ -44,9 +46,6 @@ public class MessageController implements MessageService {
 	@Autowired
 	private MudMessageLocaleRepository localeRepository;
 	
-	@Autowired
-	private TokenService tokenService;
-
 	@Override
 	public void putMessage(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, 
 			@PathVariable("targetCode") Long targetCode, @RequestParam("message") String message, 
@@ -117,13 +116,18 @@ public class MessageController implements MessageService {
 		
 		PageRequest page = PageRequest.of(pageCount, pageSize, Sort.Direction.DESC, "insertDate");
 		
+		MudUserDetails uDetails = (MudUserDetails)SecurityContextHolder.getContext().getAuthentication().getDetails();
+		
 		// Obtaining the caller locale
-		String callerLocale = tokenService.getLocaleFromToken(authToken);
-		
-		// Obtaining the beingCode
-		Long beingCode = tokenService.getBeingCodeFromToken(authToken);
-		
-		if (beingCode!=null) {
+		String callerLocale = uDetails.getPlayerData().isPresent() ? 
+				uDetails.getPlayerData().get().getLocale(): 
+				CommonConstants.DEFAULT_LOCALE;
+				
+		if (uDetails.getSessionData().isPresent()) {
+
+			// Obtaining the beingCode			
+			Long beingCode = uDetails.getSessionData().get().getBeingCode();
+			
 			Page<MudMessage> lstMessage = null;
 			
 			if (allMessages) {
@@ -207,7 +211,7 @@ public class MessageController implements MessageService {
 						Locale.forLanguageTag(callerLocale));
 		
 		result.setMessageDate(df.format(a.getInsertDate()));
-		result.setMessage(actualMessage);
+		result.setContent(actualMessage);
 
 		return result;
 	}

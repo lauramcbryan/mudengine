@@ -22,16 +22,14 @@ public class ActionClassController implements ActionClassService {
 	@Override
 	public List<Command> getAvailableCommands(@PathVariable("locale") String locale) {
 		
-		List<Command> resultList = new ArrayList<Command>();
+		List<Command> resultList = new ArrayList<>();
 		
 		List<MudActionClassCommand> lstCommands = 
 				commandRepository.findByLocale(locale);
 		
-		lstCommands.stream().forEach(d -> {
-			
-			resultList.add(ActionHelper.buildCommand(d));
-			
-		});
+		lstCommands.stream().forEach(d -> 
+			resultList.add(ActionHelper.buildCommand(d))
+		);
 		
 		return resultList;
 	}

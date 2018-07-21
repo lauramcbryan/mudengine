@@ -106,7 +106,8 @@ public class BeingTests {
 		sessionData.setPlayerId(playerId);
 		sessionData.setSessionId(Long.MAX_VALUE);
 		
-		String usToken = tokenService.buildToken(BeingTests.testUsername, playerData, sessionData);		
+		String usToken = tokenService.buildToken(BeingTests.testUsername, 
+				Optional.of(playerData), Optional.of(sessionData));		
 		
 		authHeaders.add(CommonConstants.AUTH_TOKEN_HEADER, usToken);
 		

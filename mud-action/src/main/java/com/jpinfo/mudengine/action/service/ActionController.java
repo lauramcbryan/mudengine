@@ -53,7 +53,7 @@ public class ActionController implements ActionService {
 	@Override
 	public Iterable<Action> getActiveActions(@RequestHeader String authToken, @PathVariable Long actorCode) {
 		
-		List<Action> responseList = new ArrayList<Action>();
+		List<Action> responseList = new ArrayList<>();
 		
 		List<MudAction> stateList = repository.findByIssuerCode(actorCode);
 		

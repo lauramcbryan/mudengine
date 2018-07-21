@@ -39,8 +39,8 @@ public class CommandParamState {
 		return entered &&
 				(sample!=null || !parameter.isRequired()) &&
 				(parameter.getDomainValues().isEmpty() || parameter.getDomainValues().contains(sample)) &&
-				(parameter.getType() != CommandParam.enumParamTypes.anyNumber || checkNumberFormat(sample)) &&
-				(parameter.getType() != CommandParam.enumParamTypes.email || checkEmailFormat(sample))
+				(parameter.getType() != CommandParam.enumParamTypes.ANY_NUMBER || checkNumberFormat(sample)) &&
+				(parameter.getType() != CommandParam.enumParamTypes.EMAIL || checkEmailFormat(sample))
 				;
 	}
 	

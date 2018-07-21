@@ -139,7 +139,7 @@ public class CommandHandler {
 			
 			if (!d.isLogged() || client.isLogged()) {
 				
-				StringBuffer msg = new StringBuffer();
+				StringBuilder msg = new StringBuilder();
 				msg
 					.append(d.getVerb())
 					.append(" -> ")
@@ -242,18 +242,21 @@ public class CommandHandler {
 		// If the being class is provided, create the being and set in player session
 		if (beingClass!=null) {
 			
-			ApiResult apiResult = 
-					api.createBeing(client.getAuthToken(), client.getPlayerData().get().getUsername(), 
-							beingClass, beingName, worldName, placeCode);
-
-			// Update the player info
-			client.setPlayerData(apiResult.getUpdatedPlayerData());
-			client.setAuthToken(apiResult.getChangedAuthToken());
+			if (client.getPlayerData().isPresent()) {
 			
-			// Shows up the being list again
-			ClientHelper.sendMessage(client, 
-					ClientHelper.listAvailableBeings(client, apiResult.getUpdatedPlayerData(), client.getActiveBeingCode())
-				);
+				ApiResult apiResult = 
+						api.createBeing(client.getAuthToken(), client.getPlayerData().get().getUsername(), 
+								beingClass, beingName, worldName, placeCode);
+	
+				// Update the player info
+				client.setPlayerData(apiResult.getUpdatedPlayerData());
+				client.setAuthToken(apiResult.getChangedAuthToken());
+				
+				// Shows up the being list again
+				ClientHelper.sendMessage(client, 
+						ClientHelper.listAvailableBeings(client, apiResult.getUpdatedPlayerData(), client.getActiveBeingCode())
+					);
+			}
 			
 		} else {
 			

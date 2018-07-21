@@ -18,6 +18,8 @@ import com.jpinfo.mudengine.common.action.Action.EnumTargetType;
 
 public class ActionHelper {
 	
+	private ActionHelper() { }
+	
 	public static Action buildAction(MudAction a) {
 		
 		Action state = new Action();

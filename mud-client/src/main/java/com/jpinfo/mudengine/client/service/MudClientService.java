@@ -46,7 +46,7 @@ public class MudClientService {
 				// If there's a finished command, execute it
 				if ((client.getCurCommand()!=null) && (client.getCurCommandState().isReady())) {
 					
-					StringBuffer msg = new StringBuffer();
+					StringBuilder msg = new StringBuilder();
 					
 					msg.append("Processing command [")
 						.append(client.getCurCommand().getVerb())
@@ -97,30 +97,31 @@ public class MudClientService {
 				
 			}
 			
+			// If it's waiting an input
+			if (client.getCurCommandState()!=null) {
+				
+				// return just the input prompt
+				return " ";
+				
+			} else {
+				
+				// Full Prompt
+				String username = (client.getPlayerData().isPresent() ? 
+						client.getPlayerData().get().getUsername() : 
+							client.getLocalizedMessage(LocalizedMessages.ANONYMOUS_MESSAGE));
+				
+				String beingName = (client.getActiveBeing().isPresent() ? 
+						client.getActiveBeing().get().getName(): 
+							client.getLocalizedMessage(LocalizedMessages.NO_BEING_MESSAGE));
+				
+				
+				return username + "@" + beingName + ":$ ";
+			}
+			
+			
 		} // endif client!=null
 		
-		// If it's waiting an input
-		if (client.getCurCommandState()!=null) {
-			
-			// return just the input prompt
-			return " ";
-			
-		} else {
-			
-			// Full Prompt
-			String username = (client.isLogged() ? 
-					client.getPlayerData().get().getUsername() : 
-						client.getLocalizedMessage(LocalizedMessages.ANONYMOUS_MESSAGE));
-			
-			String beingName = (client.hasBeingSelected() ? 
-					client.getActiveBeing().get().getName(): 
-						client.getLocalizedMessage(LocalizedMessages.NO_BEING_MESSAGE));
-			
-			
-			return username + "@" + beingName + ":$ ";
-		}
-		
-		
+		return " ";
 	}
 	
 	protected void updateClientState(ClientConnection client, String enteredValue) throws Exception {
