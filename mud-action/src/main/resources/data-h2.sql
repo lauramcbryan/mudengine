@@ -10,13 +10,13 @@ insert into mud_action_class_cmd(command_id, action_class_code, verb, descriptio
 	values(1, 1, 'WALK', 'Move to another place', 'WALK <DIRECTION>', 'en-US');
 
 insert into mud_action_class_cmd_parameter(command_id, name, input_message, type, required, domain_values, default_value) 
-	values (1, 'targetCode', 'Please input the direction', 'anyString', 1, null, null);
+	values (1, 'targetCode', 'Please input the direction', 'ANY_STRING', 1, null, null);
 
 insert into mud_action_class_cmd(command_id, action_class_code, verb, description, usage, locale) 
 	values(101, 1, 'VÁ PARA', 'Ir para outro lugar', 'VÁ PARA <DIREÇÃO>', 'pt-BR');
 
 insert into mud_action_class_cmd_parameter(command_id, name, input_message, type, required, domain_values, default_value) 
-	values (101, 'targetCode', 'Por favor indique a direção', 'anyString', 1, null, null);
+	values (101, 'targetCode', 'Por favor indique a direção', 'ANY_STRING', 1, null, null);
 
 
 -- ========================================================================================================
@@ -33,13 +33,13 @@ insert into mud_action_class_cmd(command_id, action_class_code, verb, descriptio
 	values(2, 2, 'LOOK', 'Get details from a place', 'LOOK <PLACE>', 'en-US');
 
 insert into mud_action_class_cmd_parameter(command_id, name, input_message, type, required, domain_values, default_value) 
-	values (2, 'targetCode', 'Please input the place to look at', 'anyString', 1, null, 'HERE');
+	values (2, 'targetCode', 'Please input the place to look at', 'ANY_STRING', 1, null, 'HERE');
 
 insert into mud_action_class_cmd(command_id, action_class_code, verb, description, usage, locale) 
 	values(102, 2, 'EXAMINE', 'Obtém detalhes do local', 'EXAMINE <LOCAL>', 'pt-BR');
 
 insert into mud_action_class_cmd_parameter(command_id, name, input_message, type, required, domain_values, default_value) 
-	values (102, 'targetCode', 'Por favor indique o local', 'anyString', 1, null, 'AQUI');
+	values (102, 'targetCode', 'Por favor indique o local', 'ANY_STRING', 1, null, 'AQUI');
 
 
 
@@ -54,14 +54,14 @@ insert into mud_action_class_cmd(command_id, action_class_code, verb, descriptio
 	values(3, 3, 'LOOK', 'Get details from a being', 'LOOK <BEING>', 'en-US');
 
 insert into mud_action_class_cmd_parameter(command_id, name, input_message, type, required, domain_values, default_value) 
-	values (3, 'targetCode', 'Please input the being to look at', 'anyString', 1, null, null);
+	values (3, 'targetCode', 'Please input the being to look at', 'ANY_STRING', 1, null, null);
 
 
 insert into mud_action_class_cmd(command_id, action_class_code, verb, description, usage, locale) 
 	values(103, 3, 'EXAMINE', 'Obtém detalhes de um ser.', 'EXAMINE <SER>', 'pt-BR');
 
 insert into mud_action_class_cmd_parameter(command_id, name, input_message, type, required, domain_values, default_value) 
-	values (103, 'targetCode', 'Por favor, indique o ser a examinar', 'anyString', 1, null, null);
+	values (103, 'targetCode', 'Por favor, indique o ser a examinar', 'ANY_STRING', 1, null, null);
 
 
 insert into mud_action_class(action_class_code, action_type, mediator_type, target_type) values (4, 0, null, 'ITEM');
@@ -76,13 +76,13 @@ insert into mud_action_class_cmd(command_id, action_class_code, verb, descriptio
 	values(4, 4, 'LOOK', 'Get details from an item', 'LOOK <ITEM>', 'en-US');
 
 insert into mud_action_class_cmd_parameter(command_id, name, input_message, type, required, domain_values, default_value) 
-	values (4, 'targetCode', 'Please input the item to look at', 'anyString', 1, null, null);
+	values (4, 'targetCode', 'Please input the item to look at', 'ANY_STRING', 1, null, null);
 
 insert into mud_action_class_cmd(command_id, action_class_code, verb, description, usage, locale) 
 	values(104, 4, 'EXAMINE', 'Obtém detalhes de um item', 'EXAMINE <ITEM>', 'pt-BR');
 
 insert into mud_action_class_cmd_parameter(command_id, name, input_message, type, required, domain_values, default_value) 
-	values (104, 'targetCode', 'Por favor, indique o item a examinar', 'anyString', 1, null, null);
+	values (104, 'targetCode', 'Por favor, indique o item a examinar', 'ANY_STRING', 1, null, null);
 
 
 -- ========================================================================================================
@@ -99,13 +99,13 @@ insert into mud_action_class_cmd(command_id, action_class_code, verb, descriptio
 	values(5, 5, 'TAKE', 'Take an item', 'TAKE <ITEM>', 'en-US');
 
 insert into mud_action_class_cmd_parameter(command_id, name, input_message, type, required, domain_values, default_value) 
-	values (5, 'targetCode', 'Please input the item', 'anyString', 1, null, null);
+	values (5, 'targetCode', 'Please input the item', 'ANY_STRING', 1, null, null);
 
 insert into mud_action_class_cmd(command_id, action_class_code, verb, description, usage, locale) 
 	values(105, 5, 'PEGUE', 'Pegar um item', 'PEGUE <ITEM>', 'pt-BR');
 
 insert into mud_action_class_cmd_parameter(command_id, name, input_message, type, required, domain_values, default_value) 
-	values (105, 'targetCode', 'Por favor, indique o item', 'anyString', 1, null, null);
+	values (105, 'targetCode', 'Por favor, indique o item', 'ANY_STRING', 1, null, null);
 
 
 -- ========================================================================================================
@@ -122,14 +122,14 @@ insert into mud_action_class_cmd(command_id, action_class_code, verb, descriptio
 	values(6, 6, 'DROP', 'Drop an item', 'DROP <ITEM>', 'en-US');
 
 insert into mud_action_class_cmd_parameter(command_id, name, input_message, type, required, domain_values, default_value) 
-	values (6, 'targetCode', 'Please input the item', 'anyString', 1, null, null);
+	values (6, 'targetCode', 'Please input the item', 'ANY_STRING', 1, null, null);
 
 
 insert into mud_action_class_cmd(command_id, action_class_code, verb, description, usage, locale) 
 	values(106, 6, 'SOLTE', 'Soltar um item', 'PEGUE <ITEM>', 'pt-BR');
 
 insert into mud_action_class_cmd_parameter(command_id, name, input_message, type, required, domain_values, default_value) 
-	values (106, 'targetCode', 'Por favor, indique o item', 'anyString', 1, null, null);
+	values (106, 'targetCode', 'Por favor, indique o item', 'ANY_STRING', 1, null, null);
 
 
 -- ========================================================================================================
@@ -144,14 +144,14 @@ insert into mud_action_class_cmd(command_id, action_class_code, verb, descriptio
 	values(7, 7, 'TALK TO', 'Talk to another being', 'TALK TO <BEING> "<MESSAGE>"', 'en-US');
 
 insert into mud_action_class_cmd_parameter(command_id, name, input_message, type, required, domain_values, default_value) 
-	values (7, 'targetCode', 'Please input the being', 'anyString', 1, null, null);
+	values (7, 'targetCode', 'Please input the being', 'ANY_STRING', 1, null, null);
 
 
 insert into mud_action_class_cmd(command_id, action_class_code, verb, description, usage, locale) 
 	values(107, 7, 'FALE COM', 'Falar com outro ser', 'FALE COM <SER> "<MENSAGEM>"', 'pt-BR');
 
 insert into mud_action_class_cmd_parameter(command_id, name, input_message, type, required, domain_values, default_value) 
-	values (107, 'targetCode', 'Por favor, indique o ser', 'anyString', 1, null, null);
+	values (107, 'targetCode', 'Por favor, indique o ser', 'ANY_STRING', 1, null, null);
 
 -- ========================================================================================================
 
@@ -165,13 +165,13 @@ insert into mud_action_class_cmd(command_id, action_class_code, verb, descriptio
 	values(8, 8, 'SHOUT AT', 'Shout at a place', 'SHOUT AT <PLACE>', 'en-US');
 
 insert into mud_action_class_cmd_parameter(command_id, name, input_message, type, required, domain_values, default_value) 
-	values (8, 'targetCode', 'Please input the place', 'anyString', 1, null, null);
+	values (8, 'targetCode', 'Please input the place', 'ANY_STRING', 1, null, null);
 
 insert into mud_action_class_cmd(command_id, action_class_code, verb, description, usage, locale) 
 	values(108, 8, 'GRITE', 'Gritar para um local', 'GRITE EM <LOCAL> "<MENSAGEM>"', 'pt-BR');
 
 insert into mud_action_class_cmd_parameter(command_id, name, input_message, type, required, domain_values, default_value) 
-	values (108, 'targetCode', 'Por favor, indique o local', 'anyString', 1, null, null);
+	values (108, 'targetCode', 'Por favor, indique o local', 'ANY_STRING', 1, null, null);
 
 -- ========================================================================================================
 

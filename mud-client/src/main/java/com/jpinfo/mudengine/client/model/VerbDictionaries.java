@@ -26,6 +26,8 @@ public class VerbDictionaries {
 	
 	private static final Logger log = LoggerFactory.getLogger(VerbDictionaries.class);
 	
+	private static final String FILE_PREFIX = "system-verbs_";
+	
 	private Map<String, VerbDictionary> dictionaries;
 	
 	@Autowired
@@ -48,15 +50,14 @@ public class VerbDictionaries {
 		try {
 			
 			Resource[] jsonFiles = 
-					ResourcePatternUtils.getResourcePatternResolver(loader).getResources("system-verbs*.json");
+					ResourcePatternUtils.getResourcePatternResolver(loader).getResources(FILE_PREFIX + "*.json");
 			
 			
 			for(Resource curDictionary: jsonFiles) {
 				
 				// Extract the locale name
 				String justFileName = curDictionary.getFilename().split("\\.")[0];
-				String[] fileParts = justFileName.split("_"); 
-				String locale = (fileParts.length>1 ? fileParts[1]:ClientHelper.DEFAULT_LOCALE);
+				String locale = justFileName.substring(FILE_PREFIX.length(), justFileName.length());
 
 				// Load the contents
 				VerbDictionary verbDictionary = 

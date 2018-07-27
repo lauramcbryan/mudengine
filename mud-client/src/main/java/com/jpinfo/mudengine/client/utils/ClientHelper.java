@@ -31,7 +31,7 @@ import org.springframework.core.io.ClassPathResource;
 
 public class ClientHelper {
 	
-	public static final String DEFAULT_LOCALE = "en-US";
+	public static final String DEFAULT_LOCALE = "en_US";
 	
 	public static final String CLIENT_TYPE = "text/plain";
 	public static final String CRLF = "\r\n";
@@ -136,9 +136,9 @@ public class ClientHelper {
 		return response;
 	}
 	
-	private static void internalSendMessage(ClientConnection c, String message) throws Exception {
+	private static void internalSendMessage(ClientConnection c, String message, boolean includeCRLF) throws Exception {
 		
-		String effectiveMessage = c.getLocalizedMessage(message);
+		String effectiveMessage = c.getLocalizedMessage(message) + (includeCRLF ? "\r\n" : "");
 		
 		// Build the message to send over tcp connection		
 		org.springframework.messaging.Message<String> clientMessage = 
@@ -157,7 +157,7 @@ public class ClientHelper {
 	 * @throws Exception
 	 */
 	public static void sendMessage(ClientConnection c, String message) throws Exception {
-		internalSendMessage(c, c.getLocalizedMessage(message) + "\r\n");
+		internalSendMessage(c, message, true);
 	}
 	
 	/**
@@ -167,7 +167,7 @@ public class ClientHelper {
 	 * @throws Exception
 	 */
 	public static void sendMessage(ClientConnection c, Message m) throws Exception {
-		sendMessage(c, ClientHelper.formatMessage(m));
+		internalSendMessage(c, ClientHelper.formatMessage(m), true);
 	}
 
 	/**
@@ -177,7 +177,7 @@ public class ClientHelper {
 	 * @throws Exception
 	 */
 	public static void sendRequestMessage(ClientConnection c, String message) throws Exception {
-		internalSendMessage(c, c.getLocalizedMessage(message));
+		internalSendMessage(c, message, false);
 	}
 
 	/**

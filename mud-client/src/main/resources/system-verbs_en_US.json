@@ -11,25 +11,25 @@
 				{
 					"name": "username",
 					"inputMessage": "Please enter the username",
-					"type": "anyString",
+					"type": "ANY_STRING",
 					"required": true
 				},
 				{
 					"name": "email",
 					"inputMessage": "Please enter the email",
-					"type": "email",
+					"type": "EMAIL",
 					"required": true
 				},
 				{
 					"name": "locale",
 					"inputMessage": "Please choose a locale",
-					"type": "anyString",
+					"type": "ANY_STRING",
 					"required": false,
 					"domainValues": [
-						"en-US",
-						"pt-BR"
+						"en_US",
+						"pt_BR"
 					],
-					"defaultValue": "en-US"
+					"defaultValue": "en_US"
 				}
 			]
 		},
@@ -43,19 +43,19 @@
 				{
 					"name": "email",
 					"inputMessage": "Please enter the email",
-					"type": "email",
+					"type": "EMAIL",
 					"required": true
 				},
 				{
 					"name": "locale",
 					"inputMessage": "Please choose a locale",
-					"type": "anyString",
+					"type": "ANY_STRING",
 					"required": false,
 					"domainValues": [
-						"en-US",
-						"pt-BR"
+						"en_US",
+						"pt_BR"
 					],
-					"defaultValue": "en-US"
+					"defaultValue": "en_US"
 				}
 			]
 		},
@@ -70,19 +70,19 @@
 				{
 					"name": "username",
 					"inputMessage": "Please enter your username",
-					"type": "anyString",
+					"type": "ANY_STRING",
 					"required": true
 				},
 				{
 					"name": "activationCode",
 					"inputMessage": "Please type the activation code received",
-					"type": "anyString",
+					"type": "ANY_STRING",
 					"required": true
 				},
 				{
 					"name": "newPassword",
 					"inputMessage": "Please type the new password",
-					"type": "anyString",
+					"type": "ANY_STRING",
 					"required": true
 				}
 			]
@@ -97,13 +97,13 @@
 				{
 					"name": "oldPassword",
 					"inputMessage": "Please type the current password",
-					"type": "anyString",
+					"type": "ANY_STRING",
 					"required": true
 				},
 				{
 					"name": "newPassword",
 					"inputMessage": "Please type the new password",
-					"type": "anyString",
+					"type": "ANY_STRING",
 					"required": true
 				}
 			]
@@ -135,13 +135,13 @@
 				{
 					"name": "username",
 					"inputMessage": "Please enter the username",
-					"type": "anyString",
+					"type": "ANY_STRING",
 					"required": true
 				},
 				{
 					"name": "password",
 					"inputMessage": "Please enter the password",
-					"type": "anyString",
+					"type": "ANY_STRING",
 					"required": true
 				}
 			]
@@ -164,13 +164,13 @@
 				{
 					"name": "beingClass",
 					"inputMessage": "Please enter the being class",
-					"type": "anyString",
+					"type": "ANY_STRING",
 					"required": false
 				},
 				{
 					"name": "beingName",
 					"inputMessage": "Please enter the being name",
-					"type": "anyString",
+					"type": "ANY_STRING",
 					"required": true
 				}
 			]
@@ -185,7 +185,7 @@
 				{
 					"name": "beingCode",
 					"inputMessage": "Please enter the being code",
-					"type": "anyNumber",
+					"type": "ANY_NUMBER",
 					"required": false
 				}
 			]
@@ -200,7 +200,7 @@
 				{
 					"name": "beingCode",
 					"inputMessage": "Please enter the being code",
-					"type": "anyNumber",
+					"type": "ANY_NUMBER",
 					"required": false
 				}
 			]
@@ -232,13 +232,13 @@
 				{
 					"name": "locale",
 					"inputMessage": "Choose the locale",
-					"type": "anyString",
+					"type": "ANY_STRING",
 					"required": false,
 					"domainValues": [
-						"en-US",
-						"pt-BR"
+						"en_US",
+						"pt_BR"
 					],
-					"defaultValue": "en-US"
+					"defaultValue": "en_US"
 				}
 			]
 		}				

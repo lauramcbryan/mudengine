@@ -5,7 +5,12 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class LocalizedMessages {
+	
+	public static final Logger log = LoggerFactory.getLogger(LocalizedMessages.class);
 	
 	public static final String GENERAL_ERROR_MESSAGE="general.error.message";
 	public static final String API_ERROR_MESSAGE="api.error.message";
@@ -64,9 +69,18 @@ public class LocalizedMessages {
 
 	public LocalizedMessages(String strLocale) {
 		
-		bundles.computeIfAbsent(strLocale, d -> 
-			ResourceBundle.getBundle("messages",Locale.forLanguageTag(d)) 
-		);
+		this.locale = strLocale;
+		
+		bundles.computeIfAbsent(strLocale, d -> {
+			ResourceBundle bundle = ResourceBundle.getBundle("messages",Locale.forLanguageTag(d));
+			
+			if ((bundle!=null) && (bundle.getLocale().toString().equals(d)))
+				log.info("Bundle for locale {} loaded", d);
+			else
+				log.warn("Bundle for locale {} NOT LOADED!", d);
+			
+			return bundle;
+		});
 	}
 	
 	public String getMessage(String key) {
