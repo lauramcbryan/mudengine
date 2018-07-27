@@ -1,4 +1,4 @@
-package com.jpinfo.mudengine.common.itemClass;
+package com.jpinfo.mudengine.common.itemclass;
 
 import java.io.Serializable;
 import java.util.HashMap;

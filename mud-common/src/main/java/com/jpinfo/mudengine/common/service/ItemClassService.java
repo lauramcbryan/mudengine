@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import com.jpinfo.mudengine.common.itemClass.ItemClass;
+import com.jpinfo.mudengine.common.itemclass.ItemClass;
 
 @RequestMapping("/item/class")
 public interface ItemClassService {

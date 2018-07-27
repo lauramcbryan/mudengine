@@ -2,6 +2,8 @@ package com.jpinfo.mudengine.client.service;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -14,6 +16,8 @@ import com.jpinfo.mudengine.common.message.Message;
 @Component
 public class MudClientScheduler {
 	
+	private static final Logger log = LoggerFactory.getLogger(MudClientScheduler.class);
+	
 	@Autowired
 	private MudClientGateway gateway;
 	
@@ -21,13 +25,13 @@ public class MudClientScheduler {
 	private MudengineApi api;
 	
 	@Scheduled(fixedDelay=1000)
-	public void updateClientScreen() throws Exception {
+	public void updateClientScreen() {
 		
 		// For each client:
 		// 		Check if there's pending messages and write them in client terminal
 		gateway.getActiveConnections().values()
 			.stream()
-			.forEach((t) -> {
+			.forEach(t -> {
 				
 				try {
 				
@@ -46,17 +50,14 @@ public class MudClientScheduler {
 					} // end if being !=null
 					else { 
 						// Player not logged.  Just check if I already gave greetings.
-						if (!t.isLogged()) {
+						if (t.isNeedGreetings()) {
 	
-							if (t.isNeedGreetings()) {
-								
-								ClientHelper.sendFile(t, ClientHelper.GREETINGS_FILE);
-								t.setNeedGreetings(false);
-							}
+							ClientHelper.sendFile(t, ClientHelper.GREETINGS_FILE);
+							t.setNeedGreetings(false);
 						}
 					}
 				} catch(Exception e) {
-					System.out.println("Error while updating messages: " + e.getMessage());
+					log.error("Error while updating messages: ", e);
 				}
 			
 			});

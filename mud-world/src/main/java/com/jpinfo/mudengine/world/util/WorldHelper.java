@@ -6,7 +6,7 @@ import java.util.Set;
 
 import com.jpinfo.mudengine.common.place.Place;
 import com.jpinfo.mudengine.common.place.PlaceExit;
-import com.jpinfo.mudengine.common.placeClass.PlaceClass;
+import com.jpinfo.mudengine.common.placeclass.PlaceClass;
 import com.jpinfo.mudengine.world.model.MudPlace;
 import com.jpinfo.mudengine.world.model.MudPlaceAttr;
 import com.jpinfo.mudengine.world.model.MudPlaceClass;

@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.jpinfo.mudengine.common.exception.EntityNotFoundException;
-import com.jpinfo.mudengine.common.placeClass.PlaceClass;
+import com.jpinfo.mudengine.common.placeclass.PlaceClass;
 import com.jpinfo.mudengine.common.service.PlaceClassService;
 import com.jpinfo.mudengine.world.model.MudPlaceClass;
 import com.jpinfo.mudengine.world.repository.PlaceClassRepository;

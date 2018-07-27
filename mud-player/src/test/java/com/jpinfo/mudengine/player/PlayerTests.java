@@ -330,7 +330,7 @@ public class PlayerTests {
 		ResponseEntity<Player> getAnotherResponse = restTemplate.exchange(
 				"/player/{username}", HttpMethod.GET, authEntity, Player.class, urlVariables);
 
-		assertThat(getAnotherResponse.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+		assertThat(getAnotherResponse.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
 		
 	}
 	

@@ -21,9 +21,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.jpinfo.mudengine.common.being.Being;
 import com.jpinfo.mudengine.common.exception.IllegalParameterException;
 import com.jpinfo.mudengine.common.message.Message;
+import com.jpinfo.mudengine.common.player.Player;
+import com.jpinfo.mudengine.common.player.Session;
 import com.jpinfo.mudengine.common.security.MudUserDetails;
 import com.jpinfo.mudengine.common.service.MessageService;
 import com.jpinfo.mudengine.common.utils.CommonConstants;
+import com.jpinfo.mudengine.common.utils.LocalizedMessages;
 import com.jpinfo.mudengine.message.client.BeingServiceClient;
 import com.jpinfo.mudengine.message.model.MudMessage;
 import com.jpinfo.mudengine.message.model.MudMessageLocale;
@@ -95,6 +98,7 @@ public class MessageController implements MessageService {
 			@RequestParam(name="parms", required=false) String...parms) {
 		
 		// Select all beings from a place
+		// @TODO Solve the worldName
 		List<Being> allBeingFromPlace = beingService.getAllFromPlace("aforgotten", placeCode);
 		
 		for(Being curBeing: allBeingFromPlace) {
@@ -119,14 +123,17 @@ public class MessageController implements MessageService {
 		MudUserDetails uDetails = (MudUserDetails)SecurityContextHolder.getContext().getAuthentication().getDetails();
 		
 		// Obtaining the caller locale
-		String callerLocale = uDetails.getPlayerData().isPresent() ? 
-				uDetails.getPlayerData().get().getLocale(): 
+		Optional<Player> playerData = uDetails.getPlayerData();
+		Optional<Session> sessionData = uDetails.getSessionData();
+		
+		String callerLocale = playerData.isPresent() ? 
+				playerData.get().getLocale(): 
 				CommonConstants.DEFAULT_LOCALE;
 				
-		if (uDetails.getSessionData().isPresent()) {
+		if (sessionData.isPresent()) {
 
-			// Obtaining the beingCode			
-			Long beingCode = uDetails.getSessionData().get().getBeingCode();
+			// Obtaining the beingCode	
+			Long beingCode = sessionData.get().getBeingCode();
 			
 			Page<MudMessage> lstMessage = null;
 			
@@ -148,7 +155,7 @@ public class MessageController implements MessageService {
 			repository.saveAll(lstMessage);
 			
 		} else {
-			throw new IllegalParameterException("Being not set in header");
+			throw new IllegalParameterException(LocalizedMessages.SESSION_BEING_NOT_FOUND);
 		}
 		
 		return result;
@@ -191,7 +198,9 @@ public class MessageController implements MessageService {
 				if (dbLocalizedMessage.isPresent()) {
 					parmsList.add(dbLocalizedMessage.get().getMessageText());
 				} else {
-					parmsList.add("Value key " + pk.getMessageKey() + " not found in " + callerLocale + " locale");
+					parmsList.add(LocalizedMessages.getMessage(
+							LocalizedMessages.KEY_NOT_FOUND, 
+							pk.getMessageKey(), callerLocale));
 				}
 			} else {
 				parmsList.add(curParm.getValue());

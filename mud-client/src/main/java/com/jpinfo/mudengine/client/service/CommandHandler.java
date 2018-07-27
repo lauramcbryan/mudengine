@@ -19,6 +19,7 @@ import com.jpinfo.mudengine.client.utils.ClientHelper;
 import com.jpinfo.mudengine.client.utils.LocalizedMessages;
 import com.jpinfo.mudengine.common.being.Being;
 import com.jpinfo.mudengine.common.being.BeingClass;
+import com.jpinfo.mudengine.common.place.Place;
 import com.jpinfo.mudengine.common.player.Player;
 
 @Component
@@ -129,7 +130,7 @@ public class CommandHandler {
 	 * @param command
 	 * @throws Exception
 	 */
-	private void handleHelpCommand(ClientConnection client, CommandState command) throws Exception {
+	private void handleHelpCommand(ClientConnection client) throws Exception {
 
 		ClientHelper.sendMessage(client, LocalizedMessages.COMMAND_HELP_START);
 		
@@ -190,7 +191,7 @@ public class CommandHandler {
 	 * @param command
 	 * @throws Exception
 	 */
-	private void handleLogoutCommand(ClientConnection client, CommandState command) throws Exception {
+	private void handleLogoutCommand(ClientConnection client) throws Exception {
 
 		client.clearState();
 		
@@ -209,7 +210,7 @@ public class CommandHandler {
 	 * @param command
 	 * @throws Exception
 	 */
-	private void handleChangeProfileCommand(ClientConnection client, CommandState command) throws Exception {
+	private void handleChangeProfileCommand(ClientConnection client, CommandState command) throws ClientException {
 		Player playerData = 
 				client.getPlayerData()
 					.orElseThrow(()-> new ClientException(LocalizedMessages.COMMAND_ONLY_LOGGED));
@@ -217,7 +218,6 @@ public class CommandHandler {
 		playerData.setEmail(ClientHelper.getParamValue(command, "email"));
 		playerData.setLocale(ClientHelper.getParamValue(command, "locale"));
 
-		// POST /{username}
 		ApiResult changedData = api.updatePlayerDetails(client.getAuthToken(), playerData);
 		
 		client.setAuthToken(changedData.getChangedAuthToken());
@@ -242,10 +242,12 @@ public class CommandHandler {
 		// If the being class is provided, create the being and set in player session
 		if (beingClass!=null) {
 			
-			if (client.getPlayerData().isPresent()) {
+			Optional<Player> playerData = client.getPlayerData();
+			
+			if (playerData.isPresent()) {
 			
 				ApiResult apiResult = 
-						api.createBeing(client.getAuthToken(), client.getPlayerData().get().getUsername(), 
+						api.createBeing(client.getAuthToken(), playerData.get().getUsername(), 
 								beingClass, beingName, worldName, placeCode);
 	
 				// Update the player info
@@ -311,7 +313,8 @@ public class CommandHandler {
 			client.setActiveBeing(selectedBeing);
 			
 			// Setting the current place at client connection
-			client.setCurPlace(api.getPlace(client.getAuthToken(), selectedBeing.getCurPlaceCode()));
+			Place curPlace = api.getPlace(client.getAuthToken(), selectedBeing.getCurPlaceCode());
+			client.setCurPlace(curPlace);
 			
 			// Show being information
 			ClientHelper.sendMessage(client, 
@@ -319,7 +322,7 @@ public class CommandHandler {
 			
 			// Show place information
 			ClientHelper.sendMessage(client, 
-					ClientHelper.returnFormattedPlaceData(client, client.getCurPlace().get()));
+					ClientHelper.returnFormattedPlaceData(client, curPlace));
 			
 		} else {
 			
@@ -380,7 +383,7 @@ public class CommandHandler {
 		
 		// Shows the being available list
 		ClientHelper.sendMessage(client,
-				ClientHelper.listAvailableBeings(client, client.getPlayerData().get(), client.getActiveBeingCode())
+				ClientHelper.listAvailableBeings(client, playerData, client.getActiveBeingCode())
 			);
 		
 	}
@@ -392,23 +395,25 @@ public class CommandHandler {
 	 * @param command
 	 * @throws Exception
 	 */
-	private void handleWhoAmICommand(ClientConnection client, CommandState command) throws Exception {
+	private void handleWhoAmICommand(ClientConnection client) throws Exception {
 		
 		Player playerData = 
 				client.getPlayerData()
 					.orElseThrow(()-> new ClientException(LocalizedMessages.COMMAND_ONLY_LOGGED ));
 		
+		Optional<Being> activeBeing = client.getActiveBeing();
 
 		// Shows up player information
 		ClientHelper.sendMessage(client, 
 				ClientHelper.returnFormattedPlayerData(client, playerData, client.getActiveBeingCode()));
+		
 
 		// If there's an active being
-		if (client.getActiveBeing().isPresent()) {
+		if (activeBeing.isPresent()) {
 			
 			// Shows up being information			
 			ClientHelper.sendMessage(client, 
-					ClientHelper.returnFormattedBeingData(client, client.getActiveBeing().get()));
+					ClientHelper.returnFormattedBeingData(client, activeBeing.get()));
 		}
 	}
 	
@@ -419,12 +424,14 @@ public class CommandHandler {
 	 * @param command
 	 * @throws Exception
 	 */
-	private void handleWhereAmICommand(ClientConnection client, CommandState command) throws Exception {
+	private void handleWhereAmICommand(ClientConnection client) throws Exception {
 		
-		if (client.getCurPlace().isPresent()) {
+		Optional<Place> curPlace = client.getCurPlace();
+		
+		if (curPlace.isPresent()) {
 			
 			ClientHelper.sendMessage(client, 
-					ClientHelper.returnFormattedPlaceData(client, client.getCurPlace().get()));
+					ClientHelper.returnFormattedPlaceData(client, curPlace.get()));
 			
 		} else {
 			throw new ClientException(LocalizedMessages.COMMAND_NO_BEING);
@@ -455,70 +462,67 @@ public class CommandHandler {
 		
 			switch(command.getCommand().getCommandId()) {
 			
-				case CommandHandler.REGISTER_COMMAND: {
+				case CommandHandler.REGISTER_COMMAND: 
 					handleRegisterCommand(client, command);
 					break;			
-				}
 					
-				case CommandHandler.ACTIVATE_COMMAND: {
+				case CommandHandler.ACTIVATE_COMMAND: 
 					handleActivateCommand(client, command);
 					break;
-				}
+				
 					
-				case CommandHandler.PASSWORD_COMMAND: {
+				case CommandHandler.PASSWORD_COMMAND:
 					handlePasswordCommand(client, command);
 					break;
-				}
-				case CommandHandler.QUIT_COMMAND: {
+				
+				case CommandHandler.QUIT_COMMAND: 
 					ClientHelper.sendFile(client,  ClientHelper.GOODBYE_FILE);
 					connFactory.closeConnection(client.getConnection().getConnectionId());
 					break;
-					
-				}
-				case CommandHandler.HELP_COMMAND: {
-					handleHelpCommand(client, command);
+				case CommandHandler.HELP_COMMAND: 
+					handleHelpCommand(client);
 					break;
-				}
-				case CommandHandler.LOGIN_COMMAND: {
+				
+				case CommandHandler.LOGIN_COMMAND: 
 					handleLoginCommand(client, command);
 					break;
-				}
-				case CommandHandler.LOGOUT_COMMAND: {
-					handleLogoutCommand(client, command);
+				
+				case CommandHandler.LOGOUT_COMMAND: 
+					handleLogoutCommand(client);
 					break;
-				}
-				case CommandHandler.CHANGEPROF_COMMAND: {
+				
+				case CommandHandler.CHANGEPROF_COMMAND: 
 					handleChangeProfileCommand(client, command);
 					break;
-				}
-				case CommandHandler.CREATEBEING_COMMAND: {
+				
+				case CommandHandler.CREATEBEING_COMMAND: 
 					handleCreateBeingCommand(client, command);
 					break;
-				}
-				case CommandHandler.SELECTBEING_COMMAND: {
+				
+				case CommandHandler.SELECTBEING_COMMAND: 
 					handleSelectBeingCommand(client, command);
 					break;
-				}
-				case CommandHandler.DELETEBEING_COMMAND: {
+				
+				case CommandHandler.DELETEBEING_COMMAND: 
 					handleDestroyBeingCommand(client, command);
 					break;
-				}
-				case CommandHandler.WHOAMI_COMMAND: {
-					handleWhoAmICommand(client, command);
+				
+				case CommandHandler.WHOAMI_COMMAND: 
+					handleWhoAmICommand(client);
 					break;
-				}
-				case CommandHandler.WHEREAMI_COMMAND: {
-					handleWhereAmICommand(client, command);
+				
+				case CommandHandler.WHEREAMI_COMMAND: 
+					handleWhereAmICommand(client);
 					break;
-				}
-				case CommandHandler.LOCALE_COMMAND: {
+				
+				case CommandHandler.LOCALE_COMMAND: 
 					handleLocaleCommand(client, command);
 					break;
-				}
 				
-				default: {
+				
+				default: 
 					ClientHelper.sendMessage(client, LocalizedMessages.COMMAND_NOT_SUPPORTED);
-				}
+				
 			}
 		} finally {
 			client.setCurCommandState(null);
@@ -532,15 +536,13 @@ public class CommandHandler {
 	 * 
 	 * @param client - object with player info
 	 * @param command - command being processed
-	 * @throws Exception
+	 * @throws ClientException 
 	 */
-	public void handleGameCommand(ClientConnection client, CommandState command) throws Exception {
+	public void handleGameCommand(ClientConnection client, CommandState command) throws ClientException {
 
-		if (!client.hasBeingSelected()) {
-			throw new ClientException(LocalizedMessages.COMMAND_ONLY_LOGGED );
-		}
+		Long actorCode = client.getActiveBeingCode()
+				.orElseThrow(() -> new ClientException(LocalizedMessages.COMMAND_ONLY_LOGGED));
 		
-		Long actorCode = client.getActiveBeing().get().getBeingCode();
 		String mediatorCode = ClientHelper.getParamValue(command, "mediatorCode");
 		String targetCode = ClientHelper.getParamValue(command, "targetCode");
 		Integer commandId = command.getCommand().getCommandId();

@@ -7,6 +7,8 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -22,6 +24,8 @@ import com.jpinfo.mudengine.common.action.Command;
 @Component
 public class VerbDictionaries {
 	
+	private static final Logger log = LoggerFactory.getLogger(VerbDictionaries.class);
+	
 	private Map<String, VerbDictionary> dictionaries;
 	
 	@Autowired
@@ -32,7 +36,7 @@ public class VerbDictionaries {
 
 	public VerbDictionaries() {
 		
-		dictionaries = new HashMap<String, VerbDictionary>();
+		dictionaries = new HashMap<>();
 		
 	}
 	
@@ -60,16 +64,16 @@ public class VerbDictionaries {
 								curDictionary.getFile(), 
 								new TypeReference<VerbDictionary>() {});
 
-				System.out.print("Loading SYSTEM verb dictionary for locale "+locale+"... ");
+				log.info("Loading SYSTEM verb dictionary for locale {}...", locale);
 				
 				dictionaries.put(locale, verbDictionary);
 				
-				System.out.println("OK");
+				log.info("OK");
 				
 				
 				// Load the GAME verb dictionary as well
 				
-				System.out.print("Loading GAME verb dictionary for locale "+locale+"... ");
+				log.info("Loading GAME verb dictionary for locale {}... ", locale);
 				
 				try {
 				
@@ -79,11 +83,11 @@ public class VerbDictionaries {
 					
 					verbDictionary.getCommandList().addAll(gameCommandList);
 					
-					System.out.println("OK");
+					log.info("OK");
 					
 				} catch(Exception e) {
 					
-					System.out.println("Error loading verb dictionary: " + e.getMessage());
+					log.error("Error loading verb dictionary: ", e);
 				}
 				
 				
@@ -92,7 +96,7 @@ public class VerbDictionaries {
 			
 		} catch (Exception e) {
 			
-			e.printStackTrace();
+			log.error("General error", e);
 		} 
 	}
 	

@@ -1,6 +1,8 @@
 package com.jpinfo.mudengine.client.utils;
 
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 public class LocalizedMessages {
@@ -56,21 +58,21 @@ public class LocalizedMessages {
 	public static final String COMMAND_WHEREAMI_EXITS="command.whereami.exits";
 	public static final String COMMAND_WHEREAMI_START="command.whereami.start";
 	
-	
+	private static Map<String, ResourceBundle> bundles = new HashMap<>();
 
-	
-	
-	private ResourceBundle messages;
+	private String locale;
 
 	public LocalizedMessages(String strLocale) {
 		
-		messages = ResourceBundle.getBundle("messages",
-				Locale.forLanguageTag(strLocale));
+		bundles.computeIfAbsent(strLocale, d -> 
+			ResourceBundle.getBundle("messages",Locale.forLanguageTag(d)) 
+		);
 	}
 	
 	public String getMessage(String key) {
-		if (messages.containsKey(key))
-			return messages.getString(key);
+		
+		if (bundles.get(locale).containsKey(key))
+			return bundles.get(locale).getString(key);
 		else
 			return key;
 	}	

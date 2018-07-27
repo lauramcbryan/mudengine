@@ -15,7 +15,7 @@ public class CommandState {
 	public CommandState(Command c) {
 		
 		this.command = c;
-		this.paramStateList = new ArrayList<CommandParamState>();
+		this.paramStateList = new ArrayList<>();
 		
 		if (c.getParameters()!=null) {
 		
@@ -38,12 +38,9 @@ public class CommandState {
 	
 	public Optional<CommandParamState> getNextParameter() {
 		
-		Optional<CommandParamState> nextParam = 
-				paramStateList.stream()
+		return paramStateList.stream()
 				.filter(e-> !e.isValid())
 				.findFirst();
-
-		return nextParam;
 	}
 	
 	public boolean isReady() {

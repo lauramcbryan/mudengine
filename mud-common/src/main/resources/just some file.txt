@@ -1,1 +1,0 @@
-... with some other text to avoid Git to kill the entire folder.

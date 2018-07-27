@@ -43,9 +43,9 @@ public interface MudengineApi {
 
 	Place getPlace(String authToken, Integer placeId) throws ClientException;
 	
-	List<Message> getMessages(String authToken);
+	List<Message> getMessages(String authToken) throws ClientException;
 	
-	List<BeingClass> getBeingClasses(String authToken);
+	List<BeingClass> getBeingClasses(String authToken) throws ClientException;
 	
 	List<Command> getGameCommandList(String locale) throws ClientException;
 	

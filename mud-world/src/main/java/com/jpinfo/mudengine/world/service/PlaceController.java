@@ -18,6 +18,7 @@ import com.jpinfo.mudengine.common.exception.IllegalParameterException;
 import com.jpinfo.mudengine.common.place.Place;
 import com.jpinfo.mudengine.common.service.PlaceService;
 import com.jpinfo.mudengine.common.utils.CommonConstants;
+import com.jpinfo.mudengine.common.utils.LocalizedMessages;
 import com.jpinfo.mudengine.world.client.BeingServiceClient;
 import com.jpinfo.mudengine.world.client.ItemServiceClient;
 import com.jpinfo.mudengine.world.model.MudPlace;
@@ -59,7 +60,7 @@ public class PlaceController implements PlaceService {
 		
 		MudPlace dbPlace = placeRepository
 				.findById(placeId)
-				.orElseThrow(() -> new EntityNotFoundException("Place entity not found"));
+				.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.PLACE_NOT_FOUND));
 		
 		response = WorldHelper.buildPlace(dbPlace);
 		
@@ -74,7 +75,7 @@ public class PlaceController implements PlaceService {
 		
 		MudPlace dbPlace = placeRepository
 				.findById(placeId)
-				.orElseThrow(() -> new EntityNotFoundException("Place entity not found"));
+				.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.PLACE_NOT_FOUND));
 		
 		
 		// 1.. Check place attributes
@@ -220,7 +221,7 @@ public class PlaceController implements PlaceService {
 		
 		MudPlaceClass placeClass = placeClassRepository
 				.findById(newPlaceClassCode)
-				.orElseThrow(() -> new EntityNotFoundException("Place class entity not found"));
+				.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.PLACE_CLASS_NOT_FOUND));
 		
 
 		internalSyncAttr(original, original.getPlaceClass(), placeClass);
@@ -245,7 +246,7 @@ public class PlaceController implements PlaceService {
 		
 		MudPlace dbPlace = placeRepository
 				.findById(placeId)
-				.orElseThrow(() -> new EntityNotFoundException("Place entity not found"));
+				.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.PLACE_NOT_FOUND));
 
 		// If exists a demise place class for this location
 		if (dbPlace.getPlaceClass().getDemisePlaceClassCode()!=null) {
@@ -290,12 +291,12 @@ public class PlaceController implements PlaceService {
 		// Retrieving the placeClass
 		MudPlaceClass dbPlaceClass = placeClassRepository
 				.findById(placeClassCode)
-				.orElseThrow(() -> new EntityNotFoundException("Place Class entity not found"));
+				.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.PLACE_CLASS_NOT_FOUND));
 		
 		// Retrieving the targetPlace
 		MudPlace targetDbPlace = placeRepository
 				.findById(targetPlaceCode)
-				.orElseThrow(() -> new EntityNotFoundException("Target Place entity not found"));
+				.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.PLACE_NOT_FOUND));
 		
 		// Check the corresponding exit of target place to be update in this flow
 		String correspondingDirection = WorldHelper.getOpposedDirection(direction);
@@ -304,7 +305,7 @@ public class PlaceController implements PlaceService {
 		if (targetDbPlace.getExits().stream()
 			.anyMatch(d -> d.getPk().getDirection().equals(correspondingDirection))) {
 			
-			throw new IllegalParameterException("Target place already has a corresponding exit");
+			throw new IllegalParameterException(LocalizedMessages.PLACE_EXIT_EXISTS);
 		}
 		
 		MudPlace newPlace = new MudPlace();

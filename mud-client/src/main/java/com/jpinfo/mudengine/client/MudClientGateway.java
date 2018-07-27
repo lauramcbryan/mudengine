@@ -39,7 +39,7 @@ public class MudClientGateway extends TcpInboundGateway {
 	@Override
 	protected void doStart() {
 		
-		this.activeConnections = new HashMap<String, ClientConnection>();
+		this.activeConnections = new HashMap<>();
 		
 		super.doStart();
 	}

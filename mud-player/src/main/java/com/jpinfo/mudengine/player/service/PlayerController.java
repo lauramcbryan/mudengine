@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.jpinfo.mudengine.common.being.Being;
+import com.jpinfo.mudengine.common.exception.AccessDeniedException;
 import com.jpinfo.mudengine.common.exception.EntityNotFoundException;
 import com.jpinfo.mudengine.common.exception.IllegalParameterException;
 import com.jpinfo.mudengine.common.player.Player;
@@ -27,6 +28,7 @@ import com.jpinfo.mudengine.common.security.MudUserDetails;
 import com.jpinfo.mudengine.common.security.TokenService;
 import com.jpinfo.mudengine.common.service.PlayerService;
 import com.jpinfo.mudengine.common.utils.CommonConstants;
+import com.jpinfo.mudengine.common.utils.LocalizedMessages;
 import com.jpinfo.mudengine.player.client.BeingServiceClient;
 import com.jpinfo.mudengine.player.model.MudPlayer;
 import com.jpinfo.mudengine.player.model.MudPlayerBeing;
@@ -59,12 +61,12 @@ public class PlayerController implements PlayerService {
 		if (canAccess(username)) {
 		
 			MudPlayer dbPlayer = repository.findByUsername(username)
-					.orElseThrow(() -> new EntityNotFoundException("Player entity not found"));
+					.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.PLAYER_NOT_FOUND));
 		
 			response = PlayerHelper.buildPlayer(dbPlayer);
 			
 		} else {
-			throw new IllegalParameterException("No access to that username");
+			throw new AccessDeniedException(LocalizedMessages.PLAYER_ACCESS_DENIED);
 		}
 		
 		return response;
@@ -100,7 +102,7 @@ public class PlayerController implements PlayerService {
 				ConstraintViolationException constraintException = (ConstraintViolationException)e.getCause();
 				
 				if (constraintException.getConstraintName().equals("mud_player_username_key")) {
-					throw new IllegalParameterException("Username already in use");
+					throw new IllegalParameterException(LocalizedMessages.PLAYER_NAME_IN_USE);
 				}
 			}
 			
@@ -119,7 +121,7 @@ public class PlayerController implements PlayerService {
 		if (canAccess(username)) {
 		
 			MudPlayer dbPlayer = repository.findByUsername(username)
-					.orElseThrow(() -> new EntityNotFoundException("Player entity not found"));
+					.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.PLAYER_NOT_FOUND));
 			
 			dbPlayer.setLocale(playerData.getLocale());
 			dbPlayer.setUsername(playerData.getUsername());
@@ -139,7 +141,7 @@ public class PlayerController implements PlayerService {
 			response = new ResponseEntity<>(changedPlayer, header, HttpStatus.ACCEPTED);
 				
 		} else {
-			throw new IllegalParameterException("No access to that username");
+			throw new AccessDeniedException(LocalizedMessages.PLAYER_ACCESS_DENIED);
 		}
 		
 		return response;
@@ -149,7 +151,7 @@ public class PlayerController implements PlayerService {
 	public void setPlayerPassword(@PathVariable String username, @RequestParam String activationCode, @RequestParam String newPassword) {
 		
 		MudPlayer dbPlayer = repository.findByUsername(username)
-				.orElseThrow(() -> new EntityNotFoundException("Player entity not found"));
+				.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.PLAYER_NOT_FOUND));
 		
 		if (dbPlayer.getPassword().equals(activationCode)) {
 			
@@ -159,7 +161,7 @@ public class PlayerController implements PlayerService {
 			repository.save(dbPlayer);
 			
 		} else {
-			throw new IllegalParameterException("Activation Code doesn't match");
+			throw new IllegalParameterException(LocalizedMessages.PLAYER_ACTIVATION_MISMATCH);
 		}
 	}
 
@@ -175,10 +177,10 @@ public class PlayerController implements PlayerService {
 			if (!lstSessions.isEmpty()) {
 				session = PlayerHelper.buildSession(lstSessions.get(0));
 			} else {
-				throw new EntityNotFoundException("Session not found");
+				throw new EntityNotFoundException(LocalizedMessages.SESSION_NOT_FOUND);
 			}
 		} else {
-			throw new IllegalParameterException("No access to that username");
+			throw new AccessDeniedException(LocalizedMessages.PLAYER_ACCESS_DENIED);
 		}
 		
 		return session;
@@ -190,7 +192,7 @@ public class PlayerController implements PlayerService {
 		ResponseEntity<Session> response = null;
 		
 		MudPlayer dbPlayer = repository.findByUsernameAndPassword(username, password)
-				.orElseThrow(() -> new IllegalParameterException("Username/password invalid"));
+				.orElseThrow(() -> new IllegalParameterException(LocalizedMessages.PLAYER_LOGIN_ERROR));
 		
 		switch(dbPlayer.getStatus()) {
 		
@@ -231,12 +233,11 @@ public class PlayerController implements PlayerService {
 				response = new ResponseEntity<>(sessionData, header, HttpStatus.CREATED);
 				break;
 			}
-			case Player.STATUS_PENDING: {
-				throw new IllegalParameterException("You must first change your password");
-			}
-			default: {
-				throw new IllegalParameterException("You cannot login at this moment.  Contact the system administrator");
-			}
+			case Player.STATUS_PENDING: 
+				throw new IllegalParameterException(LocalizedMessages.PLAYER_CHANGE_PASSWORD);
+			
+			default: 
+				throw new IllegalParameterException(LocalizedMessages.PLAYER_NO_LOGIN);
 		}
 		
 		return response;
@@ -301,10 +302,10 @@ public class PlayerController implements PlayerService {
 				response = new ResponseEntity<>(sessionData, header, HttpStatus.ACCEPTED);
 				
 			} else {
-				throw new EntityNotFoundException("Session not found");
+				throw new EntityNotFoundException(LocalizedMessages.SESSION_NOT_FOUND);
 			}
 		} else {
-			throw new IllegalParameterException("No access to that username");
+			throw new AccessDeniedException(LocalizedMessages.PLAYER_ACCESS_DENIED);
 		}
 		
 		return response;
@@ -319,7 +320,7 @@ public class PlayerController implements PlayerService {
 		if (canAccess(username)) {
 			
 			MudPlayer dbPlayer = repository.findByUsername(username)
-					.orElseThrow(() -> new EntityNotFoundException("Player not found"));
+					.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.PLAYER_NOT_FOUND));
 			
 			// Create the being
 			ResponseEntity<Being> beingResponse = 
@@ -354,7 +355,7 @@ public class PlayerController implements PlayerService {
 			response = new ResponseEntity<>(playerData, header, HttpStatus.ACCEPTED);
 			
 		} else {
-			throw new IllegalParameterException("No access to that username");
+			throw new AccessDeniedException(LocalizedMessages.PLAYER_ACCESS_DENIED);
 		}
 		
 		return response;
@@ -377,7 +378,7 @@ public class PlayerController implements PlayerService {
 						.noneMatch(e -> 
 							e.getId().getBeingCode().equals(beingCode))) {
 					
-					throw new IllegalParameterException("Being Unknown");
+					throw new IllegalParameterException(LocalizedMessages.BEING_NOT_FOUND);
 				}
 				
 				// Remove selected being from the list
@@ -423,7 +424,7 @@ public class PlayerController implements PlayerService {
 					header, HttpStatus.ACCEPTED);
 			
 		} else {
-			throw new IllegalParameterException("No access to that username");
+			throw new AccessDeniedException(LocalizedMessages.PLAYER_ACCESS_DENIED);
 		}
 		
 		return response;

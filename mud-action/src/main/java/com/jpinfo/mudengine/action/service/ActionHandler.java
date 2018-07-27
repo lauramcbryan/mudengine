@@ -15,7 +15,6 @@ import com.jpinfo.mudengine.action.dto.ActionInfo;
 import com.jpinfo.mudengine.action.dto.BeingComposite;
 import com.jpinfo.mudengine.action.dto.ItemComposite;
 import com.jpinfo.mudengine.action.dto.PlaceComposite;
-import com.jpinfo.mudengine.action.exception.ActionRefusedException;
 import com.jpinfo.mudengine.action.interfaces.ActionTarget;
 import com.jpinfo.mudengine.action.model.MudActionClass;
 import com.jpinfo.mudengine.action.repository.MudActionClassRepository;
@@ -25,11 +24,13 @@ import com.jpinfo.mudengine.common.action.ActionClass;
 import com.jpinfo.mudengine.common.action.ActionClassEffect;
 import com.jpinfo.mudengine.common.action.ActionClassPrereq;
 import com.jpinfo.mudengine.common.being.Being;
+import com.jpinfo.mudengine.common.exception.ActionRefusedException;
 import com.jpinfo.mudengine.common.exception.EntityNotFoundException;
 import com.jpinfo.mudengine.common.exception.IllegalParameterException;
 import com.jpinfo.mudengine.common.item.Item;
 import com.jpinfo.mudengine.common.place.Place;
 import com.jpinfo.mudengine.common.security.TokenService;
+import com.jpinfo.mudengine.common.utils.LocalizedMessages;
 
 @Component
 public class ActionHandler {
@@ -151,7 +152,7 @@ public class ActionHandler {
 		}
 	}
 
-	private void checkPrerequisites(ActionInfo e) throws ActionRefusedException {
+	private void checkPrerequisites(ActionInfo e) {
 
 		ExpressionParser parser = new SpelExpressionParser();
 		EvaluationContext context = new StandardEvaluationContext(e);
@@ -183,7 +184,7 @@ public class ActionHandler {
 					failExpression.getValue(context);
 				}
 
-				throw new ActionRefusedException();
+				throw new ActionRefusedException(LocalizedMessages.ACTION_REFUSED);
 			}
 			
 		}

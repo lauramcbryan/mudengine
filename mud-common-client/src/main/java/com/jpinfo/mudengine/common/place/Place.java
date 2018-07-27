@@ -2,8 +2,7 @@ package com.jpinfo.mudengine.common.place;
 
 import java.util.*;
 
-
-import com.jpinfo.mudengine.common.placeClass.PlaceClass;
+import com.jpinfo.mudengine.common.placeclass.PlaceClass;
 
 import lombok.Data;
 

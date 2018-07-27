@@ -1,3 +1,4 @@
 mud-player/.mvn/
 /.metadata/
 /.recommenders/
+.sonarlint/

@@ -48,6 +48,10 @@ public class ClientHelper {
 		
 	private static Scanner console = new Scanner(System.in);
 	
+	
+	private ClientHelper() { }
+	
+	
 	public static int readIntInput() {
 		
 		int result = console.nextInt();
@@ -62,14 +66,12 @@ public class ClientHelper {
 	
 	public static String readString() {
 		
-		String result = console.nextLine();
-		
-		return result;
+		return console.nextLine();
 	}
 	
 	public static List<String> padMultinelineString(String original, int desiredWidth) {
 
-		List<String> resultList = new ArrayList<String>();
+		List<String> resultList = new ArrayList<>();
 
 		// Starts with the full sample
 		StringBuilder str = new StringBuilder(original);
@@ -257,7 +259,7 @@ public class ClientHelper {
 		.append(ClientHelper.CRLF);
 		
 		playerData.getBeingList().stream()
-			.forEach(d -> {
+			.forEach(d -> 
 				
 				m
 					.append(ClientHelper.CRLF)
@@ -270,8 +272,7 @@ public class ClientHelper {
 					.append(") ")
 					.append((selectedBeing.isPresent() && d.getBeingCode().equals(selectedBeing.get()) ? 
 							c.getLocalizedMessage(LocalizedMessages.COMMAND_SELECT_ACTIVE):""))
-					;
-		});
+				);
 		
 		if (playerData.getBeingList().isEmpty()) {
 			m.append("\r\n--- "+ c.getLocalizedMessage(LocalizedMessages.NONE_MESSAGE) +" \r\n");
@@ -295,7 +296,7 @@ public class ClientHelper {
 			.append(client.getLocalizedMessage(LocalizedMessages.COMMAND_CREATE_AVAILABLE))
 			.append(ClientHelper.CRLF);
 		
-		beingClassList.forEach(d -> {
+		beingClassList.forEach(d -> 
 			
 			m.append(ClientHelper.CRLF)
 				.append(d.getBeingClassCode())
@@ -304,8 +305,7 @@ public class ClientHelper {
 				.append(ClientHelper.CRLF)
 				.append(d.getDescription())
 				.append(ClientHelper.CRLF)
-				;
-		});
+		);
 		
 		if (beingClassList.isEmpty()) {
 			m.append("--- "+ client.getLocalizedMessage(LocalizedMessages.NONE_MESSAGE));
@@ -372,7 +372,7 @@ public class ClientHelper {
 		.append(ClientHelper.CRLF);
 	
 		playerData.getBeingList().stream()
-			.forEach(d -> {
+			.forEach(d -> 
 				
 				m
 					.append(ClientHelper.BOX_LEFT)
@@ -385,8 +385,8 @@ public class ClientHelper {
 												c.getLocalizedMessage(LocalizedMessages.COMMAND_SELECT_ACTIVE): "") 
 									, 70))
 					.append(ClientHelper.BOX_RIGHT)
-				.append(ClientHelper.CRLF);
-		});
+				.append(ClientHelper.CRLF)
+		);
 	
 		if (playerData.getBeingList().isEmpty()) {
 			m
@@ -615,16 +615,14 @@ public class ClientHelper {
 		List<String> lstDescription = ClientHelper.padMultinelineString(
 				currentPlace.getPlaceClass().getDescription(), 75);
 		
-		lstDescription.stream().forEach(d -> {
+		lstDescription.stream().forEach(d -> 
 			
 			m
 				.append(ClientHelper.CRLF)
 				.append(ClientHelper.BOX_LEFT)
 				.append(d)
 				.append(ClientHelper.BOX_RIGHT)
-			;
-			
-		});
+		);
 		
 		m
 		.append(ClientHelper.CRLF)

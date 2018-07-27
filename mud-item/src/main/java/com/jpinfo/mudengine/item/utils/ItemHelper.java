@@ -1,7 +1,7 @@
 package com.jpinfo.mudengine.item.utils;
 
 import com.jpinfo.mudengine.common.item.Item;
-import com.jpinfo.mudengine.common.itemClass.ItemClass;
+import com.jpinfo.mudengine.common.itemclass.ItemClass;
 import com.jpinfo.mudengine.item.model.MudItem;
 import com.jpinfo.mudengine.item.model.MudItemAttr;
 import com.jpinfo.mudengine.item.model.MudItemClass;

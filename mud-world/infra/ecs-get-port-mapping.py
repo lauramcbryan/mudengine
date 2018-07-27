@@ -48,7 +48,6 @@ def get_local_container_info():
 
     return ecs_local_container['Name'], task_arn
 
-
 def main():
 
     metadata = boto.utils.get_instance_metadata()

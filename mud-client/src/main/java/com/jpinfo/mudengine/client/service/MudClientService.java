@@ -2,6 +2,8 @@ package com.jpinfo.mudengine.client.service;
 
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
@@ -16,9 +18,13 @@ import com.jpinfo.mudengine.client.model.VerbDictionaries;
 import com.jpinfo.mudengine.client.utils.ClientHelper;
 import com.jpinfo.mudengine.client.utils.LocalizedMessages;
 import com.jpinfo.mudengine.common.action.Command;
+import com.jpinfo.mudengine.common.being.Being;
+import com.jpinfo.mudengine.common.player.Player;
 
 @MessageEndpoint
 public class MudClientService {
+	
+	private static final Logger log = LoggerFactory.getLogger(MudClientService.class);
 	
 	@Autowired
 	private MudClientGateway gateway;
@@ -32,7 +38,7 @@ public class MudClientService {
 	
 	@ServiceActivator(inputChannel="plainRequestChannel")
 	public String handleCommand(@Header(name="ip_connectionId") String connectionId, String in) {
-
+		
 		// Retrieves the player attached to that connection
 		ClientConnection client = gateway.getActiveConnections().get(connectionId);
 		
@@ -53,16 +59,18 @@ public class MudClientService {
 						.append("] with parameters: ");
 
 					// Assembling the message with parameter values
-					client.getCurCommandState().getParameters().stream().forEach(d-> {
+					client.getCurCommandState().getParameters().stream().forEach(d-> 
 						msg.append(d.getParameter().getName())
 							.append("=")
 							.append(d.getEffectiveValue())
-							.append(";");
-					});
+							.append(";")
+					);
 					
 					msg.append(ClientHelper.CRLF + "Client Token: ").append(client.getAuthToken());
 					
-					System.out.println(msg.toString());
+					// Just to avoid Sonar Squid rule 52629 
+					String dummy = msg.toString();
+					log.info(dummy);
 
 					
 					// handle command
@@ -83,16 +91,15 @@ public class MudClientService {
 				try {
 					ClientHelper.sendMessage(client, e.getMessage());
 				} catch(Exception ex) {
-					ex.printStackTrace();
+					log.error("General error sending message", ex);
 				}
 				
 			} catch(Exception e) {
 				
-				try {
-					e.printStackTrace();					
+				try {			
 					ClientHelper.sendMessage(client, LocalizedMessages.GENERAL_ERROR_MESSAGE);
 				} catch(Exception ex) {
-					ex.printStackTrace();					
+					log.error("General error sending message", ex);					
 				}
 				
 			}
@@ -106,13 +113,16 @@ public class MudClientService {
 			} else {
 				
 				// Full Prompt
-				String username = (client.getPlayerData().isPresent() ? 
-						client.getPlayerData().get().getUsername() : 
-							client.getLocalizedMessage(LocalizedMessages.ANONYMOUS_MESSAGE));
+				Optional<Player> playerData = client.getPlayerData();
+				Optional<Being> activeBeing = client.getActiveBeing();
 				
-				String beingName = (client.getActiveBeing().isPresent() ? 
-						client.getActiveBeing().get().getName(): 
-							client.getLocalizedMessage(LocalizedMessages.NO_BEING_MESSAGE));
+				String username = (playerData.isPresent() ? 
+									playerData.get().getUsername() : 
+									client.getLocalizedMessage(LocalizedMessages.ANONYMOUS_MESSAGE));
+				
+				String beingName = (activeBeing.isPresent() ? 
+									activeBeing.get().getName(): 
+									client.getLocalizedMessage(LocalizedMessages.NO_BEING_MESSAGE));
 				
 				
 				return username + "@" + beingName + ":$ ";

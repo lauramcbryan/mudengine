@@ -1,4 +1,4 @@
-package com.jpinfo.mudengine.common.placeClass;
+package com.jpinfo.mudengine.common.placeclass;
 
 import java.util.HashMap;
 import java.util.Map;

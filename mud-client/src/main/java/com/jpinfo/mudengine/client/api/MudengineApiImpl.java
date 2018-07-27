@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -35,6 +37,8 @@ import com.jpinfo.mudengine.common.utils.CommonConstants;
 
 @Component
 public class MudengineApiImpl implements MudengineApi {
+	
+	private static final Logger log = LoggerFactory.getLogger(MudengineApiImpl.class);
 	
 	@Value("${api.endpoint}")
 	private String apiEndpoint;
@@ -64,7 +68,7 @@ public class MudengineApiImpl implements MudengineApi {
 			
 		} catch(RestClientResponseException e) {
 			
-			handleError(e, "Player");
+			handleError(e);
 		}
 
 		return result;
@@ -86,7 +90,7 @@ public class MudengineApiImpl implements MudengineApi {
 			
 		} catch(RestClientResponseException e) {
 			
-			handleError(e, "Player");
+			handleError(e);
 		}
 	}
 
@@ -111,7 +115,7 @@ public class MudengineApiImpl implements MudengineApi {
 			
 		} catch(RestClientResponseException e) {
 			
-			handleError(e, "Player");
+			handleError(e);
 		}
 		
 		return result;
@@ -131,7 +135,7 @@ public class MudengineApiImpl implements MudengineApi {
 					HttpMethod.POST, null, String.class, urlVariables);
 			
 		} catch(RestClientResponseException e) {
-			handleError(e, "Player");
+			handleError(e);
 		}
 	}
 
@@ -154,14 +158,14 @@ public class MudengineApiImpl implements MudengineApi {
 			
 		} catch(RestClientResponseException e) {
 			
-			handleError(e, "Being");
+			handleError(e);
 		}
 
 		return result;
 	}
 	
 	@Override
-	public List<BeingClass> getBeingClasses(String authToken) {
+	public List<BeingClass> getBeingClasses(String authToken) throws ClientException {
 
 		List<BeingClass> returnList = new ArrayList<>();
 		
@@ -171,10 +175,10 @@ public class MudengineApiImpl implements MudengineApi {
 					HttpMethod.GET, getEmptyHttpEntity(authToken), 
 					BeingClass[].class, new HashMap<String, Object>());
 			
-			returnList = (List<BeingClass>)Arrays.asList(response.getBody());
+			returnList = Arrays.asList(response.getBody());
 
 		} catch(RestClientResponseException e) {
-			System.out.println(e.getResponseBodyAsString());
+			handleError(e);
 		}
 		
 		return returnList;
@@ -207,7 +211,7 @@ public class MudengineApiImpl implements MudengineApi {
 					response.getBody());
 			
 		} catch(RestClientResponseException e) {
-			handleError(e, "Being Class");
+			handleError(e);
 		}
 
 		return result;
@@ -233,7 +237,7 @@ public class MudengineApiImpl implements MudengineApi {
 					response.getBody());
 			
 		} catch(RestClientResponseException e) {
-			handleError(e, "Being");
+			handleError(e);
 		}
 		
 		return result;
@@ -260,7 +264,7 @@ public class MudengineApiImpl implements MudengineApi {
 			result = response.getHeaders().getFirst(CommonConstants.AUTH_TOKEN_HEADER);
 
 		} catch(RestClientResponseException e) {
-			handleError(e, "Session");
+			handleError(e);
 		}
 		
 		return result;
@@ -292,7 +296,7 @@ public class MudengineApiImpl implements MudengineApi {
 			result = response.getBody();
 			
 		} catch(RestClientResponseException e) {
-			handleError(e, "Command");
+			handleError(e);
 		}
 		
 		return result;
@@ -313,7 +317,7 @@ public class MudengineApiImpl implements MudengineApi {
 			result = response.getBody();
 			
 		} catch(RestClientResponseException e) {
-			handleError(e, "Being");
+			handleError(e);
 		}
 
 		return result;
@@ -334,7 +338,7 @@ public class MudengineApiImpl implements MudengineApi {
 			result = response.getBody();
 			
 		} catch(RestClientResponseException e) {
-			handleError(e, "Item");
+			handleError(e);
 		}
 
 		return result;
@@ -355,14 +359,14 @@ public class MudengineApiImpl implements MudengineApi {
 			result = response.getBody();
 			
 		} catch(RestClientResponseException e) {
-			handleError(e, "Place");
+			handleError(e);
 		}
 			
 		return result;
 	}
 
 	@Override
-	public List<Message> getMessages(String authToken) {
+	public List<Message> getMessages(String authToken) throws ClientException {
 
 		List<Message> returnList = new ArrayList<>();
 		
@@ -375,7 +379,7 @@ public class MudengineApiImpl implements MudengineApi {
 			returnList = Arrays.asList(responseRead.getBody());
 
 		} catch(RestClientResponseException e) {
-			System.out.println(e.getResponseBodyAsString());
+			handleError(e);
 		}
 		
 		return returnList;
@@ -399,7 +403,7 @@ public class MudengineApiImpl implements MudengineApi {
 		return new HttpEntity<>(new HttpHeaders());
 	}
 	
-	private void handleError(RestClientResponseException exception, String entity) throws ClientException {
+	private void handleError(RestClientResponseException exception) throws ClientException {
 
 		try {
 			ApiErrorMessage restError = ApiErrorMessage.build(exception.getResponseBodyAsString());
@@ -408,18 +412,17 @@ public class MudengineApiImpl implements MudengineApi {
 			
 				case 400:
 				case 403:
-				case 404: {
+				case 404:
 					throw new ClientException(restError.getMessage());
-				}
 				default:
-					exception.printStackTrace();
+					log.error("service error", exception);
 					throw new ClientException("api.error.message");
 			}
 		} catch(ClientException e) {
 			throw e;
 		} catch(Exception e) {
 			
-			e.printStackTrace();
+			log.error("service error", exception);
 			throw new ClientException("api.error.message");
 		}
 	}
@@ -440,7 +443,7 @@ public class MudengineApiImpl implements MudengineApi {
 			returnList = Arrays.asList(response.getBody());
 			
 		} catch(RestClientResponseException e) {
-			handleError(e, "Command");
+			handleError(e);
 		}
 
 		return returnList;

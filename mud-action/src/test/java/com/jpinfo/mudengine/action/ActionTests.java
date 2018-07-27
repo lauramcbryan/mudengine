@@ -25,7 +25,7 @@ import com.jpinfo.mudengine.common.being.Being;
 import com.jpinfo.mudengine.common.being.BeingClass;
 import com.jpinfo.mudengine.common.place.Place;
 import com.jpinfo.mudengine.common.place.PlaceExit;
-import com.jpinfo.mudengine.common.placeClass.PlaceClass;
+import com.jpinfo.mudengine.common.placeclass.PlaceClass;
 
 import static org.mockito.BDDMockito.*;
 

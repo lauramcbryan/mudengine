@@ -17,6 +17,7 @@ import com.jpinfo.mudengine.common.exception.IllegalParameterException;
 import com.jpinfo.mudengine.common.item.Item;
 import com.jpinfo.mudengine.common.service.ItemService;
 import com.jpinfo.mudengine.common.utils.CommonConstants;
+import com.jpinfo.mudengine.common.utils.LocalizedMessages;
 import com.jpinfo.mudengine.item.model.MudItem;
 import com.jpinfo.mudengine.item.model.MudItemAttr;
 import com.jpinfo.mudengine.item.model.MudItemClass;
@@ -40,7 +41,7 @@ public class ItemController implements ItemService {
 		
 		MudItem dbItem = itemRepository
 				.findById(itemId)
-				.orElseThrow(() -> new EntityNotFoundException("Item entity not found"));
+				.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.ITEM_NOT_FOUND));
 		
 		response = ItemHelper.buildItem(dbItem);
 		
@@ -54,7 +55,7 @@ public class ItemController implements ItemService {
 		
 		// Retrieving the database record
 		MudItem dbItem = itemRepository.findById(itemId)
-				.orElseThrow(() -> new EntityNotFoundException("Item entity not found"));
+				.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.ITEM_NOT_FOUND));
 		
 		dbItem.setCurWorld(requestItem.getCurWorld());
 		dbItem.setCurPlaceCode(requestItem.getCurPlaceCode());
@@ -98,7 +99,7 @@ public class ItemController implements ItemService {
 		
 			MudItemClass dbClassItem = itemClassRepository
 					.findById(requestItem.getItemClassCode())
-					.orElseThrow(() -> new EntityNotFoundException("Item Class entity not found"));
+					.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.ITEM_CLASS_NOT_FOUND));
 
 			// Replace all current attributes from old class by the new one
 			dbItem = ItemHelper.changeItemAttrs(dbItem, dbItem.getItemClass(), dbClassItem);
@@ -123,7 +124,7 @@ public class ItemController implements ItemService {
 		
 			MudItemClass dbClassItem = itemClassRepository
 					.findById(itemClassCode)
-					.orElseThrow(() -> new EntityNotFoundException("Item Class entity not found"));
+					.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.ITEM_CLASS_NOT_FOUND));
 			
 			MudItem newDbItem = new MudItem();
 			newDbItem.setItemClass(dbClassItem);
@@ -155,7 +156,7 @@ public class ItemController implements ItemService {
 			response = ItemHelper.buildItem(newDbItem);
 			
 		} else {
-			throw new IllegalParameterException("At least owner or place must be set in request");
+			throw new IllegalParameterException(LocalizedMessages.ITEM_NO_OWNER);
 		}
 		
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
@@ -167,7 +168,7 @@ public class ItemController implements ItemService {
 		// Retrieving the database record
 		MudItem dbItem = itemRepository
 				.findById(itemId)
-				.orElseThrow(() -> new EntityNotFoundException("Item entity not found"));
+				.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.ITEM_NOT_FOUND));
 		
 		itemRepository.delete(dbItem);
 	}
