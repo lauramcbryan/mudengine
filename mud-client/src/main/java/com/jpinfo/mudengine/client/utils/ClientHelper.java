@@ -7,16 +7,14 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Scanner;
 
 
 import org.springframework.messaging.support.MessageBuilder;
 
-import com.jpinfo.mudengine.client.exception.ClientException;
 import com.jpinfo.mudengine.client.model.ClientConnection;
-import com.jpinfo.mudengine.client.model.CommandParamState;
-import com.jpinfo.mudengine.client.model.CommandState;
 import com.jpinfo.mudengine.common.being.Being;
 import com.jpinfo.mudengine.common.being.BeingAttrModifier;
 import com.jpinfo.mudengine.common.being.BeingClass;
@@ -31,7 +29,7 @@ import org.springframework.core.io.ClassPathResource;
 
 public class ClientHelper {
 	
-	public static final String DEFAULT_LOCALE = "en_US";
+	public static final Locale DEFAULT_LOCALE = Locale.US;
 	
 	public static final String CLIENT_TYPE = "text/plain";
 	public static final String CRLF = "\r\n";
@@ -199,49 +197,6 @@ public class ClientHelper {
 		} finally {
 			reader.close();
 		}
-	}
-	
-	/**
-	 * Get the value entered for a command parameter.
-	 * 
-	 * @param command
-	 * @param key
-	 * @param returnClass
-	 * @return
-	 * @throws ClientException
-	 */
-	public static <T> T getParamValue(CommandState command, String key, Class<T> returnClass) throws ClientException  {
-		
-		String paramValue = getParamValue(command, key);
-		
-		if (paramValue!=null) {
-			try {
-				return returnClass.getConstructor(String.class).newInstance(paramValue);
-			} catch (Exception e) {
-				
-				throw new ClientException("System error retrieving parameter values.");
-			}
-		}
-		
-		
-		return null;
-		
-	}	
-	
-	/**
-	 * Get the value entered for a command parameter.
-	 *  
-	 * @param command
-	 * @param key
-	 * @return
-	 */
-	public static String getParamValue(CommandState command, String key) {
-
-		Optional<CommandParamState> foundParam = command.getParameters().stream()
-				.filter(d -> d.getParameter().getName().equals(key))
-				.findFirst();
-		
-		return (foundParam.isPresent() ? foundParam.get().getEffectiveValue(): null);
 	}
 	
 	/**

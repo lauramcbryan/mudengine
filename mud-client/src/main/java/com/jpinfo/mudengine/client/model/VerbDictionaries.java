@@ -2,6 +2,7 @@ package com.jpinfo.mudengine.client.model;
 
 
 import java.util.List;
+import java.util.Locale;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,7 +29,7 @@ public class VerbDictionaries {
 	
 	private static final String FILE_PREFIX = "system-verbs_";
 	
-	private Map<String, VerbDictionary> dictionaries;
+	private Map<Locale, VerbDictionary> dictionaries;
 	
 	@Autowired
 	private ResourceLoader loader;
@@ -57,7 +58,10 @@ public class VerbDictionaries {
 				
 				// Extract the locale name
 				String justFileName = curDictionary.getFilename().split("\\.")[0];
-				String locale = justFileName.substring(FILE_PREFIX.length(), justFileName.length());
+				String strLocale = justFileName.substring(FILE_PREFIX.length(), justFileName.length());
+				Locale locale = Locale.forLanguageTag(strLocale);
+				
+				log.info("Loading SYSTEM verb dictionary for locale {}...", locale);				
 
 				// Load the contents
 				VerbDictionary verbDictionary = 
@@ -65,33 +69,13 @@ public class VerbDictionaries {
 								curDictionary.getFile(), 
 								new TypeReference<VerbDictionary>() {});
 
-				log.info("Loading SYSTEM verb dictionary for locale {}...", locale);
-				
-				dictionaries.put(locale, verbDictionary);
-				
 				log.info("OK");
-				
-				
+
 				// Load the GAME verb dictionary as well
-				
-				log.info("Loading GAME verb dictionary for locale {}... ", locale);
-				
-				try {
-				
-					// Call the API to retrieve game list
-					List<Command> gameCommandList = 
-							api.getGameCommandList(locale);
-					
-					verbDictionary.getCommandList().addAll(gameCommandList);
-					
-					log.info("OK");
-					
-				} catch(Exception e) {
-					
-					log.error("Error loading verb dictionary: ", e);
-				}
-				
-				
+				loadGameCommands(verbDictionary, locale);
+
+				// Put in the dictionary list
+				dictionaries.put(locale, verbDictionary);
 			}
 			
 			
@@ -101,11 +85,34 @@ public class VerbDictionaries {
 		} 
 	}
 	
-	public VerbDictionary getDictionary(String locale) {
+	public VerbDictionary getDictionary(Locale locale) {
 		
-		if (this.dictionaries.containsKey(locale))
-			return this.dictionaries.get(locale);
-		else
-			return this.dictionaries.get(ClientHelper.DEFAULT_LOCALE);
+		return this.dictionaries.getOrDefault(
+				locale,
+				this.dictionaries.get(ClientHelper.DEFAULT_LOCALE)
+				);
+	}
+	
+	
+	private VerbDictionary loadGameCommands(VerbDictionary verbDictionary, Locale locale) {
+
+		log.info("Loading GAME verb dictionary for locale {}... ", locale);
+		
+		try {
+		
+			// Call the API to retrieve game list
+			List<Command> gameCommandList = 
+					api.getGameCommandList(locale.toString());
+			
+			verbDictionary.getCommandList().addAll(gameCommandList);
+			
+			log.info("OK");
+			
+		} catch(Exception e) {
+			
+			log.error("Error loading verb dictionary: ", e);
+		}
+		
+		return verbDictionary;
 	}
 }

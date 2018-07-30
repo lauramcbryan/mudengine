@@ -64,9 +64,9 @@ public class CommandHandler {
 	 */
 	private void handleRegisterCommand(ClientConnection client, CommandState command) throws Exception {
 
-		String username = ClientHelper.getParamValue(command, "username");
-		String email = ClientHelper.getParamValue(command, "email");
-		String locale = ClientHelper.getParamValue(command, "locale");
+		String username = command.getParamValue("username");
+		String email = command.getParamValue("email");
+		String locale = command.getParamValue("locale");
 		
 
 		ClientHelper.sendMessage(client, LocalizedMessages.COMMAND_REGISTER_START);
@@ -91,8 +91,8 @@ public class CommandHandler {
 					.orElseThrow(()-> new ClientException(LocalizedMessages.COMMAND_ONLY_LOGGED));
 
 		
-		String oldPassword = ClientHelper.getParamValue(command, "oldPassword");
-		String newPassword = ClientHelper.getParamValue(command, "newPassword");
+		String oldPassword = command.getParamValue("oldPassword");
+		String newPassword = command.getParamValue("newPassword");
 
 		// Call setPassword in PlayerService
 		api.setPlayerPassword(playerData.getUsername(), oldPassword, newPassword);
@@ -112,9 +112,9 @@ public class CommandHandler {
 
 		ClientHelper.sendMessage(client, LocalizedMessages.COMMAND_ACTIVATE_START);
 
-		String username = ClientHelper.getParamValue(command, "username");
-		String activationCode = ClientHelper.getParamValue(command, "activationCode");
-		String newPassword = ClientHelper.getParamValue(command, "newPassword");
+		String username = command.getParamValue("username");
+		String activationCode = command.getParamValue("activationCode");
+		String newPassword = command.getParamValue("newPassword");
 
 		// Call activateAccount in PlayerService
 		api.setPlayerPassword(username, activationCode, newPassword);
@@ -169,8 +169,8 @@ public class CommandHandler {
 	 * @throws Exception
 	 */
 	private void handleLoginCommand(ClientConnection client, CommandState command) throws Exception {
-		String username = ClientHelper.getParamValue(command, "username");				
-		String password = ClientHelper.getParamValue(command, "password");
+		String username = command.getParamValue("username");				
+		String password = command.getParamValue("password");
 		
 		String authToken = api.createSession(username, password, 
 				ClientHelper.CLIENT_TYPE, client.getConnection().getHostAddress());
@@ -215,8 +215,8 @@ public class CommandHandler {
 				client.getPlayerData()
 					.orElseThrow(()-> new ClientException(LocalizedMessages.COMMAND_ONLY_LOGGED));
 
-		playerData.setEmail(ClientHelper.getParamValue(command, "email"));
-		playerData.setLocale(ClientHelper.getParamValue(command, "locale"));
+		playerData.setEmail(command.getParamValue("email"));
+		playerData.setLocale(command.getParamValue("locale"));
 
 		ApiResult changedData = api.updatePlayerDetails(client.getAuthToken(), playerData);
 		
@@ -234,8 +234,8 @@ public class CommandHandler {
 	 */
 	private void handleCreateBeingCommand(ClientConnection client, CommandState command) throws Exception {
 
-		String beingClass = ClientHelper.getParamValue(command, "beingClass");
-		String beingName  = ClientHelper.getParamValue(command, "beingName");
+		String beingClass = command.getParamValue("beingClass");
+		String beingName  = command.getParamValue("beingName");
 		String worldName = "aforgotten";
 		Integer placeCode = 1;
 
@@ -285,7 +285,7 @@ public class CommandHandler {
 				client.getPlayerData()
 					.orElseThrow(()-> new ClientException(LocalizedMessages.COMMAND_ONLY_LOGGED));
 
-		Long beingCode =ClientHelper.getParamValue(command, "beingCode", Long.class);
+		Long beingCode =command.getParamValue("beingCode", Long.class);
 		
 		// if the user provided a beingId, assume it.
 		// If not, show the being list for that player
@@ -348,7 +348,7 @@ public class CommandHandler {
 				client.getPlayerData()
 					.orElseThrow(()-> new ClientException(LocalizedMessages.COMMAND_ONLY_LOGGED ));
 
-		Long beingCode =ClientHelper.getParamValue(command, "beingCode", Long.class);
+		Long beingCode =command.getParamValue("beingCode", Long.class);
 		
 		// if the user provided a beingId, assume it.
 		// If not, show the being list for that player
@@ -441,7 +441,7 @@ public class CommandHandler {
 	
 	private void handleLocaleCommand(ClientConnection client, CommandState command) throws Exception {
 		
-		client.setLocale(ClientHelper.getParamValue(command, "locale"));
+		client.setLocale(command.getParamValue("locale"));
 		
 		ClientHelper.sendMessage(client, LocalizedMessages.COMMAND_LOCALE_OK);
 	}
@@ -543,8 +543,8 @@ public class CommandHandler {
 		Long actorCode = client.getActiveBeingCode()
 				.orElseThrow(() -> new ClientException(LocalizedMessages.COMMAND_ONLY_LOGGED));
 		
-		String mediatorCode = ClientHelper.getParamValue(command, "mediatorCode");
-		String targetCode = ClientHelper.getParamValue(command, "targetCode");
+		String mediatorCode = command.getParamValue("mediatorCode");
+		String targetCode = command.getParamValue("targetCode");
 		Integer commandId = command.getCommand().getCommandId();
 		
 		

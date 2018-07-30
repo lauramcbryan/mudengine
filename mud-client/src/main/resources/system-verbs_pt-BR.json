@@ -1,87 +1,87 @@
 {
 	"commandList": [
 		{
-			"commandId": 901,
-			"verb": "register",
+			"commandId": 901,		
+			"verb": "registre",
 			"category": "SYSTEM",
 			"logged": false,
-			"description": "Creates an account in the system.",
-			"usage": "register [<username> [<email> [<locale>] ] ]",
+			"description": "Cria uma conta no sistema.",
+			"usage": "registre [<nome-de-usuario> [<email> [<linguagem>] ] ]",
 			"parameters": [
 				{
 					"name": "username",
-					"inputMessage": "Please enter the username",
+					"inputMessage": "Indique o nome do usuário",
 					"type": "ANY_STRING",
 					"required": true
 				},
 				{
 					"name": "email",
-					"inputMessage": "Please enter the email",
+					"inputMessage": "Indique o email",
 					"type": "EMAIL",
 					"required": true
 				},
 				{
 					"name": "locale",
-					"inputMessage": "Please choose a locale",
+					"inputMessage": "Escolha a linguagem",
 					"type": "ANY_STRING",
 					"required": false,
 					"domainValues": [
-						"en_US",
-						"pt_BR"
+						"en-US",
+						"pt-BR"
 					],
-					"defaultValue": "en_US"
+					"defaultValue": "en-US"
 				}
 			]
 		},
 		{
 			"commandId": 902,		
-			"verb": "change profile",
+			"verb": "mudar perfil",
 			"category": "SYSTEM",
-			"description": "Changes profile details.",
-			"usage": "change profile [<email> [<locale>] ]",			
+			"description": "Mudar perfil do sistema.",
+			"usage": "mudar perfil [<email> [<linguagem>] ]",
 			"parameters": [
 				{
 					"name": "email",
-					"inputMessage": "Please enter the email",
+					"inputMessage": "Indique o email",
 					"type": "EMAIL",
 					"required": true
 				},
 				{
 					"name": "locale",
-					"inputMessage": "Please choose a locale",
+					"inputMessage": "Escolha a linguagem",
 					"type": "ANY_STRING",
 					"required": false,
 					"domainValues": [
-						"en_US",
-						"pt_BR"
+						"en-US",
+						"pt-BR"
 					],
-					"defaultValue": "en_US"
+					"defaultValue": "en-US"
 				}
 			]
 		},
 		{
 			"commandId": 903,		
-			"verb": "activate account",
+			"verb": "ativar conta",
 			"category": "SYSTEM",
 			"logged": false,			
-			"description": "Activates an account created through register command.",
-			"usage": "activate account [<activationCode> [<newPassword>] ]",
+			"description": "Ativa uma conta criada pelo comando 'registrar'.",
+			"usage": "ativar conta [<código> [<nova-senha>] ]",
 			"parameters": [
 				{
 					"name": "username",
-					"inputMessage": "Please enter your username",
+					"inputMessage": "Indique o nome do usuário",
 					"type": "ANY_STRING",
 					"required": true
 				},
 				{
 					"name": "activationCode",
-					"inputMessage": "Please type the activation code received",
+					"inputMessage": "Digite o código de ativação recebido",
 					"type": "ANY_STRING",
 					"required": true
 				},
 				{
 					"name": "newPassword",
-					"inputMessage": "Please type the new password",
+					"inputMessage": "Escolha uma nova senha",
 					"type": "ANY_STRING",
 					"required": true
 				}
@@ -89,20 +89,20 @@
 		},
 		{
 			"commandId": 904,		
-			"verb": "change password",
+			"verb": "mudar senha",
 			"category": "SYSTEM",		
-			"description": "Change user password",
-			"usage": "change password [<oldPassword> [<newPassword>] ]",
+			"description": "Mudar senha do usuário",
+			"usage": "mudar senha [<senha-antiga> [<senha-nova>] ]",
 			"parameters": [
 				{
 					"name": "oldPassword",
-					"inputMessage": "Please type the current password",
+					"inputMessage": "Digite a senha antiga",
 					"type": "ANY_STRING",
 					"required": true
 				},
 				{
 					"name": "newPassword",
-					"inputMessage": "Please type the new password",
+					"inputMessage": "Digite a nova senha",
 					"type": "ANY_STRING",
 					"required": true
 				}
@@ -111,36 +111,36 @@
 		{
 			"commandId": 905,		
 			"verb": "quit",
-			"description": "Closes the connection.",
-			"logged": false,			
-			"usage": "quit",			
+			"description": "Fecha a conexão.",
+			"logged": false,
+			"usage": "quit",
 			"category": "SYSTEM"
 		},
 		{
 			"commandId": 906,		
-			"verb": "help",
-			"description": "Display the command list",
-			"logged": false,			
-			"usage": "help",
+			"verb": "ajuda",
+			"description": "Mostra a lista de comandos",
+			"logged": false,
+			"usage": "ajuda",
 			"category": "SYSTEM"
 		},		
 		{
 			"commandId": 907,		
 			"verb": "login",
 			"category": "SYSTEM",
-			"description": "Authenticate the account",
+			"description": "Autentica a conta",
 			"logged": false,			
-			"usage": "login [<username> [<password>] ]",
+			"usage": "login [<nome-usuario> [<senha>] ]",
 			"parameters": [
 				{
 					"name": "username",
-					"inputMessage": "Please enter the username",
+					"inputMessage": "Por favor, digite o nome do usuário",
 					"type": "ANY_STRING",
 					"required": true
 				},
 				{
 					"name": "password",
-					"inputMessage": "Please enter the password",
+					"inputMessage": "Digite a senha",
 					"type": "ANY_STRING",
 					"required": true
 				}
@@ -150,26 +150,26 @@
 			"commandId": 908,		
 			"verb": "logout",
 			"category": "SYSTEM",
-			"description": "Finishes a session",
+			"description": "Encerra a sessão",
 			"usage": "logout",
 			"parameters": null
 		},		
 		{
 			"commandId": 909,		
-			"verb": "create being",
+			"verb": "criar ser",
 			"category": "SYSTEM",
-			"description": "Creates a new being",
-			"usage": "create being <beingClass> <beingName>",
+			"description": "Cria um novo ser",
+			"usage": "criar ser <classe> <nome>",
 			"parameters": [
 				{
 					"name": "beingClass",
-					"inputMessage": "Please enter the being class",
+					"inputMessage": "Por favor escolha uma classe",
 					"type": "ANY_STRING",
 					"required": false
 				},
 				{
 					"name": "beingName",
-					"inputMessage": "Please enter the being name",
+					"inputMessage": "Escolha o nome do ser",
 					"type": "ANY_STRING",
 					"required": true
 				}
@@ -177,14 +177,14 @@
 		},
 		{
 			"commandId": 910,		
-			"verb": "select being",
+			"verb": "selecionar ser",
 			"category": "SYSTEM",
-			"description": "Selects an existing being",
-			"usage": "select being <beingCode>",
+			"description": "Seleciona um ser já existente",
+			"usage": "selecione ser <codigo-do-ser>",
 			"parameters": [
 				{
 					"name": "beingCode",
-					"inputMessage": "Please enter the being code",
+					"inputMessage": "Entre o código do ser",
 					"type": "ANY_NUMBER",
 					"required": false
 				}
@@ -192,14 +192,14 @@
 		},
 		{
 			"commandId": 911,		
-			"verb": "destroy being",
+			"verb": "destruir ser",
 			"category": "SYSTEM",
-			"description": "Destroy an existing being",
-			"usage": "destroy being <beingCode>",
+			"description": "Destrói um ser pré-existente",
+			"usage": "destruir ser <beingCode>",
 			"parameters": [
 				{
 					"name": "beingCode",
-					"inputMessage": "Please enter the being code",
+					"inputMessage": "Entre o código do ser",
 					"type": "ANY_NUMBER",
 					"required": false
 				}
@@ -207,40 +207,40 @@
 		},
 		{
 			"commandId": 912,		
-			"verb": "whoami",
+			"verb": "quem sou eu",
 			"category": "SYSTEM",
-			"description": "Shows information about you",
+			"description": "Mostra informação do jogador",
 			"usage": "whoami",
 			"parameters": null
 		},
 		{
 			"commandId": 913,		
-			"verb": "whereami",
+			"verb": "onde estou",
 			"category": "SYSTEM",
-			"description": "Shows information about the current place",
+			"description": "Mostra informação sobre o local atual do ser",
 			"usage": "whereami",
 			"parameters": null
 		},
 		{
 			"commandId": 914,		
-			"verb": "change locale",
+			"verb": "mudar linguagem",
 			"category": "SYSTEM",
 			"logged": false,			
-			"description": "Change system locale",
-			"usage": "change locale <locale>",
+			"description": "Muda a linguagem do sistema",
+			"usage": "mudar linguagem <nova-linguagem>",
 			"parameters": [
 				{
 					"name": "locale",
-					"inputMessage": "Choose the locale",
+					"inputMessage": "Escolha a linguagem",
 					"type": "ANY_STRING",
 					"required": false,
 					"domainValues": [
-						"en_US",
-						"pt_BR"
+						"en-US",
+						"pt-BR"
 					],
-					"defaultValue": "en_US"
+					"defaultValue": "en-US"
 				}
 			]
-		}				
+		}
 	]
 }

@@ -1,5 +1,6 @@
 package com.jpinfo.mudengine.client.model;
 
+import java.util.Locale;
 import java.util.Optional;
 
 
@@ -19,7 +20,7 @@ public class ClientConnection {
 	
 	private String authToken;
 	
-	private String locale;
+	private Locale locale;
 	
 	private Optional<Being> activeBeing;
 	
@@ -64,7 +65,7 @@ public class ClientConnection {
 	public void setPlayerData(Player playerData) {
 		this.playerData = Optional.ofNullable(playerData);
 		
-		this.locale = playerData.getLocale();
+		this.locale = Locale.forLanguageTag(playerData.getLocale());
 		this.messages = new LocalizedMessages(this.locale);
 	}
 
@@ -163,11 +164,15 @@ public class ClientConnection {
 			this.curPlace = Optional.empty();
 	}
 	
-	public String getLocale() {
+	public Locale getLocale() {
 		return locale;
 	}
+	
+	public void setLocale(String locale) {
+		setLocale(Locale.forLanguageTag(locale));
+	}
 
-	public void setLocale(String newLocale) {
+	public void setLocale(Locale newLocale) {
 		
 		// If it's changing the locale, reload the messages
 		if ((newLocale!=null) && (!newLocale.equals(this.locale))) {

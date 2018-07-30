@@ -63,18 +63,18 @@ public class LocalizedMessages {
 	public static final String COMMAND_WHEREAMI_EXITS="command.whereami.exits";
 	public static final String COMMAND_WHEREAMI_START="command.whereami.start";
 	
-	private static Map<String, ResourceBundle> bundles = new HashMap<>();
+	private static Map<Locale, ResourceBundle> bundles = new HashMap<>();
 
-	private String locale;
-
-	public LocalizedMessages(String strLocale) {
+	private Locale locale;
+	
+	public LocalizedMessages(Locale locale) {
 		
-		this.locale = strLocale;
+		this.locale = locale;
 		
-		bundles.computeIfAbsent(strLocale, d -> {
-			ResourceBundle bundle = ResourceBundle.getBundle("messages",Locale.forLanguageTag(d));
+		bundles.computeIfAbsent(locale, d -> {
+			ResourceBundle bundle = ResourceBundle.getBundle("messages",d);
 			
-			if ((bundle!=null) && (bundle.getLocale().toString().equals(d)))
+			if (bundle!=null)
 				log.info("Bundle for locale {} loaded", d);
 			else
 				log.warn("Bundle for locale {} NOT LOADED!", d);

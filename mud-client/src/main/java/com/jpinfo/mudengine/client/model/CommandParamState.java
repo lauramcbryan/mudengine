@@ -1,8 +1,18 @@
 package com.jpinfo.mudengine.client.model;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import com.jpinfo.mudengine.common.action.CommandParam;
 
 public class CommandParamState {
+	
+	private static final Pattern VALID_EMAIL_ADDRESS_REGEX = 
+		    Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
+
+	private static final Pattern VALID_NUMBER_REGEX = 
+		    Pattern.compile("^[0-9.%+-]$", Pattern.CASE_INSENSITIVE);
+	
 
 	private CommandParam parameter;
 	
@@ -13,6 +23,10 @@ public class CommandParamState {
 	public CommandParamState(CommandParam parameter) {
 		this.parameter = parameter;
 		this.entered = false;
+	}
+	
+	public String getName() {
+		return this.parameter.getName();
 	}
 	
 	public CommandParam getParameter() {
@@ -46,13 +60,15 @@ public class CommandParamState {
 	
 	
 	private boolean checkEmailFormat(String email) {
-		// TODO Check email format
-		return true;
+		
+		Matcher matcher = VALID_EMAIL_ADDRESS_REGEX .matcher(email);
+        return matcher.find();
 	}	
 	
 	private boolean checkNumberFormat(String number) {
-		// TODO Check number format
-		return true;
+		
+		Matcher matcher = VALID_NUMBER_REGEX .matcher(number);
+        return matcher.find();
 	}	
 	
 }
