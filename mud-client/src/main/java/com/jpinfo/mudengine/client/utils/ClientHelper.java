@@ -43,7 +43,10 @@ public class ClientHelper {
 	public static final String BOX_CENTER = " | ";
 	public static final String BOX_RIGHT = " |";
 	public static final String SPACE_FILLER = "                                                                                ";
-		
+
+	private static final byte[] ECHO_OFF_SEQUENCE = {(byte)0xff, (byte)0xfb, (byte)0x01};
+	private static final byte[] ECHO_ON_SEQUENCE =  {(byte)0xff, (byte)0xfc, (byte)0x01};
+	
 	private static Scanner console = new Scanner(System.in);
 	
 	
@@ -141,6 +144,24 @@ public class ClientHelper {
 		// Build the message to send over tcp connection		
 		org.springframework.messaging.Message<String> clientMessage = 
 				MessageBuilder.withPayload(effectiveMessage)
+					// .setHeader("headerName", "headerValue")
+					.build();
+		
+		c.getConnection().send(clientMessage);
+	}
+	
+	public static void disableEcho(ClientConnection e) throws Exception {
+		internalSendBytes(e, ClientHelper.ECHO_OFF_SEQUENCE);
+	}
+	
+	public static void enableEcho(ClientConnection e) throws Exception {
+		internalSendBytes(e, ClientHelper.ECHO_ON_SEQUENCE);
+	}
+	
+	private static void internalSendBytes(ClientConnection c, byte[] buffer) throws Exception {
+		
+		org.springframework.messaging.Message<byte[]> clientMessage = 
+				MessageBuilder.withPayload(buffer)
 					// .setHeader("headerName", "headerValue")
 					.build();
 		

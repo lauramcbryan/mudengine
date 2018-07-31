@@ -82,7 +82,7 @@
 				{
 					"name": "newPassword",
 					"inputMessage": "Please type the new password",
-					"type": "ANY_STRING",
+					"type": "SECURE_STRING",
 					"required": true
 				}
 			]
@@ -97,13 +97,13 @@
 				{
 					"name": "oldPassword",
 					"inputMessage": "Please type the current password",
-					"type": "ANY_STRING",
+					"type": "SECURE_STRING",
 					"required": true
 				},
 				{
 					"name": "newPassword",
 					"inputMessage": "Please type the new password",
-					"type": "ANY_STRING",
+					"type": "SECURE_STRING",
 					"required": true
 				}
 			]
@@ -141,7 +141,7 @@
 				{
 					"name": "password",
 					"inputMessage": "Please enter the password",
-					"type": "ANY_STRING",
+					"type": "SECURE_STRING",
 					"required": true
 				}
 			]

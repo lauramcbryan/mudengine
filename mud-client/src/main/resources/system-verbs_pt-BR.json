@@ -76,13 +76,13 @@
 				{
 					"name": "activationCode",
 					"inputMessage": "Digite o código de ativação recebido",
-					"type": "ANY_STRING",
+					"type": "SECURE_STRING",
 					"required": true
 				},
 				{
 					"name": "newPassword",
 					"inputMessage": "Escolha uma nova senha",
-					"type": "ANY_STRING",
+					"type": "SECURE_STRING",
 					"required": true
 				}
 			]
@@ -97,13 +97,13 @@
 				{
 					"name": "oldPassword",
 					"inputMessage": "Digite a senha antiga",
-					"type": "ANY_STRING",
+					"type": "SECURE_STRING",
 					"required": true
 				},
 				{
 					"name": "newPassword",
 					"inputMessage": "Digite a nova senha",
-					"type": "ANY_STRING",
+					"type": "SECURE_STRING",
 					"required": true
 				}
 			]
@@ -141,7 +141,7 @@
 				{
 					"name": "password",
 					"inputMessage": "Digite a senha",
-					"type": "ANY_STRING",
+					"type": "SECURE_STRING",
 					"required": true
 				}
 			]

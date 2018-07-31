@@ -18,6 +18,7 @@ import com.jpinfo.mudengine.client.model.VerbDictionaries;
 import com.jpinfo.mudengine.client.utils.ClientHelper;
 import com.jpinfo.mudengine.client.utils.LocalizedMessages;
 import com.jpinfo.mudengine.common.action.Command;
+import com.jpinfo.mudengine.common.action.CommandParam.enumParamTypes;
 import com.jpinfo.mudengine.common.being.Being;
 import com.jpinfo.mudengine.common.player.Player;
 
@@ -208,11 +209,18 @@ public class MudClientService {
 			
 			if (nextParam.isPresent()) {
 				
+				CommandParamState param = nextParam.get();
+				
 				// Set the current parameter
-				client.setCurParamState(nextParam.get());
+				client.setCurParamState(param);
 				
 				// Asks for the value
-				ClientHelper.sendRequestMessage(client, nextParam.get().getParameter().getInputMessage());
+				ClientHelper.sendRequestMessage(client, param.getParameter().getInputMessage());
+				
+				// if it's a secure field, turns off the echo
+				if (param.getParameter().getType().equals(enumParamTypes.SECURE_STRING)) {
+					ClientHelper.disableEcho(client);
+				}
 			}
 		} // endif getCurCommand!=null
 		

@@ -8,7 +8,7 @@ import lombok.Data;
 @Data
 public class CommandParam {
 
-	public enum enumParamTypes { ANY_STRING, EMAIL, ANY_NUMBER}
+	public enum enumParamTypes { ANY_STRING, SECURE_STRING, EMAIL, ANY_NUMBER}
 
 	private String name;
 	private String inputMessage;
