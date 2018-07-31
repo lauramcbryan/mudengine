@@ -89,5 +89,9 @@ public class LocalizedMessages {
 			return bundles.get(locale).getString(key);
 		else
 			return key;
-	}	
+	}
+	
+	public Locale getLocale() {
+		return this.locale;
+	}
 }

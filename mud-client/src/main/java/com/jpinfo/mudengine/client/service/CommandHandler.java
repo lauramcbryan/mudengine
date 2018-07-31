@@ -69,12 +69,12 @@ public class CommandHandler {
 		String locale = command.getParamValue("locale");
 		
 
-		ClientHelper.sendMessage(client, LocalizedMessages.COMMAND_REGISTER_START);
+		client.sendMessage(LocalizedMessages.COMMAND_REGISTER_START);
 		
 		// Call register in PlayerService
 		api.registerPlayer(username, email, locale);
 
-		ClientHelper.sendMessage(client, LocalizedMessages.COMMAND_REGISTER_OK);
+		client.sendMessage(LocalizedMessages.COMMAND_REGISTER_OK);
 	}
 	
 	/**
@@ -97,7 +97,7 @@ public class CommandHandler {
 		// Call setPassword in PlayerService
 		api.setPlayerPassword(playerData.getUsername(), oldPassword, newPassword);
 		
-		ClientHelper.sendMessage(client, LocalizedMessages.COMMAND_PASSWORD_OK);
+		client.sendMessage(LocalizedMessages.COMMAND_PASSWORD_OK);
 		
 	}
 	
@@ -110,7 +110,7 @@ public class CommandHandler {
 	 */
 	private void handleActivateCommand(ClientConnection client, CommandState command) throws Exception {
 
-		ClientHelper.sendMessage(client, LocalizedMessages.COMMAND_ACTIVATE_START);
+		client.sendMessage(LocalizedMessages.COMMAND_ACTIVATE_START);
 
 		String username = command.getParamValue("username");
 		String activationCode = command.getParamValue("activationCode");
@@ -119,7 +119,7 @@ public class CommandHandler {
 		// Call activateAccount in PlayerService
 		api.setPlayerPassword(username, activationCode, newPassword);
 		
-		ClientHelper.sendMessage(client, LocalizedMessages.COMMAND_ACTIVATE_OK);
+		client.sendMessage(LocalizedMessages.COMMAND_ACTIVATE_OK);
 	}
 
 	/**
@@ -132,10 +132,10 @@ public class CommandHandler {
 	 */
 	private void handleHelpCommand(ClientConnection client) throws Exception {
 
-		ClientHelper.sendMessage(client, LocalizedMessages.COMMAND_HELP_START);
+		client.sendMessage(LocalizedMessages.COMMAND_HELP_START);
 		
 		verbDictionaries
-			.getDictionary(client.getLocale())
+			.getDictionary(client.getMessages().getLocale())
 				.getCommandList().stream().forEach(d-> {
 			
 			if (!d.isLogged() || client.isLogged()) {
@@ -150,7 +150,7 @@ public class CommandHandler {
 					.append("\r\n");
 				
 				try {
-					ClientHelper.sendMessage(client, msg.toString());
+					client.sendMessage(msg.toString());
 				} catch (Exception e) {
 					
 					// Go to the next one
@@ -181,7 +181,7 @@ public class CommandHandler {
 		// Login information
 		client.setPlayerData(api.getPlayerDetails(authToken, username));
 		
-		ClientHelper.sendMessage(client, client.getLocalizedMessage(LocalizedMessages.COMMAND_LOGIN_OK) + username);
+		client.sendMessage(client.getLocalizedMessage(LocalizedMessages.COMMAND_LOGIN_OK) + username);
 	}
 	
 	/**
@@ -195,7 +195,7 @@ public class CommandHandler {
 
 		client.clearState();
 		
-		ClientHelper.sendMessage(client, LocalizedMessages.COMMAND_LOGOUT_OK);
+		client.sendMessage(LocalizedMessages.COMMAND_LOGOUT_OK);
 		
 	}
 	
@@ -255,7 +255,7 @@ public class CommandHandler {
 				client.setAuthToken(apiResult.getChangedAuthToken());
 				
 				// Shows up the being list again
-				ClientHelper.sendMessage(client, 
+				client.sendMessage(
 						ClientHelper.listAvailableBeings(client, apiResult.getUpdatedPlayerData(), client.getActiveBeingCode())
 					);
 			}
@@ -264,7 +264,7 @@ public class CommandHandler {
 			
 			// The being class is not provided, show the being class list
 			List<BeingClass> beingClassList = api.getBeingClasses(client.getAuthToken());
-			ClientHelper.sendMessage(client,
+			client.sendMessage(
 				ClientHelper.listAvailableBeingClasses(client, beingClassList)
 				);
 		}
@@ -317,17 +317,17 @@ public class CommandHandler {
 			client.setCurPlace(curPlace);
 			
 			// Show being information
-			ClientHelper.sendMessage(client, 
+			client.sendMessage(
 					ClientHelper.returnFormattedBeingData(client, selectedBeing));
 			
 			// Show place information
-			ClientHelper.sendMessage(client, 
+			client.sendMessage(
 					ClientHelper.returnFormattedPlaceData(client, curPlace));
 			
 		} else {
 			
 			// No beingCode provided, show me the available beings
-			ClientHelper.sendMessage(client, 
+			client.sendMessage(
 				ClientHelper.listAvailableBeings(client, playerData, client.getActiveBeingCode())
 			);
 			
@@ -382,7 +382,7 @@ public class CommandHandler {
 		}
 		
 		// Shows the being available list
-		ClientHelper.sendMessage(client,
+		client.sendMessage(
 				ClientHelper.listAvailableBeings(client, playerData, client.getActiveBeingCode())
 			);
 		
@@ -404,7 +404,7 @@ public class CommandHandler {
 		Optional<Being> activeBeing = client.getActiveBeing();
 
 		// Shows up player information
-		ClientHelper.sendMessage(client, 
+		client.sendMessage(
 				ClientHelper.returnFormattedPlayerData(client, playerData, client.getActiveBeingCode()));
 		
 
@@ -412,7 +412,7 @@ public class CommandHandler {
 		if (activeBeing.isPresent()) {
 			
 			// Shows up being information			
-			ClientHelper.sendMessage(client, 
+			client.sendMessage(
 					ClientHelper.returnFormattedBeingData(client, activeBeing.get()));
 		}
 	}
@@ -430,7 +430,7 @@ public class CommandHandler {
 		
 		if (curPlace.isPresent()) {
 			
-			ClientHelper.sendMessage(client, 
+			client.sendMessage(
 					ClientHelper.returnFormattedPlaceData(client, curPlace.get()));
 			
 		} else {
@@ -443,7 +443,7 @@ public class CommandHandler {
 		
 		client.setLocale(command.getParamValue("locale"));
 		
-		ClientHelper.sendMessage(client, LocalizedMessages.COMMAND_LOCALE_OK);
+		client.sendMessage(LocalizedMessages.COMMAND_LOCALE_OK);
 	}
 	
 
@@ -476,7 +476,7 @@ public class CommandHandler {
 					break;
 				
 				case CommandHandler.QUIT_COMMAND: 
-					ClientHelper.sendFile(client,  ClientHelper.GOODBYE_FILE);
+					client.sendFile(ClientHelper.GOODBYE_FILE);
 					connFactory.closeConnection(client.getConnection().getConnectionId());
 					break;
 				case CommandHandler.HELP_COMMAND: 
@@ -521,7 +521,7 @@ public class CommandHandler {
 				
 				
 				default: 
-					ClientHelper.sendMessage(client, LocalizedMessages.COMMAND_NOT_SUPPORTED);
+					client.sendMessage(LocalizedMessages.COMMAND_NOT_SUPPORTED);
 				
 			}
 		} finally {

@@ -90,7 +90,7 @@ public class MudClientService {
 				
 			} catch(ClientException e) {
 				try {
-					ClientHelper.sendMessage(client, e.getMessage());
+					client.sendMessage(e.getMessage());
 				} catch(Exception ex) {
 					log.error("General error sending message", ex);
 				}
@@ -98,7 +98,7 @@ public class MudClientService {
 			} catch(Exception e) {
 				
 				try {			
-					ClientHelper.sendMessage(client, LocalizedMessages.GENERAL_ERROR_MESSAGE);
+					client.sendMessage(LocalizedMessages.GENERAL_ERROR_MESSAGE);
 				} catch(Exception ex) {
 					log.error("General error sending message", ex);					
 				}
@@ -153,7 +153,7 @@ public class MudClientService {
 			// if found the command, assign.
 			// otherwise, respond with error
 			CommandState choosenCommand = verbDictionaries
-					.getDictionary(client.getLocale())
+					.getDictionary(client.getMessages().getLocale())
 						.getCommand(enteredValue);
 			
 			if ((choosenCommand.getCommand().isLogged()) && (!client.isLogged())) {
@@ -183,7 +183,13 @@ public class MudClientService {
 				client.getCurParamState().setEnteredValue(enteredValue);
 				
 				if (!client.getCurParamState().isValid()) {
-					ClientHelper.sendMessage(client, LocalizedMessages.COMMAND_INVALID_PARAMETER);
+					client.sendMessage(LocalizedMessages.COMMAND_INVALID_PARAMETER);
+				} else {
+					
+					// if the value just entered was from a secure field, turns on the echo
+					if (client.getCurParam().getType().equals(enumParamTypes.SECURE_STRING)) {
+						client.enableEcho();
+					} 
 				}
 			} 
 			else {
@@ -215,13 +221,13 @@ public class MudClientService {
 				client.setCurParamState(param);
 				
 				// Asks for the value
-				ClientHelper.sendRequestMessage(client, param.getParameter().getInputMessage());
+				client.sendRequestMessage(param.getParameter().getInputMessage());
 				
 				// if it's a secure field, turns off the echo
 				if (param.getParameter().getType().equals(enumParamTypes.SECURE_STRING)) {
-					ClientHelper.disableEcho(client);
+					client.disableEcho();
 				}
-			}
+			} 
 		} // endif getCurCommand!=null
 		
 	} // end updateClientCommand

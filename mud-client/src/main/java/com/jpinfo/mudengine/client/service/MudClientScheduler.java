@@ -45,14 +45,14 @@ public class MudClientScheduler {
 						for(Message curMessage: messageList) {
 	
 							// Send the message over tcp
-							ClientHelper.sendMessage(t, curMessage);
+							t.sendMessage(curMessage);
 						}
 					} // end if being !=null
 					else { 
 						// Player not logged.  Just check if I already gave greetings.
 						if (t.isNeedGreetings()) {
 	
-							ClientHelper.sendFile(t, ClientHelper.GREETINGS_FILE);
+							t.sendFile(ClientHelper.GREETINGS_FILE);
 							t.setNeedGreetings(false);
 						}
 					}

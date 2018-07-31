@@ -1,30 +1,18 @@
 package com.jpinfo.mudengine.client.utils;
 
-import java.io.BufferedReader;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.Scanner;
-
-
-import org.springframework.messaging.support.MessageBuilder;
 
 import com.jpinfo.mudengine.client.model.ClientConnection;
 import com.jpinfo.mudengine.common.being.Being;
 import com.jpinfo.mudengine.common.being.BeingAttrModifier;
 import com.jpinfo.mudengine.common.being.BeingClass;
 import com.jpinfo.mudengine.common.being.BeingSkillModifier;
-import com.jpinfo.mudengine.common.message.Message;
 import com.jpinfo.mudengine.common.place.Place;
 import com.jpinfo.mudengine.common.place.PlaceExit;
 import com.jpinfo.mudengine.common.player.Player;
-
-import org.springframework.core.io.ClassPathResource;
 
 
 public class ClientHelper {
@@ -44,33 +32,10 @@ public class ClientHelper {
 	public static final String BOX_RIGHT = " |";
 	public static final String SPACE_FILLER = "                                                                                ";
 
-	private static final byte[] ECHO_OFF_SEQUENCE = {(byte)0xff, (byte)0xfb, (byte)0x01};
-	private static final byte[] ECHO_ON_SEQUENCE =  {(byte)0xff, (byte)0xfc, (byte)0x01};
-	
-	private static Scanner console = new Scanner(System.in);
-	
-	
 	private ClientHelper() { }
 	
 	
-	public static int readIntInput() {
-		
-		int result = console.nextInt();
-		
-		if (console.hasNextLine()) {
-			console.nextLine();
-		}
-		
-		
-		return result;
-	}
-	
-	public static String readString() {
-		
-		return console.nextLine();
-	}
-	
-	public static List<String> padMultinelineString(String original, int desiredWidth) {
+	private static List<String> padMultinelineString(String original, int desiredWidth) {
 
 		List<String> resultList = new ArrayList<>();
 
@@ -97,11 +62,11 @@ public class ClientHelper {
 		return resultList;
 	}
 
-	public static String padString(int original, int desiredLength) {
+	private static String padString(int original, int desiredLength) {
 		return ClientHelper.padString(String.valueOf(original), desiredLength);
 	}
 	
-	public static String padString(String original, int desiredLength) {
+	private static String padString(String original, int desiredLength) {
 		
 		StringBuilder result = new StringBuilder(original);
 
@@ -122,102 +87,6 @@ public class ClientHelper {
 		}
 
 		return result.toString();
-	}
-	
-	private static String formatMessage(Message m) {
-		
-		String response = null;
-		
-		if (m.getSenderCode()!=null) {
-			response = String.format("[%s] %s: %s", m.getMessageDate(), m.getSenderName(), m.getContent());
-		} else {
-			response = String.format("[%s]: %s", m.getMessageDate(), m.getContent());
-		}
-		
-		return response;
-	}
-	
-	private static void internalSendMessage(ClientConnection c, String message, boolean includeCRLF) throws Exception {
-		
-		String effectiveMessage = c.getLocalizedMessage(message) + (includeCRLF ? "\r\n" : "");
-		
-		// Build the message to send over tcp connection		
-		org.springframework.messaging.Message<String> clientMessage = 
-				MessageBuilder.withPayload(effectiveMessage)
-					// .setHeader("headerName", "headerValue")
-					.build();
-		
-		c.getConnection().send(clientMessage);
-	}
-	
-	public static void disableEcho(ClientConnection e) throws Exception {
-		internalSendBytes(e, ClientHelper.ECHO_OFF_SEQUENCE);
-	}
-	
-	public static void enableEcho(ClientConnection e) throws Exception {
-		internalSendBytes(e, ClientHelper.ECHO_ON_SEQUENCE);
-	}
-	
-	private static void internalSendBytes(ClientConnection c, byte[] buffer) throws Exception {
-		
-		org.springframework.messaging.Message<byte[]> clientMessage = 
-				MessageBuilder.withPayload(buffer)
-					// .setHeader("headerName", "headerValue")
-					.build();
-		
-		c.getConnection().send(clientMessage);
-	}
-	
-	/**
-	 * Sends a message to the client, appending the \r\n terminator
-	 * 
-	 * @param c
-	 * @param message
-	 * @throws Exception
-	 */
-	public static void sendMessage(ClientConnection c, String message) throws Exception {
-		internalSendMessage(c, message, true);
-	}
-	
-	/**
-	 * Sends a notification message from the game engine to the client
-	 * @param c
-	 * @param m
-	 * @throws Exception
-	 */
-	public static void sendMessage(ClientConnection c, Message m) throws Exception {
-		internalSendMessage(c, ClientHelper.formatMessage(m), true);
-	}
-
-	/**
-	 * Sends a data request message.  Doesn't append the \r\n terminator.
-	 * @param c
-	 * @param message
-	 * @throws Exception
-	 */
-	public static void sendRequestMessage(ClientConnection c, String message) throws Exception {
-		internalSendMessage(c, message, false);
-	}
-
-	/**
-	 * Sends a text file to the client.
-	 * @param c
-	 * @param filename
-	 * @throws Exception
-	 */
-	public static void sendFile(ClientConnection c, String filename) throws Exception {
-		
-		File f = new ClassPathResource(filename).getFile();
-		
-		BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(f)));
-		
-		try {
-			while (reader.ready()) {
-				sendMessage(c, reader.readLine());
-			}
-		} finally {
-			reader.close();
-		}
 	}
 	
 	/**
