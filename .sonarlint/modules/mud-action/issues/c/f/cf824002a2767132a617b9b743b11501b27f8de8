@@ -1,14 +1,0 @@
-
-e
-squid:S106;"9Replace this use of System.out or System.err by a logger.(—ï¤ĞH ~RMAJORZ
-CODE_SMELL
-[squid:S1199¡"-Extract this nested code block into a method.(ÏèÂ™H¡~RMINORZ
-CODE_SMELL
-`squid:S1199±"-Extract this nested code block into a method.(“º‡ÖÿÿÿÿÿHŸ~RMINORZ
-CODE_SMELL
-Zsquid:S1199¹"-Extract this nested code block into a method.(åäÏ:H~RMINORZ
-CODE_SMELL
-`squid:S1199©"-Extract this nested code block into a method.(€ç¤ıÿÿÿÿH~RMINORZ
-CODE_SMELL
-lsquid:S2696ˆ"6Make the enclosing method "static" or remove this set.(ÕÏ£ßúÿÿÿÿHœ~RCRITICALZ
-CODE_SMELL

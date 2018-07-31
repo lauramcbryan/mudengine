@@ -1,4 +1,0 @@
-
- "squid:ClassVariableVisibilityCheck"XMake plainMessage a static final constant or non-public and provide accessors if needed.( ¹Ã°HÖ€RMINORZVULNERABILITY
-˜"squid:ClassVariableVisibilityCheck"PMake args a static final constant or non-public and provide accessors if needed.(µ‘ ËH×€RMINORZVULNERABILITY
-ž"squid:ClassVariableVisibilityCheck"VMake messageKey a static final constant or non-public and provide accessors if needed.(õäÀŽHØ€RMINORZVULNERABILITY

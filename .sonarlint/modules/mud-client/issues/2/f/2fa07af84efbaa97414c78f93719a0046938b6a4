@@ -1,21 +1,0 @@
-
-ˆsquid:S2293#"YReplace the type specification in this constructor call with the diamond operator ("<>").(Ýö¦ÑüÿÿÿÿRMINORZ
-CODE_SMELL
-g
-squid:S106?"9Replace this use of System.out or System.err by a logger.(¡ËçÄúÿÿÿÿRMAJORZ
-CODE_SMELL
-b
-squid:S106C"9Replace this use of System.out or System.err by a logger.(ùàèüRMAJORZ
-CODE_SMELL
-g
-squid:S106H"9Replace this use of System.out or System.err by a logger.(ü¹’•øÿÿÿÿRMAJORZ
-CODE_SMELL
-b
-squid:S106R"9Replace this use of System.out or System.err by a logger.(ùàèüRMAJORZ
-CODE_SMELL
-b
-squid:S106V"9Replace this use of System.out or System.err by a logger.(ëõÏ†RMAJORZ
-CODE_SMELL
-dsquid:S1141J"5Extract this nested try block into a separate method.(¡»¢üùÿÿÿÿRMAJORZ
-CODE_SMELL
-Usquid:S1148_"#Use a logger to log this exception.(€ÉÔ…ýÿÿÿÿRMINORZVULNERABILITY

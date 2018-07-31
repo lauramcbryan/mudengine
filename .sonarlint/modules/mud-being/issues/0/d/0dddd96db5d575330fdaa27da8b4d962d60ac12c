@@ -1,10 +1,0 @@
-
-squid:S11929"WDefine a constant instead of duplicating this literal "Being entity not found" 3 times.(•ÔÅúıÿÿÿÿHù€RCRITICALZ
-CODE_SMELL
-fsquid:S3655À"7Call "Optional#isPresent()" before accessing the value.(ÿŸ·8ºÇÕËË,H‚RMAJORZBUG
-bsquid:S1172‹"3Remove this unused method parameter "fullResponse".(ï„¢›Hö€RMAJORZ
-CODE_SMELL
-Œsquid:S1192["VDefine a constant instead of duplicating this literal "Being Class not found" 3 times.(ÿ–Ñ•øÿÿÿÿHú€RCRITICALZ
-CODE_SMELL
-squid:S1192m"XDefine a constant instead of duplicating this literal "No access to that being" 3 times.(Ÿğü°ûÿÿÿÿH÷€RCRITICALZ
-CODE_SMELL

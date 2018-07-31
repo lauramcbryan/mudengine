@@ -1,12 +1,0 @@
-
-µ%squid:RedundantThrowsDeclarationCheck"lRemove the declaration of thrown exception 'java.lang.Exception', as it cannot be thrown from method's body.(û…ã÷þÿÿÿÿRMINORZ
-CODE_SMELL
-^squid:S10663"/Merge this if statement with the enclosing one.(ý„†ÒüÿÿÿÿRMAJORZ
-CODE_SMELL
-g
-squid:S106;"9Replace this use of System.out or System.err by a logger.(»ðÉ³þÿÿÿÿRMAJORZ
-CODE_SMELL
-„squid:S3776"RRefactor this method to reduce its Cognitive Complexity from 16 to the 15 allowed.(û…ã÷þÿÿÿÿRCRITICALZ
-CODE_SMELL
-^squid:S1611"/Remove the parentheses around the "t" parameter(‚ì¢ÂùÿÿÿÿRMINORZ
-CODE_SMELL
