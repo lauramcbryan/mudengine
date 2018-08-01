@@ -29,6 +29,6 @@ public class PlaceClass {
 	private Integer buildEffort;
 	
 	public PlaceClass() {
-		this.attrs = new HashMap<String, Integer>();
+		this.attrs = new HashMap<>();
 	}	
 }

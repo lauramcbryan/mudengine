@@ -22,7 +22,7 @@ public class Command {
 	private List<CommandParam> parameters;
 	
 	public Command() {
-		this.parameters = new ArrayList<CommandParam>();
+		this.parameters = new ArrayList<>();
 		this.logged = true;
 	}
 }

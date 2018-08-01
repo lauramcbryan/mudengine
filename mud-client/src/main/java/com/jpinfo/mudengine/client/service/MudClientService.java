@@ -13,7 +13,6 @@ import com.jpinfo.mudengine.client.MudClientGateway;
 import com.jpinfo.mudengine.client.exception.ClientException;
 import com.jpinfo.mudengine.client.model.ClientConnection;
 import com.jpinfo.mudengine.client.model.CommandParamState;
-import com.jpinfo.mudengine.client.model.CommandState;
 import com.jpinfo.mudengine.client.model.VerbDictionaries;
 import com.jpinfo.mudengine.client.utils.ClientHelper;
 import com.jpinfo.mudengine.client.utils.LocalizedMessages;
@@ -152,19 +151,19 @@ public class MudClientService {
 			
 			// if found the command, assign.
 			// otherwise, respond with error
-			CommandState choosenCommand = verbDictionaries
+			Command choosenCommand = verbDictionaries
 					.getDictionary(client.getMessages().getLocale())
 						.getCommand(enteredValue);
 			
-			if ((choosenCommand.getCommand().isLogged()) && (!client.isLogged())) {
+			if ((choosenCommand.isLogged()) && (!client.isLogged())) {
 				throw new ClientException(LocalizedMessages.COMMAND_ONLY_LOGGED);
 			}
 			
 			// Set the current command
-			client.setCurCommandState(choosenCommand);
+			client.setCurCommandState(handler.initializeCommand(client, choosenCommand));
 			
 			String remainingCommand = enteredValue
-					.substring(choosenCommand.getCommand().getVerb().length(), enteredValue.length())
+					.substring(choosenCommand.getVerb().length(), enteredValue.length())
 					.trim();
 			
 			updateClientCommand(client, remainingCommand);
@@ -221,7 +220,7 @@ public class MudClientService {
 				client.setCurParamState(param);
 				
 				// Asks for the value
-				client.sendRequestMessage(param.getParameter().getInputMessage());
+				client.sendRequestMessage(param.getInputMessage());
 				
 				// if it's a secure field, turns off the echo
 				if (param.getParameter().getType().equals(enumParamTypes.SECURE_STRING)) {

@@ -114,11 +114,7 @@ public class ClientConnection {
 	}
 
 	public void setCurPlace(Place curPlace) {
-		
-		if (curPlace!=null)
-			this.curPlace = Optional.of(curPlace);
-		else
-			this.curPlace = Optional.empty();
+		this.curPlace = Optional.ofNullable(curPlace);
 	}
 	
 	public void setLocale(String locale) {
@@ -141,7 +137,7 @@ public class ClientConnection {
 
 		clearBeingInformation();
 		
-		this.authToken = null;
+		this.setAuthToken(null);
 		this.playerData = Optional.empty();
 	}
 	
@@ -191,7 +187,6 @@ public class ClientConnection {
 		
 		org.springframework.messaging.Message<byte[]> clientMessage = 
 				MessageBuilder.withPayload(buffer)
-					// .setHeader("headerName", "headerValue")
 					.build();
 		
 		this.connection.send(clientMessage);

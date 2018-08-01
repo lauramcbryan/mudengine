@@ -49,4 +49,10 @@ public interface MudengineApi {
 	
 	List<Command> getGameCommandList(String locale) throws ClientException;
 	
+	List<Being> getBeingsFromPlace(String authToken, String worldName, Integer placeCode) throws ClientException;
+	
+	List<Item> getItemsFromPlace(String authToken, String worldName, Integer placeCode) throws ClientException;
+	
+	List<Item> getItemsFromBeing(String authToken, Long beingCode) throws ClientException;
+	
 }

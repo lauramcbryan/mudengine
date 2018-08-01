@@ -40,9 +40,9 @@ public class Being implements Serializable {
 	
 	private Map<String, Integer> skills;
 	
-	private List<BeingAttrModifier> attrModifiers;
+	private transient List<BeingAttrModifier> attrModifiers;
 	
-	private List<BeingSkillModifier> skillModifiers;
+	private transient List<BeingSkillModifier> skillModifiers;
 	
 	private String name;
 	
@@ -58,10 +58,7 @@ public class Being implements Serializable {
 	
 
 	public Being() {
-		this.attrs = new HashMap<String, Integer>();
-		this.skills = new HashMap<String, Integer>();
-		
-		//this.attrModifiers = new ArrayList<BeingAttrModifier>();
-		//this.skillModifiers = new ArrayList<BeingSkillModifier>();
+		this.attrs = new HashMap<>();
+		this.skills = new HashMap<>();
 	}
 }

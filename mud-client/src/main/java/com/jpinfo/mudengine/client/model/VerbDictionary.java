@@ -18,15 +18,13 @@ public class VerbDictionary {
 		this.commandList = dictionary;
 	}
 	
-	public CommandState getCommand(String enteredValue) throws ClientException {
+	public Command getCommand(String enteredValue) throws ClientException {
 		
-		Command choosenCommand = 
+		return 
 			commandList.stream()
 				.filter(d-> enteredValue.startsWith(d.getVerb()))
 				.findFirst()
 				.orElseThrow(() -> new ClientException(LocalizedMessages.COMMAND_UNKNOWN));
-		
-		return new CommandState(choosenCommand);
 	}
 	 
 }

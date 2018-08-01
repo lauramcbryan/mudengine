@@ -1,10 +1,13 @@
 package com.jpinfo.mudengine.client.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.integration.ip.tcp.connection.TcpNetServerConnectionFactory;
 import org.springframework.stereotype.Component;
@@ -13,14 +16,19 @@ import com.jpinfo.mudengine.client.api.ApiResult;
 import com.jpinfo.mudengine.client.api.MudengineApi;
 import com.jpinfo.mudengine.client.exception.ClientException;
 import com.jpinfo.mudengine.client.model.ClientConnection;
+import com.jpinfo.mudengine.client.model.CommandParamState;
 import com.jpinfo.mudengine.client.model.CommandState;
 import com.jpinfo.mudengine.client.model.VerbDictionaries;
 import com.jpinfo.mudengine.client.utils.ClientHelper;
 import com.jpinfo.mudengine.client.utils.LocalizedMessages;
+import com.jpinfo.mudengine.common.action.Command;
+import com.jpinfo.mudengine.common.action.CommandParam;
 import com.jpinfo.mudengine.common.being.Being;
 import com.jpinfo.mudengine.common.being.BeingClass;
+import com.jpinfo.mudengine.common.item.Item;
 import com.jpinfo.mudengine.common.place.Place;
 import com.jpinfo.mudengine.common.player.Player;
+import com.jpinfo.mudengine.common.player.PlayerBeing;
 
 @Component
 public class CommandHandler {
@@ -40,6 +48,8 @@ public class CommandHandler {
 	public static final int WHOAMI_COMMAND = 912;
 	public static final int WHEREAMI_COMMAND = 913;
 	public static final int LOCALE_COMMAND = 914;
+	
+	private static final Logger log = LoggerFactory.getLogger(CommandHandler.class);
 	
 
 	@Autowired
@@ -240,35 +250,22 @@ public class CommandHandler {
 		Integer placeCode = 1;
 
 		// If the being class is provided, create the being and set in player session
-		if (beingClass!=null) {
-			
-			Optional<Player> playerData = client.getPlayerData();
-			
-			if (playerData.isPresent()) {
-			
-				ApiResult apiResult = 
-						api.createBeing(client.getAuthToken(), playerData.get().getUsername(), 
-								beingClass, beingName, worldName, placeCode);
-	
-				// Update the player info
-				client.setPlayerData(apiResult.getUpdatedPlayerData());
-				client.setAuthToken(apiResult.getChangedAuthToken());
-				
-				// Shows up the being list again
-				client.sendMessage(
-						ClientHelper.listAvailableBeings(client, apiResult.getUpdatedPlayerData(), client.getActiveBeingCode())
-					);
-			}
-			
-		} else {
-			
-			// The being class is not provided, show the being class list
-			List<BeingClass> beingClassList = api.getBeingClasses(client.getAuthToken());
-			client.sendMessage(
-				ClientHelper.listAvailableBeingClasses(client, beingClassList)
-				);
-		}
+		Optional<Player> playerData = client.getPlayerData();
 		
+		if (playerData.isPresent()) {
+		
+			ApiResult apiResult = 
+					api.createBeing(client.getAuthToken(), playerData.get().getUsername(), 
+							beingClass, beingName, worldName, placeCode);
+
+			// Update the player info
+			client.setPlayerData(apiResult.getUpdatedPlayerData());
+			client.setAuthToken(apiResult.getChangedAuthToken());
+			
+			// Shows up the being list again
+			client.sendMessage(
+					ClientHelper.returnFormattedPlayerData(client, apiResult.getUpdatedPlayerData(), client.getActiveBeingCode()));
+		}
 	}
 	
 	/**
@@ -287,8 +284,6 @@ public class CommandHandler {
 
 		Long beingCode =command.getParamValue("beingCode", Long.class);
 		
-		// if the user provided a beingId, assume it.
-		// If not, show the being list for that player
 		if (beingCode!=null) {
 
 			// Check if the beingCode is one of the available for this player
@@ -323,13 +318,6 @@ public class CommandHandler {
 			// Show place information
 			client.sendMessage(
 					ClientHelper.returnFormattedPlaceData(client, curPlace));
-			
-		} else {
-			
-			// No beingCode provided, show me the available beings
-			client.sendMessage(
-				ClientHelper.listAvailableBeings(client, playerData, client.getActiveBeingCode())
-			);
 			
 		}
 	}
@@ -383,8 +371,8 @@ public class CommandHandler {
 		
 		// Shows the being available list
 		client.sendMessage(
-				ClientHelper.listAvailableBeings(client, playerData, client.getActiveBeingCode())
-			);
+				ClientHelper.returnFormattedPlayerData(client, playerData, client.getActiveBeingCode())
+				);
 		
 	}
 	
@@ -446,6 +434,170 @@ public class CommandHandler {
 		client.sendMessage(LocalizedMessages.COMMAND_LOCALE_OK);
 	}
 	
+	private CommandParamState initializeBeingParameter(ClientConnection client, CommandParam paramTemplate) {
+		
+		CommandParamState newParam = new CommandParamState(paramTemplate);
+
+		// Populate with all being in this place
+		client.getCurPlace().ifPresent(e -> {
+			
+			try {
+				newParam.setDynamicDomainValues(
+						api.getBeingsFromPlace(client.getAuthToken(), "aforgotten", e.getPlaceCode()).stream()
+						.collect(Collectors.toMap(
+								Being::getName, Being::getBeingCode))
+						);
+				
+			} catch(ClientException f) {
+				log.error("Error while initializing commandState", f);
+			}
+		});
+		
+		
+		return newParam;
+	}
+	
+	private CommandParamState initializeBeingClassesParameter(ClientConnection client, CommandParam paramTemplate) throws ClientException {
+
+		CommandParamState newParam = new CommandParamState(paramTemplate);
+		
+		// The being class is not provided, show the being class list
+		List<BeingClass> beingClassList = api.getBeingClasses(client.getAuthToken());
+		
+		newParam.setDynamicDomainValues(
+				beingClassList.stream()
+					.collect(Collectors.toMap(
+							BeingClass::getName, BeingClass::getBeingClassCode)
+							)
+				);
+		
+		return newParam;
+	}
+	
+	private CommandParamState initializeDirectionParameter(ClientConnection client, CommandParam paramTemplate) {
+
+		CommandParamState newParam = new CommandParamState(paramTemplate);
+		
+		client.getCurPlace().ifPresent(e ->
+		newParam.setDynamicDomainValues(
+				e.getExits().keySet().stream()
+				.collect(Collectors.toMap(
+						String::toString, String::toString))
+				)
+		);
+		
+		
+		return newParam;
+
+	}
+	
+	private CommandParamState initializeItemParameter(ClientConnection client, CommandParam paramTemplate) {
+
+		CommandParamState newParam = new CommandParamState(paramTemplate);
+		
+		// Populate with all being in this place
+		client.getCurPlace().ifPresent(e -> {
+			
+			try {
+				
+				List<Item> itemList = new ArrayList<>();
+				
+				itemList.addAll(api.getItemsFromPlace(client.getAuthToken(), "aforgotten", e.getPlaceCode()));
+				itemList.addAll(api.getItemsFromBeing(client.getAuthToken(), client.getActiveBeingCode().get()));
+				
+				newParam.setDynamicDomainValues(
+						itemList.stream()
+						.collect(Collectors.toMap(
+								Item::getItemClassCode, Item::getItemCode))
+						);
+				
+			} catch(ClientException f) {
+				log.error("Error while initializing commandState", f);
+			}
+		});
+		
+		return newParam;
+		
+	}
+	
+	private CommandParamState initializePlayerBeingsParameter(ClientConnection client, CommandParam paramTemplate) {
+		
+		CommandParamState newParam = new CommandParamState(paramTemplate);
+		
+		// If there's an active player
+		client.getPlayerData().ifPresent(e ->
+		
+			// Populate the domainValues for the current parameter
+			// with the list of beings available for that player
+			newParam.setDynamicDomainValues(
+					
+				// Converting the player being list to Map<String, Object>
+				// With that the user will be able to type the beingName
+				// and the code will be associated
+				e.getBeingList().stream()
+					.collect(Collectors.toMap(
+							PlayerBeing::getBeingName, 
+							PlayerBeing::getBeingCode)
+							)
+					)
+			);
+
+		
+		
+		return newParam;
+		
+	}
+	
+	
+	public CommandState initializeCommand(ClientConnection client, Command command) {
+		
+		// Creates the CommandParamState list from all the static params provided
+		List<CommandParamState> paramList = new ArrayList<>();
+		
+		if (command.getParameters()!=null)
+			paramList =
+				command.getParameters().stream()
+					.map(d -> {
+						
+						CommandParamState newParam;
+						
+						try {
+						
+							switch(d.getType()) {
+							case BEING:
+								newParam = initializeBeingParameter(client, d);
+								break;
+							case BEING_CLASSES:
+								newParam = initializeBeingClassesParameter(client, d);
+								break;
+							case DIRECTION:
+								newParam = initializeDirectionParameter(client, d);
+								
+								break;
+							case ITEM:
+								newParam = initializeItemParameter(client, d);
+								
+								break;
+							case PLAYER_BEINGS:
+								newParam = initializePlayerBeingsParameter(client, d);
+								break;
+								
+							default:
+								newParam = new CommandParamState(d);
+								break;
+							}
+						} catch(ClientException e) {
+							log.error("Error initializing a CommandState", e);
+							newParam = new CommandParamState(d);
+						}
+						
+						
+						return newParam;
+					})
+				.collect(Collectors.toList());
+		
+		return new CommandState(command, paramList);
+	}
 
 	/**
 	 * Main method for handling all SYSTEM commands.

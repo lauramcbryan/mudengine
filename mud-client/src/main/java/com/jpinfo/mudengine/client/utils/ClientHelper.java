@@ -8,7 +8,6 @@ import java.util.Optional;
 import com.jpinfo.mudengine.client.model.ClientConnection;
 import com.jpinfo.mudengine.common.being.Being;
 import com.jpinfo.mudengine.common.being.BeingAttrModifier;
-import com.jpinfo.mudengine.common.being.BeingClass;
 import com.jpinfo.mudengine.common.being.BeingSkillModifier;
 import com.jpinfo.mudengine.common.place.Place;
 import com.jpinfo.mudengine.common.place.PlaceExit;
@@ -87,77 +86,6 @@ public class ClientHelper {
 		}
 
 		return result.toString();
-	}
-	
-	/**
-	 * List available beings for that player.
-	 * 
-	 * @param client
-	 * @throws Exception
-	 */
-	public static String listAvailableBeings(ClientConnection c, Player playerData, Optional<Long> selectedBeing) {
-		
-		StringBuilder m = new StringBuilder(); 
-		
-		m
-			.append(c.getLocalizedMessage(LocalizedMessages.COMMAND_SELECT_AVAILABLE))
-		.append(ClientHelper.CRLF);
-		
-		playerData.getBeingList().stream()
-			.forEach(d -> 
-				
-				m
-					.append(ClientHelper.CRLF)
-					.append("\t")
-					.append(d.getBeingCode())
-					.append(" - ")
-					.append(d.getBeingName())
-					.append(" (")
-					.append(d.getBeingClass())
-					.append(") ")
-					.append((selectedBeing.isPresent() && d.getBeingCode().equals(selectedBeing.get()) ? 
-							c.getLocalizedMessage(LocalizedMessages.COMMAND_SELECT_ACTIVE):""))
-				);
-		
-		if (playerData.getBeingList().isEmpty()) {
-			m.append("\r\n--- "+ c.getLocalizedMessage(LocalizedMessages.NONE_MESSAGE) +" \r\n");
-		}
-		
-		return m.toString();
-	}
-	
-	/**
-	 * List available being classes.
-	 * 
-	 * @param client
-	 * @param beingClassList
-	 * @throws Exception
-	 */
-	public static String listAvailableBeingClasses(ClientConnection client, List<BeingClass> beingClassList) {
-		
-		StringBuilder m = new StringBuilder();
-		
-		m
-			.append(client.getLocalizedMessage(LocalizedMessages.COMMAND_CREATE_AVAILABLE))
-			.append(ClientHelper.CRLF);
-		
-		beingClassList.forEach(d -> 
-			
-			m.append(ClientHelper.CRLF)
-				.append(d.getBeingClassCode())
-				.append(" - ")
-				.append(d.getName())
-				.append(ClientHelper.CRLF)
-				.append(d.getDescription())
-				.append(ClientHelper.CRLF)
-		);
-		
-		if (beingClassList.isEmpty()) {
-			m.append("--- "+ client.getLocalizedMessage(LocalizedMessages.NONE_MESSAGE));
-		}
-		
-		return m.toString();
-
 	}
 	
 	/**

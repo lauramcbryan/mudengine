@@ -27,7 +27,7 @@ public class ActionClass {
 	
 	public ActionClass() {
 		
-		this.prereqList = new TreeSet<ActionClassPrereq>();
-		this.effectList = new TreeSet<ActionClassEffect>();
+		this.prereqList = new TreeSet<>();
+		this.effectList = new TreeSet<>();
 	}
 }

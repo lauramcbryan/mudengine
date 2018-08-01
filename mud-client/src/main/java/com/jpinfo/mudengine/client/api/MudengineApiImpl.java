@@ -448,5 +448,82 @@ public class MudengineApiImpl implements MudengineApi {
 
 		return returnList;
 	}
+
+	@Override
+	public List<Being> getBeingsFromPlace(String authToken, String worldName, Integer placeCode) throws ClientException {
+
+		List<Being> returnList = new ArrayList<>();
+		
+		try {
+			
+			Map<String, Object> urlVariables = new HashMap<>();
+			
+			urlVariables.put("worldName", worldName);
+			urlVariables.put("placeCode", placeCode);
+			
+			ResponseEntity<Being[]> response = restTemplate.exchange(
+					apiEndpoint + "/being/place/{worldName}/{placeCode}", 
+					HttpMethod.GET, getEmptyHttpEntity(authToken), 
+					Being[].class, urlVariables);
+			
+			returnList = Arrays.asList(response.getBody());
+
+		} catch(RestClientResponseException e) {
+			handleError(e);
+		}
+		
+		return returnList;
+	}
+
+	@Override
+	public List<Item> getItemsFromPlace(String authToken, String worldName, Integer placeCode) throws ClientException {
+		
+		List<Item> returnList = new ArrayList<>();
+		
+		try {
+			
+			Map<String, Object> urlVariables = new HashMap<>();
+			
+			urlVariables.put("worldName", worldName);
+			urlVariables.put("placeCode", placeCode);
+			
+			ResponseEntity<Item[]> response = restTemplate.exchange(
+					apiEndpoint + "/item/place/{worldName}/{placeCode}", 
+					HttpMethod.GET, getEmptyHttpEntity(authToken), 
+					Item[].class, urlVariables);
+			
+			returnList = Arrays.asList(response.getBody());
+
+		} catch(RestClientResponseException e) {
+			handleError(e);
+		}
+		
+		return returnList;
+	}
+
+	@Override
+	public List<Item> getItemsFromBeing(String authToken, Long beingCode) throws ClientException {
+
+		List<Item> returnList = new ArrayList<>();
+		
+		try {
+			
+			Map<String, Object> urlVariables = new HashMap<>();
+			
+			urlVariables.put("owner", beingCode);
+			
+			ResponseEntity<Item[]> response = restTemplate.exchange(
+					apiEndpoint + "/item/being/{owner}", 
+					HttpMethod.GET, getEmptyHttpEntity(authToken), 
+					Item[].class, urlVariables);
+			
+			returnList = Arrays.asList(response.getBody());
+
+		} catch(RestClientResponseException e) {
+			handleError(e);
+		}
+		
+		return returnList;
+	}
 	
 }

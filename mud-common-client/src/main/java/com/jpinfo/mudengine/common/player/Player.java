@@ -33,10 +33,10 @@ public class Player implements java.io.Serializable {
 	
 	private String strStatus;
 	
-	private List<PlayerBeing> beingList;
+	private transient List<PlayerBeing> beingList;
 
 	public Player() {
-		this.beingList = new ArrayList<PlayerBeing>();
+		this.beingList = new ArrayList<>();
 	}
 	
 	public Player(Map<String, Object> map) {

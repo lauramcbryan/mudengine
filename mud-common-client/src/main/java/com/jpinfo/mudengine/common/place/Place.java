@@ -20,7 +20,7 @@ public class Place {
 	private Map<String, Integer> attrs;
 	
 	public Place() {
-		this.attrs = new HashMap<String, Integer>();
-		this.exits = new HashMap<String, PlaceExit>();
+		this.attrs = new HashMap<>();
+		this.exits = new HashMap<>();
 	}
 }

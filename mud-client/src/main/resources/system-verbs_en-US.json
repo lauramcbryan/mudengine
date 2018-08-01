@@ -25,7 +25,7 @@
 					"inputMessage": "Please choose a locale",
 					"type": "ANY_STRING",
 					"required": false,
-					"domainValues": [
+					"staticDomainValues": [
 						"en-US",
 						"pt-BR"
 					],
@@ -51,7 +51,7 @@
 					"inputMessage": "Please choose a locale",
 					"type": "ANY_STRING",
 					"required": false,
-					"domainValues": [
+					"staticDomainValues": [
 						"en-US",
 						"pt-BR"
 					],
@@ -151,8 +151,7 @@
 			"verb": "logout",
 			"category": "SYSTEM",
 			"description": "Finishes a session",
-			"usage": "logout",
-			"parameters": null
+			"usage": "logout"
 		},		
 		{
 			"commandId": 909,		
@@ -164,7 +163,7 @@
 				{
 					"name": "beingClass",
 					"inputMessage": "Please enter the being class",
-					"type": "ANY_STRING",
+					"type": "BEING_CLASSES",
 					"required": false
 				},
 				{
@@ -185,7 +184,7 @@
 				{
 					"name": "beingCode",
 					"inputMessage": "Please enter the being code",
-					"type": "ANY_NUMBER",
+					"type": "PLAYER_BEINGS",
 					"required": false
 				}
 			]
@@ -200,7 +199,7 @@
 				{
 					"name": "beingCode",
 					"inputMessage": "Please enter the being code",
-					"type": "ANY_NUMBER",
+					"type": "PLAYER_BEINGS",
 					"required": false
 				}
 			]
@@ -210,16 +209,14 @@
 			"verb": "whoami",
 			"category": "SYSTEM",
 			"description": "Shows information about you",
-			"usage": "whoami",
-			"parameters": null
+			"usage": "whoami"
 		},
 		{
 			"commandId": 913,		
 			"verb": "whereami",
 			"category": "SYSTEM",
 			"description": "Shows information about the current place",
-			"usage": "whereami",
-			"parameters": null
+			"usage": "whereami"
 		},
 		{
 			"commandId": 914,		
@@ -234,7 +231,7 @@
 					"inputMessage": "Choose the locale",
 					"type": "ANY_STRING",
 					"required": false,
-					"domainValues": [
+					"staticDomainValues": [
 						"en-US",
 						"pt-BR"
 					],

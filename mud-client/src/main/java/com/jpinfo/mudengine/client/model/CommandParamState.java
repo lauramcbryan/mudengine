@@ -1,9 +1,14 @@
 package com.jpinfo.mudengine.client.model;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.jpinfo.mudengine.common.action.CommandParam;
+
+import lombok.Getter;
+import lombok.Setter;
 
 public class CommandParamState {
 	
@@ -14,11 +19,16 @@ public class CommandParamState {
 		    Pattern.compile("^[0-9.%+-]$", Pattern.CASE_INSENSITIVE);
 	
 
+	@Getter
 	private CommandParam parameter;
 	
-	private String enteredValue;
+	@Getter
+	private Object enteredValue;
 	
 	private boolean entered;
+	
+	@Setter
+	private Map<String, Object> dynamicDomainValues;
 	
 	public CommandParamState(CommandParam parameter) {
 		this.parameter = parameter;
@@ -29,32 +39,48 @@ public class CommandParamState {
 		return this.parameter.getName();
 	}
 	
-	public CommandParam getParameter() {
-		return this.parameter;
-	}
-
-	public String getEnteredValue() {
-		return enteredValue;
+	public Map<String, Object> getDomainValues() {
+		
+		Map<String, Object> total = new HashMap<>();
+		
+		if (parameter.getStaticDomainValues()!=null)
+			total.putAll(parameter.getStaticDomainValues());
+		
+		if (this.dynamicDomainValues!=null)
+			total.putAll(this.dynamicDomainValues);
+		
+		return total;
+		
 	}
 
 	public void setEnteredValue(String enteredValue) {
-		this.enteredValue = enteredValue;
+		
+		if ((enteredValue!=null) && (!enteredValue.isEmpty())) {
+
+			if (this.getDomainValues().containsKey(enteredValue)) {
+				this.enteredValue = this.getDomainValues().get(enteredValue);
+			} else {
+					this.enteredValue = enteredValue;
+			}			
+		}
+		
+		
 		this.entered = true;
 	}
 	
 	public String getEffectiveValue() {
-		return (enteredValue!=null && !enteredValue.isEmpty() ? enteredValue: parameter.getDefaultValue());
+		return (enteredValue!=null ? enteredValue.toString(): parameter.getDefaultValue());
 	}
 
 	public boolean isValid() {
 		
-		String sample = getEffectiveValue();
+		Object sample = (enteredValue!=null ? enteredValue: parameter.getDefaultValue());
 		
 		return entered &&
 				(sample!=null || !parameter.isRequired()) &&
-				(parameter.getDomainValues().isEmpty() || parameter.getDomainValues().contains(sample)) &&
-				(parameter.getType() != CommandParam.enumParamTypes.ANY_NUMBER || checkNumberFormat(sample)) &&
-				(parameter.getType() != CommandParam.enumParamTypes.EMAIL || checkEmailFormat(sample))
+				(this.getDomainValues().isEmpty() || this.getDomainValues().containsValue(sample)) &&
+				(parameter.getType() != CommandParam.enumParamTypes.ANY_NUMBER || checkNumberFormat(sample.toString())) &&
+				(parameter.getType() != CommandParam.enumParamTypes.EMAIL || checkEmailFormat(sample.toString()))
 				;
 	}
 	
@@ -69,6 +95,37 @@ public class CommandParamState {
 		
 		Matcher matcher = VALID_NUMBER_REGEX .matcher(number);
         return matcher.find();
-	}	
+	}
+	
+	public String getInputMessage() {
+		
+		StringBuilder msg = new StringBuilder();
+		
+		msg.append(parameter.getInputMessage());
+		
+		if (!this.getDomainValues().isEmpty()) {
+			
+			boolean first = true;
+			msg.append(" [");
+			for(String curDomainValue: this.getDomainValues().keySet()) {
+				
+				if (!first) msg.append(", ");
+				
+				msg.append(curDomainValue);
+				
+				first = false;
+			}
+			msg.append("]");
+		}
+		
+		if (parameter.getDefaultValue()!=null) {
+			msg.append(" <ENTER = ").append(parameter.getDefaultValue()).append(">");
+		}
+		
+		msg.append(": ");
+		
+		return msg.toString();
+
+	}
 	
 }

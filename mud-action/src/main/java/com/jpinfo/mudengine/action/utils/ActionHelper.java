@@ -100,11 +100,9 @@ public class ActionHelper {
 			
 			if (d.getDomainValues()!=null) {
 				
-				String[] arrDomainValues = d.getDomainValues().split(", ");
-				
-				newParam.setDomainValues(
-						Arrays.asList(arrDomainValues)
-					);
+				newParam.setStaticDomainValues(
+						Arrays.asList(d.getDomainValues().split(", "))
+						);
 			}
 			
 			newParam.setInputMessage(d.getInputMessage());

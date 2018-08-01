@@ -2,55 +2,38 @@ package com.jpinfo.mudengine.common.action;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import lombok.Data;
 
 @Data
 public class CommandParam {
 
-	public enum enumParamTypes { ANY_STRING, SECURE_STRING, EMAIL, ANY_NUMBER}
+	public enum enumParamTypes {
+		ANY_STRING, SECURE_STRING, EMAIL, ANY_NUMBER, // General command parameters 
+		BEING_CLASSES, PLAYER_BEINGS, 	// System command parameters
+		BEING, ITEM, DIRECTION, PLACE}	// Game command parameters
 
 	private String name;
 	private String inputMessage;
 	private enumParamTypes type;
 	private boolean required;
 	
-	private List<String> domainValues;
+	private Map<String, Object> staticDomainValues;
 	private String defaultValue;
 	
 
 	public CommandParam() {
-		this.domainValues = Collections.emptyList();
+		this.staticDomainValues = Collections.emptyMap();
 	}
-
-	public String getInputMessage() {
+	
+	public void setStaticDomainValues(List<String> simpleValues) {
 		
-		StringBuilder msg = new StringBuilder();
-		
-		msg.append(this.inputMessage);
-		
-		if (!domainValues.isEmpty()) {
-			
-			boolean first = true;
-			msg.append(" [");
-			for(String curDomainValue: domainValues) {
-				
-				if (!first) msg.append(", ");
-				
-				msg.append(curDomainValue);
-				
-				first = false;
-			}
-			msg.append("]");
-		}
-		
-		if (defaultValue!=null) {
-			msg.append(" <ENTER = ").append(defaultValue).append(">");
-		}
-		
-		msg.append(": ");
-		
-		return msg.toString();
-
+		this.staticDomainValues =
+			simpleValues.stream()
+				.collect(Collectors.toMap(
+						String::toString, 
+						String::toString));
 	}
 }

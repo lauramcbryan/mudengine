@@ -31,6 +31,6 @@ public class Item implements Serializable {
 	private Map<String, Integer> attrs;
 	
 	public Item() {
-		this.attrs = new HashMap<String, Integer>();
+		this.attrs = new HashMap<>();
 	}
 }

@@ -1,6 +1,5 @@
 package com.jpinfo.mudengine.client.model;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -15,20 +14,10 @@ public class CommandState {
 	
 	private List<CommandParamState> paramStateList;
 	
-	public CommandState(Command c) {
+	public CommandState(Command c, List<CommandParamState> paramStateList) {
 		
 		this.command = c;
-		this.paramStateList = new ArrayList<>();
-		
-		if (c.getParameters()!=null) {
-		
-			c.getParameters().forEach(d -> {
-				
-				CommandParamState paramState = new CommandParamState(d);
-				
-				paramStateList.add(paramState);
-			});
-		}
+		this.paramStateList = paramStateList;
 	}
 
 	public Command getCommand() {

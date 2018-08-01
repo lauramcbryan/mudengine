@@ -33,7 +33,7 @@ public class BeingClass implements Serializable {
 	
 	public BeingClass() {
 	
-		this.attributes = new HashMap<String, Integer>();
-		this.skills = new HashMap<String, Integer>();
+		this.attributes = new HashMap<>();
+		this.skills = new HashMap<>();
 	}
 }
