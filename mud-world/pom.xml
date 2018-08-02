@@ -23,6 +23,8 @@
 		<java.version>1.8</java.version>
 		<spring-cloud.version>Finchley.M9</spring-cloud.version>
 		<build-version>-1</build-version>
+   		<maven.compiler.source>1.8</maven.compiler.source>
+   		<maven.compiler.target>1.8</maven.compiler.target>		
 	</properties>
 
 	<dependencies>

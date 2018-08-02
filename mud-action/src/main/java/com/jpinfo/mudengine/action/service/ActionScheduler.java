@@ -29,7 +29,7 @@ import com.jpinfo.mudengine.common.security.TokenService;
 @Service
 public class ActionScheduler {
 	
-	private static Long currentTurn = 0L;
+	private Long currentTurn = 0L;
 	
 	@Autowired
 	private MudActionRepository repository;
@@ -55,8 +55,6 @@ public class ActionScheduler {
 	@Profile("!default")
 	@Scheduled(fixedRate=10000)
 	public void updateActions() {
-		
-		System.out.println("ActionScheduler.  Turn=" + ActionScheduler.currentTurn);
 		
 		// List of processed actors in this iteraction
 		List<Long> processedActors = new ArrayList<>();
@@ -133,7 +131,7 @@ public class ActionScheduler {
 		} // next pendingAction
 				
 		
-		ActionScheduler.currentTurn++;
+		currentTurn++;
 	}
 	
 	private void updateEntities(ActionInfo fullState) {
@@ -158,35 +156,32 @@ public class ActionScheduler {
 
 		// Updating the target
 		switch(fullState.getTargetType()) {
-			case BEING: {
+			case BEING: 
 				
 				BeingComposite targetBeing = (BeingComposite)fullState.getTarget();
-				
 				beingService.updateBeing(authToken, targetBeing.getBeing().getBeingCode(), targetBeing.getBeing());
 
 				break;
-			}
-			case ITEM: {
+			
+			case ITEM: 
 				
 				Item targetItem = (Item)fullState.getTarget();
-				
 				itemService.updateItem(authToken, targetItem.getItemCode(), targetItem);
 				
 				break;
-			}
-			case PLACE: {
+			
+			case PLACE: 
 				
 				PlaceComposite targetPlace = (PlaceComposite)fullState.getTarget();
-				
 				placeService.updatePlace(authToken, targetPlace.getPlace().getPlaceCode(), targetPlace.getPlace());
 				
 				break;
-			}
-			case DIRECTION: {
+			
+			case DIRECTION: 
 				
 				// Do nothing
 				break;
-			}
+			
 		}
 		
 		
@@ -229,8 +224,8 @@ public class ActionScheduler {
 		}
 	}
 	
-	public static Long getCurrentTurn() {
-		return ActionScheduler.currentTurn;
+	public Long getCurrentTurn() {
+		return currentTurn;
 	}
 
 }

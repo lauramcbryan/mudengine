@@ -8,9 +8,6 @@ public class ActionTestResult {
 	
 	private Object result;
 
-	public ActionTestResult() {
-	}
-
 	public ActionInfo getTestData() {
 		return testData;
 	}

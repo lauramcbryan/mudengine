@@ -55,7 +55,7 @@ public class ActionHandler {
 
 		switch (curAction.getCurState()) {
 
-		case NOT_STARTED: {
+		case NOT_STARTED: 
 
 			try {
 
@@ -108,8 +108,8 @@ public class ActionHandler {
 			}
 
 			break;
-		}
-		case STARTED: {
+		
+		case STARTED: 
 
 			try {
 				// Recheck prerequisites
@@ -147,8 +147,8 @@ public class ActionHandler {
 			}
 
 			break;
-		}
-		default:
+		
+			default:
 		}
 	}
 
@@ -253,7 +253,7 @@ public class ActionHandler {
 		// Solving the actionClass
 		MudActionClass dbActionClass = classRepository
 				.findById(a.getActionClassCode())
-				.orElseThrow(() -> new EntityNotFoundException("Being " + a.getActorCode() + " not found"));
+				.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.BEING_NOT_FOUND));
 
 		result.setActionClass(ActionHelper.buildActionClass(dbActionClass));
 
@@ -279,7 +279,7 @@ public class ActionHandler {
 				result.setActor(actor);
 				
 			} else {
-				throw new EntityNotFoundException("Being " + a.getActorCode() + " not found");
+				throw new EntityNotFoundException(LocalizedMessages.BEING_NOT_FOUND);
 			}
 		}
 		
@@ -288,17 +288,16 @@ public class ActionHandler {
 			
 			switch(a.getMediatorType()) {
 			
-			case ITEM: {
+			case ITEM: 
 				Item mediator = itemService.getItem(token, Long.valueOf(a.getMediatorCode()));
 				
 				if (mediator!=null) {
 					result.setMediator(mediator);
 				} else {
-					throw new EntityNotFoundException("Item " + a.getMediatorCode() + " not found");
+					throw new EntityNotFoundException(LocalizedMessages.ITEM_NOT_FOUND);
 				}
 				
 				break;
-			}
 			
 			case PLACE:
 				throw new IllegalParameterException("PLACE Mediators not supported.");
@@ -316,31 +315,31 @@ public class ActionHandler {
 			ActionTarget target = null;
 			
 			switch(a.getTargetType()) {
-			case ITEM: {
+			case ITEM: 
 				
 					Item targetItem = itemService.getItem(token, Long.valueOf(a.getTargetCode()));
 					
 					if (targetItem!=null) {
 						target = new ItemComposite(targetItem);
 					} else {
-						throw new EntityNotFoundException("Item " + a.getTargetCode() + " not found");
+						throw new EntityNotFoundException(LocalizedMessages.ITEM_NOT_FOUND);
 					}
 					
 					break;
-				}
-			case PLACE: {
+				
+			case PLACE: 
 				
 					Place targetPlace = placeService.getPlace(token, Integer.valueOf(a.getTargetCode()));
 				
 					if (targetPlace!=null) {
 						target = new PlaceComposite(targetPlace);
 					} else {
-						throw new EntityNotFoundException("Place " + a.getTargetCode() + " not found");
+						throw new EntityNotFoundException(LocalizedMessages.PLACE_NOT_FOUND);
 					}
 					
 					break;
-				}
-			case BEING: {
+				
+			case BEING: 
 					Being targetBeing = beingService.getBeing(token, Long.valueOf(a.getTargetCode()));
 					
 					if (targetBeing!=null) {
@@ -350,11 +349,11 @@ public class ActionHandler {
 					}
 					
 					break;
-				}
+				
 			case DIRECTION:
-			default: {
+			default: 
 				result.setTargetCode(a.getTargetCode());
-				}
+				
 			}
 			
 			if (target!=null) {

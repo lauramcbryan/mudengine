@@ -1,13 +1,19 @@
 package com.jpinfo.mudengine.player.util;
 
+import java.util.Random;
+
 import com.jpinfo.mudengine.common.player.Player;
 import com.jpinfo.mudengine.common.player.PlayerBeing;
 import com.jpinfo.mudengine.common.player.Session;
+import com.jpinfo.mudengine.common.utils.LocalizedMessages;
 import com.jpinfo.mudengine.player.model.MudPlayer;
 import com.jpinfo.mudengine.player.model.MudPlayerBeing;
 import com.jpinfo.mudengine.player.model.MudSession;
 
 public class PlayerHelper {
+	
+	private static final int FIRST_PWD_CHAR = 48;  // '0'
+	private static final int LAST_PWD_CHAR = 122;  // 'z'
 	
 	private PlayerHelper() {}
 
@@ -21,25 +27,24 @@ public class PlayerHelper {
 		response.setLocale(dbPlayer.getLocale());
 		response.setStatus(dbPlayer.getStatus());
 		
-		// TODO: Apply locale information here
 		switch(dbPlayer.getStatus()) {
 			case Player.STATUS_ACTIVE:
-				response.setStrStatus("Active");
+				response.setStrStatus(LocalizedMessages.PLAYER_ACTIVE_STATUS);
 				break;				
 			case Player.STATUS_BANNED:
-				response.setStrStatus("Banned");
+				response.setStrStatus(LocalizedMessages.PLAYER_BANNED_STATUS);
 				break;				
 			case Player.STATUS_BLOCKED:
-				response.setStrStatus("Blocked");
+				response.setStrStatus(LocalizedMessages.PLAYER_BLOCKED_STATUS);
 				break;				
 			case Player.STATUS_INACTIVE:
-				response.setStrStatus("Inactive");
+				response.setStrStatus(LocalizedMessages.PLAYER_INACTIVE_STATUS);
 				break;				
 			case Player.STATUS_PENDING:
-				response.setStrStatus("Pending");
+				response.setStrStatus(LocalizedMessages.PLAYER_PENDING_STATUS);
 				break;
 			default: 
-				response.setStrStatus("Unknown");
+				response.setStrStatus(LocalizedMessages.PLAYER_UNKNOWN_STATUS);
 		}
 		
 		
@@ -62,8 +67,14 @@ public class PlayerHelper {
 	
 	public static String generatePassword() {
 		
-		// TODO: Do something real here
-		return "dummy";
+		Random rand = new Random(System.currentTimeMillis());
+		
+		StringBuilder hash = new StringBuilder(8);
+		
+		for(int k=0;k<8;k++)
+			hash.append((char)rand.nextInt(LAST_PWD_CHAR - FIRST_PWD_CHAR));
+		
+		return hash.toString();
 	}
 	
 	public static Session buildSession(MudSession dbSession) {

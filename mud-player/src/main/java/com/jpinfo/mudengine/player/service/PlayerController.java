@@ -196,7 +196,7 @@ public class PlayerController implements PlayerService {
 		
 		switch(dbPlayer.getStatus()) {
 		
-			case Player.STATUS_ACTIVE: {
+			case Player.STATUS_ACTIVE:
 				
 				// Find all the active sessions and terminate them
 				List<MudSession> lstSessions = sessionRepository.findActiveSession(username);
@@ -232,7 +232,7 @@ public class PlayerController implements PlayerService {
 				
 				response = new ResponseEntity<>(sessionData, header, HttpStatus.CREATED);
 				break;
-			}
+			
 			case Player.STATUS_PENDING: 
 				throw new IllegalParameterException(LocalizedMessages.PLAYER_CHANGE_PASSWORD);
 			

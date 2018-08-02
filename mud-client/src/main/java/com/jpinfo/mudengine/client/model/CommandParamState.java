@@ -79,22 +79,30 @@ public class CommandParamState {
 		return entered &&
 				(sample!=null || !parameter.isRequired()) &&
 				(this.getDomainValues().isEmpty() || this.getDomainValues().containsValue(sample)) &&
-				(parameter.getType() != CommandParam.enumParamTypes.ANY_NUMBER || checkNumberFormat(sample.toString())) &&
-				(parameter.getType() != CommandParam.enumParamTypes.EMAIL || checkEmailFormat(sample.toString()))
+				(parameter.getType() != CommandParam.enumParamTypes.ANY_NUMBER || checkNumberFormat(sample)) &&
+				(parameter.getType() != CommandParam.enumParamTypes.EMAIL || checkEmailFormat(sample))
 				;
 	}
 	
 	
-	private boolean checkEmailFormat(String email) {
+	private boolean checkEmailFormat(Object email) {
 		
-		Matcher matcher = VALID_EMAIL_ADDRESS_REGEX .matcher(email);
-        return matcher.find();
+		if (email!=null) {
+			Matcher matcher = VALID_EMAIL_ADDRESS_REGEX .matcher(email.toString());
+	        return matcher.find();
+		}
+		
+		return false;
 	}	
 	
-	private boolean checkNumberFormat(String number) {
+	private boolean checkNumberFormat(Object number) {
 		
-		Matcher matcher = VALID_NUMBER_REGEX .matcher(number);
-        return matcher.find();
+		if (number!=null) {
+			Matcher matcher = VALID_NUMBER_REGEX .matcher(number.toString());
+	        return matcher.find();
+		}
+		
+		return false;
 	}
 	
 	public String getInputMessage() {

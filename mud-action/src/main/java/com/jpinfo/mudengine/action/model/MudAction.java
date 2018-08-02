@@ -30,13 +30,13 @@ public class MudAction {
 	private String mediatorCode;
 
 	@Column(name="MEDIATOR_TYPE")
-	private String mediatorType;  // {BEING, ITEM, PLACE, DIRECTION, MESSAGE}
+	private String mediatorType;
 	
 	@Column(name="TARGET_CODE")
 	private String targetCode;
 
 	@Column(name="TARGET_TYPE")
-	private String targetType;  // {BEING, ITEM, PLACE, DIRECTION, MESSAGE}
+	private String targetType;
 	
 	@Column(name="START_TURN")
 	private Long startTurn;

@@ -16,13 +16,13 @@ public class MudActionClass {
 	private Integer actionClassCode;
 	
 	@Column(name="ACTION_TYPE")
-	private Integer actionType;    // 0 = SIMPLE, 1 = CONTINUOUS (effects every turn)
+	private Integer actionType;    /* 0 = SIMPLE, 1 = CONTINUOUS (effects every turn)  */
 	
 	@Column(name="MEDIATOR_TYPE")
-	private String mediatorType;  // {BEING, ITEM, PLACE, DIRECTION, MESSAGE}
+	private String mediatorType;
 	
 	@Column(name="TARGET_TYPE")
-	private String targetType;  // {BEING, ITEM, PLACE, DIRECTION, MESSAGE}	
+	private String targetType;	
 	
 	
 	@Column(name="SUCCESS_RATE_EXPRESSION")

@@ -38,6 +38,13 @@ public class LocalizedMessages {
 	public static final String PLAYER_NO_LOGIN = "player.no.login";
 	public static final String PLAYER_LOGIN_ERROR = "player.login.error";
 	
+	public static final String PLAYER_ACTIVE_STATUS = "player.active.status";
+	public static final String PLAYER_BANNED_STATUS = "player.banned.status";
+	public static final String PLAYER_BLOCKED_STATUS = "player.blocked.status";
+	public static final String PLAYER_INACTIVE_STATUS = "player.inactive.status";
+	public static final String PLAYER_PENDING_STATUS = "player.pending.status";
+	public static final String PLAYER_UNKNOWN_STATUS = "player.unknown.status";
+	
 	public static final String SESSION_NOT_FOUND = "session.not.found";
 	public static final String SESSION_BEING_NOT_FOUND = "session.being.not.found";
 	
