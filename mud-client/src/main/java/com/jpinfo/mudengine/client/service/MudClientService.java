@@ -5,12 +5,14 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.handler.annotation.Header;
 
 import com.jpinfo.mudengine.client.MudClientGateway;
 import com.jpinfo.mudengine.client.exception.ClientException;
+import com.jpinfo.mudengine.client.interfaces.CommandHandler;
 import com.jpinfo.mudengine.client.model.ClientConnection;
 import com.jpinfo.mudengine.client.model.CommandParamState;
 import com.jpinfo.mudengine.client.model.VerbDictionaries;
@@ -33,7 +35,16 @@ public class MudClientService {
 	private VerbDictionaries verbDictionaries;
 	
 	@Autowired
-	private CommandHandler handler;
+	@Qualifier("game-commands")
+	private CommandHandler gameHandler;
+	
+	@Autowired
+	@Qualifier("system-commands")
+	private CommandHandler systemHandler;
+	
+	@Autowired
+	@Qualifier("admin-commands")
+	private CommandHandler adminHandler;
 		
 	
 	@ServiceActivator(inputChannel="plainRequestChannel")
@@ -43,6 +54,9 @@ public class MudClientService {
 		ClientConnection client = gateway.getActiveConnections().get(connectionId);
 		
 		if (client!=null) {
+			
+			// Update the last activity time from that client
+			client.setLastActivity(System.currentTimeMillis());
 			
 			try {
 
@@ -72,18 +86,24 @@ public class MudClientService {
 					String dummy = msg.toString();
 					log.info(dummy);
 
-					
-					// handle command
-					if (Command.enumCategory.SYSTEM.equals(client.getCurCommand().getCategory())) {
-
-						// handle internal command
-						handler.handleSystemCommand(client, client.getCurCommandState());
-						
-					} else {
+					switch(client.getCurCommand().getCategory()) {
+					case ADMIN:
+						adminHandler.handleCommand(client, client.getCurCommandState());
+						break;
+					case GAME:
 						// handle game command
-						handler.handleGameCommand(client, client.getCurCommandState());
-					}
+						gameHandler.handleCommand(client, client.getCurCommandState());
+						
+						break;
+					case SYSTEM:
+						// handle internal command
+						systemHandler.handleCommand(client, client.getCurCommandState());
+						
+						break;
+					default:
+						break;
 					
+					}
 				}
 			
 				
@@ -125,7 +145,7 @@ public class MudClientService {
 									client.getLocalizedMessage(LocalizedMessages.NO_BEING_MESSAGE));
 				
 				
-				return username + "@" + beingName + ":$ ";
+				return username + "@" + beingName + ":" + (client.isAdmin() ? "# ":"$ ");
 			}
 			
 			
@@ -160,7 +180,19 @@ public class MudClientService {
 			}
 			
 			// Set the current command
-			client.setCurCommandState(handler.initializeCommand(client, choosenCommand));
+			switch(choosenCommand.getCategory()) {
+			case ADMIN:
+				client.setCurCommandState(adminHandler.initializeCommand(client, choosenCommand));
+				break;
+			case GAME:
+				client.setCurCommandState(gameHandler.initializeCommand(client, choosenCommand));
+				break;
+			case SYSTEM:
+				client.setCurCommandState(systemHandler.initializeCommand(client, choosenCommand));
+				break;
+			default:
+				throw new ClientException(LocalizedMessages.COMMAND_NOT_SUPPORTED);
+			}
 			
 			String remainingCommand = enteredValue
 					.substring(choosenCommand.getVerb().length(), enteredValue.length())
@@ -177,19 +209,7 @@ public class MudClientService {
 			
 			// Verify if there's an active parameter
 			if (client.getCurParam()!=null) {
-				
-				// Set the entered value as input for the parameter
-				client.getCurParamState().setEnteredValue(enteredValue);
-				
-				if (!client.getCurParamState().isValid()) {
-					client.sendMessage(LocalizedMessages.COMMAND_INVALID_PARAMETER);
-				} else {
-					
-					// if the value just entered was from a secure field, turns on the echo
-					if (client.getCurParam().getType().equals(enumParamTypes.SECURE_STRING)) {
-						client.enableEcho();
-					} 
-				}
+				updateCurParameter(client, client.getCurParamState(), enteredValue);
 			} 
 			else {
 				
@@ -209,26 +229,50 @@ public class MudClientService {
 				}
 			}
 			
-			// Get the next parameter (or the very same if the value entered is invalid)
-			Optional<CommandParamState> nextParam = client.getCurCommandState().getNextParameter(); 
+			getNextParameter(client);
 			
-			if (nextParam.isPresent()) {
-				
-				CommandParamState param = nextParam.get();
-				
-				// Set the current parameter
-				client.setCurParamState(param);
-				
-				// Asks for the value
-				client.sendRequestMessage(param.getInputMessage());
-				
-				// if it's a secure field, turns off the echo
-				if (param.getParameter().getType().equals(enumParamTypes.SECURE_STRING)) {
-					client.disableEcho();
-				}
-			} 
+			
 		} // endif getCurCommand!=null
 		
 	} // end updateClientCommand
+	
+	private void updateCurParameter(ClientConnection client, CommandParamState param, String enteredValue) throws Exception {
+		
+		// Set the entered value as input for the parameter
+		param.setEnteredValue(enteredValue);
+		
+		if (!param.isValid()) {
+			client.sendMessage(LocalizedMessages.COMMAND_INVALID_PARAMETER);
+		} else {
+			
+			// if the value just entered was from a secure field, turns on the echo
+			if (client.getCurParam().getType().equals(enumParamTypes.SECURE_STRING)) {
+				client.enableEcho();
+			} 
+		}
+	}
+	
+	private void getNextParameter(ClientConnection client) throws Exception {
+
+		// Get the next parameter (or the very same if the value entered is invalid)
+		Optional<CommandParamState> nextParam = client.getCurCommandState().getNextParameter(); 
+		
+		if (nextParam.isPresent()) {
+			
+			CommandParamState param = nextParam.get();
+			
+			// Set the current parameter
+			client.setCurParamState(param);
+			
+			// Asks for the value
+			client.sendRequestMessage(param.getInputMessage());
+			
+			// if it's a secure field, turns off the echo
+			if (param.getParameter().getType().equals(enumParamTypes.SECURE_STRING)) {
+				client.disableEcho();
+			}
+		} 
+		
+	}
 
 }

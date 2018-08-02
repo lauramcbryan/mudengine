@@ -1,37 +1,30 @@
-package com.jpinfo.mudengine.client.service;
+package com.jpinfo.mudengine.client.handlers;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import java.io.IOException;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.integration.ip.tcp.connection.TcpNetServerConnectionFactory;
 import org.springframework.stereotype.Component;
 
 import com.jpinfo.mudengine.client.api.ApiResult;
-import com.jpinfo.mudengine.client.api.MudengineApi;
 import com.jpinfo.mudengine.client.exception.ClientException;
 import com.jpinfo.mudengine.client.model.ClientConnection;
-import com.jpinfo.mudengine.client.model.CommandParamState;
 import com.jpinfo.mudengine.client.model.CommandState;
 import com.jpinfo.mudengine.client.model.VerbDictionaries;
 import com.jpinfo.mudengine.client.utils.ClientHelper;
 import com.jpinfo.mudengine.client.utils.LocalizedMessages;
-import com.jpinfo.mudengine.common.action.Command;
-import com.jpinfo.mudengine.common.action.CommandParam;
+import com.jpinfo.mudengine.common.action.Command.enumCategory;
 import com.jpinfo.mudengine.common.being.Being;
-import com.jpinfo.mudengine.common.being.BeingClass;
-import com.jpinfo.mudengine.common.item.Item;
 import com.jpinfo.mudengine.common.place.Place;
 import com.jpinfo.mudengine.common.player.Player;
-import com.jpinfo.mudengine.common.player.PlayerBeing;
 
 @Component
-public class CommandHandler {
+@Qualifier("system-commands")
+public class SystemCommandHandler extends BaseCommandHandler {
 	
 	public static final int REGISTER_COMMAND = 901;
 	public static final int CHANGEPROF_COMMAND = 902;
@@ -47,20 +40,15 @@ public class CommandHandler {
 	
 	public static final int WHOAMI_COMMAND = 912;
 	public static final int WHEREAMI_COMMAND = 913;
-	public static final int LOCALE_COMMAND = 914;
-	
-	private static final Logger log = LoggerFactory.getLogger(CommandHandler.class);
-	
+	public static final int EXIT_COMMAND = 915;
+
+	private static final Logger log = LoggerFactory.getLogger(SystemCommandHandler.class);
 
 	@Autowired
 	private VerbDictionaries verbDictionaries;
 	
 	@Autowired
 	private TcpNetServerConnectionFactory connFactory;
-	
-	@Autowired
-	private MudengineApi api;
-
 	
 	/**
 	 * That command is used to register a new account.
@@ -72,7 +60,7 @@ public class CommandHandler {
 	 * @param command
 	 * @throws Exception
 	 */
-	private void handleRegisterCommand(ClientConnection client, CommandState command) throws Exception {
+	private void handleRegisterCommand(ClientConnection client, CommandState command) throws ClientException {
 
 		String username = command.getParamValue("username");
 		String email = command.getParamValue("email");
@@ -94,7 +82,7 @@ public class CommandHandler {
 	 * @param command
 	 * @throws Exception
 	 */
-	private void handlePasswordCommand(ClientConnection client, CommandState command) throws Exception {
+	private void handlePasswordCommand(ClientConnection client, CommandState command) throws ClientException {
 
 		Player playerData = 
 				client.getPlayerData()
@@ -118,7 +106,7 @@ public class CommandHandler {
 	 * @param command
 	 * @throws Exception
 	 */
-	private void handleActivateCommand(ClientConnection client, CommandState command) throws Exception {
+	private void handleActivateCommand(ClientConnection client, CommandState command) throws ClientException {
 
 		client.sendMessage(LocalizedMessages.COMMAND_ACTIVATE_START);
 
@@ -140,7 +128,7 @@ public class CommandHandler {
 	 * @param command
 	 * @throws Exception
 	 */
-	private void handleHelpCommand(ClientConnection client) throws Exception {
+	private void handleHelpCommand(ClientConnection client) {
 
 		client.sendMessage(LocalizedMessages.COMMAND_HELP_START);
 		
@@ -148,7 +136,10 @@ public class CommandHandler {
 			.getDictionary(client.getMessages().getLocale())
 				.getCommandList().stream().forEach(d-> {
 			
-			if (!d.isLogged() || client.isLogged()) {
+			if (
+					(!d.isLogged() || client.isLogged()) && 
+					(client.isAdmin() || !d.getCategory().equals(enumCategory.ADMIN))
+				) {
 				
 				StringBuilder msg = new StringBuilder();
 				msg
@@ -178,7 +169,7 @@ public class CommandHandler {
 	 * @param command
 	 * @throws Exception
 	 */
-	private void handleLoginCommand(ClientConnection client, CommandState command) throws Exception {
+	private void handleLoginCommand(ClientConnection client, CommandState command) throws ClientException {
 		String username = command.getParamValue("username");				
 		String password = command.getParamValue("password");
 		
@@ -201,7 +192,7 @@ public class CommandHandler {
 	 * @param command
 	 * @throws Exception
 	 */
-	private void handleLogoutCommand(ClientConnection client) throws Exception {
+	private void handleLogoutCommand(ClientConnection client) {
 
 		client.clearState();
 		
@@ -242,7 +233,7 @@ public class CommandHandler {
 	 * @param command
 	 * @throws Exception
 	 */
-	private void handleCreateBeingCommand(ClientConnection client, CommandState command) throws Exception {
+	private void handleCreateBeingCommand(ClientConnection client, CommandState command) throws ClientException {
 
 		String beingClass = command.getParamValue("beingClass");
 		String beingName  = command.getParamValue("beingName");
@@ -276,7 +267,7 @@ public class CommandHandler {
 	 * @param command
 	 * @throws Exception
 	 */
-	private void handleSelectBeingCommand(ClientConnection client, CommandState command) throws Exception {
+	private void handleSelectBeingCommand(ClientConnection client, CommandState command) throws ClientException {
 		
 		Player playerData = 
 				client.getPlayerData()
@@ -330,7 +321,7 @@ public class CommandHandler {
 	 * @param command
 	 * @throws Exception
 	 */
-	private void handleDestroyBeingCommand(ClientConnection client, CommandState command) throws Exception {
+	private void handleDestroyBeingCommand(ClientConnection client, CommandState command) throws ClientException {
 
 		Player playerData = 
 				client.getPlayerData()
@@ -383,7 +374,7 @@ public class CommandHandler {
 	 * @param command
 	 * @throws Exception
 	 */
-	private void handleWhoAmICommand(ClientConnection client) throws Exception {
+	private void handleWhoAmICommand(ClientConnection client) throws ClientException {
 		
 		Player playerData = 
 				client.getPlayerData()
@@ -412,7 +403,7 @@ public class CommandHandler {
 	 * @param command
 	 * @throws Exception
 	 */
-	private void handleWhereAmICommand(ClientConnection client) throws Exception {
+	private void handleWhereAmICommand(ClientConnection client) throws ClientException {
 		
 		Optional<Place> curPlace = client.getCurPlace();
 		
@@ -427,178 +418,27 @@ public class CommandHandler {
 		
 	}
 	
-	private void handleLocaleCommand(ClientConnection client, CommandState command) throws Exception {
+	private void handleExitCommand(ClientConnection client) {
 		
-		client.setLocale(command.getParamValue("locale"));
-		
-		client.sendMessage(LocalizedMessages.COMMAND_LOCALE_OK);
-	}
-	
-	private CommandParamState initializeBeingParameter(ClientConnection client, CommandParam paramTemplate) {
-		
-		CommandParamState newParam = new CommandParamState(paramTemplate);
-
-		// Populate with all being in this place
-		client.getCurPlace().ifPresent(e -> {
+		if (client.isAdmin()) {
+			client.setAdmin(false);
+		} else if (client.hasBeingSelected()) {
+			client.clearBeingInformation();
+		} else if (client.isLogged()) {
+			client.clearState();
+		} else {
 			
 			try {
-				newParam.setDynamicDomainValues(
-						api.getBeingsFromPlace(client.getAuthToken(), "aforgotten", e.getPlaceCode()).stream()
-						.collect(Collectors.toMap(
-								Being::getName, Being::getBeingCode))
-						);
-				
-			} catch(ClientException f) {
-				log.error("Error while initializing commandState", f);
-			}
-		});
-		
-		
-		return newParam;
-	}
-	
-	private CommandParamState initializeBeingClassesParameter(ClientConnection client, CommandParam paramTemplate) throws ClientException {
-
-		CommandParamState newParam = new CommandParamState(paramTemplate);
-		
-		// The being class is not provided, show the being class list
-		List<BeingClass> beingClassList = api.getBeingClasses(client.getAuthToken());
-		
-		newParam.setDynamicDomainValues(
-				beingClassList.stream()
-					.collect(Collectors.toMap(
-							BeingClass::getName, BeingClass::getBeingClassCode)
-							)
-				);
-		
-		return newParam;
-	}
-	
-	private CommandParamState initializeDirectionParameter(ClientConnection client, CommandParam paramTemplate) {
-
-		CommandParamState newParam = new CommandParamState(paramTemplate);
-		
-		client.getCurPlace().ifPresent(e ->
-		newParam.setDynamicDomainValues(
-				e.getExits().keySet().stream()
-				.collect(Collectors.toMap(
-						String::toString, String::toString))
-				)
-		);
-		
-		
-		return newParam;
-
-	}
-	
-	private CommandParamState initializeItemParameter(ClientConnection client, CommandParam paramTemplate) {
-
-		CommandParamState newParam = new CommandParamState(paramTemplate);
-		
-		// Populate with all being in this place
-		client.getCurPlace().ifPresent(e -> {
+				client.sendFile(ClientHelper.GOODBYE_FILE);
 			
-			try {
-				
-				List<Item> itemList = new ArrayList<>();
-				
-				itemList.addAll(api.getItemsFromPlace(client.getAuthToken(), "aforgotten", e.getPlaceCode()));
-				itemList.addAll(api.getItemsFromBeing(client.getAuthToken(), client.getActiveBeingCode().get()));
-				
-				newParam.setDynamicDomainValues(
-						itemList.stream()
-						.collect(Collectors.toMap(
-								Item::getItemClassCode, Item::getItemCode))
-						);
-				
-			} catch(ClientException f) {
-				log.error("Error while initializing commandState", f);
+			} catch(IOException e) {
+				log.error("Error trying to send goodbye file", e);
 			}
-		});
-		
-		return newParam;
-		
+			
+			connFactory.closeConnection(client.getConnection().getConnectionId());
+		}
 	}
 	
-	private CommandParamState initializePlayerBeingsParameter(ClientConnection client, CommandParam paramTemplate) {
-		
-		CommandParamState newParam = new CommandParamState(paramTemplate);
-		
-		// If there's an active player
-		client.getPlayerData().ifPresent(e ->
-		
-			// Populate the domainValues for the current parameter
-			// with the list of beings available for that player
-			newParam.setDynamicDomainValues(
-					
-				// Converting the player being list to Map<String, Object>
-				// With that the user will be able to type the beingName
-				// and the code will be associated
-				e.getBeingList().stream()
-					.collect(Collectors.toMap(
-							PlayerBeing::getBeingName, 
-							PlayerBeing::getBeingCode)
-							)
-					)
-			);
-
-		
-		
-		return newParam;
-		
-	}
-	
-	
-	public CommandState initializeCommand(ClientConnection client, Command command) {
-		
-		// Creates the CommandParamState list from all the static params provided
-		List<CommandParamState> paramList = new ArrayList<>();
-		
-		if (command.getParameters()!=null)
-			paramList =
-				command.getParameters().stream()
-					.map(d -> {
-						
-						CommandParamState newParam;
-						
-						try {
-						
-							switch(d.getType()) {
-							case BEING:
-								newParam = initializeBeingParameter(client, d);
-								break;
-							case BEING_CLASSES:
-								newParam = initializeBeingClassesParameter(client, d);
-								break;
-							case DIRECTION:
-								newParam = initializeDirectionParameter(client, d);
-								
-								break;
-							case ITEM:
-								newParam = initializeItemParameter(client, d);
-								
-								break;
-							case PLAYER_BEINGS:
-								newParam = initializePlayerBeingsParameter(client, d);
-								break;
-								
-							default:
-								newParam = new CommandParamState(d);
-								break;
-							}
-						} catch(ClientException e) {
-							log.error("Error initializing a CommandState", e);
-							newParam = new CommandParamState(d);
-						}
-						
-						
-						return newParam;
-					})
-				.collect(Collectors.toList());
-		
-		return new CommandState(command, paramList);
-	}
-
 	/**
 	 * Main method for handling all SYSTEM commands.
 	 * These commands are handled internally by the client.
@@ -608,69 +448,72 @@ public class CommandHandler {
 	 * @param command - command being processed
 	 * @throws Exception
 	 */
-	public void handleSystemCommand(ClientConnection client, CommandState command) throws Exception {
+	public void handleCommand(ClientConnection client, CommandState command) throws ClientException {
 
 		try {
 		
 			switch(command.getCommand().getCommandId()) {
 			
-				case CommandHandler.REGISTER_COMMAND: 
+				case SystemCommandHandler.REGISTER_COMMAND: 
 					handleRegisterCommand(client, command);
 					break;			
 					
-				case CommandHandler.ACTIVATE_COMMAND: 
+				case SystemCommandHandler.ACTIVATE_COMMAND: 
 					handleActivateCommand(client, command);
 					break;
 				
 					
-				case CommandHandler.PASSWORD_COMMAND:
+				case SystemCommandHandler.PASSWORD_COMMAND:
 					handlePasswordCommand(client, command);
 					break;
 				
-				case CommandHandler.QUIT_COMMAND: 
-					client.sendFile(ClientHelper.GOODBYE_FILE);
+				case SystemCommandHandler.QUIT_COMMAND: 
+					
+					try {
+						client.sendFile(ClientHelper.GOODBYE_FILE);
+					} catch(IOException e) {
+						log.error("Error while trying to send goodbye file", e);
+					}
 					connFactory.closeConnection(client.getConnection().getConnectionId());
 					break;
-				case CommandHandler.HELP_COMMAND: 
+				case SystemCommandHandler.EXIT_COMMAND:
+					handleExitCommand(client);
+					break;
+				case SystemCommandHandler.HELP_COMMAND: 
 					handleHelpCommand(client);
 					break;
 				
-				case CommandHandler.LOGIN_COMMAND: 
+				case SystemCommandHandler.LOGIN_COMMAND: 
 					handleLoginCommand(client, command);
 					break;
 				
-				case CommandHandler.LOGOUT_COMMAND: 
+				case SystemCommandHandler.LOGOUT_COMMAND: 
 					handleLogoutCommand(client);
 					break;
 				
-				case CommandHandler.CHANGEPROF_COMMAND: 
+				case SystemCommandHandler.CHANGEPROF_COMMAND: 
 					handleChangeProfileCommand(client, command);
 					break;
 				
-				case CommandHandler.CREATEBEING_COMMAND: 
+				case SystemCommandHandler.CREATEBEING_COMMAND: 
 					handleCreateBeingCommand(client, command);
 					break;
 				
-				case CommandHandler.SELECTBEING_COMMAND: 
+				case SystemCommandHandler.SELECTBEING_COMMAND: 
 					handleSelectBeingCommand(client, command);
 					break;
 				
-				case CommandHandler.DELETEBEING_COMMAND: 
+				case SystemCommandHandler.DELETEBEING_COMMAND: 
 					handleDestroyBeingCommand(client, command);
 					break;
 				
-				case CommandHandler.WHOAMI_COMMAND: 
+				case SystemCommandHandler.WHOAMI_COMMAND: 
 					handleWhoAmICommand(client);
 					break;
 				
-				case CommandHandler.WHEREAMI_COMMAND: 
+				case SystemCommandHandler.WHEREAMI_COMMAND: 
 					handleWhereAmICommand(client);
 					break;
-				
-				case CommandHandler.LOCALE_COMMAND: 
-					handleLocaleCommand(client, command);
-					break;
-				
 				
 				default: 
 					client.sendMessage(LocalizedMessages.COMMAND_NOT_SUPPORTED);
@@ -679,29 +522,5 @@ public class CommandHandler {
 		} finally {
 			client.setCurCommandState(null);
 		}
-	}
-
-	/**
-	 * Main method for handling GAME commands.
-	 * All these commands generates ACTIONs in game engine.
-	 * The output of such ACTIONs can be received by the messages channel
-	 * 
-	 * @param client - object with player info
-	 * @param command - command being processed
-	 * @throws ClientException 
-	 */
-	public void handleGameCommand(ClientConnection client, CommandState command) throws ClientException {
-
-		Long actorCode = client.getActiveBeingCode()
-				.orElseThrow(() -> new ClientException(LocalizedMessages.COMMAND_ONLY_LOGGED));
-		
-		String mediatorCode = command.getParamValue("mediatorCode");
-		String targetCode = command.getParamValue("targetCode");
-		Integer commandId = command.getCommand().getCommandId();
-		
-		
-		// Perform the call to the API gateway
-		api.insertCommand(client.getAuthToken(), commandId, actorCode, 
-				Optional.ofNullable(mediatorCode), targetCode);
 	}
 }

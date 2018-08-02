@@ -219,25 +219,52 @@
 			"usage": "whereami"
 		},
 		{
-			"commandId": 914,		
-			"verb": "change locale",
+			"commandId": 915,		
+			"verb": "exit",
 			"category": "SYSTEM",
+			"description": "Exits the current state.",
 			"logged": false,			
-			"description": "Change system locale",
-			"usage": "change locale <locale>",
+			"usage": "exit"
+		},
+		{
+			"commandId": 997,		
+			"verb": "sudo",
+			"category": "ADMIN",
+			"description": "admin login",
+			"logged": false,
+			"usage": "sudo <password>",
 			"parameters": [
 				{
-					"name": "locale",
-					"inputMessage": "Choose the locale",
-					"type": "ANY_STRING",
-					"required": false,
-					"staticDomainValues": [
-						"en-US",
-						"pt-BR"
-					],
-					"defaultValue": "en-US"
+					"name": "password",
+					"inputMessage": "Type the password",
+					"type": "SECURE_STRING",
+					"required": true
 				}
 			]
-		}				
+		},
+		{
+			"commandId": 998,		
+			"verb": "list sessions",
+			"category": "ADMIN",		
+			"description": "Shows the current sessions",
+			"logged": false,
+			"usage": "list sessions"
+		},
+		{
+			"commandId": 999,		
+			"verb": "drop session",
+			"category": "ADMIN",		
+			"description": "Destroy the indicated session",
+			"logged": false,
+			"usage": "drop session <session-id>",
+			"parameters": [
+				{
+					"name": "sessionId",
+					"inputMessage": "Choose the sessionid",
+					"type": "ANY_STRING",
+					"required": true
+				}
+			]
+		}
 	]
 }

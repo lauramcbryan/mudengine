@@ -8,7 +8,7 @@ import lombok.Data;
 @Data
 public class Command {
 
-	public enum enumCategory {GAME, SYSTEM}
+	public enum enumCategory {GAME, SYSTEM, ADMIN}
 	
 	private Integer commandId;
 	

@@ -3,10 +3,13 @@ package com.jpinfo.mudengine.client.model;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Locale;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.integration.ip.tcp.connection.TcpConnection;
 import org.springframework.messaging.support.MessageBuilder;
@@ -27,6 +30,8 @@ import lombok.Setter;
 
 @Data
 public class ClientConnection {
+	
+	private static final Logger log = LoggerFactory.getLogger(ClientConnection.class);
 	
 	private static final byte[] ECHO_OFF_SEQUENCE = {(byte)0xff, (byte)0xfb, (byte)0x01, (byte)0x00};
 	private static final byte[] ECHO_ON_SEQUENCE =  {(byte)0xff, (byte)0xfc, (byte)0x01, (byte)0x00};
@@ -54,6 +59,12 @@ public class ClientConnection {
 	@Setter(AccessLevel.NONE)
 	private boolean echoEnabled;
 	
+	private boolean admin;
+	
+	private Long lastActivity;
+	
+	private boolean inactivityWarning;
+	
 	
 	public ClientConnection(TcpConnection connection) {
 		this.connection = connection;
@@ -64,8 +75,15 @@ public class ClientConnection {
 		this.activeBeing = Optional.empty();
 		this.curPlace = Optional.empty();
 		this.echoEnabled = true;
+		this.lastActivity = System.currentTimeMillis();
 	}
-
+	
+	public void setLastActivity(Long value) {
+		this.lastActivity = value;
+		this.setInactivityWarning(false);
+	}
+	
+	
 	public void setPlayerData(Player playerData) {
 		this.playerData = Optional.ofNullable(playerData);
 		
@@ -160,7 +178,7 @@ public class ClientConnection {
 		return response;
 	}
 	
-	private void internalSendMessage(String message, boolean includeCRLF) throws Exception {
+	private void internalSendMessage(String message, boolean includeCRLF) {
 		
 		String effectiveMessage = getLocalizedMessage(message) + (includeCRLF ? ClientHelper.CRLF : "");
 		
@@ -170,7 +188,11 @@ public class ClientConnection {
 					// .setHeader("headerName", "headerValue")
 					.build();
 		
-		this.connection.send(clientMessage);
+		try {
+			this.connection.send(clientMessage);
+		} catch(Exception e) {
+			log.error("Error trying to send message", e);
+		}
 	}
 	
 	public void disableEcho() throws Exception {
@@ -199,7 +221,7 @@ public class ClientConnection {
 	 * @param message
 	 * @throws Exception
 	 */
-	public void sendMessage(String message) throws Exception {
+	public void sendMessage(String message) {
 		internalSendMessage(message, true);
 	}
 	
@@ -209,7 +231,7 @@ public class ClientConnection {
 	 * @param m
 	 * @throws Exception
 	 */
-	public void sendMessage(Message m) throws Exception {
+	public void sendMessage(Message m) {
 		internalSendMessage(formatMessage(m), true);
 	}
 
@@ -219,7 +241,7 @@ public class ClientConnection {
 	 * @param message
 	 * @throws Exception
 	 */
-	public void sendRequestMessage(String message) throws Exception {
+	public void sendRequestMessage(String message) {
 		internalSendMessage(message, false);
 	}
 
@@ -227,9 +249,10 @@ public class ClientConnection {
 	 * Sends a text file to the client.
 	 * @param c
 	 * @param filename
+	 * @throws IOException 
 	 * @throws Exception
 	 */
-	public void sendFile(String filename) throws Exception {
+	public void sendFile(String filename) throws IOException  {
 		
 		File f = new ClassPathResource(filename).getFile();
 		

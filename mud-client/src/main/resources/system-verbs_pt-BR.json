@@ -219,23 +219,50 @@
 			"usage": "whereami"
 		},
 		{
-			"commandId": 914,		
-			"verb": "mudar linguagem",
+			"commandId": 915,		
+			"verb": "exit",
 			"category": "SYSTEM",
-			"logged": false,			
-			"description": "Muda a linguagem do sistema",
-			"usage": "mudar linguagem <nova-linguagem>",
+			"description": "Sair do estado atual.",
+			"logged": false,
+			"usage": "exit"
+		},
+		{
+			"commandId": 997,		
+			"verb": "sudo",
+			"category": "ADMIN",
+			"description": "Faz login de admin",
+			"logged": false,
+			"usage": "sudo <password>",
 			"parameters": [
 				{
-					"name": "locale",
-					"inputMessage": "Escolha a linguagem",
+					"name": "password",
+					"inputMessage": "Digite a senha",
+					"type": "SECURE_STRING",
+					"required": true
+				}
+			]
+		},
+		{
+			"commandId": 998,		
+			"verb": "list sessions",
+			"category": "ADMIN",		
+			"description": "Mostra as sessões correntes",
+			"logged": false,
+			"usage": "list sessions"
+		},
+		{
+			"commandId": 999,		
+			"verb": "drop session",
+			"category": "ADMIN",		
+			"description": "Destrói a sessão indicada",
+			"logged": false,
+			"usage": "drop session <session-id>",
+			"parameters": [
+				{
+					"name": "sessionId",
+					"inputMessage": "Escolha a sessão",
 					"type": "ANY_STRING",
-					"required": false,
-					"staticDomainValues": [
-						"en-US",
-						"pt-BR"
-					],
-					"defaultValue": "en-US"
+					"required": true
 				}
 			]
 		}

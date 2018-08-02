@@ -14,6 +14,8 @@ public class LocalizedMessages {
 	
 	public static final String GENERAL_ERROR_MESSAGE="general.error.message";
 	public static final String API_ERROR_MESSAGE="api.error.message";
+	public static final String WARN_IDLE_TIMEOUT="warn.idle.timeout";
+	public static final String KILL_IDLE_TIMEOUT="kill.idle.timeout";
 	
 	public static final String ANONYMOUS_MESSAGE="anonymous.message";
 	public static final String NO_BEING_MESSAGE="nobeing.message";
@@ -21,6 +23,7 @@ public class LocalizedMessages {
 
 
 	public static final String COMMAND_ONLY_LOGGED="command.only.logged";
+	public static final String COMMAND_ONLY_ADMIN="command.only.admin";
 	public static final String COMMAND_NO_BEING="command.no.being";
 	public static final String COMMAND_NOT_SUPPORTED="command.not.supported";
 	public static final String COMMAND_UNKNOWN_BEING="command.unknown.being";
