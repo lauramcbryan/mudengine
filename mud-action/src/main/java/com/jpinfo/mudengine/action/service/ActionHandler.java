@@ -1,6 +1,7 @@
 package com.jpinfo.mudengine.action.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
@@ -29,7 +30,6 @@ import com.jpinfo.mudengine.common.exception.EntityNotFoundException;
 import com.jpinfo.mudengine.common.exception.IllegalParameterException;
 import com.jpinfo.mudengine.common.item.Item;
 import com.jpinfo.mudengine.common.place.Place;
-import com.jpinfo.mudengine.common.security.TokenService;
 import com.jpinfo.mudengine.common.utils.LocalizedMessages;
 
 @Component
@@ -46,9 +46,6 @@ public class ActionHandler {
 	
 	@Autowired
 	private ItemServiceClient itemService;
-	
-	@Autowired
-	private TokenService tokenService;
 	
 
 	public void updateAction(Long currentTurn, Action curAction, ActionInfo fullActionState) {
@@ -257,15 +254,11 @@ public class ActionHandler {
 
 		result.setActionClass(ActionHelper.buildActionClass(dbActionClass));
 
-		// Preparing the token to internally call the services to compose the ActionInfo
-		String token = tokenService.buildInternalToken();
-		
-
 		
 		//Actor
 		if (a.getActorCode()!=null) {
 			
-			Being actorBeing = beingService.getBeing(token, a.getActorCode());
+			Being actorBeing = beingService.getBeing(a.getActorCode());
 			
 			if (actorBeing!=null) {
 				
@@ -273,7 +266,7 @@ public class ActionHandler {
 				BeingComposite actor = new BeingComposite(actorBeing);
 				
 				// Set the place
-				Place curPlace = placeService.getPlace(token, actorBeing.getCurPlaceCode());
+				Place curPlace = placeService.getPlace(actorBeing.getCurPlaceCode());
 				actor.setPlace(curPlace);
 				
 				result.setActor(actor);
@@ -289,7 +282,7 @@ public class ActionHandler {
 			switch(a.getMediatorType()) {
 			
 			case ITEM: 
-				Item mediator = itemService.getItem(token, Long.valueOf(a.getMediatorCode()));
+				Item mediator = itemService.getItem(Long.valueOf(a.getMediatorCode()));
 				
 				if (mediator!=null) {
 					result.setMediator(mediator);
@@ -317,7 +310,7 @@ public class ActionHandler {
 			switch(a.getTargetType()) {
 			case ITEM: 
 				
-					Item targetItem = itemService.getItem(token, Long.valueOf(a.getTargetCode()));
+					Item targetItem = itemService.getItem(Long.valueOf(a.getTargetCode()));
 					
 					if (targetItem!=null) {
 						target = new ItemComposite(targetItem);
@@ -329,7 +322,7 @@ public class ActionHandler {
 				
 			case PLACE: 
 				
-					Place targetPlace = placeService.getPlace(token, Integer.valueOf(a.getTargetCode()));
+					Place targetPlace = placeService.getPlace(Integer.valueOf(a.getTargetCode()));
 				
 					if (targetPlace!=null) {
 						target = new PlaceComposite(targetPlace);
@@ -340,7 +333,7 @@ public class ActionHandler {
 					break;
 				
 			case BEING: 
-					Being targetBeing = beingService.getBeing(token, Long.valueOf(a.getTargetCode()));
+					Being targetBeing = beingService.getBeing(Long.valueOf(a.getTargetCode()));
 					
 					if (targetBeing!=null) {
 						target = new BeingComposite(targetBeing);

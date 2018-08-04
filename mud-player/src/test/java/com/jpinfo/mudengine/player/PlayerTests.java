@@ -1,7 +1,6 @@
 package com.jpinfo.mudengine.player;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.anyString;
 
 import java.util.*;
 
@@ -91,7 +90,7 @@ public class PlayerTests {
 		
 		ResponseEntity<Being> responseBeing = new ResponseEntity<Being>(createdBeing, HttpStatus.CREATED);
 		
-		given(this.beingClient.createPlayerBeing(anyString(), 
+		given(this.beingClient.createPlayerBeing( 
 				eq(PlayerTests.TEST_PLAYER_ID),
 				eq(PlayerTests.TEST_BEING_CLASS),
 				eq(PlayerTests.TEST_WORLD_NAME),

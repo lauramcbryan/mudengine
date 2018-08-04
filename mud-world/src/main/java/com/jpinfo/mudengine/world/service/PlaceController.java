@@ -10,14 +10,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.jpinfo.mudengine.common.exception.EntityNotFoundException;
 import com.jpinfo.mudengine.common.exception.IllegalParameterException;
 import com.jpinfo.mudengine.common.place.Place;
 import com.jpinfo.mudengine.common.service.PlaceService;
-import com.jpinfo.mudengine.common.utils.CommonConstants;
 import com.jpinfo.mudengine.common.utils.LocalizedMessages;
 import com.jpinfo.mudengine.world.client.BeingServiceClient;
 import com.jpinfo.mudengine.world.client.ItemServiceClient;
@@ -53,7 +51,6 @@ public class PlaceController implements PlaceService {
 	@Override
 	@ApiOperation(value="Returns information about a place")
 	public Place getPlace(
-			@ApiParam(value="Authentication token", allowEmptyValue=false, required=true) @RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, 
 			@PathVariable Integer placeId) {
 		
 		Place response = null;
@@ -69,7 +66,7 @@ public class PlaceController implements PlaceService {
 
 	
 	@Override
-	public Place updatePlace(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable Integer placeId, @RequestBody Place requestPlace) {
+	public Place updatePlace(@PathVariable Integer placeId, @RequestBody Place requestPlace) {
 		
 		Place response = null;
 		
@@ -90,7 +87,7 @@ public class PlaceController implements PlaceService {
 		if (placeToBeDestroyed) {
 			
 			// destroy the place
-			destroyPlace(authToken, dbPlace.getPlaceCode());
+			destroyPlace(dbPlace.getPlaceCode());
 			
 		} else {
 
@@ -242,7 +239,7 @@ public class PlaceController implements PlaceService {
 
 
 	@Override
-	public void destroyPlace(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable Integer placeId) {
+	public void destroyPlace(@PathVariable Integer placeId) {
 		
 		MudPlace dbPlace = placeRepository
 				.findById(placeId)
@@ -267,12 +264,12 @@ public class PlaceController implements PlaceService {
 				// THAT MUST GOES FIRST!!!
 				// This call will drop all items belonging to beings into the place
 				// TODO: solve the worldName
-				beingService.destroyAllFromPlace(authToken, "aforgotten", placeId);
+				beingService.destroyAllFromPlace("aforgotten", placeId);
 				
 				// Remove all items from the place
 				// (That will include items dropped from beings above)
 				// TODO: solve the worldName
-				itemService.destroyAllFromPlace(authToken, "aforgotten", placeId);
+				itemService.destroyAllFromPlace("aforgotten", placeId);
 				
 			} catch(Exception e) {
 				

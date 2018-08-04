@@ -2,6 +2,7 @@ package com.jpinfo.mudengine.player.service;
 
 import java.util.Date;
 
+
 import java.util.List;
 import java.util.Optional;
 
@@ -14,7 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -54,7 +54,7 @@ public class PlayerController implements PlayerService {
 	private TokenService tokenService;
 
 	@Override
-	public Player getPlayerDetails(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable String username) {
+	public Player getPlayerDetails(@PathVariable String username) {
 		
 		Player response = null;
 		
@@ -114,7 +114,7 @@ public class PlayerController implements PlayerService {
 	}
 
 	@Override
-	public ResponseEntity<Player> updatePlayerDetails(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable String username, @RequestBody Player playerData) {
+	public ResponseEntity<Player> updatePlayerDetails(@PathVariable String username, @RequestBody Player playerData) {
 		
 		ResponseEntity<Player> response = null;
 		
@@ -135,6 +135,9 @@ public class PlayerController implements PlayerService {
 			MudPlayer changedDbPlayer = repository.save(dbPlayer);
 			
 			Player changedPlayer = PlayerHelper.buildPlayer(changedDbPlayer);
+			
+			String authToken = (String)SecurityContextHolder.getContext().getAuthentication().getCredentials();
+			
 			
 			// Update the authToken
 			HttpHeaders header = updateAuthHeaders(authToken, changedPlayer, null);
@@ -166,7 +169,7 @@ public class PlayerController implements PlayerService {
 	}
 
 	@Override
-	public Session getActiveSession(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable String username) {
+	public Session getActiveSession(@PathVariable String username) {
 		
 		Session session = null;
 		
@@ -252,13 +255,13 @@ public class PlayerController implements PlayerService {
 	}
 
 	@Override
-	public ResponseEntity<Session> setActiveBeing(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable String username, @PathVariable Long beingCode) {
+	public ResponseEntity<Session> setActiveBeing(@PathVariable String username, @PathVariable Long beingCode) {
 		
-		return updateBeingSession(authToken, username, Optional.of(beingCode));
+		return updateBeingSession(username, Optional.of(beingCode));
 	}
 		
 	
-	private ResponseEntity<Session> updateBeingSession(String authToken, String username, Optional<Long> beingCode) {
+	private ResponseEntity<Session> updateBeingSession(String username, Optional<Long> beingCode) {
 		
 		ResponseEntity<Session> response = null;
 		
@@ -296,6 +299,7 @@ public class PlayerController implements PlayerService {
 				// Retrieves the player object
 				Player playerData = PlayerHelper.buildPlayer(dbSession.getPlayer());
 				
+				String authToken = (String)SecurityContextHolder.getContext().getAuthentication().getCredentials();
 				
 				// Update the authToken
 				HttpHeaders header = updateAuthHeaders(authToken, playerData, sessionData);
@@ -312,7 +316,7 @@ public class PlayerController implements PlayerService {
 	}
 	
 	@Override
-	public ResponseEntity<Player> createBeing(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable String username, @RequestParam String beingClass, @RequestParam String beingName,
+	public ResponseEntity<Player> createBeing(@PathVariable String username, @RequestParam String beingClass, @RequestParam String beingName,
 			@RequestParam String worldName, @RequestParam Integer placeCode) {
 		
 		ResponseEntity<Player> response = null;
@@ -324,7 +328,7 @@ public class PlayerController implements PlayerService {
 			
 			// Create the being
 			ResponseEntity<Being> beingResponse = 
-				this.beingClient.createPlayerBeing(authToken,
+				this.beingClient.createPlayerBeing(
 						dbPlayer.getPlayerId(), beingClass, 
 						worldName, placeCode, beingName);
 			
@@ -349,6 +353,8 @@ public class PlayerController implements PlayerService {
 			MudPlayer updatedPlayerData = repository.save(dbPlayer);
 			
 			Player playerData = PlayerHelper.buildPlayer(updatedPlayerData);
+			
+			String authToken = (String)SecurityContextHolder.getContext().getAuthentication().getCredentials();
 
 			// Assembling the response
 			HttpHeaders header = updateAuthHeaders(authToken, playerData, null);
@@ -362,7 +368,7 @@ public class PlayerController implements PlayerService {
 	}
 
 	@Override
-	public ResponseEntity<Player> destroyBeing(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable String username, @PathVariable Long beingCode) {
+	public ResponseEntity<Player> destroyBeing(@PathVariable String username, @PathVariable Long beingCode) {
 		
 		ResponseEntity<Player> response = null;
 		
@@ -385,7 +391,7 @@ public class PlayerController implements PlayerService {
 				d.getBeingList().removeIf(e -> e.getId().getBeingCode().equals(beingCode));
 
 				// Destroy the selected being at being service
-				beingClient.destroyBeing(authToken, beingCode);
+				beingClient.destroyBeing(beingCode);
 				
 				// Update the playerData
 				repository.save(d);
@@ -398,16 +404,18 @@ public class PlayerController implements PlayerService {
 					
 					if (beingCode.equals(e.getBeingCode())) {
 						// Clear the beingCode from the token
-						updateBeingSession(authToken, username, Optional.empty());						
+						updateBeingSession(username, Optional.empty());						
 					}
 				});
 			});
 			
 			// Get the session data
-			Session sessionData = getActiveSession(authToken, username);
+			Session sessionData = getActiveSession(username);
 
 			// Get the player info again
-			Player playerData = getPlayerDetails(authToken, username);
+			Player playerData = getPlayerDetails(username);
+			
+			String authToken = (String)SecurityContextHolder.getContext().getAuthentication().getCredentials();
 
 			// Update the authToken
 			String token = tokenService.updateToken(authToken, 

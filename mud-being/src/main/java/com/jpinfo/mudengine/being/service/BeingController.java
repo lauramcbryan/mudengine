@@ -2,6 +2,7 @@ package com.jpinfo.mudengine.being.service;
 
 import java.util.ArrayList;
 
+
 import java.util.List;
 import java.util.Optional;
 
@@ -13,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -33,7 +33,6 @@ import com.jpinfo.mudengine.common.player.Player;
 import com.jpinfo.mudengine.common.security.MudUserDetails;
 import com.jpinfo.mudengine.common.security.TokenService;
 import com.jpinfo.mudengine.common.service.BeingService;
-import com.jpinfo.mudengine.common.utils.CommonConstants;
 import com.jpinfo.mudengine.common.utils.LocalizedMessages;
 
 @RestController
@@ -51,7 +50,7 @@ public class BeingController implements BeingService {
 	private BeingClassRepository classRepository;
 
 	@Override
-	public Being getBeing(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable Long beingCode) {
+	public Being getBeing(@PathVariable Long beingCode) {
 		
 		Being response = null;
 		
@@ -63,11 +62,11 @@ public class BeingController implements BeingService {
 		
 		response = BeingHelper.buildBeing(dbBeing, fullResponse);
 		
-		return expandBeingEquipment(authToken, response, dbBeing, fullResponse);
+		return expandBeingEquipment(response, dbBeing, fullResponse);
 	}
 	
 	@Override
-	public Being updateBeing(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable Long beingCode, @RequestBody Being requestBeing) {
+	public Being updateBeing(@PathVariable Long beingCode, @RequestBody Being requestBeing) {
 		
 		Being response = null;
 		
@@ -116,7 +115,7 @@ public class BeingController implements BeingService {
 	}
 	
 	@Override
-	public ResponseEntity<Being> createBeing(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, 
+	public ResponseEntity<Being> createBeing( 
 			@RequestParam Integer beingType, @RequestParam String beingClass, @RequestParam String worldName, 
 			@RequestParam Integer placeCode, @RequestParam Integer quantity,
 			@RequestParam String beingName) {
@@ -161,7 +160,7 @@ public class BeingController implements BeingService {
 	}
 
 	@Override
-	public ResponseEntity<Being> createPlayerBeing(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken,
+	public ResponseEntity<Being> createPlayerBeing(
 			@PathVariable Long playerId, @RequestParam String beingClass, 
 			@RequestParam String worldName, @RequestParam Integer placeCode, @RequestParam String beingName) {
 		
@@ -206,7 +205,7 @@ public class BeingController implements BeingService {
 	}
 	
 	@Override
-	public List<Being> getAllFromPlayer(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable Long playerId) {
+	public List<Being> getAllFromPlayer(@PathVariable Long playerId) {
 		
 		List<Being> response = null;
 		
@@ -241,7 +240,7 @@ public class BeingController implements BeingService {
 	}
 
 	@Override
-	public void destroyBeing(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable Long beingCode) {
+	public void destroyBeing(@PathVariable Long beingCode) {
 		
 		MudBeing dbBeing = repository.findById(beingCode)
 				.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.BEING_NOT_FOUND));
@@ -251,7 +250,7 @@ public class BeingController implements BeingService {
 			try {
 		
 				// Update Item service to drop all items of this being
-				itemService.dropAllFromBeing(authToken, beingCode, dbBeing.getCurWorld(), dbBeing.getCurPlaceCode());
+				itemService.dropAllFromBeing(beingCode, dbBeing.getCurWorld(), dbBeing.getCurPlaceCode());
 			} catch(Exception e) {
 				
 				// as this is a *should have* feature, errors at this point
@@ -267,14 +266,14 @@ public class BeingController implements BeingService {
 		}
 	}
 	
-	private Being expandBeingEquipment(String token, Being responseBeing, MudBeing dbBeing, boolean fullResponse) {
+	private Being expandBeingEquipment(Being responseBeing, MudBeing dbBeing, boolean fullResponse) {
 		
 		for(MudBeingSlot curSlot: dbBeing.getEquipment()) {
 			
 			Item responseItem = null;
 			
 			if (curSlot.getItemCode()!=null) {
-				responseItem = itemService.getItem(token, curSlot.getItemCode());
+				responseItem = itemService.getItem(curSlot.getItemCode());
 			} else {
 				responseItem = new Item();
 				responseItem.setItemClassCode("NOTHING");
@@ -287,26 +286,26 @@ public class BeingController implements BeingService {
 	}
 
 	@Override
-	public void destroyAllFromPlace(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable String worldName, @PathVariable Integer placeCode) {
+	public void destroyAllFromPlace(@PathVariable String worldName, @PathVariable Integer placeCode) {
 		
 		List<MudBeing> lstFound = repository.findByCurWorldAndCurPlaceCode(worldName, placeCode);
 		
 		for(MudBeing curDbBeing: lstFound) {
 			
-			itemService.dropAllFromBeing(authToken, curDbBeing.getBeingCode(), worldName, placeCode);
+			itemService.dropAllFromBeing(curDbBeing.getBeingCode(), worldName, placeCode);
 			
 			repository.delete(curDbBeing);
 		}
 	}
 	
 	@Override
-	public void destroyAllFromPlayer(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable Long playerId) {
+	public void destroyAllFromPlayer(@PathVariable Long playerId) {
 		
 		List<MudBeing> lstFound = repository.findByPlayerId(playerId);
 		
 		for(MudBeing curDbBeing: lstFound) {
 			
-			itemService.dropAllFromBeing(authToken, curDbBeing.getBeingCode(), curDbBeing.getCurWorld(), curDbBeing.getCurPlaceCode());
+			itemService.dropAllFromBeing(curDbBeing.getBeingCode(), curDbBeing.getCurWorld(), curDbBeing.getCurPlaceCode());
 			
 			repository.delete(curDbBeing);
 		}

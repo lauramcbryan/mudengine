@@ -116,9 +116,9 @@ public class ActionTests {
 
 	private void setupMocks() {
 		
-		given(beingClient.getBeing(anyString(), eq(1L))).willReturn(getBeingOne());
-		given(beingClient.getBeing(anyString(), eq(2L))).willReturn(getBeingTwo());
-		given(placeClient.getPlace(anyString(), eq(1))).willReturn(getPlaceOne());
+		given(beingClient.getBeing(eq(1L))).willReturn(getBeingOne());
+		given(beingClient.getBeing(eq(2L))).willReturn(getBeingTwo());
+		given(placeClient.getPlace(eq(1))).willReturn(getPlaceOne());
 		
 	}
 	

@@ -24,7 +24,6 @@ import com.jpinfo.mudengine.common.action.Action.EnumActionState;
 import com.jpinfo.mudengine.common.exception.EntityNotFoundException;
 import com.jpinfo.mudengine.common.exception.IllegalParameterException;
 import com.jpinfo.mudengine.common.item.Item;
-import com.jpinfo.mudengine.common.security.TokenService;
 
 @Service
 public class ActionScheduler {
@@ -48,9 +47,6 @@ public class ActionScheduler {
 	
 	@Autowired
 	private ActionHandler handler;
-	
-	@Autowired
-	private TokenService tokenService;
 	
 	@Profile("!default")
 	@Scheduled(fixedRate=10000)
@@ -136,22 +132,20 @@ public class ActionScheduler {
 	
 	private void updateEntities(ActionInfo fullState) {
 		
-		String authToken = tokenService.buildInternalToken();
-
 		// Update the actor
-		beingService.updateBeing(authToken, 
+		beingService.updateBeing( 
 					fullState.getActor().getBeing().getBeingCode(), 
 					fullState.getActor().getBeing());
 		
 		// Update the place where the actor is
-		placeService.updatePlace(authToken, 
+		placeService.updatePlace( 
 				fullState.getActor().getPlace().getPlaceCode(), 
 				fullState.getActor().getPlace());
 
 		
 		// If the Mediator is used, updated it too
 		if (fullState.getMediator()!=null) {
-			itemService.updateItem(authToken, fullState.getMediator().getItemCode(), fullState.getMediator());
+			itemService.updateItem(fullState.getMediator().getItemCode(), fullState.getMediator());
 		}
 
 		// Updating the target
@@ -159,21 +153,21 @@ public class ActionScheduler {
 			case BEING: 
 				
 				BeingComposite targetBeing = (BeingComposite)fullState.getTarget();
-				beingService.updateBeing(authToken, targetBeing.getBeing().getBeingCode(), targetBeing.getBeing());
+				beingService.updateBeing(targetBeing.getBeing().getBeingCode(), targetBeing.getBeing());
 
 				break;
 			
 			case ITEM: 
 				
 				Item targetItem = (Item)fullState.getTarget();
-				itemService.updateItem(authToken, targetItem.getItemCode(), targetItem);
+				itemService.updateItem(targetItem.getItemCode(), targetItem);
 				
 				break;
 			
 			case PLACE: 
 				
 				PlaceComposite targetPlace = (PlaceComposite)fullState.getTarget();
-				placeService.updatePlace(authToken, targetPlace.getPlace().getPlaceCode(), targetPlace.getPlace());
+				placeService.updatePlace(targetPlace.getPlace().getPlaceCode(), targetPlace.getPlace());
 				
 				break;
 			
@@ -189,12 +183,10 @@ public class ActionScheduler {
 	
 	private void sendMessages(ActionInfo fullState) {
 		
-		String authToken = tokenService.buildInternalToken();
-		
 		for(ActionMessage curActorMessage : fullState.getActor().getMessages()) {
 			
 			// Send message to the actor
-			this.messageService.putMessage(authToken, fullState.getActorCode(), 
+			this.messageService.putMessage(fullState.getActorCode(), 
 					curActorMessage.getMessageKey(), 
 					null, null,
 					curActorMessage.args);
@@ -207,7 +199,7 @@ public class ActionScheduler {
 			switch (fullState.getTargetType()) {
 			
 			case BEING:
-				this.messageService.putMessage(authToken, fullState.getActorCode(), 
+				this.messageService.putMessage(fullState.getActorCode(), 
 						curTargetMessage.getMessageKey(), 
 						fullState.getActor().getBeing().getBeingCode(), fullState.getActor().getBeing().getName(),
 						curTargetMessage.args);

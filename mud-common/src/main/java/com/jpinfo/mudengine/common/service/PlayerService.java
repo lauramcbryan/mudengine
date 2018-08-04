@@ -1,22 +1,21 @@
 package com.jpinfo.mudengine.common.service;
 
 import org.springframework.http.ResponseEntity;
+
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.jpinfo.mudengine.common.player.Player;
 import com.jpinfo.mudengine.common.player.Session;
-import com.jpinfo.mudengine.common.utils.CommonConstants;
 
 @RequestMapping("/player")
 public interface PlayerService {
 
 	@RequestMapping(method=RequestMethod.GET, value="/{username}")
-	Player getPlayerDetails(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable("username") String username);
+	Player getPlayerDetails(@PathVariable("username") String username);
 
 	/**
 	 * Create a profile for that username
@@ -36,7 +35,7 @@ public interface PlayerService {
 	 * @return
 	 */
 	@RequestMapping(method=RequestMethod.POST, value="/{username}")
-	ResponseEntity<Player> updatePlayerDetails(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable("username") String username, @RequestBody Player playerData);
+	ResponseEntity<Player> updatePlayerDetails(@PathVariable("username") String username, @RequestBody Player playerData);
 	
 	/**
 	 * Change the password
@@ -49,18 +48,18 @@ public interface PlayerService {
 	
 
 	@RequestMapping(method=RequestMethod.GET, value="/{username}/session")
-	Session getActiveSession(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable("username") String username);
+	Session getActiveSession(@PathVariable("username") String username);
 
 	@RequestMapping(method=RequestMethod.POST, value="/{username}/session/being/{beingCode}")
-	ResponseEntity<Session> setActiveBeing(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable("username") String username, @PathVariable("beingCode") Long beingCode);
+	ResponseEntity<Session> setActiveBeing(@PathVariable("username") String username, @PathVariable("beingCode") Long beingCode);
 
 	@RequestMapping(method=RequestMethod.PUT, value="/{username}/being")
-	ResponseEntity<Player> createBeing(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable("username") String username, 
+	ResponseEntity<Player> createBeing(@PathVariable("username") String username, 
 			@RequestParam("beingClass") String beingClass, @RequestParam("beingName") String beingName, 
 			@RequestParam("worldName") String worldName, @RequestParam("placeCode") Integer placeCode);
 	
 	@RequestMapping(method=RequestMethod.DELETE, value="/{username}/being/{beingCode}")
-	ResponseEntity<Player> destroyBeing(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, @PathVariable("username") String username, @PathVariable("beingCode") Long beingCode);
+	ResponseEntity<Player> destroyBeing(@PathVariable("username") String username, @PathVariable("beingCode") Long beingCode);
 	
 	@RequestMapping(method=RequestMethod.PUT, value="/{username}/session")
 	ResponseEntity<Session> createSession(@PathVariable("username") String username, @RequestParam("password") String password, 

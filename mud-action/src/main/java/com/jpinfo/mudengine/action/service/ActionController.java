@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 
 
+
 import java.util.List;
 import java.util.Optional;
 
@@ -15,7 +16,6 @@ import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -32,7 +32,6 @@ import com.jpinfo.mudengine.action.utils.ActionTestResult;
 import com.jpinfo.mudengine.common.action.Action;
 import com.jpinfo.mudengine.common.exception.EntityNotFoundException;
 import com.jpinfo.mudengine.common.service.ActionService;
-import com.jpinfo.mudengine.common.utils.CommonConstants;
 
 @RestController
 @RequestMapping("/action")
@@ -51,7 +50,7 @@ public class ActionController implements ActionService {
 	private ActionHandler handler;
 
 	@Override
-	public Iterable<Action> getActiveActions(@RequestHeader String authToken, @PathVariable Long actorCode) {
+	public Iterable<Action> getActiveActions(@PathVariable Long actorCode) {
 		
 		List<Action> responseList = new ArrayList<>();
 		
@@ -67,7 +66,7 @@ public class ActionController implements ActionService {
 	}
 
 	@Override
-	public Action getAction(@RequestHeader String authToken, @PathVariable Long actionCode) {
+	public Action getAction(@PathVariable Long actionCode) {
 		
 		Action response = null;
 		
@@ -82,7 +81,7 @@ public class ActionController implements ActionService {
 	}	
 	
 	@Override
-	public Action insertCommand(@RequestHeader(CommonConstants.AUTH_TOKEN_HEADER) String authToken, 
+	public Action insertCommand( 
 			@PathVariable("commandId") Integer commandId,
 			@RequestParam("actorCode") Long actorCode,
 			@RequestParam("mediatorCode") Optional<String> mediatorCode, 
@@ -183,7 +182,7 @@ public class ActionController implements ActionService {
 	}
 	
 	@Override
-	public void cancelAction(@RequestHeader String authToken, @PathVariable Long actionCode) {
+	public void cancelAction(@PathVariable Long actionCode) {
 		
 		MudAction dbAction = repository.findActiveOne(actionCode);
 		
@@ -196,7 +195,7 @@ public class ActionController implements ActionService {
 	}
 
 	@Override
-	public void cancelAllActionFromBeing(@RequestHeader String authToken, @PathVariable Long actorCode) {
+	public void cancelAllActionFromBeing(@PathVariable Long actorCode) {
 		
 		List<MudAction> dbActionList = repository.findActiveByActorCode(actorCode);
 		
