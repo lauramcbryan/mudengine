@@ -2,15 +2,17 @@ package com.jpinfo.mudengine.item.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.jpinfo.mudengine.common.exception.EntityNotFoundException;
 import com.jpinfo.mudengine.common.itemclass.ItemClass;
 import com.jpinfo.mudengine.common.service.ItemClassService;
+import com.jpinfo.mudengine.common.utils.LocalizedMessages;
 import com.jpinfo.mudengine.item.model.MudItemClass;
+import com.jpinfo.mudengine.item.model.converter.ItemClassConverter;
 import com.jpinfo.mudengine.item.repository.ItemClassRepository;
-import com.jpinfo.mudengine.item.utils.ItemHelper;
 
 @RestController
 public class ItemClassController implements ItemClassService {
@@ -23,9 +25,9 @@ public class ItemClassController implements ItemClassService {
 		
 		MudItemClass found = repository
 				.findById(id)
-				.orElseThrow(() -> new EntityNotFoundException("Item Class entity not found"));
+				.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.ITEM_CLASS_NOT_FOUND));
 		
-		return ItemHelper.buildItemClass(found);
+		return ItemClassConverter.convert(found);
 	}
 
 }

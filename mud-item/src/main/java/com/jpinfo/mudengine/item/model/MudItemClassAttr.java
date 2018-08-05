@@ -23,4 +23,9 @@ public class MudItemClassAttr implements Serializable {
 
 	@Column(name="attr_value")
 	private Integer attrValue;
+	
+	@Transient
+	public String getAttrCode() {
+		return id.getAttrCode();
+	}
 }

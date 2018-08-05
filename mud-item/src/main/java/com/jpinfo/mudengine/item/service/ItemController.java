@@ -20,6 +20,8 @@ import com.jpinfo.mudengine.common.utils.LocalizedMessages;
 import com.jpinfo.mudengine.item.model.MudItem;
 import com.jpinfo.mudengine.item.model.MudItemAttr;
 import com.jpinfo.mudengine.item.model.MudItemClass;
+import com.jpinfo.mudengine.item.model.converter.ItemConverter;
+import com.jpinfo.mudengine.item.model.converter.MudItemAttrConverter;
 import com.jpinfo.mudengine.item.repository.ItemClassRepository;
 import com.jpinfo.mudengine.item.repository.ItemRepository;
 import com.jpinfo.mudengine.item.utils.ItemHelper;
@@ -42,7 +44,7 @@ public class ItemController implements ItemService {
 				.findById(itemId)
 				.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.ITEM_NOT_FOUND));
 		
-		response = ItemHelper.buildItem(dbItem);
+		response = ItemConverter.convert(dbItem);
 		
 		return response;
 	}
@@ -56,61 +58,129 @@ public class ItemController implements ItemService {
 		MudItem dbItem = itemRepository.findById(itemId)
 				.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.ITEM_NOT_FOUND));
 		
+		// 1. Updating basic fields
 		dbItem.setCurWorld(requestItem.getCurWorld());
 		dbItem.setCurPlaceCode(requestItem.getCurPlaceCode());
 		dbItem.setQuantity(requestItem.getQuantity());
 		dbItem.setCurOwner(requestItem.getCurOwner());
 		
-		// Adjusting the attributes in database against those in request
-		// (This is done even if the itemClass has changed the attributes)
+		// 2. Checking item attributes
+		// ============================================
+		internalSyncAttr(dbItem, requestItem);
+		
+		// 3. Check item duration
+		// ============================================
+		boolean itemToBeDestroyed = internalSyncItemDuration(dbItem, requestItem);
+		
+		if (itemToBeDestroyed) {
 			
+			// destroy the item
+			destroyItem(itemId);
+			
+			// Retrieve it again from database
+			dbItem = itemRepository.findById(itemId)
+					.orElse(null);
+			
+			response = ItemConverter.convert(dbItem);
+			
+		} else {
+			
+			// 4. Check item class
+			// ============================================
+			
+			// if itemClass has changed, resync the attributes of changed item
+			if (!dbItem.getItemClass().getItemClassCode().equals(requestItem.getItemClassCode())) {
+				internalUpdateClass(dbItem, requestItem.getItemClassCode());
+			}
+
+			// Save the changes in database
+			MudItem changedDbItem = itemRepository.save(dbItem);
+			
+			// Build the response
+			response = ItemConverter.convert(changedDbItem);
+		}
+		
+		
+		return response;
+	}
+	
+	/**
+	 * This method syncs up the attribute list present in database
+	 * with the ones present in 
+	 * @param dbItem
+	 * @param requestItem
+	 */
+	private void internalSyncAttr(MudItem dbItem, Item requestItem) {
+
 		// Looking for attributes to remove
-		List<MudItemAttr> removeList = 
-			dbItem.getAttrs().stream()
-				// Filtering attributes from db record that doesn't exist in request
-				.filter(d -> !requestItem.getAttrs().containsKey(d.getId().getAttrCode()))
-				.collect(Collectors.toList());
+		dbItem.getAttrs().removeIf(d -> 
+			// Filtering attributes from db record that doesn't exist in request
+			!requestItem.getAttrs().containsKey(d.getAttrCode())			
+		);
 
-		// Remove from list all records found
-		dbItem.getAttrs().removeAll(removeList);
-
-		// Looking for attributes to add
+		// Looking for attributes to add/update
 		for(String curAttr: requestItem.getAttrs().keySet()) {
 			
-			boolean found = false;
-			for(MudItemAttr curItemAttr: dbItem.getAttrs()) {
-				
-				if (curItemAttr.getId().getAttrCode().equals(curAttr)) {
-					curItemAttr.setAttrValue(requestItem.getAttrs().get(curAttr));
-					found = true;
-				}
-			}
+			Integer curAttrValue = requestItem.getAttrs().get(curAttr);
 			
-			if (!found) {
+			Optional<MudItemAttr> dbItemAttr =
+				dbItem.getAttrs().stream()
+					.filter(d -> d.getAttrCode().equals(curAttr))
+					.findFirst();
+			
+			if (dbItemAttr.isPresent()) {
+				dbItemAttr.get().setAttrValue(curAttrValue);
+			} else {
 				dbItem.getAttrs().add(
-						ItemHelper.buildMudItemAttr(dbItem.getItemCode(), curAttr, requestItem.getAttrs().get(curAttr))
+						MudItemAttrConverter.build(dbItem.getItemCode(), curAttr, curAttrValue)
 						);
 			}
 		}
+	}
+	
+	private boolean internalSyncItemDuration(MudItem dbItem, Item requestItem) {
+		
+		boolean itemDestroyed = false;
+		
+		// Check current place health
+		// First, we obtain the maxHP for this place
+		// if this value is different from zero, it means that this is a place that can be destroyed
+		Integer maxDuration = 
+				dbItem.getAttrs().stream()
+					.filter(d-> d.getAttrCode().equals(ItemHelper.ITEM_MAX_DURATION_ATTR))
+					.mapToInt(MudItemAttr::getAttrValue)
+					.findFirst()
+					.orElse(0);
+		
+		// Retrieve the current HP of the place.  That value came from the request
+		Integer currentDuration = requestItem.getAttrs().getOrDefault(ItemHelper.ITEM_DURATION_ATTR, 0);
+		
+		// If the currentItem has a duration and it is exhausted		
+		itemDestroyed = (maxDuration!=0) && (currentDuration<=0);
+		
+		// Checks if the current duration is greater than maximum
+		if ((maxDuration!=0) && (currentDuration > maxDuration)) {
+			
+			// Adjusts the current duration to the maximum
+			dbItem.getAttrs().stream()
+				.filter(d -> d.getAttrCode().equals(ItemHelper.ITEM_DURATION_ATTR))
+				.findFirst()
+				.ifPresent(e -> e.setAttrValue(maxDuration));
+		}
+		
+		return itemDestroyed;
+	}
+	
+	private void internalUpdateClass(MudItem dbItem, String itemClassCode) {
 
-		// if the itemClass is changing, reset the attributes
-		if (!dbItem.getItemClass().getItemClass().equals(requestItem.getItemClassCode())) {
-		
-			MudItemClass dbClassItem = itemClassRepository
-					.findById(requestItem.getItemClassCode())
-					.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.ITEM_CLASS_NOT_FOUND));
+		MudItemClass dbClassItem = itemClassRepository
+				.findById(itemClassCode)
+				.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.ITEM_CLASS_NOT_FOUND));
 
-			// Replace all current attributes from old class by the new one
-			dbItem = ItemHelper.changeItemAttrs(dbItem, dbItem.getItemClass(), dbClassItem);
-			dbItem.setItemClass(dbClassItem);
-		} 
+		// Replace all current attributes from old class by the new one
+		internalSyncAttr(dbItem, dbItem.getItemClass(), dbClassItem);
+		dbItem.setItemClass(dbClassItem);
 		
-		
-		dbItem = itemRepository.save(dbItem);
-		
-		response = ItemHelper.buildItem(dbItem);
-		
-		return response;
 	}
 	
 	@Override
@@ -140,25 +210,64 @@ public class ItemController implements ItemService {
 			if (quantity.isPresent())
 				newDbItem.setQuantity(quantity.get());
 			else
-				newDbItem.setQuantity(1);
+				newDbItem.setQuantity(ItemHelper.CREATE_DEFAULT_QUANTITY);
 		
 			// Saving the entity (to get the itemCode)
 			newDbItem = itemRepository.save(newDbItem);
 		
 			// Populating the attrs
-			newDbItem = ItemHelper.changeItemAttrs(newDbItem, null, dbClassItem);
+			internalSyncAttr(newDbItem, null, dbClassItem);
 		
 			// Saving again
 			itemRepository.save(newDbItem);
 		
 			// Building the response
-			response = ItemHelper.buildItem(newDbItem);
+			response = ItemConverter.convert(newDbItem);
 			
 		} else {
 			throw new IllegalParameterException(LocalizedMessages.ITEM_NO_OWNER);
 		}
 		
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
+	}
+	
+	private MudItem internalSyncAttr(final MudItem dbItem, final MudItemClass previousItemClass, final MudItemClass itemClass) {
+		
+		// If a previous itemClass exist, remove the attributes set by it
+		if (previousItemClass!=null) {
+
+			dbItem.getAttrs().removeIf(d -> { 
+				
+				// Check if exists in the old class
+				boolean existsInOldClass =
+						previousItemClass.getAttrs().stream()
+						.anyMatch(e -> e.getAttrCode().equals(d.getAttrCode()));
+				
+				// Check if exists in the new class
+				boolean existsInNewClass =
+						itemClass.getAttrs().stream()
+						.anyMatch(e -> e.getAttrCode().equals(d.getAttrCode()));
+				
+				return existsInOldClass && (!existsInNewClass);
+			});
+		}
+		
+		// Mounting the list of attributes to add
+		List<MudItemAttr> addAttrList = 
+			itemClass.getAttrs().stream()
+				// Filtering out those who already exists
+				.filter(d ->  
+						dbItem.getAttrs().stream()
+								.noneMatch(e -> e.getAttrCode().equals(d.getAttrCode()))
+					)
+				// Converting List<MudItemClassAttr> to List<MudItemAttr>
+				.map(d -> MudItemAttrConverter.build(dbItem.getItemCode(), d))
+				.collect(Collectors.toList());
+
+		// Adding those from new attr list
+		dbItem.getAttrs().addAll(addAttrList);
+
+		return dbItem;
 	}
 	
 	@Override
@@ -169,20 +278,26 @@ public class ItemController implements ItemService {
 				.findById(itemId)
 				.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.ITEM_NOT_FOUND));
 		
-		itemRepository.delete(dbItem);
+		if (dbItem.getItemClass().getDemiseItemClassCode()!=null) {
+			internalUpdateClass(dbItem, dbItem.getItemClass().getDemiseItemClassCode());
+		} else {
+			
+			itemRepository.delete(dbItem);
+		}
 	}
 
 	@Override
 	public List<Item> getAllFromPlace(@PathVariable String worldName, @PathVariable Integer placeCode) {
 		
-		List<Item> responseList = new ArrayList<>();
+		List<Item> responseList;
 		
 		List<MudItem> dbResponse = itemRepository.findByCurWorldAndCurPlaceCode(worldName, placeCode);
 		
-		
-		dbResponse.stream().forEach(d-> 
-			responseList.add(ItemHelper.buildItem(d))
-		);
+		responseList = 
+			dbResponse.stream()
+				.map(ItemConverter::convert)
+				.collect(Collectors.toList());
+			
 		
 		return responseList;
 	}
@@ -190,13 +305,14 @@ public class ItemController implements ItemService {
 	@Override
 	public List<Item> getAllFromBeing(@PathVariable Long owner) {
 		
-		List<Item> responseList = new ArrayList<>();
+		List<Item> responseList;
 		
 		List<MudItem> dbResponse = itemRepository.findByCurOwner(owner);
-		
-		dbResponse.stream().forEach(d-> 
-			responseList.add(ItemHelper.buildItem(d))
-		);
+
+		responseList = 
+				dbResponse.stream()
+					.map(ItemConverter::convert)
+					.collect(Collectors.toList());
 		
 		return responseList;
 	}
@@ -206,9 +322,10 @@ public class ItemController implements ItemService {
 		
 		List<MudItem> dbResponse = itemRepository.findByCurWorldAndCurPlaceCode(worldName, placeCode);
 		
-		dbResponse.stream().forEach(d-> 
-			itemRepository.delete(d)
-		);
+		// We don't have any check for demisedItemClass here... it's assumed that the item is being destroyed
+		// due to the place being destroyed.
+		
+		itemRepository.deleteAll(dbResponse);
 	}
 
 	@Override

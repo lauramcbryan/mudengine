@@ -18,8 +18,8 @@ public class MudItemClassAttrPK implements Serializable {
 	//default serial version id, required for serializable classes.
 	private static final long serialVersionUID = 1L;
 
-	@Column(name="item_class", insertable=false, updatable=false)
-	private String itemClass;
+	@Column(name="item_class_code", insertable=false, updatable=false)
+	private String itemClassCode;
 
 	@Column(name="attr_code")
 	private String attrCode;

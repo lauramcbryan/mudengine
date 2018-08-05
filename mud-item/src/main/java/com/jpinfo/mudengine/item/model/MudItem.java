@@ -26,7 +26,7 @@ public class MudItem implements Serializable {
 	private Long itemCode;
 
 	@ManyToOne
-	@JoinColumn(name="item_class", referencedColumnName="item_class")
+	@JoinColumn(name="item_class", referencedColumnName="ITEM_CLASS_CODE")
 	private MudItemClass itemClass;
 	
 	@Column(name="current_world")
