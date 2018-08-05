@@ -1,15 +1,15 @@
-package com.jpinfo.mudengine.being.utils;
+package com.jpinfo.mudengine.being.model.converter;
 
 import com.jpinfo.mudengine.being.model.MudBeingClass;
 import com.jpinfo.mudengine.being.model.MudBeingClassAttr;
 import com.jpinfo.mudengine.being.model.MudBeingClassSkill;
 import com.jpinfo.mudengine.common.being.BeingClass;
 
-public class BeingClassHelper {
-	
-	private BeingClassHelper() { }
+public class BeingClassConverter {
 
-	public static BeingClass buildBeingClass(MudBeingClass a) {
+	private BeingClassConverter() { }
+	
+	public static BeingClass convert(MudBeingClass a) {
 		
 		BeingClass result = new BeingClass();
 		
@@ -30,4 +30,5 @@ public class BeingClassHelper {
 		
 		return result;
 	}
+	
 }

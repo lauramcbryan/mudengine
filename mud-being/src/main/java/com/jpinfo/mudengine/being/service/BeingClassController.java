@@ -2,6 +2,7 @@ package com.jpinfo.mudengine.being.service;
 
 import java.util.ArrayList;
 
+
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,11 +11,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.jpinfo.mudengine.being.model.MudBeingClass;
+import com.jpinfo.mudengine.being.model.converter.BeingClassConverter;
 import com.jpinfo.mudengine.being.repository.BeingClassRepository;
-import com.jpinfo.mudengine.being.utils.BeingClassHelper;
 import com.jpinfo.mudengine.common.being.BeingClass;
 import com.jpinfo.mudengine.common.exception.EntityNotFoundException;
 import com.jpinfo.mudengine.common.service.BeingClassService;
+import com.jpinfo.mudengine.common.utils.LocalizedMessages;
 
 @RestController
 public class BeingClassController implements BeingClassService {
@@ -27,10 +29,10 @@ public class BeingClassController implements BeingClassService {
 		
 		MudBeingClass found = repository
 				.findById(id)
-				.orElseThrow(() -> new EntityNotFoundException("Item class entity not found"));
+				.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.BEING_CLASS_NOT_FOUND));
 		
 	
-		return BeingClassHelper.buildBeingClass(found);
+		return BeingClassConverter.convert(found);
 	}
 
 	@Override
@@ -40,9 +42,8 @@ public class BeingClassController implements BeingClassService {
 		
 		Iterable<MudBeingClass> dbList = repository.findAll();
 		
-		
 		dbList.forEach(d -> 
-			resultList.add(BeingClassHelper.buildBeingClass(d))
+			resultList.add(BeingClassConverter.convert(d))
 		);
 		
 		return resultList;
