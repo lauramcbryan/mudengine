@@ -175,10 +175,11 @@ public class PlayerController implements PlayerService {
 		
 		if (canAccess(username)) {
 		
-			List<MudSession> lstSessions = sessionRepository.findActiveSession(username);
+			Optional<MudSession> dbSession = sessionRepository.findActiveSession(username);
 			
-			if (!lstSessions.isEmpty()) {
-				session = PlayerHelper.buildSession(lstSessions.get(0));
+			if (dbSession.isPresent()) {
+				
+				session = PlayerHelper.buildSession(dbSession.get());
 			} else {
 				throw new EntityNotFoundException(LocalizedMessages.SESSION_NOT_FOUND);
 			}
@@ -202,7 +203,7 @@ public class PlayerController implements PlayerService {
 			case Player.STATUS_ACTIVE:
 				
 				// Find all the active sessions and terminate them
-				List<MudSession> lstSessions = sessionRepository.findActiveSession(username);
+				List<MudSession> lstSessions = sessionRepository.findAllActiveSession(username);
 				
 				lstSessions.forEach(d -> {
 					
@@ -267,47 +268,55 @@ public class PlayerController implements PlayerService {
 		
 		if (canAccess(username)) {
 		
-			List<MudSession> lstSessions = sessionRepository.findActiveSession(username);
+			MudSession dbSession = 
+					sessionRepository.findActiveSession(username)
+					.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.SESSION_NOT_FOUND));
 			
-			if (!lstSessions.isEmpty()) {
+			Being selectedBeing= null;
+			
+			if (beingCode.isPresent()) {
+				
+				Long activeBeingCode = beingCode.get();
 
-				// Get the first session data found
-				MudSession dbSession = lstSessions.get(0);
+				// Set the beingCode in the session object					
+				dbSession.setBeingCode(activeBeingCode);
+				
+				// Find the being record for this player					
+				dbSession.getPlayer().getBeingList().stream()
+					.filter(e -> e.getId().getBeingCode().equals(activeBeingCode))
+					.findFirst()
+					.ifPresent(f -> 
+						// Update the last time played
+						f.setLastPlayed(new Date(System.currentTimeMillis()))
+					);
+				
+				selectedBeing = beingClient.getBeing(activeBeingCode);
+				
+			} else {
 				
 				// Erases the beingCode
 				dbSession.setBeingCode(null);
-				
-				beingCode.ifPresent(d -> 
-
-					// Find the being record for this player					
-					dbSession.getPlayer().getBeingList().stream()
-						.filter(e -> e.getId().getBeingCode().equals(d))
-						.findFirst()
-						.ifPresent(f -> {
-							// Update the last time played
-							f.setLastPlayed(new Date(System.currentTimeMillis()));
-							
-							// Set the beingCode in the session object
-							dbSession.setBeingCode(beingCode.get());
-					}));
-				
-				sessionRepository.save(dbSession);
-								
-				// Retrieves the Session object
-				Session sessionData = PlayerHelper.buildSession(dbSession);
-				
-				// Retrieves the player object
-				Player playerData = PlayerHelper.buildPlayer(dbSession.getPlayer());
-				
-				String authToken = (String)SecurityContextHolder.getContext().getAuthentication().getCredentials();
-				
-				// Update the authToken
-				HttpHeaders header = updateAuthHeaders(authToken, playerData, sessionData);
-				response = new ResponseEntity<>(sessionData, header, HttpStatus.ACCEPTED);
-				
-			} else {
-				throw new EntityNotFoundException(LocalizedMessages.SESSION_NOT_FOUND);
 			}
+			
+			// Update in database				
+			sessionRepository.save(dbSession);
+			
+			// Converts the dbSession object to Session
+			Session sessionData = PlayerHelper.buildSession(dbSession);
+			
+			if (selectedBeing!=null)
+				sessionData.setCurWorldName(selectedBeing.getCurWorld());
+			
+			
+			// Retrieves the player object
+			Player playerData = PlayerHelper.buildPlayer(dbSession.getPlayer());
+			
+			String authToken = (String)SecurityContextHolder.getContext().getAuthentication().getCredentials();
+			
+			// Update the authToken
+			HttpHeaders header = updateAuthHeaders(authToken, playerData, sessionData);
+			response = new ResponseEntity<>(sessionData, header, HttpStatus.ACCEPTED);
+			
 		} else {
 			throw new AccessDeniedException(LocalizedMessages.PLAYER_ACCESS_DENIED);
 		}
