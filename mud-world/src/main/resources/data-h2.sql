@@ -39,8 +39,8 @@ insert into mud_place_attr(place_code, attr_code, attr_value) values(6, 'HP', 50
 insert into mud_place_attr(place_code, attr_code, attr_value) values(6, 'MAXHP', 100);
 
 
-INSERT INTO mud_place(place_code, place_class_code) values(7, 'TEST');
+INSERT INTO mud_place(place_code, place_class_code, name) values(7, 'TEST', 'TEST Place');
 
-INSERT INTO mud_place_exit(place_code, direction, name, opened, visible, target_place_code) values (1, 'OUT', 'Plain', true, true, 2);
+INSERT INTO mud_place_exit(place_code, direction, opened, visible, target_place_code) values (1, 'OUT', true, true, 2);
 
 alter sequence MUD_PLACE_SEQ restart with 8;

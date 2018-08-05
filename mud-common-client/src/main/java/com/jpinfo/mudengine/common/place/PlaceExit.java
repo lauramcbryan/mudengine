@@ -8,7 +8,7 @@ import lombok.Data;
 @Data
 public class PlaceExit {
 	
-	public static final List<String> DIRECTIONS = Arrays.asList("EAST", "NORTH", "UP", "DOWN", "SOUTH", "WEST");
+	protected static final List<String> DIRECTIONS = Arrays.asList("EAST", "NORTH", "UP", "DOWN", "SOUTH", "WEST");
 
 	private String name;
 	
@@ -21,4 +21,15 @@ public class PlaceExit {
 	private boolean lockable;
 
 	private Integer targetPlaceCode;
+	
+	
+	public static String getOpposedDirection(String direction) {
+		
+		int size = PlaceExit.DIRECTIONS.size(); 
+		int originalPos = PlaceExit.DIRECTIONS.indexOf(direction);
+		
+		int newpos = size - originalPos - 1;
+		
+		return PlaceExit.DIRECTIONS.get(newpos);
+	}
 }

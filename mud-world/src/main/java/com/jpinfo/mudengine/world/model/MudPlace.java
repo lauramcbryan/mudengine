@@ -16,6 +16,9 @@ public class MudPlace {
 	@GeneratedValue(generator="mud_place_seq", strategy=GenerationType.SEQUENCE)
 	@Column(name="PLACE_CODE")
 	private Integer placeCode;
+	
+	@Column(name="NAME")
+	private String placeName;
 
 	@ManyToOne
 	@JoinColumn(name="PLACE_CLASS_CODE", referencedColumnName="PLACE_CLASS_CODE", nullable = false)

@@ -1,13 +1,18 @@
 package com.jpinfo.mudengine.world.service;
 
+import java.util.HashSet;
+
 import java.util.Optional;
 
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,6 +20,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.jpinfo.mudengine.common.exception.EntityNotFoundException;
 import com.jpinfo.mudengine.common.exception.IllegalParameterException;
 import com.jpinfo.mudengine.common.place.Place;
+import com.jpinfo.mudengine.common.place.PlaceExit;
+import com.jpinfo.mudengine.common.security.MudUserDetails;
 import com.jpinfo.mudengine.common.service.PlaceService;
 import com.jpinfo.mudengine.common.utils.LocalizedMessages;
 import com.jpinfo.mudengine.world.client.BeingServiceClient;
@@ -23,8 +30,10 @@ import com.jpinfo.mudengine.world.model.MudPlace;
 import com.jpinfo.mudengine.world.model.MudPlaceAttr;
 import com.jpinfo.mudengine.world.model.MudPlaceClass;
 import com.jpinfo.mudengine.world.model.MudPlaceExit;
+import com.jpinfo.mudengine.world.model.converter.MudPlaceAttrConverter;
+import com.jpinfo.mudengine.world.model.converter.MudPlaceExitConverter;
+import com.jpinfo.mudengine.world.model.converter.PlaceConverter;
 import com.jpinfo.mudengine.world.repository.PlaceClassRepository;
-import com.jpinfo.mudengine.world.repository.PlaceExitRepository;
 import com.jpinfo.mudengine.world.repository.PlaceRepository;
 import com.jpinfo.mudengine.world.util.WorldHelper;
 
@@ -32,6 +41,8 @@ import io.swagger.annotations.*;
 
 @RestController
 public class PlaceController implements PlaceService {
+	
+	private static final Logger log = LoggerFactory.getLogger(PlaceController.class);
 	
 	@Autowired
 	private ItemServiceClient itemService;
@@ -43,11 +54,11 @@ public class PlaceController implements PlaceService {
 	private PlaceRepository placeRepository;
 
 	@Autowired
-	private PlaceExitRepository placeExitRepository;
-	
-	@Autowired
 	private PlaceClassRepository placeClassRepository;
 
+	@Autowired
+	private PlaceConverter placeConverter;
+	
 	@Override
 	@ApiOperation(value="Returns information about a place")
 	public Place getPlace(
@@ -58,8 +69,9 @@ public class PlaceController implements PlaceService {
 		MudPlace dbPlace = placeRepository
 				.findById(placeId)
 				.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.PLACE_NOT_FOUND));
+
 		
-		response = WorldHelper.buildPlace(dbPlace);
+		response = placeConverter.convert(dbPlace);
 		
 		return response;
 	}
@@ -88,6 +100,13 @@ public class PlaceController implements PlaceService {
 			
 			// destroy the place
 			destroyPlace(dbPlace.getPlaceCode());
+
+			// Retrieve it again from the database.
+			dbPlace = placeRepository
+					.findById(placeId)
+					.orElse(null);
+			
+			response = placeConverter.convert(dbPlace);
 			
 		} else {
 
@@ -105,13 +124,13 @@ public class PlaceController implements PlaceService {
 			// 4.. Check place exits
 			// ============================================
 			
-			dbPlace = WorldHelper.updatePlaceExits(dbPlace, requestPlace);
+			internalSyncExits(dbPlace, requestPlace);
 	
 			// updating the place in database
 			MudPlace updatedPlace = placeRepository.save(dbPlace);
 			
 			// Mounting the response
-			response = WorldHelper.buildPlace(updatedPlace);
+			response = placeConverter.convert(updatedPlace);
 		}
 		
 		return response;
@@ -154,18 +173,37 @@ public class PlaceController implements PlaceService {
 		
 		if (previousPlaceClass!=null) {
 			
-			previousPlaceClass.getAttrs().stream()
-				.forEach(curClassAttr -> {
-					MudPlaceAttr oldAttr = WorldHelper.buildPlaceAttr(dbPlace.getPlaceCode(), curClassAttr);
-					dbPlace.getAttrs().remove(oldAttr);
-			});
+			// Check all the attributes that existed in old class
+			// and not exists in the new one
 			
+			dbPlace.getAttrs().removeIf(d -> {
+				
+				boolean existsInOldClass = previousPlaceClass.getAttrs().stream()
+						.anyMatch(e -> e.getAttrCode().equals(d.getAttrCode()));
+				
+				boolean existsInNewClass = placeClass.getAttrs().stream()
+						.anyMatch(e -> e.getAttrCode().equals(d.getAttrCode()));
+			
+				return existsInOldClass && !existsInNewClass;
+			});
 		}
 		
+		// Looking for attributes to add/update
 		placeClass.getAttrs().stream()
 			.forEach(curClassAttr -> {
-				MudPlaceAttr newAttr = WorldHelper.buildPlaceAttr(dbPlace.getPlaceCode(), curClassAttr);
-				dbPlace.getAttrs().add(newAttr);
+				
+				MudPlaceAttr dbAttr = 
+					dbPlace.getAttrs().stream()
+						.filter(e -> e.getAttrCode().equals(curClassAttr.getAttrCode()))
+						.findFirst()
+						.orElse(MudPlaceAttrConverter.convert(dbPlace.getPlaceCode(), curClassAttr));
+				
+				// Set the value regardless if the attr came from existing
+				// list or was created now
+				dbAttr.setAttrValue(curClassAttr.getAttrValue());
+				
+				// Update the attribute list in entity
+				dbPlace.getAttrs().add(dbAttr);
 		});
 
 		return dbPlace;
@@ -206,12 +244,40 @@ public class PlaceController implements PlaceService {
 				
 				// Creates a new attribute
 				dbPlace.getAttrs().add(
-						WorldHelper.buildPlaceAttr(dbPlace.getPlaceCode(), curAttr, curValue)
+						MudPlaceAttrConverter.build(dbPlace.getPlaceCode(), curAttr, curValue)
 						);
 			}
 		}
 
 		return dbPlace;
+	}
+	
+	private MudPlace internalSyncExits(MudPlace dbPlace, Place requestPlace) {
+		
+		// 4. exits		
+		if (requestPlace.getExits()!=null) {
+			
+			Set<MudPlaceExit> newExits = new HashSet<>();
+			
+			requestPlace.getExits().keySet().stream()
+				.forEach(curDirection -> {
+				
+				PlaceExit curExit = requestPlace.getExits().get(curDirection);
+				
+				newExits.add(
+						MudPlaceExitConverter.build(curExit, dbPlace.getPlaceCode(), curDirection)
+						);
+			});
+			
+			// As hibernate manages the child list returned by him, we must not to create
+			// a new list, but to clear the existing one to force DELETE/UPDATE of changed entries
+			dbPlace.getExits().clear();
+			dbPlace.getExits().addAll(newExits);
+			
+		}
+		
+		return dbPlace;
+		
 	}
 	
 	private MudPlace internalUpdateClass(MudPlace original, String newPlaceClassCode) {
@@ -223,16 +289,6 @@ public class PlaceController implements PlaceService {
 
 		internalSyncAttr(original, original.getPlaceClass(), placeClass);
 		original.setPlaceClass(placeClass);
-
-		// Find all exits pointing to this place
-		Iterable<MudPlaceExit> exitList = placeExitRepository.findByTargetPlaceCode(original.getPlaceCode());
-		
-		// Update them all
-		exitList.forEach(curExit -> {
-			curExit.setName(placeClass.getName());
-			placeExitRepository.save(curExit);
-			
-		});
 		
 		return original;
 	}
@@ -257,25 +313,33 @@ public class PlaceController implements PlaceService {
 			
 			// Destroy the place
 			placeRepository.delete(dbPlace);
+
+			// Sends a notification for other entities that the current place is being destroyed
 			
-			try {
+			// First, get the session data from securityContext in order to have the curWorldName recorded there
+			MudUserDetails uDetails = (MudUserDetails)SecurityContextHolder.getContext()
+					.getAuthentication().getDetails();
 			
-				// Remove all beings from the place
-				// THAT MUST GOES FIRST!!!
-				// This call will drop all items belonging to beings into the place
-				// TODO: solve the worldName
-				beingService.destroyAllFromPlace("aforgotten", placeId);
+			uDetails.getSessionData().ifPresent(d -> {
+
+				try {
 				
-				// Remove all items from the place
-				// (That will include items dropped from beings above)
-				// TODO: solve the worldName
-				itemService.destroyAllFromPlace("aforgotten", placeId);
+					// Remove all beings from the place
+					// THAT MUST GOES FIRST!!!
+					// This call will drop all items belonging to beings into the place
+					beingService.destroyAllFromPlace(d.getCurWorldName(), placeId);
+					
+					// Remove all items from the place
+					// (That will include items dropped from beings above)
+					itemService.destroyAllFromPlace(d.getCurWorldName(), placeId);
+					
+				} catch(Exception e) {
+					
+					// Any exception on these calls will be disregarded
+					log.error("Error while cascading place delete to being and item", e);
+				}
 				
-			} catch(Exception e) {
-				
-				// Any exception on these calls will be disregarded
-				// TODO: Log this exception
-			}
+			});
 		}
 	}
 
@@ -296,7 +360,7 @@ public class PlaceController implements PlaceService {
 				.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.PLACE_NOT_FOUND));
 		
 		// Check the corresponding exit of target place to be update in this flow
-		String correspondingDirection = WorldHelper.getOpposedDirection(direction);
+		String correspondingDirection = PlaceExit.getOpposedDirection(direction);
 
 		// Check if the target place already has an exit to this direction
 		if (targetDbPlace.getExits().stream()
@@ -315,32 +379,28 @@ public class PlaceController implements PlaceService {
 		internalSyncAttr(dbPlace, null, dbPlaceClass);
 
 		// Creating the new exit
-		MudPlaceExit newExit = WorldHelper.buildMudPlaceExit(dbPlace.getPlaceCode(), 
-				direction, targetPlaceCode);
-		newExit.setName(targetDbPlace.getPlaceClass().getName());
-		newExit.setOpened(true);
-		newExit.setVisible(true);
-		
-		dbPlace.getExits().add(newExit);
+		dbPlace.getExits().add(
+				MudPlaceExitConverter.build(
+						dbPlace.getPlaceCode(), 
+						direction, 
+						targetPlaceCode)
+				);
 		
 		// Updating the place in database
 		dbPlace = placeRepository.save(dbPlace);
 		
 		// Updating the targetPlace exit to have a corresponding exit to new place created
-		MudPlaceExit correspondingExit = WorldHelper.buildMudPlaceExit(targetDbPlace.getPlaceCode(), 
-				WorldHelper.getOpposedDirection(direction), 
+		MudPlaceExit correspondingExit = MudPlaceExitConverter.build(
+				targetDbPlace.getPlaceCode(), 
+				correspondingDirection, 
 				dbPlace.getPlaceCode());
-		correspondingExit.setName(dbPlaceClass.getName());
-		correspondingExit.setOpened(true);
-		correspondingExit.setVisible(true);
 		
 		targetDbPlace.getExits().add(correspondingExit);
-		
 		placeRepository.save(targetDbPlace);
 		
-		response = WorldHelper.buildPlace(dbPlace);
+		response = placeConverter.convert(dbPlace);
 		
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
-	}	
+	}
 	
 }

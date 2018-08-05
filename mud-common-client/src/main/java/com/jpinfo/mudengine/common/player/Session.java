@@ -26,10 +26,12 @@ public class Session implements java.io.Serializable {
 	
 	private Long beingCode;
 	
+	private String curWorldName;
+	
 	public Session(Map<String, Object> map) {
 		
-		this.sessionId = new Long(String.valueOf(map.get("sessionId")));
-		this.playerId = new Long(String.valueOf(map.get("playerId")));
+		this.sessionId = Long.valueOf(String.valueOf(map.get("sessionId")));
+		this.playerId = Long.valueOf(String.valueOf(map.get("playerId")));
 		
 		if (map.get("sessionStart")!=null)
 			this.sessionStart = new Date((Long)map.get("sessionStart"));
@@ -41,6 +43,8 @@ public class Session implements java.io.Serializable {
 		this.clientType = (String)map.get("clientType");
 		
 		if (map.get("beingCode")!=null)
-			this.beingCode = new Long(String.valueOf(map.get("beingCode")));
+			this.beingCode = Long.valueOf(String.valueOf(map.get("beingCode")));
+		
+		this.curWorldName = (String)map.get("curWorldName");
 	}
 }

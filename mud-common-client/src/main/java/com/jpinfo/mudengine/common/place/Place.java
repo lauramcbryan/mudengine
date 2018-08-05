@@ -10,6 +10,8 @@ import lombok.Data;
 public class Place {
 	
 	private Integer placeCode;
+	
+	private String placeName;
 
 	private String placeClassCode;
 	

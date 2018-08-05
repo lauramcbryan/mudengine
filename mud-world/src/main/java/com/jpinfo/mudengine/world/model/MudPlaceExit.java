@@ -7,18 +7,17 @@ import org.hibernate.annotations.ColumnDefault;
 import com.jpinfo.mudengine.world.model.pk.PlaceExitPK;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Entity
 @Table(name="MUD_PLACE_EXIT")
 @Data
+@EqualsAndHashCode(of="pk")
 public class MudPlaceExit {
 
 	@EmbeddedId
 	private PlaceExitPK pk;
 
-	@Column(length = 30)
-	private String name;
-	
 	@Column
 	@ColumnDefault(value = "true")	
 	private boolean opened;
@@ -35,6 +34,11 @@ public class MudPlaceExit {
 	@ColumnDefault(value = "false")	
 	private boolean lockable;
 
-	@Column(nullable = false)
-	private Integer targetPlaceCode;	
+	@Column(name="TARGET_PLACE_CODE", nullable = false)
+	private Integer targetPlaceCode;
+	
+	@Transient
+	public String getDirection() {
+		return pk.getDirection();
+	}
 }
