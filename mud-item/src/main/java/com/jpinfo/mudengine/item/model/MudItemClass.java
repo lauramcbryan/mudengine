@@ -22,6 +22,9 @@ public class MudItemClass implements Serializable {
 	@Id
 	@Column(name="ITEM_CLASS_CODE")
 	private String itemClassCode;
+	
+	@Column(name="ITEM_CLASS_NAME")
+	private String itemClassName;
 
 	private float size;
 

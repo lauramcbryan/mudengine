@@ -23,6 +23,10 @@ public class ItemConverter {
 			response.setQuantity(dbItem.getQuantity());
 			response.setCurOwner(dbItem.getCurOwner());
 			
+			response.setItemName(dbItem.getItemName()!=null ? 
+						dbItem.getItemName() : 
+						dbItem.getItemClass().getItemClassName());
+			
 			response.setItemClass(ItemClassConverter.convert(dbItem.getItemClass()));
 			
 			response.setAttrs(

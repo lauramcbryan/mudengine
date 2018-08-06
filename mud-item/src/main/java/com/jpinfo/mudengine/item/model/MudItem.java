@@ -24,9 +24,12 @@ public class MudItem implements Serializable {
 	@GeneratedValue(generator="mud_item_seq", strategy=GenerationType.SEQUENCE)
 	@Column(name="item_code")
 	private Long itemCode;
+	
+	@Column(name="name")
+	private String itemName;
 
 	@ManyToOne
-	@JoinColumn(name="item_class", referencedColumnName="ITEM_CLASS_CODE")
+	@JoinColumn(name="item_class_code", referencedColumnName="ITEM_CLASS_CODE")
 	private MudItemClass itemClass;
 	
 	@Column(name="current_world")

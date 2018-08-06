@@ -15,6 +15,7 @@ public class ItemClassConverter {
 		ItemClass result = new ItemClass();
 		
 		result.setItemClassCode(dbItemClass.getItemClassCode());
+		result.setItemClassName(dbItemClass.getItemClassName());
 		result.setSize(dbItemClass.getSize());
 		result.setWeight(dbItemClass.getWeight());
 		result.setDescription(dbItemClass.getDescription());
