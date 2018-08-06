@@ -106,7 +106,7 @@ public class BeingComposite implements ActionTarget  {
 			Float attrModifier = 0.0F;
 			
 			for (BeingAttrModifier curModifier: this.getBeing().getAttrModifiers()) {
-				if (curModifier.getAttribute().equals(curAttr)) {
+				if (curModifier.getAttrCode().equals(curAttr)) {
 					
 					attrModifier += curModifier.getOffset();
 				}

@@ -245,7 +245,7 @@ public class ClientHelper {
 			// Calculate the amount of modifiers applied			
 			for(BeingAttrModifier curModifier: activeBeing.getAttrModifiers()) {
 				
-				if (curModifier.getAttribute().equals(curAttrKey)) {
+				if (curModifier.getAttrCode().equals(curAttrKey)) {
 					curAttrModifiers +=curModifier.getOffset();
 				}
 				

@@ -6,6 +6,7 @@ import javax.persistence.*;
 import com.jpinfo.mudengine.being.model.pk.MudBeingSkillModifierPK;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 
 /**
@@ -15,6 +16,7 @@ import lombok.Data;
 @Entity
 @Table(name="mud_being_skill_modifier")
 @Data
+@EqualsAndHashCode(of="id")
 public class MudBeingSkillModifier implements Serializable {
 	private static final long serialVersionUID = 1L;
 

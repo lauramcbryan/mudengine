@@ -85,7 +85,7 @@ public class BeingConverter {
 			for (MudBeingAttrModifier curAttrModifier : dbBeing.getAttrModifiers()) {
 				BeingAttrModifier dummy = new BeingAttrModifier();
 
-				dummy.setAttribute(curAttrModifier.getId().getAttrCode());
+				dummy.setAttrCode(curAttrModifier.getId().getAttrCode());
 				dummy.setOriginCode(curAttrModifier.getId().getOriginCode());
 				dummy.setOriginType(curAttrModifier.getId().getOriginType());
 

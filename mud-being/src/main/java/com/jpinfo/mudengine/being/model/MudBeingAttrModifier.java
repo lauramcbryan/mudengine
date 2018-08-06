@@ -6,6 +6,7 @@ import javax.persistence.*;
 import com.jpinfo.mudengine.being.model.pk.MudBeingAttrModifierPK;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 
 /**
@@ -15,6 +16,7 @@ import lombok.Data;
 @Entity
 @Table(name="mud_being_attr_modifier")
 @Data
+@EqualsAndHashCode(of="id")
 public class MudBeingAttrModifier implements Serializable {
 	
 	private static final long serialVersionUID = 1L;

@@ -1,9 +1,9 @@
 package com.jpinfo.mudengine.being.service;
 
-import java.util.ArrayList;
-
 import java.util.List;
+
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,26 +18,18 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.jpinfo.mudengine.being.client.ItemServiceClient;
 import com.jpinfo.mudengine.being.model.MudBeing;
-import com.jpinfo.mudengine.being.model.MudBeingAttr;
-import com.jpinfo.mudengine.being.model.MudBeingAttrModifier;
 import com.jpinfo.mudengine.being.model.MudBeingClass;
-import com.jpinfo.mudengine.being.model.MudBeingClassAttr;
-import com.jpinfo.mudengine.being.model.MudBeingClassSkill;
-import com.jpinfo.mudengine.being.model.MudBeingClassSlot;
-import com.jpinfo.mudengine.being.model.MudBeingSkill;
-import com.jpinfo.mudengine.being.model.MudBeingSkillModifier;
 import com.jpinfo.mudengine.being.model.MudBeingSlot;
 import com.jpinfo.mudengine.being.model.converter.BeingConverter;
 import com.jpinfo.mudengine.being.model.converter.MudBeingAttrConverter;
+import com.jpinfo.mudengine.being.model.converter.MudBeingAttrModifierConverter;
 import com.jpinfo.mudengine.being.model.converter.MudBeingSkillConverter;
+import com.jpinfo.mudengine.being.model.converter.MudBeingSkillModifierConverter;
 import com.jpinfo.mudengine.being.model.converter.MudBeingSlotConverter;
-import com.jpinfo.mudengine.being.model.pk.MudBeingAttrModifierPK;
-import com.jpinfo.mudengine.being.model.pk.MudBeingSkillModifierPK;
 import com.jpinfo.mudengine.being.repository.BeingClassRepository;
 import com.jpinfo.mudengine.being.repository.BeingRepository;
+import com.jpinfo.mudengine.being.utils.BeingHelper;
 import com.jpinfo.mudengine.common.being.Being;
-import com.jpinfo.mudengine.common.being.BeingAttrModifier;
-import com.jpinfo.mudengine.common.being.BeingSkillModifier;
 import com.jpinfo.mudengine.common.exception.AccessDeniedException;
 import com.jpinfo.mudengine.common.exception.EntityNotFoundException;
 import com.jpinfo.mudengine.common.exception.IllegalParameterException;
@@ -71,11 +63,9 @@ public class BeingController implements BeingService {
 				.findById(beingCode)
 				.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.BEING_NOT_FOUND));
 		
-		boolean fullResponse = canAccess(dbBeing.getPlayerId());
+		response = BeingConverter.convert(dbBeing, canAccess(dbBeing.getPlayerId()));
 		
-		response = BeingConverter.convert(dbBeing, fullResponse);
-		
-		return expandBeingEquipment(response, dbBeing, fullResponse);
+		return expandBeingEquipment(response, dbBeing);
 	}
 	
 	@Override
@@ -89,16 +79,28 @@ public class BeingController implements BeingService {
 		
 		if (canAccess(dbBeing.getPlayerId())) {
 	
-			// Basic data
+			// Updating basic fields
 			dbBeing.setCurPlaceCode(requestBeing.getCurPlaceCode());
 			dbBeing.setCurWorld(requestBeing.getCurWorld());
-			dbBeing.setQuantity(requestBeing.getQuantity());
 			
-			// 2. attrModifiers
-			updateBeingAttrModifiers(dbBeing, requestBeing);
+			// We only update quantity for regular beings (non NPC and not player beings)
+			if (requestBeing.getBeingType().equals(Being.BEING_TYPE_REGULAR_NON_SENTIENT) ||
+					(requestBeing.getBeingType().equals(Being.BEING_TYPE_REGULAR_SENTIENT))) {
 			
-			// 3. skillModifiers
-			updateBeingSkillModifiers(dbBeing, requestBeing);
+				dbBeing.setQuantity(requestBeing.getQuantity());
+			}
+			
+			// 2. attributes
+			MudBeingAttrConverter.sync(dbBeing, requestBeing);
+			
+			// 3. skills
+			MudBeingSkillConverter.sync(dbBeing, requestBeing);
+			
+			// 4. attrModifiers
+			MudBeingAttrModifierConverter.sync(dbBeing, requestBeing);
+			
+			// 5. skillModifiers
+			MudBeingSkillModifierConverter.sync(dbBeing, requestBeing);
 
 		
 			// if the beingClass is changing, reset the attributes
@@ -108,9 +110,7 @@ public class BeingController implements BeingService {
 						.findById(requestBeing.getBeingClassCode())
 						.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.BEING_CLASS_NOT_FOUND));
 				
-				dbBeing = updateBeingClass(dbBeing, dbBeing.getBeingClass(), dbClassBeing);
-				
-				dbBeing.setBeingClass(dbClassBeing);
+				updateBeingClass(dbBeing, dbBeing.getBeingClass(), dbClassBeing);
 			}
 						
 			// Updating the entity
@@ -122,158 +122,6 @@ public class BeingController implements BeingService {
 		}
 		
 		return response;
-	}
-
-	private MudBeing updateBeingAttrModifiers(MudBeing dbBeing, Being requestBeing) {
-		
-		if (requestBeing.getAttrModifiers()!=null) {
-			
-			List<MudBeingAttrModifier> attrList = new ArrayList<>();
-			
-			for(BeingAttrModifier curAttrModifier: requestBeing.getAttrModifiers()) {
-				
-				MudBeingAttrModifier newDbAttrModifier = new MudBeingAttrModifier();
-				MudBeingAttrModifierPK newDbAttrModifierPK = new MudBeingAttrModifierPK();
-				
-				newDbAttrModifierPK.setAttrCode(curAttrModifier.getAttribute());
-				newDbAttrModifierPK.setBeingCode(dbBeing.getBeingCode());
-				newDbAttrModifierPK.setOriginCode(curAttrModifier.getOriginCode());
-				newDbAttrModifierPK.setOriginType(curAttrModifier.getOriginType());
-				
-				newDbAttrModifier.setId(newDbAttrModifierPK);
-				newDbAttrModifier.setOffset(curAttrModifier.getOffset());
-				newDbAttrModifier.setEndTurn(curAttrModifier.getEndTurn());
-				
-				attrList.add(newDbAttrModifier);
-			}
-
-			dbBeing.getAttrModifiers().clear();
-			dbBeing.getAttrModifiers().addAll(attrList);
-		}
-				
-		return dbBeing;
-	}
-	
-	
-	private MudBeing updateBeingSkillModifiers(MudBeing dbBeing, Being requestBeing) {
-		
-		if (requestBeing.getSkillModifiers()!=null) {
-			
-			List<MudBeingSkillModifier> skillList = new ArrayList<>();
-			
-			for(BeingSkillModifier curSkillModifier: requestBeing.getSkillModifiers()) {
-				
-				MudBeingSkillModifier newDbSkillModifier = new MudBeingSkillModifier();
-				MudBeingSkillModifierPK newDbSkillModifierPK = new MudBeingSkillModifierPK();
-				
-				newDbSkillModifierPK.setBeingCode(dbBeing.getBeingCode());
-				newDbSkillModifierPK.setSkillCode(curSkillModifier.getSkillCode());
-				newDbSkillModifierPK.setOriginCode(curSkillModifier.getOriginCode());
-				newDbSkillModifierPK.setOriginType(curSkillModifier.getOriginType());
-				
-				newDbSkillModifier.setId(newDbSkillModifierPK);
-				newDbSkillModifier.setOffset(curSkillModifier.getOffset());
-				newDbSkillModifier.setEndTurn(curSkillModifier.getEndTurn());
-				
-				skillList.add(newDbSkillModifier);
-			}
-
-			dbBeing.getSkillModifiers().clear();
-			dbBeing.getSkillModifiers().addAll(skillList);
-		}
-		
-		return dbBeing;
-	}
-	
-	private MudBeing updateBeingAttributes(MudBeing dbBeing, Being requestBeing) {
-
-		// Looking for attributes to remove
-		for(MudBeingAttr curItemAttr: dbBeing.getAttrs()) {
-			
-			// If it not exists in request, remove it
-			if (requestBeing.getAttrs().get(curItemAttr.getId().getAttrCode())==null) {
-				dbBeing.getAttrs().remove(curItemAttr);
-			}
-		}
-
-		// Looking for attributes to add
-		for(String curAttr: requestBeing.getAttrs().keySet()) {
-			
-			MudBeingAttr newAttr = MudBeingAttrConverter.build(dbBeing.getBeingCode(), 
-					curAttr, 
-					requestBeing.getAttrs().get(curAttr));
-			
-			if (!dbBeing.getAttrs().contains(newAttr)) {
-				dbBeing.getAttrs().add(newAttr);
-			}
-		}
-		
-		return dbBeing;
-	}
-	
-	private MudBeing updateBeingClass(MudBeing dbBeing, MudBeingClass previousClass, MudBeingClass beingClass) {
-		
-		if (previousClass!=null) {
-			
-			// Removing attributes set by previous being class
-			// (attributes modifiers aren't changed)
-			for (MudBeingClassAttr curAttr: previousClass.getAttributes()) {
-				
-				MudBeingAttr oldAttr = MudBeingAttrConverter.build(dbBeing.getBeingCode(), curAttr.getId().getAttrCode(), curAttr.getAttrValue());
-				
-				dbBeing.getAttrs().remove(oldAttr);
-			}
-			
-			// Removing skills set by previous being class
-			// (skills modifiers aren't changed)
-			for (MudBeingClassSkill curSkill: previousClass.getSkills()) {
-				
-				MudBeingSkill oldSkill = MudBeingSkillConverter.build(dbBeing.getBeingCode(), curSkill.getId().getSkillCode(), curSkill.getSkillValue());
-				
-				dbBeing.getSkills().remove(oldSkill);
-			}
-			
-			// Removing slots set by previous being class
-			for (MudBeingClassSlot curSlot: previousClass.getSlots()) {
-				
-				MudBeingSlot oldSlot = MudBeingSlotConverter.build(dbBeing.getBeingCode(), curSlot.getId().getSlotCode());
-				
-				dbBeing.getEquipment().remove(oldSlot);
-			}
-			
-		}
-		
-		// Adding attributes from new beingClass
-		for(MudBeingClassAttr curAttr: beingClass.getAttributes()) {
-			
-			MudBeingAttr newAttr = MudBeingAttrConverter.build(dbBeing.getBeingCode(), curAttr.getId().getAttrCode(), curAttr.getAttrValue());
-			
-			if (!dbBeing.getAttrs().contains(newAttr)) {
-				dbBeing.getAttrs().add(newAttr);
-			}
-		}
-		
-		// Adding skills from new beingClass
-		for (MudBeingClassSkill curSkill: beingClass.getSkills()) {
-			
-			MudBeingSkill newSkill = MudBeingSkillConverter.build(dbBeing.getBeingCode(), curSkill.getId().getSkillCode(), curSkill.getSkillValue());
-			
-			if (!dbBeing.getSkills().contains(newSkill)) {
-				dbBeing.getSkills().add(newSkill);
-			}
-		}
-		
-		// Adding slots from new beingClass
-		for (MudBeingClassSlot curSlot: beingClass.getSlots()) {
-		
-			MudBeingSlot newSlot = MudBeingSlotConverter.build(dbBeing.getBeingCode(), curSlot.getId().getSlotCode());
-			
-			if (!dbBeing.getEquipment().contains(newSlot)) {
-				dbBeing.getEquipment().add(newSlot);
-			}
-		}
-		
-		return dbBeing;
 	}
 	
 	
@@ -302,7 +150,7 @@ public class BeingController implements BeingService {
 		if (quantity!=null)
 			dbBeing.setQuantity(quantity);
 		else
-			dbBeing.setQuantity(1);
+			dbBeing.setQuantity(BeingHelper.CREATE_DEFAULT_QUANTITY);
 		
 		// Saving the entity (to have the beingCode)
 		dbBeing = repository.save(dbBeing);
@@ -310,7 +158,7 @@ public class BeingController implements BeingService {
 			
 		// 2. attributes  (from class)
 		// 3. skills  (from class)	
-		dbBeing = updateBeingClass(dbBeing, null, dbBeingClass);
+		updateBeingClass(dbBeing, null, dbBeingClass);
 		
 		dbBeing = repository.save(dbBeing);
 		
@@ -334,7 +182,6 @@ public class BeingController implements BeingService {
 			throw new IllegalParameterException(LocalizedMessages.BEING_NAME_IN_USE);
 		}
 
-		// Checking the playerId against the authenticated playerId
 		MudBeing dbBeing = new MudBeing();
 		
 		MudBeingClass dbBeingClass = classRepository
@@ -347,7 +194,7 @@ public class BeingController implements BeingService {
 		dbBeing.setCurWorld(worldName);
 		dbBeing.setPlayerId(playerId);
 		dbBeing.setName(beingName);
-		dbBeing.setQuantity(1);
+		dbBeing.setQuantity(BeingHelper.CREATE_DEFAULT_QUANTITY);
 		
 		// Saving the entity (to have the beingCode)
 		dbBeing = repository.save(dbBeing);
@@ -355,7 +202,7 @@ public class BeingController implements BeingService {
 			
 		// 2. attributes  (from class)
 		// 3. skills  (from class)	
-		dbBeing = updateBeingClass(dbBeing, null, dbBeingClass);
+		updateBeingClass(dbBeing, null, dbBeingClass);
 		
 		dbBeing = repository.save(dbBeing);
 		
@@ -370,17 +217,17 @@ public class BeingController implements BeingService {
 	@Override
 	public List<Being> getAllFromPlayer(@PathVariable Long playerId) {
 		
-		List<Being> response = null;
+		List<Being> response;
 		
 		if (canAccess(playerId)) {
 		
 			List<MudBeing> lstFound = repository.findByPlayerId(playerId);
 			
-			response = new ArrayList<>();
+			response =
+				lstFound.stream()
+					.map(BeingConverter::convert)
+					.collect(Collectors.toList());
 			
-			for(MudBeing curDbBeing: lstFound) {
-				response.add(BeingConverter.convert(curDbBeing, false));
-			}
 		} else {
 			throw new AccessDeniedException(LocalizedMessages.BEING_ACCESS_DENIED);
 		}
@@ -393,11 +240,11 @@ public class BeingController implements BeingService {
 
 		List<MudBeing> lstFound = repository.findByCurWorldAndCurPlaceCode(worldName, placeCode);
 		
-		List<Being> response = new ArrayList<>();
+		List<Being> response;
 		
-		for(MudBeing curDbBeing: lstFound) {
-			response.add(BeingConverter.convert(curDbBeing, false));
-		}
+		response = lstFound.stream()
+				.map(BeingConverter::convert)
+				.collect(Collectors.toList());
 		
 		return response;
 	}
@@ -422,7 +269,7 @@ public class BeingController implements BeingService {
 				
 			}
 			
-			repository.deleteById(beingCode);
+			repository.delete(dbBeing);
 			
 		} else {
 			throw new AccessDeniedException(LocalizedMessages.BEING_ACCESS_DENIED);
@@ -434,12 +281,12 @@ public class BeingController implements BeingService {
 		
 		List<MudBeing> lstFound = repository.findByCurWorldAndCurPlaceCode(worldName, placeCode);
 		
-		for(MudBeing curDbBeing: lstFound) {
-			
-			itemService.dropAllFromBeing(curDbBeing.getBeingCode(), worldName, placeCode);
-			
-			repository.delete(curDbBeing);
-		}
+		lstFound.stream()
+			.forEach(d -> {
+				
+				itemService.dropAllFromBeing(d.getBeingCode(), worldName, placeCode);
+				repository.delete(d);
+			});
 	}
 	
 	@Override
@@ -447,25 +294,49 @@ public class BeingController implements BeingService {
 		
 		List<MudBeing> lstFound = repository.findByPlayerId(playerId);
 		
-		for(MudBeing curDbBeing: lstFound) {
-			
-			itemService.dropAllFromBeing(curDbBeing.getBeingCode(), curDbBeing.getCurWorld(), curDbBeing.getCurPlaceCode());
-			
-			repository.delete(curDbBeing);
-		}
+		lstFound.stream()
+			.forEach(d -> {
+				
+				// Drop items carried by that being
+				itemService.dropAllFromBeing(d.getBeingCode(), d.getCurWorld(), d.getCurPlaceCode());
+				
+				// Delete the being in database
+				repository.delete(d);
+			});
+	}
+	
+	private MudBeing updateBeingClass(MudBeing dbBeing, MudBeingClass previousClass, MudBeingClass nextClass) {
+		
+		// Synchronizing attributes with the new being class
+		MudBeingAttrConverter.sync(dbBeing, previousClass, nextClass);
+		
+		// Synchronizing skills with the new being class
+		MudBeingSkillConverter.sync(dbBeing, previousClass, nextClass);
+		
+		// Synchronizing slots with the new being class
+		MudBeingSlotConverter.sync(dbBeing, previousClass, nextClass);
+
+		// Synchronizing attribute modifier with the new being class (no addition, only removal)
+		MudBeingAttrModifierConverter.sync(dbBeing, previousClass, nextClass);
+		
+		// Synchronizing skill modifier with the new being class (no addition, only removal)		
+		MudBeingSkillModifierConverter.sync(dbBeing, previousClass, nextClass);
+		
+		// Updating the being class
+		dbBeing.setBeingClass(nextClass);
+		
+		return dbBeing;
 	}
 
-	private Being expandBeingEquipment(Being responseBeing, MudBeing dbBeing, boolean fullResponse) {
+
+	private Being expandBeingEquipment(Being responseBeing, MudBeing dbBeing) {
 		
-		for(MudBeingSlot curSlot: dbBeing.getEquipment()) {
+		for(MudBeingSlot curSlot: dbBeing.getSlots()) {
 			
 			Item responseItem = null;
 			
 			if (curSlot.getItemCode()!=null) {
 				responseItem = itemService.getItem(curSlot.getItemCode());
-			} else {
-				responseItem = new Item();
-				responseItem.setItemClassCode("NOTHING");
 			}
 			
 			responseBeing.getEquipment().put(curSlot.getId().getSlotCode(), responseItem);

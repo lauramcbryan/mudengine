@@ -1,13 +1,15 @@
 package com.jpinfo.mudengine.being.model;
 
 import java.io.Serializable;
+
+
 import javax.persistence.*;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 
 /**
@@ -33,20 +35,20 @@ public class MudBeing implements Serializable {
 	private MudBeingClass beingClass;
 	
 	@OneToMany(mappedBy="id.beingCode", cascade=CascadeType.ALL, orphanRemoval=true)
-	private List<MudBeingAttr> attrs;
+	private Set<MudBeingAttr> attrs;
 
 	@OneToMany(mappedBy="id.beingCode", cascade=CascadeType.ALL, orphanRemoval=true)
-	private List<MudBeingSkill> skills;
+	private Set<MudBeingSkill> skills;
 	
 	@OneToMany(mappedBy="id.beingCode", cascade=CascadeType.ALL, orphanRemoval=true)
-	private List<MudBeingAttrModifier> attrModifiers;
+	private Set<MudBeingAttrModifier> attrModifiers;
 	
 	@OneToMany(mappedBy="id.beingCode", cascade=CascadeType.ALL, orphanRemoval=true)
-	private List<MudBeingSlot> equipment;
+	private Set<MudBeingSlot> slots;
 	
 	
 	@OneToMany(mappedBy="id.beingCode")
-	private List<MudBeingSkillModifier> skillModifiers;
+	private Set<MudBeingSkillModifier> skillModifiers;
 
 	@Column
 	private String name;
@@ -66,10 +68,10 @@ public class MudBeing implements Serializable {
 	private Integer quantity;
 
 	public MudBeing() {
-		this.attrs = new ArrayList<>();
-		this.skills = new ArrayList<>();
-		this.attrModifiers = new ArrayList<>();
-		this.skillModifiers = new ArrayList<>();
-		this.equipment = new ArrayList<>();
+		this.attrs = new HashSet<>();
+		this.skills = new HashSet<>();
+		this.attrModifiers = new HashSet<>();
+		this.skillModifiers = new HashSet<>();
+		this.slots = new HashSet<>();
 	}
 }
