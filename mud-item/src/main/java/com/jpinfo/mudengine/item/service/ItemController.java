@@ -2,6 +2,8 @@ package com.jpinfo.mudengine.item.service;
 
 import java.util.*;
 
+
+
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +56,7 @@ public class ItemController implements ItemService {
 		
 		Item response = null;
 		
-		// Retrieving the database record
+		// Retrieving the item record
 		MudItem dbItem = itemRepository.findById(itemId)
 				.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.ITEM_NOT_FOUND));
 		
@@ -102,40 +104,6 @@ public class ItemController implements ItemService {
 		
 		
 		return response;
-	}
-	
-	/**
-	 * This method syncs up the attribute list present in database
-	 * with the ones present in 
-	 * @param dbItem
-	 * @param requestItem
-	 */
-	private void internalSyncAttr(MudItem dbItem, Item requestItem) {
-
-		// Looking for attributes to remove
-		dbItem.getAttrs().removeIf(d -> 
-			// Filtering attributes from db record that doesn't exist in request
-			!requestItem.getAttrs().containsKey(d.getAttrCode())			
-		);
-
-		// Looking for attributes to add/update
-		for(String curAttr: requestItem.getAttrs().keySet()) {
-			
-			Integer curAttrValue = requestItem.getAttrs().get(curAttr);
-			
-			Optional<MudItemAttr> dbItemAttr =
-				dbItem.getAttrs().stream()
-					.filter(d -> d.getAttrCode().equals(curAttr))
-					.findFirst();
-			
-			if (dbItemAttr.isPresent()) {
-				dbItemAttr.get().setAttrValue(curAttrValue);
-			} else {
-				dbItem.getAttrs().add(
-						MudItemAttrConverter.build(dbItem.getItemCode(), curAttr, curAttrValue)
-						);
-			}
-		}
 	}
 	
 	private boolean internalSyncItemDuration(MudItem dbItem, Item requestItem) {
@@ -188,47 +156,87 @@ public class ItemController implements ItemService {
 		
 		Item response = null;
 		
+		boolean ownerPresent = owner.isPresent();
+		boolean placePresent = (worldName.isPresent() && placeCode.isPresent());
+		
 		// Check if a minimum parameters are present
-		if (owner.isPresent() || (placeCode.isPresent() && worldName.isPresent())) {
-		
-			MudItemClass dbClassItem = itemClassRepository
-					.findById(itemClassCode)
-					.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.ITEM_CLASS_NOT_FOUND));
-			
-			MudItem newDbItem = new MudItem();
-			newDbItem.setItemClass(dbClassItem);
-			
-			if (worldName.isPresent())
-				newDbItem.setCurWorld(worldName.get());
-			
-			if (placeCode.isPresent())
-				newDbItem.setCurPlaceCode(placeCode.get());
-			
-			if (owner.isPresent())
-				newDbItem.setCurOwner(owner.get());
-
-			if (quantity.isPresent())
-				newDbItem.setQuantity(quantity.get());
-			else
-				newDbItem.setQuantity(ItemHelper.CREATE_DEFAULT_QUANTITY);
-		
-			// Saving the entity (to get the itemCode)
-			newDbItem = itemRepository.save(newDbItem);
-		
-			// Populating the attrs
-			internalSyncAttr(newDbItem, null, dbClassItem);
-		
-			// Saving again
-			itemRepository.save(newDbItem);
-		
-			// Building the response
-			response = ItemConverter.convert(newDbItem);
-			
-		} else {
+		if (!ownerPresent && !placePresent) {
 			throw new IllegalParameterException(LocalizedMessages.ITEM_NO_OWNER);
 		}
 		
+		// Check if there's only one set of
+		if (ownerPresent && placePresent) {
+			throw new IllegalParameterException(LocalizedMessages.ITEM_BOTH_OWNER);			
+		}
+		
+		MudItemClass dbClassItem = itemClassRepository
+				.findById(itemClassCode)
+				.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.ITEM_CLASS_NOT_FOUND));
+		
+		MudItem newDbItem = new MudItem();
+		newDbItem.setItemClass(dbClassItem);
+		
+		if (worldName.isPresent())
+			newDbItem.setCurWorld(worldName.get());
+		
+		if (placeCode.isPresent())
+			newDbItem.setCurPlaceCode(placeCode.get());
+		
+		if (owner.isPresent())
+			newDbItem.setCurOwner(owner.get());
+
+		if (quantity.isPresent())
+			newDbItem.setQuantity(quantity.get());
+		else
+			newDbItem.setQuantity(ItemHelper.CREATE_DEFAULT_QUANTITY);
+	
+		// Saving the entity (to get the itemCode)
+		newDbItem = itemRepository.save(newDbItem);
+	
+		// Populating the attrs
+		internalSyncAttr(newDbItem, null, dbClassItem);
+	
+		// Saving again
+		itemRepository.save(newDbItem);
+	
+		// Building the response
+		response = ItemConverter.convert(newDbItem);
+		
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
+	}
+
+	/**
+	 * This method syncs up the attribute list present in database
+	 * with the ones present in 
+	 * @param dbItem
+	 * @param requestItem
+	 */
+	private void internalSyncAttr(MudItem dbItem, Item requestItem) {
+
+		// Looking for attributes to remove
+		dbItem.getAttrs().removeIf(d -> 
+			// Filtering attributes from db record that doesn't exist in request
+			!requestItem.getAttrs().containsKey(d.getAttrCode())			
+		);
+
+		// Looking for attributes to add/update
+		for(String curAttr: requestItem.getAttrs().keySet()) {
+			
+			Integer curAttrValue = requestItem.getAttrs().get(curAttr);
+			
+			Optional<MudItemAttr> dbItemAttr =
+				dbItem.getAttrs().stream()
+					.filter(d -> d.getAttrCode().equals(curAttr))
+					.findFirst();
+			
+			if (dbItemAttr.isPresent()) {
+				dbItemAttr.get().setAttrValue(curAttrValue);
+			} else {
+				dbItem.getAttrs().add(
+						MudItemAttrConverter.build(dbItem.getItemCode(), curAttr, curAttrValue)
+						);
+			}
+		}
 	}
 	
 	private MudItem internalSyncAttr(final MudItem dbItem, final MudItemClass previousItemClass, final MudItemClass itemClass) {
@@ -266,12 +274,28 @@ public class ItemController implements ItemService {
 
 		// Adding those from new attr list
 		dbItem.getAttrs().addAll(addAttrList);
+		
+		// Sync the duration attributes, if present
+		dbItem.getAttrs().stream()
+			.filter(d -> d.getAttrCode().equals(ItemHelper.ITEM_MAX_DURATION_ATTR))
+			.findFirst()
+			.ifPresent(e -> 
+			
+				dbItem.getAttrs().stream()
+					.filter(f -> f.getAttrCode().equals(ItemHelper.ITEM_DURATION_ATTR))
+					.findFirst()
+					.ifPresent(g -> {
+						g.setAttrValue(e.getAttrValue());
+					})
+		);
 
 		return dbItem;
 	}
 	
 	@Override
-	public void destroyItem(@PathVariable Long itemId) {
+	public Item destroyItem(@PathVariable Long itemId) {
+		
+		Item response;
 
 		// Retrieving the database record
 		MudItem dbItem = itemRepository
@@ -280,10 +304,17 @@ public class ItemController implements ItemService {
 		
 		if (dbItem.getItemClass().getDemiseItemClassCode()!=null) {
 			internalUpdateClass(dbItem, dbItem.getItemClass().getDemiseItemClassCode());
+			
+			response = ItemConverter.convert(dbItem);
+			
 		} else {
 			
 			itemRepository.delete(dbItem);
+			
+			response = ItemConverter.convert(null);
 		}
+		
+		return response;
 	}
 
 	@Override

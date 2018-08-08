@@ -23,6 +23,7 @@ public class LocalizedMessages {
 	public static final String ITEM_NOT_FOUND = "item.not.found";
 	public static final String ITEM_CLASS_NOT_FOUND = "item.class.not.found";
 	public static final String ITEM_NO_OWNER= "item.no.owner";
+	public static final String ITEM_BOTH_OWNER = "item.both.owner";
 	
 	
 	public static final String BEING_NOT_FOUND = "being.not.found";

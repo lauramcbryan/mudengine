@@ -1,6 +1,7 @@
 package com.jpinfo.mudengine.item.model;
 
 import java.io.Serializable;
+
 import javax.persistence.*;
 
 import lombok.Data;
@@ -46,9 +47,10 @@ public class MudItem implements Serializable {
 
 	//bi-directional many-to-one association to ItemAttr
 	@OneToMany(mappedBy="id.itemCode", cascade=CascadeType.ALL, orphanRemoval=true)
-	private List<MudItemAttr> attrs;
+	private Set<MudItemAttr> attrs;
 
 	public MudItem() {
-		this.attrs = new ArrayList<>();
+		this.attrs = new HashSet<>();
 	}
+
 }

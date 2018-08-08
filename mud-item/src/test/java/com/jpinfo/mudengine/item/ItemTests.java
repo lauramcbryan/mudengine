@@ -1,15 +1,21 @@
 package com.jpinfo.mudengine.item;
 
+import org.apache.commons.lang.SerializationUtils;
 import org.junit.Test;
+
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.*;
 
+import javax.annotation.PostConstruct;
+
 import org.junit.runner.RunWith;
+import static org.mockito.BDDMockito.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -19,12 +25,30 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.jpinfo.mudengine.common.item.Item;
+import com.jpinfo.mudengine.common.itemclass.ItemClass;
 import com.jpinfo.mudengine.common.security.TokenService;
 import com.jpinfo.mudengine.common.utils.CommonConstants;
+import com.jpinfo.mudengine.item.fixture.ItemTemplates;
+import com.jpinfo.mudengine.item.fixture.MudItemProcessor;
+import com.jpinfo.mudengine.item.model.MudItem;
+import com.jpinfo.mudengine.item.model.MudItemAttr;
+import com.jpinfo.mudengine.item.model.MudItemClass;
+import com.jpinfo.mudengine.item.model.MudItemClassAttr;
+import com.jpinfo.mudengine.item.model.converter.ItemConverter;
+import com.jpinfo.mudengine.item.model.converter.MudItemAttrConverter;
+import com.jpinfo.mudengine.item.repository.ItemClassRepository;
+import com.jpinfo.mudengine.item.repository.ItemRepository;
+import com.jpinfo.mudengine.item.utils.ItemHelper;
+
+import br.com.six2six.fixturefactory.Fixture;
+import br.com.six2six.fixturefactory.loader.FixtureFactoryLoader;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment=WebEnvironment.RANDOM_PORT)
 public class ItemTests {
+	
+	private static final Integer MAX_DURATION_VALUE = 100;
+	private static final Integer DURATION_VALUE = 500;
 
 	@Autowired
 	private TestRestTemplate restTemplate;
@@ -32,345 +56,550 @@ public class ItemTests {
 	@Autowired
 	private TokenService tokenService;
 	
-	private static final String testItemClass = "TEST";
-	private static final String testItemClassAttr1 = "TSTA1";
-	private static final String testItemClassAttr2 = "TSTA2";
+	@MockBean
+	private ItemRepository repository;
 	
-	private static final String test2ItemClass = "TEST2";
-	private static final String test2ItemClassAttr1 = "TSTA3";
-	private static final String test2ItemClassAttr2 = "TSTA4";
+	@MockBean
+	private ItemClassRepository classRepository;
 	
-	private static final String testCurrentWorld = "aforgotten";
-	private static final Integer testCurrentPlace = 1;
+	private HttpEntity<Object> emptyHttpEntity;
 	
-	private static final String test2CurrentWorld = "fake";
-	private static final Integer test2CurrentPlace = 2;
 
-	private static final Integer testQtty = 1;
-	private static final Integer test2Qtty = 2;
-	
-	private static final String testNewAttr = "TSTA5";
-	
-	private static final Long testCurOwner = 1L;
-	
-	/**
-	 * Create the internal authentication token
-	 * and put it in a HttpHeader
-	 * @return
-	 */
-	private HttpHeaders getAuthHeaders() {
+	@PostConstruct
+	private void setup() {
 		HttpHeaders authHeaders = new HttpHeaders();
 		authHeaders.add(CommonConstants.AUTH_TOKEN_HEADER, tokenService.buildInternalToken());
 		
-		return authHeaders;
+		emptyHttpEntity = new HttpEntity<Object>(authHeaders);
+		
+		FixtureFactoryLoader.loadTemplates("com.jpinfo.mudengine.item.fixture");
 	}
 	
 	@Test
-	public void testCrudItem() {
+	public void testCreateWithPlace() {
 		
-		// Creating the authentication token
-		HttpEntity<Object> authEntity = new HttpEntity<Object>(getAuthHeaders());
+		MudItem mockRequest = Fixture.from(MudItem.class).gimme(ItemTemplates.REQUEST_WITH_PLACE);
+		MudItem mockResponse = Fixture.from(MudItem.class).gimme(ItemTemplates.RESPONSE_WITH_PLACE);
 		
-		// ********** CREATE ***************
-		// =================================
-		Map<String, Object> urlVariables = new HashMap<String, Object>();
+		given(repository.save(mockRequest)).willReturn(mockResponse);
 		
-		urlVariables.put("itemClassCode", ItemTests.testItemClass);
-		urlVariables.put("worldName", ItemTests.testCurrentWorld);
-		urlVariables.put("placeCode", ItemTests.testCurrentPlace);
-		urlVariables.put("quantity", ItemTests.testQtty);
+		given(classRepository.findById(mockRequest.getItemClass().getItemClassCode()))
+			.willReturn(Optional.of(mockRequest.getItemClass()));
+		
+		Map<String, Object> urlVariables = new HashMap<>();
+		
+		urlVariables.put("itemClassCode", mockRequest.getItemClass().getItemClassCode());
+		urlVariables.put("worldName", mockRequest.getCurWorld());
+		urlVariables.put("placeCode", mockRequest.getCurPlaceCode());
 		
 		ResponseEntity<Item> createResponse = restTemplate.exchange(
-				"/item/?itemClassCode={itemClassCode}&worldName={worldName}&placeCode={placeCode}&quantity={quantity}", 
-				HttpMethod.PUT, authEntity, Item.class, urlVariables);
+				"/item/?itemClassCode={itemClassCode}&worldName={worldName}&placeCode={placeCode}", 
+				HttpMethod.PUT, emptyHttpEntity, Item.class, urlVariables);
 		
 		assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 		assertThat(createResponse.getBody()).isNotNull();
 		
-		Item createItem = createResponse.getBody();
+		Item createdItem = createResponse.getBody();
 		
-		assertThat(createItem.getItemClassCode()).isEqualTo(ItemTests.testItemClass);
-		assertThat(createItem.getCurPlaceCode()).isEqualTo(ItemTests.testCurrentPlace);
-		assertThat(createItem.getCurWorld()).isEqualTo(ItemTests.testCurrentWorld);
-		assertThat(createItem.getQuantity()).isEqualTo(ItemTests.testQtty);
-		assertThat(createItem.getCurOwner()).isNull();
-
-		assertThat(createItem.getAttrs().get(ItemTests.testItemClassAttr1)).isNotNull();
-		assertThat(createItem.getAttrs().get(ItemTests.testItemClassAttr2)).isNotNull();
+		assertThat(createdItem.getCurOwner()).isNull();
+		assertThat(createdItem.getCurPlaceCode()).isEqualTo(mockResponse.getCurPlaceCode());
+		assertThat(createdItem.getCurWorld()).isEqualTo(mockResponse.getCurWorld());
+		assertThat(createdItem.getItemName()).isEqualTo(mockResponse.getItemClass().getItemClassName());
+		assertThat(createdItem.getQuantity()).isEqualTo(1);
+		assertThat(createdItem.getItemCode()).isNotNull();
 		
-		
-		// ************ READ ***************
-		// =================================
-		urlVariables.put("itemId", createItem.getItemCode());
-		
-		
-		ResponseEntity<Item> readResponse = restTemplate.exchange(
-				"/item/{itemId}", HttpMethod.GET, authEntity, Item.class, urlVariables);
-		
-		assertThat(readResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(readResponse.getBody()).isNotNull();
-
-		Item readItem = readResponse.getBody();
-		
-		assertThat(readItem.getItemClassCode()).isEqualTo(ItemTests.testItemClass);
-		assertThat(readItem.getCurPlaceCode()).isEqualTo(ItemTests.testCurrentPlace);
-		assertThat(readItem.getCurWorld()).isEqualTo(ItemTests.testCurrentWorld);
-		
-		assertThat(readItem.getAttrs().get(ItemTests.testItemClassAttr1)).isNotNull();
-		assertThat(readItem.getAttrs().get(ItemTests.testItemClassAttr2)).isNotNull();
-		
-
-		// *********** UPDATE **************
-		// =================================
-		urlVariables.put("itemId", createItem.getItemCode());
-
-		readItem.setCurWorld(ItemTests.test2CurrentWorld);
-		readItem.setCurPlaceCode(ItemTests.test2CurrentPlace);
-		readItem.setItemClassCode(ItemTests.test2ItemClass);
-		readItem.setQuantity(ItemTests.test2Qtty);
-		
-		readItem.getAttrs().put(ItemTests.testNewAttr, new Integer(55));
-		
-		HttpEntity<Item> updateRequest = new HttpEntity<Item>(readItem, getAuthHeaders());
-		
-		ResponseEntity<Item> updateResponse = restTemplate.exchange(
-				"/item/{itemId}", HttpMethod.POST, updateRequest, Item.class, urlVariables);
-
-		assertThat(updateResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(updateResponse.getBody()).isNotNull();
-
-		Item updateItem = updateResponse.getBody();
-		
-		assertThat(updateItem.getItemClassCode()).isEqualTo(ItemTests.test2ItemClass);
-		assertThat(updateItem.getCurPlaceCode()).isEqualTo(ItemTests.test2CurrentPlace);
-		assertThat(updateItem.getCurWorld()).isEqualTo(ItemTests.test2CurrentWorld);
-		assertThat(updateItem.getQuantity()).isEqualTo(ItemTests.test2Qtty);
-		
-		// Old attributes removed
-		assertThat(updateItem.getAttrs().get(ItemTests.testItemClassAttr1)).isNull();
-		assertThat(updateItem.getAttrs().get(ItemTests.testItemClassAttr2)).isNull();
-		
-		// New attributes added
-		assertThat(updateItem.getAttrs().get(ItemTests.test2ItemClassAttr1)).isNotNull();
-		assertThat(updateItem.getAttrs().get(ItemTests.test2ItemClassAttr2)).isNotNull();
-		
-		// This attribute cannot be changed!
-		assertThat(updateItem.getAttrs().get(ItemTests.testNewAttr)).isNotNull();
-		
-		// *********** DELETE **************
-		// =================================
-
-		ResponseEntity<Item> deleteResponse =  restTemplate.exchange(
-				"/item/{itemId}", HttpMethod.DELETE, authEntity, Item.class, urlVariables);
-		
-
-		assertThat(deleteResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-		
-		
-		// Read after delete
-		ResponseEntity<Item> readAfterDeleteResponse = restTemplate.exchange(
-				"/item/{itemId}", HttpMethod.GET, authEntity, Item.class, urlVariables);
-		
-		assertThat(readAfterDeleteResponse.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+		assertItemClass(mockResponse.getItemClass(), createdItem.getItemClass());
 	}
 
 	@Test
-	public void testCrudWithPlace() {
-		
-		// Creating the authentication token
-		HttpEntity<Object> authEntity = new HttpEntity<Object>(getAuthHeaders());
+	public void testCreateWithOwner() {
 
-		Map<String, Object> urlVariables = new HashMap<String, Object>();
+		MudItem mockRequest = Fixture.from(MudItem.class).gimme(ItemTemplates.REQUEST_WITH_OWNER);
+		MudItem mockResponse = Fixture.from(MudItem.class).gimme(ItemTemplates.RESPONSE_WITH_OWNER);
 		
-		// ********** CREATING FIRST ITEM ***************
-		// ==============================================
+		given(repository.save(mockRequest)).willReturn(mockResponse);
 		
-		urlVariables.put("itemClassCode", ItemTests.testItemClass);
-		urlVariables.put("worldName", ItemTests.testCurrentWorld);
-		urlVariables.put("placeCode", ItemTests.testCurrentPlace);
+		given(classRepository.findById(mockRequest.getItemClass().getItemClassCode()))
+			.willReturn(Optional.of(mockRequest.getItemClass()));
+		
+		Map<String, Object> urlVariables = new HashMap<>();
+		
+		urlVariables.put("itemClassCode", mockRequest.getItemClass().getItemClassCode());
+		urlVariables.put("owner", mockRequest.getCurOwner());
 		
 		ResponseEntity<Item> createResponse = restTemplate.exchange(
-				"/item/?itemClassCode={itemClassCode}&worldName={worldName}&placeCode={placeCode}", 
-				HttpMethod.PUT, authEntity, Item.class, urlVariables);
+				"/item/?itemClassCode={itemClassCode}&owner={owner}", 
+				HttpMethod.PUT, emptyHttpEntity, Item.class, urlVariables);
 		
 		assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 		assertThat(createResponse.getBody()).isNotNull();
 		
-		// ********** CREATING SECOND ITEM **************
-		// ==============================================
+		Item createdItem = createResponse.getBody();
 		
-		urlVariables.put("itemClassCode", ItemTests.test2ItemClass);
-		urlVariables.put("worldName", ItemTests.testCurrentWorld);
-		urlVariables.put("placeCode", ItemTests.testCurrentPlace);
-
-		createResponse = restTemplate.exchange(
-				"/item/?itemClassCode={itemClassCode}&worldName={worldName}&placeCode={placeCode}", 
-				HttpMethod.PUT, authEntity, Item.class, urlVariables);
+		assertThat(createdItem.getCurOwner()).isEqualTo(mockResponse.getCurOwner());
+		assertThat(createdItem.getCurPlaceCode()).isNull();
+		assertThat(createdItem.getCurWorld()).isNull();
+		assertThat(createdItem.getItemName()).isEqualTo(mockResponse.getItemClass().getItemClassName());
+		assertThat(createdItem.getQuantity()).isEqualTo(1);
+		assertThat(createdItem.getItemClassCode()).isEqualTo(mockResponse.getItemClass().getItemClassCode());
+		assertThat(createdItem.getItemCode()).isNotNull();
 		
-		assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-		assertThat(createResponse.getBody()).isNotNull();
-		
-		
-		// ******** READ ITEMS FROM PLACE ***********
-		// ==============================================
-		urlVariables.clear();
-		urlVariables.put("worldName", ItemTests.testCurrentWorld);
-		urlVariables.put("placeCode", ItemTests.testCurrentPlace);
-		
-		ResponseEntity<Item[]> findResponse = restTemplate.exchange(
-				"/item/place/{worldName}/{placeCode}", HttpMethod.GET, authEntity, Item[].class, urlVariables);
-		
-		assertThat(findResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(findResponse.getBody().length).isEqualTo(2);
-		
-		
-		// ******** DESTROYING ALL FROM PLACE ***********
-		// ==============================================
-		ResponseEntity<String> destroyResponse = restTemplate.exchange(
-				"/item/place/{worldName}/{placeCode}", HttpMethod.DELETE, authEntity, String.class, urlVariables);
-		
-		assertThat(destroyResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-		
-		
-		// Looking after both items again
-		findResponse = restTemplate.exchange(
-				"/item/place/{worldName}/{placeCode}", HttpMethod.GET, authEntity, Item[].class, urlVariables);
-		
-		assertThat(findResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(findResponse.getBody().length).isEqualTo(0);
+		assertItemClass(mockResponse.getItemClass(), createdItem.getItemClass());
 		
 	}
 	
 	@Test
-	public void testCrudWithOwner() {
-		
-		// Creating the authentication token
-		HttpEntity<Object> authEntity = new HttpEntity<Object>(getAuthHeaders());
+	public void testCreateWithBoth() {
 
-		Map<String, Object> urlVariables = new HashMap<String, Object>();
+		MudItem mockRequest = Fixture.from(MudItem.class).gimme(ItemTemplates.REQUEST_WITH_BOTH);
 		
-		// ********** CREATING FIRST ITEM ***************
-		// ==============================================
-		
-		urlVariables.put("itemClassCode", ItemTests.testItemClass);
-		urlVariables.put("owner", ItemTests.testCurOwner);
+		Map<String, Object> urlVariables = new HashMap<>();
+		urlVariables.put("itemClassCode", mockRequest.getItemClass().getItemClassCode());
+		urlVariables.put("worldName", mockRequest.getCurWorld());
+		urlVariables.put("placeCode", mockRequest.getCurPlaceCode());		
+		urlVariables.put("owner", mockRequest.getCurOwner());
 		
 		ResponseEntity<Item> createResponse = restTemplate.exchange(
-				"/item/?itemClassCode={itemClassCode}&owner={owner}", 
-				HttpMethod.PUT, authEntity, Item.class, urlVariables);
+				"/item/?itemClassCode={itemClassCode}&worldName={worldName}&placeCode={placeCode}&owner={owner}", 
+				HttpMethod.PUT, emptyHttpEntity, Item.class, urlVariables);
 		
-		assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-		assertThat(createResponse.getBody()).isNotNull();
+		assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
 		
-		Item firstItem = createResponse.getBody();
-		
-		// ********** CREATING SECOND ITEM **************
-		// ==============================================
-		
-		urlVariables.put("itemClassCode", ItemTests.test2ItemClass);
+	}
 
-		createResponse = restTemplate.exchange(
-				"/item/?itemClassCode={itemClassCode}&owner={owner}", 
-				HttpMethod.PUT, authEntity, Item.class, urlVariables);
-		
-		assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-		assertThat(createResponse.getBody()).isNotNull();
-		
-		Item secondItem = createResponse.getBody();
-		
-		// ************ READ FROM OWNER ***************
-		// ============================================
-		
-		urlVariables.clear();
-		urlVariables.put("owner", ItemTests.testCurOwner);
-		
-		ResponseEntity<Item[]> readPlaceResponse = restTemplate.exchange(
-				"/item/being/{owner}", HttpMethod.GET, authEntity, Item[].class, urlVariables);
-		
-		assertThat(readPlaceResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(readPlaceResponse.getBody()).isNotNull();
-		assertThat(readPlaceResponse.getBody().length).isEqualTo(2);
-		
-		
-		// ******** DROPPING ALL FROM OWNER ***********
-		// ==============================================
-		
-		urlVariables.put("owner", ItemTests.testCurOwner);
-		urlVariables.put("worldName", ItemTests.test2CurrentWorld);
-		urlVariables.put("placeCode", ItemTests.test2CurrentPlace);
-		
-		ResponseEntity<String> dropResponse = restTemplate.exchange(
-				"/item/being/{owner}?worldName={worldName}&placeCode={placeCode}", 
-				HttpMethod.DELETE, authEntity, String.class, urlVariables);
-		
-		assertThat(dropResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+	@Test
+	public void testCreateWithNone() {
 
+		MudItem mockRequest = Fixture.from(MudItem.class).gimme(ItemTemplates.REQUEST);
 		
+		Map<String, Object> urlVariables = new HashMap<>();
+		urlVariables.put("itemClassCode", mockRequest.getItemClass().getItemClassCode());
 		
-		// ********* READ ALL OWNER AGAIN *************
-		// ============================================
-		ResponseEntity<Item[]> findResponse = restTemplate.exchange(
-				"/item/being/{owner}", 
-				HttpMethod.GET, authEntity, Item[].class, urlVariables);
+		ResponseEntity<Item> createResponse = restTemplate.exchange(
+				"/item/?itemClassCode={itemClassCode}", 
+				HttpMethod.PUT, emptyHttpEntity, Item.class, urlVariables);
 		
-		assertThat(findResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(findResponse.getBody().length).isEqualTo(0);
+		assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+		
+	}
 
+	@Test
+	public void testRead() {
+		MudItem mockResponse = Fixture.from(MudItem.class).gimme(ItemTemplates.RESPONSE_FULL);
 		
-		// ************ READ FIRST ITEM ***************
-		// ============================================
+		given(repository.findById(mockResponse.getItemCode())).willReturn(Optional.of(mockResponse));
 		
-		// Looking after the items created; they must be in place, no longer in being
-		urlVariables.clear();
-		urlVariables.put("itemId", firstItem.getItemCode());
-		ResponseEntity<Item> firstItemResponse = restTemplate.exchange(
-				"/item/{itemId}", HttpMethod.GET, authEntity, Item.class, urlVariables);
+		Map<String, Object> urlVariables = new HashMap<>();
 		
-		assertThat(firstItemResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(firstItemResponse.getBody()).isNotNull();
+		urlVariables.put("itemId", mockResponse.getItemCode());
 		
-		Item updatedFirstItem = firstItemResponse.getBody();
-		
-		assertThat(updatedFirstItem.getCurWorld()).isEqualTo(ItemTests.test2CurrentWorld);
-		assertThat(updatedFirstItem.getCurPlaceCode()).isEqualTo(ItemTests.test2CurrentPlace);
-		assertThat(updatedFirstItem.getCurOwner()).isNull();
-		
-		// Deleting it
-		urlVariables.clear();
-		urlVariables.put("itemId", firstItem.getItemCode());
-		ResponseEntity<Item> cleanupFirstItem = restTemplate.exchange(
-				"/item/{itemId}", HttpMethod.DELETE, authEntity, Item.class, urlVariables);
-		
-		assertThat(cleanupFirstItem.getStatusCode()).isEqualTo(HttpStatus.OK)		;
-
-		// ************ READ SECOND ITEM **************
-		// ============================================
-		
-		// Looking after the second item
-		
-		urlVariables.clear();
-		urlVariables.put("itemId", secondItem.getItemCode());
-		ResponseEntity<Item> secondItemResponse = restTemplate.exchange(
-				"/item/{itemId}", HttpMethod.GET, authEntity, Item.class, urlVariables);
-		
-		assertThat(secondItemResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(secondItemResponse.getBody()).isNotNull();
-		
-		Item updatedSecondItem = secondItemResponse.getBody();
-		
-		assertThat(updatedSecondItem.getCurWorld()).isEqualTo(ItemTests.test2CurrentWorld);
-		assertThat(updatedSecondItem.getCurPlaceCode()).isEqualTo(ItemTests.test2CurrentPlace);
-		assertThat(updatedSecondItem.getCurOwner()).isNull();
-		
-
-		// Deleting this second item as well
-		urlVariables.clear();
-		urlVariables.put("itemId", secondItem.getItemCode());
-		ResponseEntity<Item> cleanupSecondItem = restTemplate.exchange(
+		ResponseEntity<Item> serviceResponse = restTemplate.exchange(
 				"/item/{itemId}", 
-				HttpMethod.DELETE, authEntity, Item.class, urlVariables);
+				HttpMethod.GET, emptyHttpEntity, Item.class, urlVariables);
 		
-		assertThat(cleanupSecondItem.getStatusCode()).isEqualTo(HttpStatus.OK)		;
+		assertThat(serviceResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(serviceResponse.getBody()).isNotNull();
+		
+		Item serviceItem = serviceResponse.getBody();
+		
+		assertThat(serviceItem.getCurOwner()).isNull();
+		assertThat(serviceItem.getCurPlaceCode()).isEqualTo(mockResponse.getCurPlaceCode());
+		assertThat(serviceItem.getCurWorld()).isEqualTo(mockResponse.getCurWorld());
+		assertThat(serviceItem.getItemName()).isEqualTo(mockResponse.getItemClass().getItemClassName());
+		assertThat(serviceItem.getQuantity()).isEqualTo(1);
+		assertThat(serviceItem.getItemClassCode()).isEqualTo(mockResponse.getItemClass().getItemClassCode());
+		assertThat(serviceItem.getItemCode()).isNotNull();
+		
+		assertAttrMap(mockResponse, serviceItem);
 		
 	}
+
+	@Test
+	public void testUpdateClass() {
+
+		MudItem originalMudItem = Fixture.from(MudItem.class)
+				.uses(new MudItemProcessor())
+				.gimme(ItemTemplates.RESPONSE_FULL);
+
+		MudItemClass newClass = Fixture.from(MudItemClass.class).gimme(ItemTemplates.VALID);
+		
+		MudItem savedItem = (MudItem)SerializationUtils.clone(originalMudItem);
+		savedItem.setItemCode(originalMudItem.getItemCode());
+		savedItem.setItemName(originalMudItem.getItemName());
+		savedItem.setQuantity(originalMudItem.getQuantity());
+		savedItem.setCurOwner(originalMudItem.getCurOwner());
+		savedItem.setCurPlaceCode(originalMudItem.getCurPlaceCode());
+		savedItem.setCurWorld(originalMudItem.getCurWorld());
+		
+		// Update the savedItem to contain the new Class
+		savedItem.setItemClass(newClass);
+
+		// Adjust attributes as well
+		savedItem.getAttrs().clear();
+		newClass.getAttrs().stream()
+			.forEach(d -> {
+				savedItem.getAttrs().add(MudItemAttrConverter.build(savedItem.getItemCode(), d));
+			});
+		
+		
+		given(repository.findById(originalMudItem.getItemCode())).willReturn(Optional.of(originalMudItem));
+		given(classRepository.findById(originalMudItem.getItemClass().getItemClassCode())).willReturn(Optional.of(originalMudItem.getItemClass()));
+		given(classRepository.findById(newClass.getItemClassCode())).willReturn(Optional.of(newClass));
+
+		given(repository.save(savedItem)).willReturn(savedItem);
+		
+
+		Item mockBody = ItemConverter.convert(originalMudItem);
+		mockBody.setItemClassCode(newClass.getItemClassCode());
+		
+		HttpEntity<Item> mockHttpEntity = new HttpEntity<>(mockBody, emptyHttpEntity.getHeaders());
+		
+		Map<String, Object> urlVariables = new HashMap<>();
+		urlVariables.put("itemId", originalMudItem.getItemCode());
+		
+		ResponseEntity<Item> serviceResponse = restTemplate.exchange(
+				"/item/{itemId}", 
+				HttpMethod.POST, mockHttpEntity, Item.class, urlVariables);
+		
+		assertThat(serviceResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(serviceResponse.getBody()).isNotNull();
+		
+		Item serviceItem = serviceResponse.getBody();
+		
+		assertThat(serviceItem.getItemName()).isEqualTo(newClass.getItemClassName());
+		assertThat(serviceItem.getQuantity()).isEqualTo(1);
+		assertThat(serviceItem.getItemClassCode()).isEqualTo(newClass.getItemClassCode());
+		assertThat(serviceItem.getItemCode()).isNotNull();
+		
+		// Check consistency between MudItemClass and ItemClass
+		assertItemClass(newClass, serviceItem.getItemClass());
+		
+		// Check consistency between ItemClass and Item
+		assertAttrMap(serviceItem, serviceItem.getItemClass());
+	}
+	
+	@Test
+	public void testUpdateDuration() {
+
+		// That's the original mudItem record
+		MudItem originalMudItem = Fixture.from(MudItem.class)
+				.uses(new MudItemProcessor())
+				.gimme(ItemTemplates.RESPONSE_FULL);
+		
+		// We'll inject two duration attributes: DURATION and MAX_DURATION.
+		// Both will be the same, because we expect that these values to be correct
+		// by the time the record is persisted in database
+		originalMudItem.getAttrs().add(
+				MudItemAttrConverter.build(
+						originalMudItem.getItemCode(), ItemHelper.ITEM_DURATION_ATTR, MAX_DURATION_VALUE)
+				);
+
+		originalMudItem.getAttrs().add(
+				MudItemAttrConverter.build(
+						originalMudItem.getItemCode(), ItemHelper.ITEM_MAX_DURATION_ATTR, MAX_DURATION_VALUE)
+				);
+		
+		// Instruct the mocked Item repository to return our original Item
+		given(repository.findById(originalMudItem.getItemCode())).willReturn(Optional.of(originalMudItem));
+
+		// Return the same record as result of updating the database
+		given(repository.save(originalMudItem)).willReturn(originalMudItem);
+		
+		
+		// Translates our original item in a service request
+		Item mockBody = ItemConverter.convert(originalMudItem);
+		
+		// In this request, we'll set the duration above the maximum allowed.
+		mockBody.getAttrs().put(ItemHelper.ITEM_DURATION_ATTR, DURATION_VALUE);
+		
+		HttpEntity<Item> mockHttpEntity = new HttpEntity<>(mockBody, emptyHttpEntity.getHeaders());
+		
+		Map<String, Object> urlVariables = new HashMap<>();
+		urlVariables.put("itemId", originalMudItem.getItemCode());
+		
+		ResponseEntity<Item> serviceResponse = restTemplate.exchange(
+				"/item/{itemId}", 
+				HttpMethod.POST, mockHttpEntity, Item.class, urlVariables);
+		
+		assertThat(serviceResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(serviceResponse.getBody()).isNotNull();
+		
+		Item serviceItem = serviceResponse.getBody();
+		
+		// Check that the duration attribute was adjusted to the maximum duration
+		// (The same fact that the return is not null implies that the result was ajusted when
+		// saved to database
+		assertThat(serviceItem.getAttrs().get(ItemHelper.ITEM_DURATION_ATTR)).isEqualTo(100);
+
+	}
+	
+	@Test
+	public void testUpdateDestroyed() {
+
+		// That's the original mudItem record
+		MudItem originalMudItem = Fixture.from(MudItem.class)
+				.uses(new MudItemProcessor())
+				.gimme(ItemTemplates.RESPONSE_FULL);
+		
+		// Setting the MAX_DURATION attribute
+		// That will be used to trigger item destruction
+		originalMudItem.getAttrs().add(
+				MudItemAttrConverter.build(
+						originalMudItem.getItemCode(), ItemHelper.ITEM_MAX_DURATION_ATTR, MAX_DURATION_VALUE)
+				);
+		
+		// Instruct the mocked Item repository to return our original Item
+		given(repository.findById(originalMudItem.getItemCode())).willReturn(Optional.of(originalMudItem));
+		
+		// Translates our original item in a service request
+		Item mockBody = ItemConverter.convert(originalMudItem);
+		
+		// In this request, we'll set the duration to zero
+		mockBody.getAttrs().put(ItemHelper.ITEM_DURATION_ATTR, 0);
+		
+		HttpEntity<Item> mockHttpEntity = new HttpEntity<>(mockBody, emptyHttpEntity.getHeaders());
+		
+		Map<String, Object> urlVariables = new HashMap<>();
+		urlVariables.put("itemId", originalMudItem.getItemCode());
+		
+		ResponseEntity<Item> serviceResponse = restTemplate.exchange(
+				"/item/{itemId}", 
+				HttpMethod.POST, mockHttpEntity, Item.class, urlVariables);
+		
+		assertThat(serviceResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+		
+		// Check that the delete method was called in database
+		verify(repository, times(1)).delete(originalMudItem);
+		
+	}
+	
+	@Test
+	public void testUpdateDemised() {
+
+		MudItem originalMudItem = Fixture.from(MudItem.class)
+				.uses(new MudItemProcessor())
+				.gimme(ItemTemplates.RESPONSE_FULL);
+		
+		
+		// We'll inject two duration attributes: DURATION and MAX_DURATION.
+		// Both will be the same, because we expect that these values to be correct
+		// by the time the record is persisted in database
+		originalMudItem.getAttrs().add(
+				MudItemAttrConverter.build(
+						originalMudItem.getItemCode(), ItemHelper.ITEM_DURATION_ATTR, MAX_DURATION_VALUE)
+				);
+
+		originalMudItem.getAttrs().add(
+				MudItemAttrConverter.build(
+						originalMudItem.getItemCode(), ItemHelper.ITEM_MAX_DURATION_ATTR, MAX_DURATION_VALUE)
+				);
+
+
+		MudItemClass newClass = Fixture.from(MudItemClass.class).gimme(ItemTemplates.VALID);
+		
+		// Set the demised class of the original item to the second class
+		originalMudItem.getItemClass().setDemiseItemClassCode(newClass.getItemClassCode());
+		
+		// The item saved in database will need to contain already the new class
+		MudItem savedItem = (MudItem)SerializationUtils.clone(originalMudItem);
+		savedItem.setItemCode(originalMudItem.getItemCode());
+		savedItem.setItemName(originalMudItem.getItemName());
+		savedItem.setQuantity(originalMudItem.getQuantity());
+		savedItem.setCurOwner(originalMudItem.getCurOwner());
+		savedItem.setCurPlaceCode(originalMudItem.getCurPlaceCode());
+		savedItem.setCurWorld(originalMudItem.getCurWorld());
+		
+		// Update the savedItem to contain the new Class
+		savedItem.setItemClass(newClass);
+
+		// Adjust attributes as well
+		savedItem.getAttrs().clear();
+		newClass.getAttrs().stream()
+			.forEach(d -> {
+				savedItem.getAttrs().add(MudItemAttrConverter.build(savedItem.getItemCode(), d));
+			});
+		
+		
+		given(repository.findById(originalMudItem.getItemCode())).willReturn(Optional.of(originalMudItem));
+		given(classRepository.findById(originalMudItem.getItemClass().getItemClassCode())).willReturn(Optional.of(originalMudItem.getItemClass()));
+		given(classRepository.findById(newClass.getItemClassCode())).willReturn(Optional.of(newClass));
+
+		given(repository.save(savedItem)).willReturn(savedItem);
+		
+
+		// Converting the original item to service request
+		Item mockBody = ItemConverter.convert(originalMudItem);
+		
+		// In this request, we'll set the duration to zero
+		mockBody.getAttrs().put(ItemHelper.ITEM_DURATION_ATTR, 0);
+		
+		HttpEntity<Item> mockHttpEntity = new HttpEntity<>(mockBody, emptyHttpEntity.getHeaders());
+		
+		Map<String, Object> urlVariables = new HashMap<>();
+		urlVariables.put("itemId", originalMudItem.getItemCode());
+		
+		ResponseEntity<Item> serviceResponse = restTemplate.exchange(
+				"/item/{itemId}", 
+				HttpMethod.POST, mockHttpEntity, Item.class, urlVariables);
+		
+		assertThat(serviceResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(serviceResponse.getBody()).isNotNull();
+		
+		Item serviceItem = serviceResponse.getBody();
+		
+		assertThat(serviceItem.getItemName()).isEqualTo(newClass.getItemClassName());
+		assertThat(serviceItem.getQuantity()).isEqualTo(1);
+		assertThat(serviceItem.getItemClassCode()).isEqualTo(newClass.getItemClassCode());
+		assertThat(serviceItem.getItemCode()).isNotNull();
+		
+		// Check consistency between MudItemClass and ItemClass
+		assertItemClass(newClass, serviceItem.getItemClass());
+		
+		// Check consistency between ItemClass and Item
+		
+		// Checking that all attributes in database response are present in result
+		// We'll not compare map sizes here because we injected two 'strange' attributes, so
+		// the sizes will differ
+		for(String curAttr: serviceItem.getItemClass().getAttrs().keySet()) {
+			assertThat(serviceItem.getAttrs()).containsKey(curAttr);
+			assertThat(serviceItem.getAttrs().get(curAttr)).isEqualTo(serviceItem.getItemClass().getAttrs().get(curAttr));
+		}
+		
+		// Checking if the duration was reset to the maximum duration allowed
+		assertThat(serviceItem.getAttrs().get(ItemHelper.ITEM_DURATION_ATTR)).isEqualTo(MAX_DURATION_VALUE);
+	}
+	
+	@Test
+	public void testDeleteDemised() {
+
+		MudItem originalMudItem = Fixture.from(MudItem.class)
+				.uses(new MudItemProcessor())
+				.gimme(ItemTemplates.RESPONSE_FULL);
+		
+		MudItemClass newClass = Fixture.from(MudItemClass.class).gimme(ItemTemplates.VALID);
+		
+		// Set the demised class of the original item to the second class
+		originalMudItem.getItemClass().setDemiseItemClassCode(newClass.getItemClassCode());
+		
+		// The item saved in database will need to contain already the new class
+		MudItem savedItem = (MudItem)SerializationUtils.clone(originalMudItem);
+		savedItem.setItemCode(originalMudItem.getItemCode());
+		savedItem.setItemName(originalMudItem.getItemName());
+		savedItem.setQuantity(originalMudItem.getQuantity());
+		savedItem.setCurOwner(originalMudItem.getCurOwner());
+		savedItem.setCurPlaceCode(originalMudItem.getCurPlaceCode());
+		savedItem.setCurWorld(originalMudItem.getCurWorld());
+		
+		// Update the savedItem to contain the new Class
+		savedItem.setItemClass(newClass);
+
+		// Adjust attributes as well
+		savedItem.getAttrs().clear();
+		newClass.getAttrs().stream()
+			.forEach(d -> {
+				savedItem.getAttrs().add(MudItemAttrConverter.build(savedItem.getItemCode(), d));
+			});
+		
+		
+		given(repository.findById(originalMudItem.getItemCode())).willReturn(Optional.of(originalMudItem));
+		given(classRepository.findById(originalMudItem.getItemClass().getItemClassCode())).willReturn(Optional.of(originalMudItem.getItemClass()));
+		given(classRepository.findById(newClass.getItemClassCode())).willReturn(Optional.of(newClass));
+
+		given(repository.save(savedItem)).willReturn(savedItem);
+		
+
+		Map<String, Object> urlVariables = new HashMap<>();
+		urlVariables.put("itemId", originalMudItem.getItemCode());
+		
+		ResponseEntity<Item> serviceResponse = restTemplate.exchange(
+				"/item/{itemId}", 
+				HttpMethod.DELETE, emptyHttpEntity, Item.class, urlVariables);
+		
+		Item serviceItem = serviceResponse.getBody();
+		
+		assertThat(serviceItem.getItemName()).isEqualTo(newClass.getItemClassName());
+		assertThat(serviceItem.getQuantity()).isEqualTo(1);
+		assertThat(serviceItem.getItemClassCode()).isEqualTo(newClass.getItemClassCode());
+		assertThat(serviceItem.getItemCode()).isNotNull();
+		
+		// Check consistency between MudItemClass and ItemClass
+		assertItemClass(newClass, serviceItem.getItemClass());
+		
+		// Check consistency between ItemClass and Item
+		assertAttrMap(serviceItem, serviceItem.getItemClass());
+	}
+	
+	@Test
+	public void testDeleteDestroyed() {
+		
+		// That's the original mudItem record
+		MudItem originalMudItem = Fixture.from(MudItem.class)
+				.uses(new MudItemProcessor())
+				.gimme(ItemTemplates.RESPONSE_FULL);
+		
+		// Instruct the mocked Item repository to return our original Item
+		given(repository.findById(originalMudItem.getItemCode())).willReturn(Optional.of(originalMudItem));
+		
+		Map<String, Object> urlVariables = new HashMap<>();
+		urlVariables.put("itemId", originalMudItem.getItemCode());
+		
+		ResponseEntity<Item> serviceResponse = restTemplate.exchange(
+				"/item/{itemId}", 
+				HttpMethod.DELETE, emptyHttpEntity, Item.class, urlVariables);
+		
+		assertThat(serviceResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+		
+		// Check that the delete method was called in database
+		verify(repository, times(1)).delete(originalMudItem);
+
+		
+	}
+	
+	
+
+	private void assertAttrMap(MudItem mudItem, Item item) {
+
+		// Ensure that the attributes map has the same size as returned by database
+		assertThat(item.getAttrs().keySet().size()).isEqualTo(mudItem.getAttrs().size());
+		
+		// Checking that all attributes in database response are present in result
+		for(MudItemAttr curAttr: mudItem.getAttrs()) {
+			assertThat(item.getAttrs()).containsKey(curAttr.getAttrCode());
+			assertThat(item.getAttrs().get(curAttr.getAttrCode())).isEqualTo(curAttr.getAttrValue());
+		}		
+	}
+
+	private void assertAttrMap(Item item, ItemClass itemClass) {
+
+		// Ensure that the attributes map has the same size as returned by database
+		assertThat(item.getAttrs().keySet().size()).isEqualTo(itemClass.getAttrs().keySet().size());
+		
+		// Checking that all attributes in database response are present in result
+		for(String curAttr: itemClass.getAttrs().keySet()) {
+			assertThat(item.getAttrs()).containsKey(curAttr);
+			assertThat(item.getAttrs().get(curAttr)).isEqualTo(itemClass.getAttrs().get(curAttr));
+		}		
+	}
+	
+	
+	private void assertItemClass(MudItemClass mudItemClass, ItemClass itemClass) {
+
+		assertThat(itemClass).isNotNull();
+		assertThat(itemClass.getItemClassCode()).isEqualTo(mudItemClass.getItemClassCode());
+		assertThat(itemClass.getItemClassName()).isEqualTo(mudItemClass.getItemClassName());
+		assertThat(itemClass.getSize()).isEqualTo(mudItemClass.getSize());
+		assertThat(itemClass.getWeight()).isEqualTo(mudItemClass.getWeight());
+		assertThat(itemClass.getDescription()).isEqualTo(mudItemClass.getDescription());
+
+		// Ensure that the attributes map has the same size as returned by database
+		assertThat(itemClass.getAttrs().keySet().size()).isEqualTo(mudItemClass.getAttrs().size());
+		
+		// Checking that all attributes in database response are present in result
+		for(MudItemClassAttr curAttr: mudItemClass.getAttrs()) {
+			assertThat(itemClass.getAttrs()).containsKey(curAttr.getAttrCode());
+			assertThat(itemClass.getAttrs().get(curAttr.getAttrCode())).isEqualTo(curAttr.getAttrValue());
+		}		
+	}
+	
+	
 }

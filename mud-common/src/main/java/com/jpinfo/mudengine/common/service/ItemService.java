@@ -25,7 +25,7 @@ public interface ItemService {
 	ResponseEntity<Item> createItem(@RequestParam("itemClassCode") String itemClassCode, @RequestParam("worldName") Optional<String> worldName, @RequestParam("placeCode") Optional<Integer> placeCode, @RequestParam("quantity") Optional<Integer> quantity, @RequestParam("owner") Optional<Long> owner);
 	
 	@RequestMapping(method=RequestMethod.DELETE, value="{itemId}")
-	void destroyItem(@PathVariable("itemId") Long itemId);
+	Item destroyItem(@PathVariable("itemId") Long itemId);
 
 	@RequestMapping(method=RequestMethod.GET, value="/place/{worldName}/{placeCode}")
 	List<Item> getAllFromPlace(@PathVariable("worldName") String worldName, @PathVariable("placeCode") Integer placeCode);

@@ -17,7 +17,6 @@ public class ItemConverter {
 		if (dbItem!=null) {
 		
 			response.setItemCode(dbItem.getItemCode());
-			response.setItemClassCode(dbItem.getItemClass().getItemClassCode());
 			response.setCurPlaceCode(dbItem.getCurPlaceCode());
 			response.setCurWorld(dbItem.getCurWorld());
 			response.setQuantity(dbItem.getQuantity());
