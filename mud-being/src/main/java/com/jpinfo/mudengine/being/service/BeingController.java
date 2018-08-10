@@ -339,7 +339,7 @@ public class BeingController implements BeingService {
 				responseItem = itemService.getItem(curSlot.getItemCode());
 			}
 			
-			responseBeing.getEquipment().put(curSlot.getId().getSlotCode(), responseItem);
+			responseBeing.getEquipment().put(curSlot.getId().getCode(), responseItem);
 		}
 		
 		return responseBeing;

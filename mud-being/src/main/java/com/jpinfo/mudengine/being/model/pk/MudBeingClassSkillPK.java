@@ -7,13 +7,13 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
- * The primary key class for the mud_being_class_attr database table.
+ * The primary key class for the mud_being_class_skills database table.
  * 
  */
 @Embeddable
 @Data
 @EqualsAndHashCode
-public class BeingClassAttrPK implements Serializable {
+public class MudBeingClassSkillPK implements Serializable {
 	
 	//default serial version id, required for serializable classes.
 	private static final long serialVersionUID = 1L;

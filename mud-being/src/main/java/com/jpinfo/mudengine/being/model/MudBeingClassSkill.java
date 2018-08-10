@@ -3,7 +3,7 @@ package com.jpinfo.mudengine.being.model;
 import java.io.Serializable;
 import javax.persistence.*;
 
-import com.jpinfo.mudengine.being.model.pk.BeingClassSkillPK;
+import com.jpinfo.mudengine.being.model.pk.MudBeingClassSkillPK;
 
 import lombok.Data;
 
@@ -19,7 +19,7 @@ public class MudBeingClassSkill implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@EmbeddedId
-	private BeingClassSkillPK id;
+	private MudBeingClassSkillPK id;
 
 	private Integer value;
 }

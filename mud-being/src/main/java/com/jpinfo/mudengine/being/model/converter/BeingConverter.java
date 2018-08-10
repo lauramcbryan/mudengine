@@ -28,11 +28,18 @@ public class BeingConverter {
 
 		response.setType(Being.enumBeingType.values()[dbBeing.getType()]);
 		response.setCode(dbBeing.getCode());
-		response.setName(dbBeing.getName());
 		response.setPlayerId(dbBeing.getPlayerId());
 		response.setCurPlaceCode(dbBeing.getCurPlaceCode());
 		response.setCurWorld(dbBeing.getCurWorld());
 		response.setQuantity(dbBeing.getQuantity());
+		
+		if (dbBeing.getName()!=null) {
+			response.setName(dbBeing.getName());
+		} else {
+			response.setName(dbBeing.getBeingClass().getName());
+		}
+		
+		
 
 		response.setBeingClass(BeingClassConverter.convert(dbBeing.getBeingClass()));
 
@@ -47,10 +54,10 @@ public class BeingConverter {
 
 		for (MudBeingSkill curSkill : dbBeing.getSkills()) {
 
-			int effectiveSkillValue = calcEffectiveSkill(curSkill.getId().getSkillCode(),
-					curSkill.getSkillValue(), dbBeing);
+			int effectiveSkillValue = calcEffectiveSkill(curSkill.getId().getCode(),
+					curSkill.getValue(), dbBeing);
 
-			response.getSkills().put(curSkill.getId().getSkillCode(), effectiveSkillValue);
+			response.getSkills().put(curSkill.getId().getCode(), effectiveSkillValue);
 		}
 
 		if (fullResponse) {
@@ -65,7 +72,7 @@ public class BeingConverter {
 			}
 
 			for (MudBeingSkill curSkill : dbBeing.getSkills()) {
-				baseSkillMap.put(curSkill.getId().getSkillCode(), curSkill.getSkillValue());
+				baseSkillMap.put(curSkill.getId().getCode(), curSkill.getValue());
 			}
 
 			for (MudBeingSkillModifier curSkillModifier : dbBeing.getSkillModifiers()) {

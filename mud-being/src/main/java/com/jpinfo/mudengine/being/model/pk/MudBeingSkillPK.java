@@ -22,5 +22,5 @@ public class MudBeingSkillPK implements Serializable {
 	private Long beingCode;
 
 	@Column(name="skill_code")
-	private String skillCode;	
+	private String code;	
 }

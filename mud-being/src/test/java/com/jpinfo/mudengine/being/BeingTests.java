@@ -7,6 +7,7 @@ import java.util.*;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.lang.SerializationUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,10 +82,27 @@ public class BeingTests {
 	@Test
 	public void testCreateSimple() {
 		
-		MudBeing originalMudBeing = Fixture.from(MudBeing.class).gimme(BeingTemplates.VALID);
+		MudBeing originalMudBeing = Fixture.from(MudBeing.class).gimme(BeingTemplates.SIMPLE);
 		originalMudBeing.setQuantity(BeingHelper.CREATE_DEFAULT_QUANTITY);
 		originalMudBeing.setType(Being.enumBeingType.REGULAR_NON_SENTIENT.ordinal());
+
+		MudBeing cleanWithIdMudBeing = (MudBeing)SerializationUtils.clone(originalMudBeing);
+		cleanWithIdMudBeing.getAttrs().clear();
+		cleanWithIdMudBeing.getSkills().clear();
+		cleanWithIdMudBeing.getSlots().clear();
 		
+		MudBeing cleanMudBeing = (MudBeing)SerializationUtils.clone(cleanWithIdMudBeing);
+		cleanMudBeing.setCode(null);
+		
+		/*
+		MudBeing updatedMudBeing = (MudBeing)SerializationUtils.clone(originalMudBeing);
+		updatedMudBeing.getAttrs().clear();
+		updatedMudBeing.getSkills().clear();
+		updatedMudBeing.getSlots().clear();
+		 */
+		
+		
+		given(repository.save(cleanMudBeing)).willReturn(cleanWithIdMudBeing);
 		given(repository.save(originalMudBeing)).willReturn(originalMudBeing);
 		
 		given(classRepository.findById(originalMudBeing.getBeingClass().getCode())).willReturn(Optional.of(originalMudBeing.getBeingClass()));
@@ -96,9 +114,10 @@ public class BeingTests {
 		urlVariables.put("worldName", originalMudBeing.getCurWorld());
 		urlVariables.put("placeCode", originalMudBeing.getCurPlaceCode());
 		urlVariables.put("beingName", originalMudBeing.getName());
+		urlVariables.put("quantity", originalMudBeing.getQuantity());
 
 		ResponseEntity<Being> responseCreate= restTemplate.exchange(
-				"/being/?beingType={beingType}&beingClass={beingClass}&worldName={worldName}&placeCode={placeCode}&beingName={beingName}", 
+				"/being?beingType={beingType}&beingClass={beingClass}&worldName={worldName}&placeCode={placeCode}&beingName={beingName}&quantity={quantity}", 
 				HttpMethod.PUT, emptyHttpEntity, Being.class, urlVariables);
 		
 		assertThat(responseCreate.getStatusCode()).isEqualTo(HttpStatus.CREATED);

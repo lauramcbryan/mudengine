@@ -1,5 +1,6 @@
 package com.jpinfo.mudengine.common.being;
 
+import java.beans.Transient;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
@@ -57,10 +58,12 @@ public class Being implements Serializable {
 		this.skills = new HashMap<>();
 	}
 	
+	@Transient	
 	public String getClassCode() {
 		return beingClass.getCode();
 	}
 	
+	@Transient
 	public void setClassCode(String value) {
 		beingClass = new BeingClass();
 		beingClass.setCode(value);

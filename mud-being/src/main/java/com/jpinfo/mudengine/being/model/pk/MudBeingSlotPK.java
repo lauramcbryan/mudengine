@@ -14,5 +14,5 @@ public class MudBeingSlotPK implements java.io.Serializable {
 	
 	private Long beingCode;
 	
-	private String slotCode;
+	private String code;
 }

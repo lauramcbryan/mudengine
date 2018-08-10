@@ -16,11 +16,11 @@ public class MudBeingSkillConverter {
 		MudBeingSkill dbSkill = new MudBeingSkill();
 		MudBeingSkillPK dbSkillPK = new MudBeingSkillPK();
 		
-		dbSkillPK.setSkillCode(skillCode);
+		dbSkillPK.setCode(skillCode);
 		dbSkillPK.setBeingCode(beingCode);
 		
 		dbSkill.setId(dbSkillPK);
-		dbSkill.setSkillValue(skillValue);
+		dbSkill.setValue(skillValue);
 		
 		return dbSkill;
 	}
@@ -30,11 +30,11 @@ public class MudBeingSkillConverter {
 		MudBeingSkill dbSkill = new MudBeingSkill();
 		MudBeingSkillPK dbSkillPK = new MudBeingSkillPK();
 		
-		dbSkillPK.setSkillCode(classSkill.getId().getCode());
+		dbSkillPK.setCode(classSkill.getId().getCode());
 		dbSkillPK.setBeingCode(beingCode);
 		
 		dbSkill.setId(dbSkillPK);
-		dbSkill.setSkillValue(classSkill.getValue());
+		dbSkill.setValue(classSkill.getValue());
 		
 		return dbSkill;
 	}
@@ -51,10 +51,10 @@ public class MudBeingSkillConverter {
 			dbBeing.getSkills().removeIf(d -> {
 				
 				boolean existsInOldClass = previousClass.getSkills().stream()
-						.anyMatch(e -> d.getId().getSkillCode().equals(e.getId().getCode()));
+						.anyMatch(e -> d.getId().getCode().equals(e.getId().getCode()));
 				
 				boolean existsInNewClass = nextClass.getSkills().stream()
-						.anyMatch(e -> d.getId().getSkillCode().equals(e.getId().getCode()));
+						.anyMatch(e -> d.getId().getCode().equals(e.getId().getCode()));
 				
 				return existsInOldClass && ! existsInNewClass;
 			});
@@ -66,12 +66,12 @@ public class MudBeingSkillConverter {
 
 				MudBeingSkill skill = 
 					dbBeing.getSkills().stream()
-						.filter(e -> e.getId().getSkillCode().equals(d.getId().getCode()))
+						.filter(e -> e.getId().getCode().equals(d.getId().getCode()))
 						.findFirst()
 						.orElse(MudBeingSkillConverter.convert(dbBeing.getCode(), d));
 
 				// Update the attribute value
-				skill.setSkillValue(d.getValue());
+				skill.setValue(d.getValue());
 				
 				dbBeing.getSkills().add(skill);				
 			});
@@ -83,7 +83,7 @@ public class MudBeingSkillConverter {
 
 		// Looking for skills to remove
 		dbBeing.getSkills().removeIf(d -> 
-			!requestBeing.getSkills().containsKey(d.getId().getSkillCode())
+			!requestBeing.getSkills().containsKey(d.getId().getCode())
 		);
 		
 		// Looking for skills to add/update
@@ -94,14 +94,14 @@ public class MudBeingSkillConverter {
 				
 				MudBeingSkill skill = 
 					dbBeing.getSkills().stream()
-						.filter(d -> d.getId().getSkillCode().equals(requestSkillCode))
+						.filter(d -> d.getId().getCode().equals(requestSkillCode))
 						.findFirst()
 						.orElse(MudBeingSkillConverter.build(
 								dbBeing.getCode(), requestSkillCode, requestSkillValue));
 				
 				
 				// Update the skill value
-				skill.setSkillValue(requestSkillValue);
+				skill.setValue(requestSkillValue);
 				
 				dbBeing.getSkills().add(skill);
 				

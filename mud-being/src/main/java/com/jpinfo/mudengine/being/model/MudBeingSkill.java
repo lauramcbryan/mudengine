@@ -25,5 +25,5 @@ public class MudBeingSkill implements Serializable {
 	private MudBeingSkillPK id;
 
 	@Column(name="skill_value")
-	private Integer skillValue;
+	private Integer value;
 }
