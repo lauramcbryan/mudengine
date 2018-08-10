@@ -21,6 +21,5 @@ public class MudItemAttrPK implements Serializable {
 	@Column(name="item_code", insertable=false, updatable=false)
 	private Long itemCode;
 
-	@Column(name="attr_code")
-	private String attrCode;
+	private String code;
 }

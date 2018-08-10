@@ -19,17 +19,12 @@ public class Being implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
-	public static final Integer BEING_TYPE_REGULAR_NON_SENTIENT = 0;
-	public static final Integer BEING_TYPE_REGULAR_SENTIENT = 1;
-	public static final Integer BEING_TYPE_NPC = 2;
-	public static final Integer BEING_TYPE_PLAYER = 3;
+	public enum enumBeingType {REGULAR_NON_SENTIENT, REGULAR_SENTIENT, NPC, PLAYABLE}
 	
-	private Long beingCode;
+	private Long code;
 	
-	private Integer beingType;
+	private enumBeingType type;
 
-	private String beingClassCode;
-	
 	private BeingClass beingClass;
 	
 	private Map<String, Integer> baseAttrs;
@@ -60,5 +55,14 @@ public class Being implements Serializable {
 	public Being() {
 		this.attrs = new HashMap<>();
 		this.skills = new HashMap<>();
+	}
+	
+	public String getClassCode() {
+		return beingClass.getCode();
+	}
+	
+	public void setClassCode(String value) {
+		beingClass = new BeingClass();
+		beingClass.setCode(value);
 	}
 }

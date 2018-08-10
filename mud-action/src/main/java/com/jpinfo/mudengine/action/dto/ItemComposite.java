@@ -23,7 +23,7 @@ public class ItemComposite implements ActionTarget {
 
 	@Override
 	public void addMessage(Long senderCode, String messageKey, String... args) {
-		this.messages.add(new ActionMessage(senderCode, this.getItem().getItemCode(), EnumTargetType.ITEM, messageKey, args));
+		this.messages.add(new ActionMessage(senderCode, this.getItem().getCode(), EnumTargetType.ITEM, messageKey, args));
 	}
 
 	@Override

@@ -91,8 +91,8 @@ public class ItemController implements ItemService {
 			// ============================================
 			
 			// if itemClass has changed, resync the attributes of changed item
-			if (!dbItem.getItemClass().getItemClassCode().equals(requestItem.getItemClassCode())) {
-				internalUpdateClass(dbItem, requestItem.getItemClassCode());
+			if (!dbItem.getItemClass().getCode().equals(requestItem.getItemClass().getCode())) {
+				internalUpdateClass(dbItem, requestItem.getItemClass().getCode());
 			}
 
 			// Save the changes in database
@@ -115,8 +115,8 @@ public class ItemController implements ItemService {
 		// if this value is different from zero, it means that this is a place that can be destroyed
 		Integer maxDuration = 
 				dbItem.getAttrs().stream()
-					.filter(d-> d.getAttrCode().equals(ItemHelper.ITEM_MAX_DURATION_ATTR))
-					.mapToInt(MudItemAttr::getAttrValue)
+					.filter(d-> d.getCode().equals(ItemHelper.ITEM_MAX_DURATION_ATTR))
+					.mapToInt(MudItemAttr::getValue)
 					.findFirst()
 					.orElse(0);
 		
@@ -131,9 +131,9 @@ public class ItemController implements ItemService {
 			
 			// Adjusts the current duration to the maximum
 			dbItem.getAttrs().stream()
-				.filter(d -> d.getAttrCode().equals(ItemHelper.ITEM_DURATION_ATTR))
+				.filter(d -> d.getCode().equals(ItemHelper.ITEM_DURATION_ATTR))
 				.findFirst()
-				.ifPresent(e -> e.setAttrValue(maxDuration));
+				.ifPresent(e -> e.setValue(maxDuration));
 		}
 		
 		return itemDestroyed;
@@ -216,7 +216,7 @@ public class ItemController implements ItemService {
 		// Looking for attributes to remove
 		dbItem.getAttrs().removeIf(d -> 
 			// Filtering attributes from db record that doesn't exist in request
-			!requestItem.getAttrs().containsKey(d.getAttrCode())			
+			!requestItem.getAttrs().containsKey(d.getCode())			
 		);
 
 		// Looking for attributes to add/update
@@ -226,14 +226,14 @@ public class ItemController implements ItemService {
 			
 			Optional<MudItemAttr> dbItemAttr =
 				dbItem.getAttrs().stream()
-					.filter(d -> d.getAttrCode().equals(curAttr))
+					.filter(d -> d.getCode().equals(curAttr))
 					.findFirst();
 			
 			if (dbItemAttr.isPresent()) {
-				dbItemAttr.get().setAttrValue(curAttrValue);
+				dbItemAttr.get().setValue(curAttrValue);
 			} else {
 				dbItem.getAttrs().add(
-						MudItemAttrConverter.build(dbItem.getItemCode(), curAttr, curAttrValue)
+						MudItemAttrConverter.build(dbItem.getCode(), curAttr, curAttrValue)
 						);
 			}
 		}
@@ -249,12 +249,12 @@ public class ItemController implements ItemService {
 				// Check if exists in the old class
 				boolean existsInOldClass =
 						previousItemClass.getAttrs().stream()
-						.anyMatch(e -> e.getAttrCode().equals(d.getAttrCode()));
+						.anyMatch(e -> e.getCode().equals(d.getCode()));
 				
 				// Check if exists in the new class
 				boolean existsInNewClass =
 						itemClass.getAttrs().stream()
-						.anyMatch(e -> e.getAttrCode().equals(d.getAttrCode()));
+						.anyMatch(e -> e.getCode().equals(d.getCode()));
 				
 				return existsInOldClass && (!existsInNewClass);
 			});
@@ -266,10 +266,10 @@ public class ItemController implements ItemService {
 				// Filtering out those who already exists
 				.filter(d ->  
 						dbItem.getAttrs().stream()
-								.noneMatch(e -> e.getAttrCode().equals(d.getAttrCode()))
+								.noneMatch(e -> e.getCode().equals(d.getCode()))
 					)
 				// Converting List<MudItemClassAttr> to List<MudItemAttr>
-				.map(d -> MudItemAttrConverter.build(dbItem.getItemCode(), d))
+				.map(d -> MudItemAttrConverter.build(dbItem.getCode(), d))
 				.collect(Collectors.toList());
 
 		// Adding those from new attr list
@@ -277,16 +277,16 @@ public class ItemController implements ItemService {
 		
 		// Sync the duration attributes, if present
 		dbItem.getAttrs().stream()
-			.filter(d -> d.getAttrCode().equals(ItemHelper.ITEM_MAX_DURATION_ATTR))
+			.filter(d -> d.getCode().equals(ItemHelper.ITEM_MAX_DURATION_ATTR))
 			.findFirst()
 			.ifPresent(e -> 
 			
 				dbItem.getAttrs().stream()
-					.filter(f -> f.getAttrCode().equals(ItemHelper.ITEM_DURATION_ATTR))
+					.filter(f -> f.getCode().equals(ItemHelper.ITEM_DURATION_ATTR))
 					.findFirst()
-					.ifPresent(g -> {
-						g.setAttrValue(e.getAttrValue());
-					})
+					.ifPresent(g -> 
+						g.setValue(e.getValue())
+					)
 		);
 
 		return dbItem;
@@ -302,8 +302,8 @@ public class ItemController implements ItemService {
 				.findById(itemId)
 				.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.ITEM_NOT_FOUND));
 		
-		if (dbItem.getItemClass().getDemiseItemClassCode()!=null) {
-			internalUpdateClass(dbItem, dbItem.getItemClass().getDemiseItemClassCode());
+		if (dbItem.getItemClass().getDemiseClassCode()!=null) {
+			internalUpdateClass(dbItem, dbItem.getItemClass().getDemiseClassCode());
 			
 			response = ItemConverter.convert(dbItem);
 			

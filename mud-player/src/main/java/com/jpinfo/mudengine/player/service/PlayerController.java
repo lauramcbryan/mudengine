@@ -349,7 +349,7 @@ public class PlayerController implements PlayerService {
 			dbBeing.setId(pk);
 			
 			pk.setPlayerId(dbPlayer.getPlayerId());
-			pk.setBeingCode(being.getBeingCode());
+			pk.setBeingCode(being.getCode());
 			
 			dbBeing.setBeingName(beingName);
 			dbBeing.setBeingClass(being.getBeingClass().getName());

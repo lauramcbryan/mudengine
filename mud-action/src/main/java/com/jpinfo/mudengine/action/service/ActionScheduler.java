@@ -134,7 +134,7 @@ public class ActionScheduler {
 		
 		// Update the actor
 		beingService.updateBeing( 
-					fullState.getActor().getBeing().getBeingCode(), 
+					fullState.getActor().getBeing().getCode(), 
 					fullState.getActor().getBeing());
 		
 		// Update the place where the actor is
@@ -145,7 +145,7 @@ public class ActionScheduler {
 		
 		// If the Mediator is used, updated it too
 		if (fullState.getMediator()!=null) {
-			itemService.updateItem(fullState.getMediator().getItemCode(), fullState.getMediator());
+			itemService.updateItem(fullState.getMediator().getCode(), fullState.getMediator());
 		}
 
 		// Updating the target
@@ -153,14 +153,14 @@ public class ActionScheduler {
 			case BEING: 
 				
 				BeingComposite targetBeing = (BeingComposite)fullState.getTarget();
-				beingService.updateBeing(targetBeing.getBeing().getBeingCode(), targetBeing.getBeing());
+				beingService.updateBeing(targetBeing.getBeing().getCode(), targetBeing.getBeing());
 
 				break;
 			
 			case ITEM: 
 				
 				Item targetItem = (Item)fullState.getTarget();
-				itemService.updateItem(targetItem.getItemCode(), targetItem);
+				itemService.updateItem(targetItem.getCode(), targetItem);
 				
 				break;
 			
@@ -201,7 +201,7 @@ public class ActionScheduler {
 			case BEING:
 				this.messageService.putMessage(fullState.getActorCode(), 
 						curTargetMessage.getMessageKey(), 
-						fullState.getActor().getBeing().getBeingCode(), fullState.getActor().getBeing().getName(),
+						fullState.getActor().getBeing().getCode(), fullState.getActor().getBeing().getName(),
 						curTargetMessage.args);
 				break;
 			

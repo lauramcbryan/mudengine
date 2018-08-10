@@ -84,8 +84,8 @@ public class BeingController implements BeingService {
 			dbBeing.setCurWorld(requestBeing.getCurWorld());
 			
 			// We only update quantity for regular beings (non NPC and not player beings)
-			if (requestBeing.getBeingType().equals(Being.BEING_TYPE_REGULAR_NON_SENTIENT) ||
-					(requestBeing.getBeingType().equals(Being.BEING_TYPE_REGULAR_SENTIENT))) {
+			if (requestBeing.getType().equals(Being.enumBeingType.REGULAR_NON_SENTIENT) ||
+					(requestBeing.getType().equals(Being.enumBeingType.REGULAR_SENTIENT))) {
 			
 				dbBeing.setQuantity(requestBeing.getQuantity());
 			}
@@ -104,10 +104,10 @@ public class BeingController implements BeingService {
 
 		
 			// if the beingClass is changing, reset the attributes
-			if (!dbBeing.getBeingClass().getBeingClassCode().equals(requestBeing.getBeingClassCode())) {
+			if (!dbBeing.getBeingClass().getCode().equals(requestBeing.getClassCode())) {
 				
 				MudBeingClass dbClassBeing = classRepository
-						.findById(requestBeing.getBeingClassCode())
+						.findById(requestBeing.getClassCode())
 						.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.BEING_CLASS_NOT_FOUND));
 				
 				updateBeingClass(dbBeing, dbBeing.getBeingClass(), dbClassBeing);
@@ -127,7 +127,7 @@ public class BeingController implements BeingService {
 	
 	@Override
 	public ResponseEntity<Being> createBeing( 
-			@RequestParam Integer beingType, @RequestParam String beingClass, @RequestParam String worldName, 
+			@RequestParam Being.enumBeingType beingType, @RequestParam String beingClass, @RequestParam String worldName, 
 			@RequestParam Integer placeCode, @RequestParam Integer quantity,
 			@RequestParam String beingName) {
 		
@@ -139,7 +139,7 @@ public class BeingController implements BeingService {
 				.findById(beingClass)
 				.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.BEING_CLASS_NOT_FOUND));
 
-		dbBeing.setBeingType(beingType);
+		dbBeing.setType(beingType.ordinal());
 		dbBeing.setBeingClass(dbBeingClass);
 		dbBeing.setCurPlaceCode(placeCode);
 		dbBeing.setCurWorld(worldName);
@@ -188,7 +188,7 @@ public class BeingController implements BeingService {
 				.findById(beingClass)
 				.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.BEING_CLASS_NOT_FOUND));
 
-		dbBeing.setBeingType(Being.BEING_TYPE_PLAYER);
+		dbBeing.setType(Being.enumBeingType.PLAYABLE.ordinal());
 		dbBeing.setBeingClass(dbBeingClass);
 		dbBeing.setCurPlaceCode(placeCode);
 		dbBeing.setCurWorld(worldName);
@@ -284,7 +284,7 @@ public class BeingController implements BeingService {
 		lstFound.stream()
 			.forEach(d -> {
 				
-				itemService.dropAllFromBeing(d.getBeingCode(), worldName, placeCode);
+				itemService.dropAllFromBeing(d.getCode(), worldName, placeCode);
 				repository.delete(d);
 			});
 	}
@@ -298,7 +298,7 @@ public class BeingController implements BeingService {
 			.forEach(d -> {
 				
 				// Drop items carried by that being
-				itemService.dropAllFromBeing(d.getBeingCode(), d.getCurWorld(), d.getCurPlaceCode());
+				itemService.dropAllFromBeing(d.getCode(), d.getCurWorld(), d.getCurPlaceCode());
 				
 				// Delete the being in database
 				repository.delete(d);

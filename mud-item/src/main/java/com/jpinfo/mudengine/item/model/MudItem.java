@@ -23,14 +23,12 @@ public class MudItem implements Serializable {
 
 	@Id
 	@GeneratedValue(generator="mud_item_seq", strategy=GenerationType.SEQUENCE)
-	@Column(name="item_code")
-	private Long itemCode;
+	private Long code;
 	
-	@Column(name="name")
-	private String itemName;
+	private String name;
 
 	@ManyToOne
-	@JoinColumn(name="item_class_code", referencedColumnName="ITEM_CLASS_CODE")
+	@JoinColumn(name="class_code", referencedColumnName="CODE")
 	private MudItemClass itemClass;
 	
 	@Column(name="current_world")
@@ -46,7 +44,7 @@ public class MudItem implements Serializable {
 	
 
 	//bi-directional many-to-one association to ItemAttr
-	@OneToMany(mappedBy="id.itemCode", cascade=CascadeType.ALL, orphanRemoval=true)
+	@OneToMany(mappedBy="id.code", cascade=CascadeType.ALL, orphanRemoval=true)
 	private Set<MudItemAttr> attrs;
 
 	public MudItem() {

@@ -29,7 +29,7 @@ public class MudBeingSlotConverter {
 		MudBeingSlotPK dbSlotPK = new MudBeingSlotPK();
 		
 		dbSlotPK.setBeingCode(beingCode);
-		dbSlotPK.setSlotCode(classSlot.getId().getSlotCode());
+		dbSlotPK.setSlotCode(classSlot.getId().getCode());
 		
 		dbSlot.setId(dbSlotPK);
 		
@@ -45,10 +45,10 @@ public class MudBeingSlotConverter {
 			dbBeing.getSlots().removeIf(d -> {
 				
 				boolean existsInOldClass = previousClass.getSlots().stream()
-						.anyMatch(e -> d.getId().getSlotCode().equals(e.getId().getSlotCode()));
+						.anyMatch(e -> d.getId().getSlotCode().equals(e.getId().getCode()));
 				
 				boolean existsInNewClass = nextClass.getSlots().stream()
-						.anyMatch(e -> d.getId().getSlotCode().equals(e.getId().getSlotCode()));
+						.anyMatch(e -> d.getId().getSlotCode().equals(e.getId().getCode()));
 				
 				return existsInOldClass && ! existsInNewClass;
 			});
@@ -60,9 +60,9 @@ public class MudBeingSlotConverter {
 
 				MudBeingSlot slot = 
 					dbBeing.getSlots().stream()
-						.filter(e -> e.getId().getSlotCode().equals(d.getId().getSlotCode()))
+						.filter(e -> e.getId().getSlotCode().equals(d.getId().getCode()))
 						.findFirst()
-						.orElse(MudBeingSlotConverter.convert(dbBeing.getBeingCode(), d));
+						.orElse(MudBeingSlotConverter.convert(dbBeing.getCode(), d));
 
 				dbBeing.getSlots().add(slot);
 				

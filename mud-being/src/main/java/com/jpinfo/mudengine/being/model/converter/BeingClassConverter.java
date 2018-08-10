@@ -13,18 +13,18 @@ public class BeingClassConverter {
 		
 		BeingClass result = new BeingClass();
 		
-		result.setBeingClassCode(a.getBeingClassCode());
+		result.setCode(a.getCode());
 		result.setName(a.getName());
 		result.setDescription(a.getDescription());
 		result.setSize(a.getSize());
 		result.setWeightCapacity(a.getWeightCapacity());
 		
-		for(MudBeingClassAttr curAttr: a.getAttributes()) {
-			result.getAttributes().put(curAttr.getId().getAttrCode(), curAttr.getAttrValue());
+		for(MudBeingClassAttr curAttr: a.getAttrs()) {
+			result.getAttrs().put(curAttr.getId().getCode(), curAttr.getValue());
 		}
 		
 		for(MudBeingClassSkill curSkill: a.getSkills()) {
-			result.getSkills().put(curSkill.getId().getSkillCode(), curSkill.getSkillValue());
+			result.getSkills().put(curSkill.getId().getCode(), curSkill.getValue());
 			
 		}
 		

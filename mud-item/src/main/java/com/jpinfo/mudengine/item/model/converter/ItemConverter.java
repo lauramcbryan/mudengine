@@ -16,23 +16,23 @@ public class ItemConverter {
 		
 		if (dbItem!=null) {
 		
-			response.setItemCode(dbItem.getItemCode());
+			response.setCode(dbItem.getCode());
 			response.setCurPlaceCode(dbItem.getCurPlaceCode());
 			response.setCurWorld(dbItem.getCurWorld());
 			response.setQuantity(dbItem.getQuantity());
 			response.setCurOwner(dbItem.getCurOwner());
 			
-			response.setItemName(dbItem.getItemName()!=null ? 
-						dbItem.getItemName() : 
-						dbItem.getItemClass().getItemClassName());
+			response.setName(dbItem.getName()!=null ? 
+						dbItem.getName() : 
+						dbItem.getItemClass().getName());
 			
 			response.setItemClass(ItemClassConverter.convert(dbItem.getItemClass()));
 			
 			response.setAttrs(
 					dbItem.getAttrs().stream()
 					.collect(Collectors.toMap(
-							MudItemAttr::getAttrCode, 
-							MudItemAttr::getAttrValue))
+							MudItemAttr::getCode, 
+							MudItemAttr::getValue))
 					);
 		}
 		

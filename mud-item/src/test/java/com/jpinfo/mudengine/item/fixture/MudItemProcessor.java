@@ -17,7 +17,7 @@ public class MudItemProcessor implements Processor {
 			mock.getAttrs().clear();
 			mock.getItemClass().getAttrs().stream()
 				.forEach(e -> {
-					mock.getAttrs().add(MudItemAttrConverter.build(mock.getItemCode(), e));
+					mock.getAttrs().add(MudItemAttrConverter.build(mock.getCode(), e));
 				});
 			
 		}

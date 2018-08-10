@@ -23,6 +23,5 @@ public class MudBeingAttrPK implements Serializable {
 	@Column(name="being_code", insertable=false, updatable=false)
 	private Long beingCode;
 	
-	@Column(name="attr_code")
-	private String attrCode;
+	private String code;
 }

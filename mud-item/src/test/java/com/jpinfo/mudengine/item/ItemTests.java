@@ -83,12 +83,12 @@ public class ItemTests {
 		
 		given(repository.save(mockRequest)).willReturn(mockResponse);
 		
-		given(classRepository.findById(mockRequest.getItemClass().getItemClassCode()))
+		given(classRepository.findById(mockRequest.getItemClass().getCode()))
 			.willReturn(Optional.of(mockRequest.getItemClass()));
 		
 		Map<String, Object> urlVariables = new HashMap<>();
 		
-		urlVariables.put("itemClassCode", mockRequest.getItemClass().getItemClassCode());
+		urlVariables.put("itemClassCode", mockRequest.getItemClass().getCode());
 		urlVariables.put("worldName", mockRequest.getCurWorld());
 		urlVariables.put("placeCode", mockRequest.getCurPlaceCode());
 		
@@ -104,9 +104,9 @@ public class ItemTests {
 		assertThat(createdItem.getCurOwner()).isNull();
 		assertThat(createdItem.getCurPlaceCode()).isEqualTo(mockResponse.getCurPlaceCode());
 		assertThat(createdItem.getCurWorld()).isEqualTo(mockResponse.getCurWorld());
-		assertThat(createdItem.getItemName()).isEqualTo(mockResponse.getItemClass().getItemClassName());
+		assertThat(createdItem.getName()).isEqualTo(mockResponse.getItemClass().getName());
 		assertThat(createdItem.getQuantity()).isEqualTo(1);
-		assertThat(createdItem.getItemCode()).isNotNull();
+		assertThat(createdItem.getCode()).isNotNull();
 		
 		assertItemClass(mockResponse.getItemClass(), createdItem.getItemClass());
 	}
@@ -119,12 +119,12 @@ public class ItemTests {
 		
 		given(repository.save(mockRequest)).willReturn(mockResponse);
 		
-		given(classRepository.findById(mockRequest.getItemClass().getItemClassCode()))
+		given(classRepository.findById(mockRequest.getItemClass().getCode()))
 			.willReturn(Optional.of(mockRequest.getItemClass()));
 		
 		Map<String, Object> urlVariables = new HashMap<>();
 		
-		urlVariables.put("itemClassCode", mockRequest.getItemClass().getItemClassCode());
+		urlVariables.put("itemClassCode", mockRequest.getItemClass().getCode());
 		urlVariables.put("owner", mockRequest.getCurOwner());
 		
 		ResponseEntity<Item> createResponse = restTemplate.exchange(
@@ -139,10 +139,9 @@ public class ItemTests {
 		assertThat(createdItem.getCurOwner()).isEqualTo(mockResponse.getCurOwner());
 		assertThat(createdItem.getCurPlaceCode()).isNull();
 		assertThat(createdItem.getCurWorld()).isNull();
-		assertThat(createdItem.getItemName()).isEqualTo(mockResponse.getItemClass().getItemClassName());
+		assertThat(createdItem.getName()).isEqualTo(mockResponse.getItemClass().getName());
 		assertThat(createdItem.getQuantity()).isEqualTo(1);
-		assertThat(createdItem.getItemClassCode()).isEqualTo(mockResponse.getItemClass().getItemClassCode());
-		assertThat(createdItem.getItemCode()).isNotNull();
+		assertThat(createdItem.getCode()).isNotNull();
 		
 		assertItemClass(mockResponse.getItemClass(), createdItem.getItemClass());
 		
@@ -154,7 +153,7 @@ public class ItemTests {
 		MudItem mockRequest = Fixture.from(MudItem.class).gimme(ItemTemplates.REQUEST_WITH_BOTH);
 		
 		Map<String, Object> urlVariables = new HashMap<>();
-		urlVariables.put("itemClassCode", mockRequest.getItemClass().getItemClassCode());
+		urlVariables.put("itemClassCode", mockRequest.getItemClass().getCode());
 		urlVariables.put("worldName", mockRequest.getCurWorld());
 		urlVariables.put("placeCode", mockRequest.getCurPlaceCode());		
 		urlVariables.put("owner", mockRequest.getCurOwner());
@@ -173,7 +172,7 @@ public class ItemTests {
 		MudItem mockRequest = Fixture.from(MudItem.class).gimme(ItemTemplates.REQUEST);
 		
 		Map<String, Object> urlVariables = new HashMap<>();
-		urlVariables.put("itemClassCode", mockRequest.getItemClass().getItemClassCode());
+		urlVariables.put("itemClassCode", mockRequest.getItemClass().getCode());
 		
 		ResponseEntity<Item> createResponse = restTemplate.exchange(
 				"/item/?itemClassCode={itemClassCode}", 
@@ -187,11 +186,11 @@ public class ItemTests {
 	public void testRead() {
 		MudItem mockResponse = Fixture.from(MudItem.class).gimme(ItemTemplates.RESPONSE_FULL);
 		
-		given(repository.findById(mockResponse.getItemCode())).willReturn(Optional.of(mockResponse));
+		given(repository.findById(mockResponse.getCode())).willReturn(Optional.of(mockResponse));
 		
 		Map<String, Object> urlVariables = new HashMap<>();
 		
-		urlVariables.put("itemId", mockResponse.getItemCode());
+		urlVariables.put("itemId", mockResponse.getCode());
 		
 		ResponseEntity<Item> serviceResponse = restTemplate.exchange(
 				"/item/{itemId}", 
@@ -205,10 +204,9 @@ public class ItemTests {
 		assertThat(serviceItem.getCurOwner()).isNull();
 		assertThat(serviceItem.getCurPlaceCode()).isEqualTo(mockResponse.getCurPlaceCode());
 		assertThat(serviceItem.getCurWorld()).isEqualTo(mockResponse.getCurWorld());
-		assertThat(serviceItem.getItemName()).isEqualTo(mockResponse.getItemClass().getItemClassName());
+		assertThat(serviceItem.getName()).isEqualTo(mockResponse.getItemClass().getName());
 		assertThat(serviceItem.getQuantity()).isEqualTo(1);
-		assertThat(serviceItem.getItemClassCode()).isEqualTo(mockResponse.getItemClass().getItemClassCode());
-		assertThat(serviceItem.getItemCode()).isNotNull();
+		assertThat(serviceItem.getCode()).isNotNull();
 		
 		assertAttrMap(mockResponse, serviceItem);
 		
@@ -224,8 +222,8 @@ public class ItemTests {
 		MudItemClass newClass = Fixture.from(MudItemClass.class).gimme(ItemTemplates.VALID);
 		
 		MudItem savedItem = (MudItem)SerializationUtils.clone(originalMudItem);
-		savedItem.setItemCode(originalMudItem.getItemCode());
-		savedItem.setItemName(originalMudItem.getItemName());
+		savedItem.setCode(originalMudItem.getCode());
+		savedItem.setName(originalMudItem.getName());
 		savedItem.setQuantity(originalMudItem.getQuantity());
 		savedItem.setCurOwner(originalMudItem.getCurOwner());
 		savedItem.setCurPlaceCode(originalMudItem.getCurPlaceCode());
@@ -238,24 +236,24 @@ public class ItemTests {
 		savedItem.getAttrs().clear();
 		newClass.getAttrs().stream()
 			.forEach(d -> {
-				savedItem.getAttrs().add(MudItemAttrConverter.build(savedItem.getItemCode(), d));
+				savedItem.getAttrs().add(MudItemAttrConverter.build(savedItem.getCode(), d));
 			});
 		
 		
-		given(repository.findById(originalMudItem.getItemCode())).willReturn(Optional.of(originalMudItem));
-		given(classRepository.findById(originalMudItem.getItemClass().getItemClassCode())).willReturn(Optional.of(originalMudItem.getItemClass()));
-		given(classRepository.findById(newClass.getItemClassCode())).willReturn(Optional.of(newClass));
+		given(repository.findById(originalMudItem.getCode())).willReturn(Optional.of(originalMudItem));
+		given(classRepository.findById(originalMudItem.getItemClass().getCode())).willReturn(Optional.of(originalMudItem.getItemClass()));
+		given(classRepository.findById(newClass.getCode())).willReturn(Optional.of(newClass));
 
 		given(repository.save(savedItem)).willReturn(savedItem);
 		
 
 		Item mockBody = ItemConverter.convert(originalMudItem);
-		mockBody.setItemClassCode(newClass.getItemClassCode());
+		mockBody.setClassCode(newClass.getCode());
 		
 		HttpEntity<Item> mockHttpEntity = new HttpEntity<>(mockBody, emptyHttpEntity.getHeaders());
 		
 		Map<String, Object> urlVariables = new HashMap<>();
-		urlVariables.put("itemId", originalMudItem.getItemCode());
+		urlVariables.put("itemId", originalMudItem.getCode());
 		
 		ResponseEntity<Item> serviceResponse = restTemplate.exchange(
 				"/item/{itemId}", 
@@ -266,10 +264,9 @@ public class ItemTests {
 		
 		Item serviceItem = serviceResponse.getBody();
 		
-		assertThat(serviceItem.getItemName()).isEqualTo(newClass.getItemClassName());
+		assertThat(serviceItem.getName()).isEqualTo(newClass.getName());
 		assertThat(serviceItem.getQuantity()).isEqualTo(1);
-		assertThat(serviceItem.getItemClassCode()).isEqualTo(newClass.getItemClassCode());
-		assertThat(serviceItem.getItemCode()).isNotNull();
+		assertThat(serviceItem.getCode()).isNotNull();
 		
 		// Check consistency between MudItemClass and ItemClass
 		assertItemClass(newClass, serviceItem.getItemClass());
@@ -291,16 +288,16 @@ public class ItemTests {
 		// by the time the record is persisted in database
 		originalMudItem.getAttrs().add(
 				MudItemAttrConverter.build(
-						originalMudItem.getItemCode(), ItemHelper.ITEM_DURATION_ATTR, MAX_DURATION_VALUE)
+						originalMudItem.getCode(), ItemHelper.ITEM_DURATION_ATTR, MAX_DURATION_VALUE)
 				);
 
 		originalMudItem.getAttrs().add(
 				MudItemAttrConverter.build(
-						originalMudItem.getItemCode(), ItemHelper.ITEM_MAX_DURATION_ATTR, MAX_DURATION_VALUE)
+						originalMudItem.getCode(), ItemHelper.ITEM_MAX_DURATION_ATTR, MAX_DURATION_VALUE)
 				);
 		
 		// Instruct the mocked Item repository to return our original Item
-		given(repository.findById(originalMudItem.getItemCode())).willReturn(Optional.of(originalMudItem));
+		given(repository.findById(originalMudItem.getCode())).willReturn(Optional.of(originalMudItem));
 
 		// Return the same record as result of updating the database
 		given(repository.save(originalMudItem)).willReturn(originalMudItem);
@@ -315,7 +312,7 @@ public class ItemTests {
 		HttpEntity<Item> mockHttpEntity = new HttpEntity<>(mockBody, emptyHttpEntity.getHeaders());
 		
 		Map<String, Object> urlVariables = new HashMap<>();
-		urlVariables.put("itemId", originalMudItem.getItemCode());
+		urlVariables.put("itemId", originalMudItem.getCode());
 		
 		ResponseEntity<Item> serviceResponse = restTemplate.exchange(
 				"/item/{itemId}", 
@@ -345,11 +342,11 @@ public class ItemTests {
 		// That will be used to trigger item destruction
 		originalMudItem.getAttrs().add(
 				MudItemAttrConverter.build(
-						originalMudItem.getItemCode(), ItemHelper.ITEM_MAX_DURATION_ATTR, MAX_DURATION_VALUE)
+						originalMudItem.getCode(), ItemHelper.ITEM_MAX_DURATION_ATTR, MAX_DURATION_VALUE)
 				);
 		
 		// Instruct the mocked Item repository to return our original Item
-		given(repository.findById(originalMudItem.getItemCode())).willReturn(Optional.of(originalMudItem));
+		given(repository.findById(originalMudItem.getCode())).willReturn(Optional.of(originalMudItem));
 		
 		// Translates our original item in a service request
 		Item mockBody = ItemConverter.convert(originalMudItem);
@@ -360,7 +357,7 @@ public class ItemTests {
 		HttpEntity<Item> mockHttpEntity = new HttpEntity<>(mockBody, emptyHttpEntity.getHeaders());
 		
 		Map<String, Object> urlVariables = new HashMap<>();
-		urlVariables.put("itemId", originalMudItem.getItemCode());
+		urlVariables.put("itemId", originalMudItem.getCode());
 		
 		ResponseEntity<Item> serviceResponse = restTemplate.exchange(
 				"/item/{itemId}", 
@@ -386,24 +383,24 @@ public class ItemTests {
 		// by the time the record is persisted in database
 		originalMudItem.getAttrs().add(
 				MudItemAttrConverter.build(
-						originalMudItem.getItemCode(), ItemHelper.ITEM_DURATION_ATTR, MAX_DURATION_VALUE)
+						originalMudItem.getCode(), ItemHelper.ITEM_DURATION_ATTR, MAX_DURATION_VALUE)
 				);
 
 		originalMudItem.getAttrs().add(
 				MudItemAttrConverter.build(
-						originalMudItem.getItemCode(), ItemHelper.ITEM_MAX_DURATION_ATTR, MAX_DURATION_VALUE)
+						originalMudItem.getCode(), ItemHelper.ITEM_MAX_DURATION_ATTR, MAX_DURATION_VALUE)
 				);
 
 
 		MudItemClass newClass = Fixture.from(MudItemClass.class).gimme(ItemTemplates.VALID);
 		
 		// Set the demised class of the original item to the second class
-		originalMudItem.getItemClass().setDemiseItemClassCode(newClass.getItemClassCode());
+		originalMudItem.getItemClass().setDemiseClassCode(newClass.getCode());
 		
 		// The item saved in database will need to contain already the new class
 		MudItem savedItem = (MudItem)SerializationUtils.clone(originalMudItem);
-		savedItem.setItemCode(originalMudItem.getItemCode());
-		savedItem.setItemName(originalMudItem.getItemName());
+		savedItem.setCode(originalMudItem.getCode());
+		savedItem.setName(originalMudItem.getName());
 		savedItem.setQuantity(originalMudItem.getQuantity());
 		savedItem.setCurOwner(originalMudItem.getCurOwner());
 		savedItem.setCurPlaceCode(originalMudItem.getCurPlaceCode());
@@ -416,13 +413,13 @@ public class ItemTests {
 		savedItem.getAttrs().clear();
 		newClass.getAttrs().stream()
 			.forEach(d -> {
-				savedItem.getAttrs().add(MudItemAttrConverter.build(savedItem.getItemCode(), d));
+				savedItem.getAttrs().add(MudItemAttrConverter.build(savedItem.getCode(), d));
 			});
 		
 		
-		given(repository.findById(originalMudItem.getItemCode())).willReturn(Optional.of(originalMudItem));
-		given(classRepository.findById(originalMudItem.getItemClass().getItemClassCode())).willReturn(Optional.of(originalMudItem.getItemClass()));
-		given(classRepository.findById(newClass.getItemClassCode())).willReturn(Optional.of(newClass));
+		given(repository.findById(originalMudItem.getCode())).willReturn(Optional.of(originalMudItem));
+		given(classRepository.findById(originalMudItem.getItemClass().getCode())).willReturn(Optional.of(originalMudItem.getItemClass()));
+		given(classRepository.findById(newClass.getCode())).willReturn(Optional.of(newClass));
 
 		given(repository.save(savedItem)).willReturn(savedItem);
 		
@@ -436,7 +433,7 @@ public class ItemTests {
 		HttpEntity<Item> mockHttpEntity = new HttpEntity<>(mockBody, emptyHttpEntity.getHeaders());
 		
 		Map<String, Object> urlVariables = new HashMap<>();
-		urlVariables.put("itemId", originalMudItem.getItemCode());
+		urlVariables.put("itemId", originalMudItem.getCode());
 		
 		ResponseEntity<Item> serviceResponse = restTemplate.exchange(
 				"/item/{itemId}", 
@@ -447,10 +444,9 @@ public class ItemTests {
 		
 		Item serviceItem = serviceResponse.getBody();
 		
-		assertThat(serviceItem.getItemName()).isEqualTo(newClass.getItemClassName());
+		assertThat(serviceItem.getName()).isEqualTo(newClass.getName());
 		assertThat(serviceItem.getQuantity()).isEqualTo(1);
-		assertThat(serviceItem.getItemClassCode()).isEqualTo(newClass.getItemClassCode());
-		assertThat(serviceItem.getItemCode()).isNotNull();
+		assertThat(serviceItem.getCode()).isNotNull();
 		
 		// Check consistency between MudItemClass and ItemClass
 		assertItemClass(newClass, serviceItem.getItemClass());
@@ -479,12 +475,12 @@ public class ItemTests {
 		MudItemClass newClass = Fixture.from(MudItemClass.class).gimme(ItemTemplates.VALID);
 		
 		// Set the demised class of the original item to the second class
-		originalMudItem.getItemClass().setDemiseItemClassCode(newClass.getItemClassCode());
+		originalMudItem.getItemClass().setDemiseClassCode(newClass.getCode());
 		
 		// The item saved in database will need to contain already the new class
 		MudItem savedItem = (MudItem)SerializationUtils.clone(originalMudItem);
-		savedItem.setItemCode(originalMudItem.getItemCode());
-		savedItem.setItemName(originalMudItem.getItemName());
+		savedItem.setCode(originalMudItem.getCode());
+		savedItem.setName(originalMudItem.getName());
 		savedItem.setQuantity(originalMudItem.getQuantity());
 		savedItem.setCurOwner(originalMudItem.getCurOwner());
 		savedItem.setCurPlaceCode(originalMudItem.getCurPlaceCode());
@@ -497,19 +493,19 @@ public class ItemTests {
 		savedItem.getAttrs().clear();
 		newClass.getAttrs().stream()
 			.forEach(d -> {
-				savedItem.getAttrs().add(MudItemAttrConverter.build(savedItem.getItemCode(), d));
+				savedItem.getAttrs().add(MudItemAttrConverter.build(savedItem.getCode(), d));
 			});
 		
 		
-		given(repository.findById(originalMudItem.getItemCode())).willReturn(Optional.of(originalMudItem));
-		given(classRepository.findById(originalMudItem.getItemClass().getItemClassCode())).willReturn(Optional.of(originalMudItem.getItemClass()));
-		given(classRepository.findById(newClass.getItemClassCode())).willReturn(Optional.of(newClass));
+		given(repository.findById(originalMudItem.getCode())).willReturn(Optional.of(originalMudItem));
+		given(classRepository.findById(originalMudItem.getItemClass().getCode())).willReturn(Optional.of(originalMudItem.getItemClass()));
+		given(classRepository.findById(newClass.getCode())).willReturn(Optional.of(newClass));
 
 		given(repository.save(savedItem)).willReturn(savedItem);
 		
 
 		Map<String, Object> urlVariables = new HashMap<>();
-		urlVariables.put("itemId", originalMudItem.getItemCode());
+		urlVariables.put("itemId", originalMudItem.getCode());
 		
 		ResponseEntity<Item> serviceResponse = restTemplate.exchange(
 				"/item/{itemId}", 
@@ -517,10 +513,9 @@ public class ItemTests {
 		
 		Item serviceItem = serviceResponse.getBody();
 		
-		assertThat(serviceItem.getItemName()).isEqualTo(newClass.getItemClassName());
+		assertThat(serviceItem.getName()).isEqualTo(newClass.getName());
 		assertThat(serviceItem.getQuantity()).isEqualTo(1);
-		assertThat(serviceItem.getItemClassCode()).isEqualTo(newClass.getItemClassCode());
-		assertThat(serviceItem.getItemCode()).isNotNull();
+		assertThat(serviceItem.getCode()).isNotNull();
 		
 		// Check consistency between MudItemClass and ItemClass
 		assertItemClass(newClass, serviceItem.getItemClass());
@@ -538,10 +533,10 @@ public class ItemTests {
 				.gimme(ItemTemplates.RESPONSE_FULL);
 		
 		// Instruct the mocked Item repository to return our original Item
-		given(repository.findById(originalMudItem.getItemCode())).willReturn(Optional.of(originalMudItem));
+		given(repository.findById(originalMudItem.getCode())).willReturn(Optional.of(originalMudItem));
 		
 		Map<String, Object> urlVariables = new HashMap<>();
-		urlVariables.put("itemId", originalMudItem.getItemCode());
+		urlVariables.put("itemId", originalMudItem.getCode());
 		
 		ResponseEntity<Item> serviceResponse = restTemplate.exchange(
 				"/item/{itemId}", 
@@ -564,8 +559,8 @@ public class ItemTests {
 		
 		// Checking that all attributes in database response are present in result
 		for(MudItemAttr curAttr: mudItem.getAttrs()) {
-			assertThat(item.getAttrs()).containsKey(curAttr.getAttrCode());
-			assertThat(item.getAttrs().get(curAttr.getAttrCode())).isEqualTo(curAttr.getAttrValue());
+			assertThat(item.getAttrs()).containsKey(curAttr.getCode());
+			assertThat(item.getAttrs().get(curAttr.getCode())).isEqualTo(curAttr.getValue());
 		}		
 	}
 
@@ -585,8 +580,8 @@ public class ItemTests {
 	private void assertItemClass(MudItemClass mudItemClass, ItemClass itemClass) {
 
 		assertThat(itemClass).isNotNull();
-		assertThat(itemClass.getItemClassCode()).isEqualTo(mudItemClass.getItemClassCode());
-		assertThat(itemClass.getItemClassName()).isEqualTo(mudItemClass.getItemClassName());
+		assertThat(itemClass.getCode()).isEqualTo(mudItemClass.getCode());
+		assertThat(itemClass.getName()).isEqualTo(mudItemClass.getName());
 		assertThat(itemClass.getSize()).isEqualTo(mudItemClass.getSize());
 		assertThat(itemClass.getWeight()).isEqualTo(mudItemClass.getWeight());
 		assertThat(itemClass.getDescription()).isEqualTo(mudItemClass.getDescription());
@@ -596,8 +591,8 @@ public class ItemTests {
 		
 		// Checking that all attributes in database response are present in result
 		for(MudItemClassAttr curAttr: mudItemClass.getAttrs()) {
-			assertThat(itemClass.getAttrs()).containsKey(curAttr.getAttrCode());
-			assertThat(itemClass.getAttrs().get(curAttr.getAttrCode())).isEqualTo(curAttr.getAttrValue());
+			assertThat(itemClass.getAttrs()).containsKey(curAttr.getCode());
+			assertThat(itemClass.getAttrs().get(curAttr.getCode())).isEqualTo(curAttr.getValue());
 		}		
 	}
 	

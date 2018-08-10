@@ -20,11 +20,9 @@ public class MudItemClass implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@Column(name="ITEM_CLASS_CODE")
-	private String itemClassCode;
+	private String code;
 	
-	@Column(name="ITEM_CLASS_NAME")
-	private String itemClassName;
+	private String name;
 
 	private float size;
 
@@ -33,10 +31,10 @@ public class MudItemClass implements Serializable {
 	private String description;
 	
 	@Column(name="DEMISE_CLASS_CODE", length = 20)
-	private String demiseItemClassCode;
+	private String demiseClassCode;
 
 	//bi-directional many-to-one association to ItemClassAttr
-	@OneToMany(mappedBy="id.itemClassCode", cascade=CascadeType.ALL, orphanRemoval=true)
+	@OneToMany(mappedBy="id.classCode", cascade=CascadeType.ALL, orphanRemoval=true)
 	private List<MudItemClassAttr> attrs;
 
 	public MudItemClass() {

@@ -103,8 +103,8 @@ public class MessageController implements MessageService {
 		
 		for(Being curBeing: allBeingFromPlace) {
 			
-			if (curBeing.getBeingType() == Being.BEING_TYPE_PLAYER) {
-				putMessage(curBeing.getBeingCode(), message, senderCode, senderName, parms);
+			if (curBeing.getType().equals(Being.enumBeingType.PLAYABLE)) {
+				putMessage(curBeing.getCode(), message, senderCode, senderName, parms);
 			}
 		}
 	}

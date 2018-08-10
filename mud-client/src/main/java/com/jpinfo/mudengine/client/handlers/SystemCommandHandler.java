@@ -347,7 +347,7 @@ public class SystemCommandHandler extends BaseCommandHandler {
 			client.getActiveBeing().ifPresent(d -> {
 
 				// If the currently active beingCode is the same destroyed, erase it				
-				if (d.getBeingCode().equals(beingCode)) {
+				if (d.getCode().equals(beingCode)) {
 					client.clearBeingInformation();
 				}
 				

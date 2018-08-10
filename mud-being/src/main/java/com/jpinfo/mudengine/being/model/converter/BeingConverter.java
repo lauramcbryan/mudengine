@@ -26,9 +26,8 @@ public class BeingConverter {
 
 		Being response = new Being();
 
-		response.setBeingType(dbBeing.getBeingType());
-		response.setBeingCode(dbBeing.getBeingCode());
-		response.setBeingClassCode(dbBeing.getBeingClass().getBeingClassCode());
+		response.setType(Being.enumBeingType.values()[dbBeing.getType()]);
+		response.setCode(dbBeing.getCode());
 		response.setName(dbBeing.getName());
 		response.setPlayerId(dbBeing.getPlayerId());
 		response.setCurPlaceCode(dbBeing.getCurPlaceCode());
@@ -40,10 +39,10 @@ public class BeingConverter {
 		for (MudBeingAttr curAttr : dbBeing.getAttrs()) {
 
 			// Calculating the attribute effective value
-			int effectiveAttrValue = calcEffectiveAttr(curAttr.getId().getAttrCode(),
-					curAttr.getAttrValue(), dbBeing);
+			int effectiveAttrValue = calcEffectiveAttr(curAttr.getId().getCode(),
+					curAttr.getValue(), dbBeing);
 
-			response.getAttrs().put(curAttr.getId().getAttrCode(), effectiveAttrValue);
+			response.getAttrs().put(curAttr.getId().getCode(), effectiveAttrValue);
 		}
 
 		for (MudBeingSkill curSkill : dbBeing.getSkills()) {
@@ -62,7 +61,7 @@ public class BeingConverter {
 			List<BeingSkillModifier> skillModifierList = new ArrayList<>();
 
 			for (MudBeingAttr curAttr : dbBeing.getAttrs()) {
-				baseAttrMap.put(curAttr.getId().getAttrCode(), curAttr.getAttrValue());
+				baseAttrMap.put(curAttr.getId().getCode(), curAttr.getValue());
 			}
 
 			for (MudBeingSkill curSkill : dbBeing.getSkills()) {
@@ -72,7 +71,7 @@ public class BeingConverter {
 			for (MudBeingSkillModifier curSkillModifier : dbBeing.getSkillModifiers()) {
 				BeingSkillModifier dummy = new BeingSkillModifier();
 
-				dummy.setSkillCode(curSkillModifier.getId().getSkillCode());
+				dummy.setCode(curSkillModifier.getId().getCode());
 				dummy.setOriginCode(curSkillModifier.getId().getOriginCode());
 				dummy.setOriginType(curSkillModifier.getId().getOriginType());
 
@@ -85,7 +84,7 @@ public class BeingConverter {
 			for (MudBeingAttrModifier curAttrModifier : dbBeing.getAttrModifiers()) {
 				BeingAttrModifier dummy = new BeingAttrModifier();
 
-				dummy.setAttrCode(curAttrModifier.getId().getAttrCode());
+				dummy.setCode(curAttrModifier.getId().getCode());
 				dummy.setOriginCode(curAttrModifier.getId().getOriginCode());
 				dummy.setOriginType(curAttrModifier.getId().getOriginType());
 
@@ -112,7 +111,7 @@ public class BeingConverter {
 		// Traverse all modifier list
 		for (MudBeingAttrModifier curAttrModifier : dbBeing.getAttrModifiers()) {
 
-			if (curAttrModifier.getId().getAttrCode().equals(attrCode)) {
+			if (curAttrModifier.getId().getCode().equals(attrCode)) {
 
 				response += curAttrModifier.getOffset();
 			}
@@ -127,7 +126,7 @@ public class BeingConverter {
 
 		for (MudBeingSkillModifier curSkillModifier : dbBeing.getSkillModifiers()) {
 
-			if (curSkillModifier.getId().getSkillCode().equals(skillCode)) {
+			if (curSkillModifier.getId().getCode().equals(skillCode)) {
 				response += curSkillModifier.getOffset();
 			}
 		}

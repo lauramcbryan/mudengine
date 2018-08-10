@@ -23,7 +23,7 @@ public interface BeingService {
 
 	@RequestMapping(method=RequestMethod.PUT)
 	ResponseEntity<Being> createBeing( 
-			@RequestParam("beingType") Integer beingType, @RequestParam("beingClass") String beingClass, 
+			@RequestParam("beingType") Being.enumBeingType beingType, @RequestParam("beingClass") String beingClass, 
 			@RequestParam("worldName") String worldName, @RequestParam("placeCode") Integer placeCode, 
 			@RequestParam("quantity") Integer quantity, @RequestParam("beingName") String beingName);
 

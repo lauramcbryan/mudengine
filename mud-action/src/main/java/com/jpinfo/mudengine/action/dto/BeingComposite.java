@@ -58,7 +58,7 @@ public class BeingComposite implements ActionTarget  {
 	
 	public void addMessage(Long senderCode, String messageKey, String... parms) {
 		
-		this.messages.add(new ActionMessage(senderCode, this.getBeing().getBeingCode(), 
+		this.messages.add(new ActionMessage(senderCode, this.getBeing().getCode(), 
 				EnumTargetType.BEING, messageKey, parms));
 	}
 
@@ -70,7 +70,7 @@ public class BeingComposite implements ActionTarget  {
 	@Override
 	public void describeIt(ActionTarget target) {
 
-		if (getBeing().getBeingType().equals(Being.BEING_TYPE_REGULAR_NON_SENTIENT)) {
+		if (getBeing().getType().equals(Being.enumBeingType.REGULAR_NON_SENTIENT)) {
 			
 			if (getBeing().getQuantity()>1) {
 				target.addMessage("{str:PACKOFBEINGS}", getBeing().getBeingClass().getName());				
@@ -78,7 +78,7 @@ public class BeingComposite implements ActionTarget  {
 				target.addMessage("{str:SIMPLESTR}", getBeing().getBeingClass().getName());				
 			}
 			
-		} else if (getBeing().getBeingType().equals(Being.BEING_TYPE_REGULAR_SENTIENT)) {
+		} else if (getBeing().getType().equals(Being.enumBeingType.REGULAR_SENTIENT)) {
 			
 			if (getBeing().getQuantity()>1) {
 				target.addMessage("{str:GROUPOFBEINGS}", getBeing().getBeingClass().getName());
@@ -106,7 +106,7 @@ public class BeingComposite implements ActionTarget  {
 			Float attrModifier = 0.0F;
 			
 			for (BeingAttrModifier curModifier: this.getBeing().getAttrModifiers()) {
-				if (curModifier.getAttrCode().equals(curAttr)) {
+				if (curModifier.getCode().equals(curAttr)) {
 					
 					attrModifier += curModifier.getOffset();
 				}
@@ -132,7 +132,7 @@ public class BeingComposite implements ActionTarget  {
 			
 			for(BeingSkillModifier curModifier: this.getBeing().getSkillModifiers()) {
 				
-				if (curModifier.getSkillCode().equals(curSkill)) {
+				if (curModifier.getCode().equals(curSkill)) {
 					skillModifier += curModifier.getOffset();
 				}
 			}

@@ -23,8 +23,7 @@ public class MudBeingAttrModifierPK implements Serializable {
 	@Column(name="being_code")
 	private Long beingCode;
 	
-	@Column(name="attr_code")
-	private String attrCode;
+	private String code;
 	
 	@Column(name="origin_code")
 	private String originCode;

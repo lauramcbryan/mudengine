@@ -30,11 +30,11 @@ public class MudBeingSkillConverter {
 		MudBeingSkill dbSkill = new MudBeingSkill();
 		MudBeingSkillPK dbSkillPK = new MudBeingSkillPK();
 		
-		dbSkillPK.setSkillCode(classSkill.getId().getSkillCode());
+		dbSkillPK.setSkillCode(classSkill.getId().getCode());
 		dbSkillPK.setBeingCode(beingCode);
 		
 		dbSkill.setId(dbSkillPK);
-		dbSkill.setSkillValue(classSkill.getSkillValue());
+		dbSkill.setSkillValue(classSkill.getValue());
 		
 		return dbSkill;
 	}
@@ -51,10 +51,10 @@ public class MudBeingSkillConverter {
 			dbBeing.getSkills().removeIf(d -> {
 				
 				boolean existsInOldClass = previousClass.getSkills().stream()
-						.anyMatch(e -> d.getId().getSkillCode().equals(e.getId().getSkillCode()));
+						.anyMatch(e -> d.getId().getSkillCode().equals(e.getId().getCode()));
 				
 				boolean existsInNewClass = nextClass.getSkills().stream()
-						.anyMatch(e -> d.getId().getSkillCode().equals(e.getId().getSkillCode()));
+						.anyMatch(e -> d.getId().getSkillCode().equals(e.getId().getCode()));
 				
 				return existsInOldClass && ! existsInNewClass;
 			});
@@ -66,12 +66,12 @@ public class MudBeingSkillConverter {
 
 				MudBeingSkill skill = 
 					dbBeing.getSkills().stream()
-						.filter(e -> e.getId().getSkillCode().equals(d.getId().getSkillCode()))
+						.filter(e -> e.getId().getSkillCode().equals(d.getId().getCode()))
 						.findFirst()
-						.orElse(MudBeingSkillConverter.convert(dbBeing.getBeingCode(), d));
+						.orElse(MudBeingSkillConverter.convert(dbBeing.getCode(), d));
 
 				// Update the attribute value
-				skill.setSkillValue(d.getSkillValue());
+				skill.setSkillValue(d.getValue());
 				
 				dbBeing.getSkills().add(skill);				
 			});
@@ -97,7 +97,7 @@ public class MudBeingSkillConverter {
 						.filter(d -> d.getId().getSkillCode().equals(requestSkillCode))
 						.findFirst()
 						.orElse(MudBeingSkillConverter.build(
-								dbBeing.getBeingCode(), requestSkillCode, requestSkillValue));
+								dbBeing.getCode(), requestSkillCode, requestSkillValue));
 				
 				
 				// Update the skill value

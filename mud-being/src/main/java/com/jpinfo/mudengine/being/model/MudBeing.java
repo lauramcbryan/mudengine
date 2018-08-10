@@ -20,35 +20,14 @@ import java.util.Set;
 @Table(name="mud_being")
 @SequenceGenerator(name = "mud_being_seq", sequenceName="mud_being_seq", allocationSize=1)
 @Data
-@EqualsAndHashCode(of= {"beingCode"})
+@EqualsAndHashCode(of= {"code"})
 public class MudBeing implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
 	@Id
 	@GeneratedValue(generator="mud_being_seq", strategy=GenerationType.SEQUENCE)
-	@Column(name="being_code")
-	private Long beingCode;
-	
-	@ManyToOne
-	@JoinColumn(columnDefinition="being_class_code", referencedColumnName="being_class_code")
-	private MudBeingClass beingClass;
-	
-	@OneToMany(mappedBy="id.beingCode", cascade=CascadeType.ALL, orphanRemoval=true)
-	private Set<MudBeingAttr> attrs;
-
-	@OneToMany(mappedBy="id.beingCode", cascade=CascadeType.ALL, orphanRemoval=true)
-	private Set<MudBeingSkill> skills;
-	
-	@OneToMany(mappedBy="id.beingCode", cascade=CascadeType.ALL, orphanRemoval=true)
-	private Set<MudBeingAttrModifier> attrModifiers;
-	
-	@OneToMany(mappedBy="id.beingCode", cascade=CascadeType.ALL, orphanRemoval=true)
-	private Set<MudBeingSlot> slots;
-	
-	
-	@OneToMany(mappedBy="id.beingCode")
-	private Set<MudBeingSkillModifier> skillModifiers;
+	private Long code;
 
 	@Column
 	private String name;
@@ -63,9 +42,31 @@ public class MudBeing implements Serializable {
 	private Long playerId;
 	
 	@Column(name="being_type")
-	private Integer beingType;
+	private Integer type;
 	
 	private Integer quantity;
+	
+	
+	@ManyToOne
+	@JoinColumn(columnDefinition="class_code", referencedColumnName="code")
+	private MudBeingClass beingClass;
+	
+	@OneToMany(mappedBy="id.beingCode", cascade=CascadeType.ALL, orphanRemoval=true)
+	private Set<MudBeingAttr> attrs;
+
+	@OneToMany(mappedBy="id.beingCode", cascade=CascadeType.ALL, orphanRemoval=true)
+	private Set<MudBeingSkill> skills;
+	
+	@OneToMany(mappedBy="id.beingCode", cascade=CascadeType.ALL, orphanRemoval=true)
+	private Set<MudBeingAttrModifier> attrModifiers;
+
+	@OneToMany(mappedBy="id.beingCode")
+	private Set<MudBeingSkillModifier> skillModifiers;
+	
+	@OneToMany(mappedBy="id.beingCode", cascade=CascadeType.ALL, orphanRemoval=true)
+	private Set<MudBeingSlot> slots;
+	
+	
 
 	public MudBeing() {
 		this.attrs = new HashSet<>();

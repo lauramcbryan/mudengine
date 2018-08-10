@@ -16,7 +16,7 @@ public class BeingClass implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
-	private String beingClassCode;
+	private String code;
 
 	private String description;
 
@@ -26,14 +26,14 @@ public class BeingClass implements Serializable {
 
 	private Integer weightCapacity;
 
-	private Map<String, Integer> attributes;
+	private Map<String, Integer> attrs;
 
 	private Map<String, Integer> skills;
 	
 	
 	public BeingClass() {
 	
-		this.attributes = new HashMap<>();
+		this.attrs = new HashMap<>();
 		this.skills = new HashMap<>();
 	}
 }

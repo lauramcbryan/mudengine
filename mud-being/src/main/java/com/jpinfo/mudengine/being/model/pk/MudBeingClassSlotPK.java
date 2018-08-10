@@ -12,7 +12,7 @@ public class MudBeingClassSlotPK implements java.io.Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
-	private String beingClassCode;
+	private String classCode;
 	
-	private String slotCode;
+	private String code;
 }

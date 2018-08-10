@@ -18,9 +18,9 @@ public class BeingClassSkillPK implements Serializable {
 	//default serial version id, required for serializable classes.
 	private static final long serialVersionUID = 1L;
 
-	@Column(name="being_class_code", insertable=false, updatable=false)
-	private String beingClass;
+	@Column(name="class_code", insertable=false, updatable=false)
+	private String classCode;
 
-	@Column(name="skill_code", insertable=false, updatable=false)
-	private String skillCode;
+	@Column(name="code", insertable=false, updatable=false)
+	private String code;
 }

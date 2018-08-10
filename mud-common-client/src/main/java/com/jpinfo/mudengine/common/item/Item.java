@@ -15,9 +15,9 @@ public class Item implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
-	private Long itemCode;
+	private Long code;
 	
-	private String itemName;
+	private String name;
 
 	private ItemClass itemClass;
 	
@@ -34,14 +34,16 @@ public class Item implements Serializable {
 	public Item() {
 		this.attrs = new HashMap<>();
 	}
-	
+
 	@JsonIgnore
-	public String getItemClassCode() {
-		return itemClass.getItemClassCode();
+	public String getClassCode() {
+		return itemClass.getCode();
 	}
-	
-	public void setItemClassCode(String classCode) {
+
+	@JsonIgnore
+	public void setClassCode(String classCode) {
 		this.itemClass = new ItemClass();
-		this.itemClass.setItemClassCode(classCode);
+		this.itemClass.setCode(classCode);
 	}
+
 }

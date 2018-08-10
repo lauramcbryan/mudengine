@@ -17,7 +17,7 @@ public class MudBeingSkillModifierConverter {
 		MudBeingSkillModifierPK newDbSkillModifierPK = new MudBeingSkillModifierPK();
 		
 		newDbSkillModifierPK.setBeingCode(beingCode);
-		newDbSkillModifierPK.setSkillCode(curSkillModifier.getSkillCode());
+		newDbSkillModifierPK.setCode(curSkillModifier.getCode());
 		newDbSkillModifierPK.setOriginCode(curSkillModifier.getOriginCode());
 		newDbSkillModifierPK.setOriginType(curSkillModifier.getOriginType());
 		
@@ -36,7 +36,7 @@ public class MudBeingSkillModifierConverter {
 			dbBeing.getSkillModifiers().removeIf(d -> 
 				
 				requestBeing.getSkillModifiers().stream()
-					.noneMatch(e -> d.getId().getSkillCode().equals(e.getSkillCode()))
+					.noneMatch(e -> d.getId().getCode().equals(e.getCode()))
 			);
 			
 			// Looking for skillModifiers to add/update
@@ -46,9 +46,9 @@ public class MudBeingSkillModifierConverter {
 					// Search for the skillModifier in database record
 					MudBeingSkillModifier skillMod = 
 					dbBeing.getSkillModifiers().stream()
-						.filter(e -> e.getId().getSkillCode().equals(requestSkill.getSkillCode()))
+						.filter(e -> e.getId().getCode().equals(requestSkill.getCode()))
 						.findFirst()
-						.orElse(MudBeingSkillModifierConverter.convert(dbBeing.getBeingCode(), requestSkill));
+						.orElse(MudBeingSkillModifierConverter.convert(dbBeing.getCode(), requestSkill));
 					
 					skillMod.setOffset(requestSkill.getOffset());
 				
@@ -68,11 +68,11 @@ public class MudBeingSkillModifierConverter {
 				
 				boolean existsInOldClass = 
 						previousClass.getSkills().stream()
-						.anyMatch(e -> d.getId().getSkillCode().equals(e.getId().getSkillCode()));
+						.anyMatch(e -> d.getId().getCode().equals(e.getId().getCode()));
 				
 				boolean existsInNewClass =
 						nextClass.getSkills().stream()
-						.anyMatch(e -> d.getId().getSkillCode().equals(e.getId().getSkillCode()));
+						.anyMatch(e -> d.getId().getCode().equals(e.getId().getCode()));
 				
 				return existsInOldClass && !existsInNewClass;
 			});

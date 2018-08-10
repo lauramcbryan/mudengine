@@ -9,7 +9,7 @@ public class MudItemAttrConverter {
 	private MudItemAttrConverter() { }
 	
 	public static MudItemAttr build(Long itemCode, MudItemClassAttr classAttr) {
-		return build(itemCode, classAttr.getAttrCode(), classAttr.getAttrValue());
+		return build(itemCode, classAttr.getCode(), classAttr.getValue());
 	}
 	
 	public static MudItemAttr build(Long itemCode, String attrCode, Integer attrValue) {
@@ -17,11 +17,11 @@ public class MudItemAttrConverter {
 		MudItemAttr response = new MudItemAttr();
 		MudItemAttrPK pk = new MudItemAttrPK();
 		
-		pk.setAttrCode(attrCode);
+		pk.setCode(attrCode);
 		pk.setItemCode(itemCode);
 		
 		response.setId(pk);
-		response.setAttrValue(attrValue);
+		response.setValue(attrValue);
 		
 		return response;
 	}

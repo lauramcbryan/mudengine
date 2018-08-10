@@ -75,7 +75,7 @@ public class AdminCommandHandler extends BaseCommandHandler {
 			session.getActiveBeing().ifPresent(d -> {
 
 				message
-					.append("\tbeing: (id=").append(d.getBeingCode())
+					.append("\tbeing: (id=").append(d.getCode())
 					.append(", name=").append(d.getName());
 
 					session.getCurPlace().ifPresent(f -> 

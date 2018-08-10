@@ -30,17 +30,17 @@ public class ItemTemplates implements TemplateLoader {
 	public void load() {
 		
 		Fixture.of(MudItemClassAttrPK.class).addTemplate(VALID, new Rule() {{
-			add("attrCode", regex("attr-(\\d{4})"));
+			add("code", regex("attr-(\\d{4})"));
 		}});
 		
 		Fixture.of(MudItemClassAttr.class).addTemplate(ItemTemplates.VALID, new Rule () {{
 			add("id", one(MudItemClassAttrPK.class, VALID));
-			add("attrValue", random(Integer.class));
+			add("value", random(Integer.class));
 		}});
 		
 		Fixture.of(MudItemClass.class).addTemplate(VALID, new Rule() {{
-			add("itemClassCode", regex("class(\\d{4})"));
-			add("itemClassName", regex("className(\\d{4})"));
+			add("code", regex("class(\\d{4})"));
+			add("name", regex("className(\\d{4})"));
 			add("size", random(Float.class));
 			add("weight", random(Float.class));
 			add("description", regex("description-(\\d{4})"));
@@ -52,12 +52,12 @@ public class ItemTemplates implements TemplateLoader {
 		}});
 
 		Fixture.of(MudItemAttrPK.class).addTemplate(VALID, new Rule() {{
-			add("attrCode", regex("attr-(\\d{4})"));
+			add("code", regex("attr-(\\d{4})"));
 		}});
 	
 		Fixture.of(MudItemAttr.class).addTemplate(ItemTemplates.VALID, new Rule () {{
 			add("id", one(MudItemAttrPK.class, VALID));
-			add("attrValue", random(Integer.class));
+			add("value", random(Integer.class));
 		}});
 				
 		Fixture.of(MudItem.class).addTemplate(ItemTemplates.REQUEST, new Rule() {{
@@ -82,7 +82,7 @@ public class ItemTemplates implements TemplateLoader {
 		
 		
 		Fixture.of(MudItem.class).addTemplate(ItemTemplates.RESPONSE).inherits(REQUEST, new Rule() {{
-			add("itemCode", random(Long.class));
+			add("code", random(Long.class));
 		}});
 
 		Fixture.of(MudItem.class).addTemplate(ItemTemplates.RESPONSE_WITH_OWNER).inherits(RESPONSE, new Rule() {{

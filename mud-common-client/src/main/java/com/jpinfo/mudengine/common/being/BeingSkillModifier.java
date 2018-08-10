@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class BeingSkillModifier {
 
-	private String skillCode;
+	private String code;
 	private String originCode;
 	private String originType;
 

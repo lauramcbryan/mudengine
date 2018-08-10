@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class BeingAttrModifier {
 
-	private String attrCode;
+	private String code;
 	private String originCode;
 	private String originType;
 	

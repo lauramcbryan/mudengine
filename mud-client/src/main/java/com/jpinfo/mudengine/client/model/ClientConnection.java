@@ -117,7 +117,7 @@ public class ClientConnection {
 	public Optional<Long> getActiveBeingCode() {
 		
 		if (this.activeBeing.isPresent()) {
-			return Optional.of(this.activeBeing.get().getBeingCode());
+			return Optional.of(this.activeBeing.get().getCode());
 		} else {
 			return Optional.empty();
 		}

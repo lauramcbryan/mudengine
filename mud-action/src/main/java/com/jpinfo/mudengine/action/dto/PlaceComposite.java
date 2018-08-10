@@ -96,9 +96,9 @@ public class PlaceComposite implements ActionTarget {
 		
 		for(Being curBeing: this.getBeings()) {
 			
-			if (curBeing.getBeingType().equals(Being.BEING_TYPE_REGULAR_NON_SENTIENT)) {
+			if (curBeing.getType().equals(Being.enumBeingType.REGULAR_NON_SENTIENT)) {
 				target.addMessage("{str:PACKOFBEINGS}", curBeing.getBeingClass().getName());
-			} else if (curBeing.getBeingType().equals(Being.BEING_TYPE_REGULAR_SENTIENT)) {
+			} else if (curBeing.getType().equals(Being.enumBeingType.REGULAR_SENTIENT)) {
 				target.addMessage("{str:GROUPOFBEINGS}", curBeing.getBeingClass().getName());
 			} else {
 				target.addMessage("{str:HEREIS}", curBeing.getName());

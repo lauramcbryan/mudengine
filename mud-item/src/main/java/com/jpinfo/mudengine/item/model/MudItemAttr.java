@@ -23,11 +23,10 @@ public class MudItemAttr implements Serializable {
 	@EmbeddedId
 	private MudItemAttrPK id;
 
-	@Column(name="attr_value")
-	private Integer attrValue;
+	private Integer value;
 	
 	@Transient
-	public String getAttrCode() {
-		return id.getAttrCode();
+	public String getCode() {
+		return id.getCode();
 	}
 }

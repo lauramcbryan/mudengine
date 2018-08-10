@@ -211,7 +211,7 @@ public class ClientHelper {
 			.append(ClientHelper.BOX_LEFT)
 				.append(ClientHelper.padString(c.getLocalizedMessage(LocalizedMessages.COMMAND_WHOAMI_NAME)+ activeBeing.getName(), 36))
 			.append(ClientHelper.BOX_CENTER)
-				.append(ClientHelper.padString(c.getLocalizedMessage(LocalizedMessages.COMMAND_WHOAMI_CLASS)+ activeBeing.getBeingClassCode(), 36))
+				.append(ClientHelper.padString(c.getLocalizedMessage(LocalizedMessages.COMMAND_WHOAMI_CLASS)+ activeBeing.getClassCode(), 36))
 			.append(ClientHelper.BOX_RIGHT)
 		.append(ClientHelper.CRLF);
 	
@@ -245,7 +245,7 @@ public class ClientHelper {
 			// Calculate the amount of modifiers applied			
 			for(BeingAttrModifier curModifier: activeBeing.getAttrModifiers()) {
 				
-				if (curModifier.getAttrCode().equals(curAttrKey)) {
+				if (curModifier.getCode().equals(curAttrKey)) {
 					curAttrModifiers +=curModifier.getOffset();
 				}
 				
@@ -311,7 +311,7 @@ public class ClientHelper {
 			// Calculate the amount of modifiers applied			
 			for(BeingSkillModifier curModifier: activeBeing.getSkillModifiers()) {
 				
-				if (curModifier.getSkillCode().equals(curSkillKey)) {
+				if (curModifier.getCode().equals(curSkillKey)) {
 					curSkillModifiers +=curModifier.getOffset();
 				}
 				

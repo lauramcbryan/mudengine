@@ -16,18 +16,17 @@ import java.util.List;
 @Entity
 @Table(name="mud_being_class")
 @Data
-@EqualsAndHashCode(of= {"beingClassCode"})
+@EqualsAndHashCode(of= {"code"})
 public class MudBeingClass implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@Column(name="being_class_code")
-	private String beingClassCode;
-
-	private String description;
+	private String code;
 
 	private String name;
+	
+	private String description;
 
 	private Integer size;
 
@@ -35,13 +34,13 @@ public class MudBeingClass implements Serializable {
 	private Integer weightCapacity;
 
 	//bi-directional many-to-one association to MudBeingClassAttr
-	@OneToMany(mappedBy="id.beingClass", cascade=CascadeType.ALL, orphanRemoval=true)
-	private List<MudBeingClassAttr> attributes;
+	@OneToMany(mappedBy="id.classCode", cascade=CascadeType.ALL, orphanRemoval=true)
+	private List<MudBeingClassAttr> attrs;
 
 	//bi-directional many-to-one association to MudBeingClassSkill
-	@OneToMany(mappedBy="id.beingClass", cascade=CascadeType.ALL, orphanRemoval=true)
+	@OneToMany(mappedBy="id.classCode", cascade=CascadeType.ALL, orphanRemoval=true)
 	private List<MudBeingClassSkill> skills;
 	
-	@OneToMany(mappedBy="id.beingClassCode", cascade=CascadeType.ALL, orphanRemoval=true)
+	@OneToMany(mappedBy="id.classCode", cascade=CascadeType.ALL, orphanRemoval=true)
 	private List<MudBeingClassSlot> slots;
 }

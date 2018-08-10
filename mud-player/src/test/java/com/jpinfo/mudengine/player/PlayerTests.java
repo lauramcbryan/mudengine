@@ -86,7 +86,7 @@ public class PlayerTests {
 		createdBeing.getBeingClass().setName(TEST_BEING_CLASS_NAME);
 		createdBeing.setName(TEST_BEING_NAME);
 		createdBeing.setPlayerId(PlayerTests.TEST_PLAYER_ID);
-		createdBeing.setBeingCode(PlayerTests.TEST_BEING_CODE);
+		createdBeing.setCode(PlayerTests.TEST_BEING_CODE);
 		
 		ResponseEntity<Being> responseBeing = new ResponseEntity<Being>(createdBeing, HttpStatus.CREATED);
 		

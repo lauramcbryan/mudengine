@@ -17,11 +17,11 @@ public class MudBeingAttrConverter {
 		MudBeingAttr dbAttr = new MudBeingAttr();
 		MudBeingAttrPK dbAttrPK = new MudBeingAttrPK();
 		
-		dbAttrPK.setAttrCode(attrCode);
+		dbAttrPK.setCode(attrCode);
 		dbAttrPK.setBeingCode(beingCode);
 		
 		dbAttr.setId(dbAttrPK);
-		dbAttr.setAttrValue(attrValue);
+		dbAttr.setValue(attrValue);
 		
 		return dbAttr;
 	}
@@ -31,11 +31,11 @@ public class MudBeingAttrConverter {
 		MudBeingAttr dbAttr = new MudBeingAttr();
 		MudBeingAttrPK dbAttrPK = new MudBeingAttrPK();
 		
-		dbAttrPK.setAttrCode(classAttr.getId().getAttrCode());
+		dbAttrPK.setCode(classAttr.getId().getCode());
 		dbAttrPK.setBeingCode(beingCode);
 		
 		dbAttr.setId(dbAttrPK);
-		dbAttr.setAttrValue(classAttr.getAttrValue());
+		dbAttr.setValue(classAttr.getValue());
 		
 		return dbAttr;
 	}
@@ -49,28 +49,28 @@ public class MudBeingAttrConverter {
 			// Looking for attributes to remove
 			dbBeing.getAttrs().removeIf(d -> {
 				
-				boolean existsInOldClass = previousClass.getAttributes().stream()
-						.anyMatch(e -> d.getId().getAttrCode().equals(e.getId().getAttrCode()));
+				boolean existsInOldClass = previousClass.getAttrs().stream()
+						.anyMatch(e -> d.getId().getCode().equals(e.getId().getCode()));
 				
-				boolean existsInNewClass = nextClass.getAttributes().stream()
-						.anyMatch(e -> d.getId().getAttrCode().equals(e.getId().getAttrCode()));
+				boolean existsInNewClass = nextClass.getAttrs().stream()
+						.anyMatch(e -> d.getId().getCode().equals(e.getId().getCode()));
 				
 				return existsInOldClass && ! existsInNewClass;
 			});
 		}
 		
 		// Looking for attributes to add/update
-		nextClass.getAttributes().stream()
+		nextClass.getAttrs().stream()
 			.forEach(d -> {
 
 				MudBeingAttr attr = 
 					dbBeing.getAttrs().stream()
-						.filter(e -> e.getId().getAttrCode().equals(d.getId().getAttrCode()))
+						.filter(e -> e.getId().getCode().equals(d.getId().getCode()))
 						.findFirst()
-						.orElse(MudBeingAttrConverter.convert(dbBeing.getBeingCode(), d));
+						.orElse(MudBeingAttrConverter.convert(dbBeing.getCode(), d));
 
 				// Update the attribute value
-				attr.setAttrValue(d.getAttrValue());
+				attr.setValue(d.getValue());
 				
 				dbBeing.getAttrs().add(attr);
 				
@@ -83,7 +83,7 @@ public class MudBeingAttrConverter {
 
 		// Looking for attributes to remove
 		dbBeing.getAttrs().removeIf(d -> 
-			!requestBeing.getAttrs().containsKey(d.getId().getAttrCode())
+			!requestBeing.getAttrs().containsKey(d.getId().getCode())
 		);
 		
 		// Looking for attributes to add/update
@@ -94,13 +94,13 @@ public class MudBeingAttrConverter {
 				
 				MudBeingAttr attr = 
 				dbBeing.getAttrs().stream()
-					.filter(d -> d.getId().getAttrCode().equals(requestAttrCode))
+					.filter(d -> d.getId().getCode().equals(requestAttrCode))
 					.findFirst()
-					.orElse(MudBeingAttrConverter.build(dbBeing.getBeingCode(), requestAttrCode, requestAttrValue));
+					.orElse(MudBeingAttrConverter.build(dbBeing.getCode(), requestAttrCode, requestAttrValue));
 				
 				
 				// Update the attribute value
-				attr.setAttrValue(requestAttrValue);
+				attr.setValue(requestAttrValue);
 				
 				dbBeing.getAttrs().add(attr);
 				

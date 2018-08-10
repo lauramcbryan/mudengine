@@ -18,7 +18,7 @@ public class MudBeingAttrModifierConverter {
 		MudBeingAttrModifier newDbAttrModifier = new MudBeingAttrModifier();
 		MudBeingAttrModifierPK newDbAttrModifierPK = new MudBeingAttrModifierPK();
 		
-		newDbAttrModifierPK.setAttrCode(attrModifier.getAttrCode());
+		newDbAttrModifierPK.setCode(attrModifier.getCode());
 		newDbAttrModifierPK.setBeingCode(beingCode);
 		newDbAttrModifierPK.setOriginCode(attrModifier.getOriginCode());
 		newDbAttrModifierPK.setOriginType(attrModifier.getOriginType());
@@ -38,7 +38,7 @@ public class MudBeingAttrModifierConverter {
 			dbBeing.getAttrModifiers().removeIf(d -> 
 				
 				requestBeing.getAttrModifiers().stream()
-					.noneMatch(e -> d.getId().getAttrCode().equals(e.getAttrCode()))
+					.noneMatch(e -> d.getId().getCode().equals(e.getCode()))
 			);
 			
 			// Looking for attrModifiers to add/update
@@ -48,9 +48,9 @@ public class MudBeingAttrModifierConverter {
 					// Retrieve the existing modifier in database record
 					MudBeingAttrModifier attrModifier =
 						dbBeing.getAttrModifiers().stream()
-							.filter(e -> e.getId().getAttrCode().equals(requestAttr.getAttrCode()))
+							.filter(e -> e.getId().getCode().equals(requestAttr.getCode()))
 							.findFirst()
-							.orElse(MudBeingAttrModifierConverter.convert(dbBeing.getBeingCode(), requestAttr));
+							.orElse(MudBeingAttrModifierConverter.convert(dbBeing.getCode(), requestAttr));
 					
 					// Updating the modifier regardless it was found in current list or just created
 					attrModifier.setOffset(requestAttr.getOffset());
@@ -70,12 +70,12 @@ public class MudBeingAttrModifierConverter {
 			dbBeing.getAttrModifiers().removeIf(d -> {
 				
 				boolean existsInOldClass = 
-						previousClass.getAttributes().stream()
-						.anyMatch(e -> d.getId().getAttrCode().equals(e.getId().getAttrCode()));
+						previousClass.getAttrs().stream()
+						.anyMatch(e -> d.getId().getCode().equals(e.getId().getCode()));
 				
 				boolean existsInNewClass =
-						nextClass.getAttributes().stream()
-						.anyMatch(e -> d.getId().getAttrCode().equals(e.getId().getAttrCode()));
+						nextClass.getAttrs().stream()
+						.anyMatch(e -> d.getId().getCode().equals(e.getId().getCode()));
 				
 				return existsInOldClass && !existsInNewClass;
 			});

@@ -14,8 +14,8 @@ public class ItemClassConverter {
 		
 		ItemClass result = new ItemClass();
 		
-		result.setItemClassCode(dbItemClass.getItemClassCode());
-		result.setItemClassName(dbItemClass.getItemClassName());
+		result.setCode(dbItemClass.getCode());
+		result.setName(dbItemClass.getName());
 		result.setSize(dbItemClass.getSize());
 		result.setWeight(dbItemClass.getWeight());
 		result.setDescription(dbItemClass.getDescription());
@@ -23,8 +23,8 @@ public class ItemClassConverter {
 		result.setAttrs(
 				dbItemClass.getAttrs().stream()
 				.collect(Collectors.toMap(
-						MudItemClassAttr::getAttrCode, 
-						MudItemClassAttr::getAttrValue))
+						MudItemClassAttr::getCode, 
+						MudItemClassAttr::getValue))
 			);
 		
 		return result;

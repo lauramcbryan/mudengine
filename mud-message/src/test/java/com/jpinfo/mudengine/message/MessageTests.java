@@ -538,12 +538,12 @@ public class MessageTests {
 		List<Being> testBeingList = new ArrayList<Being>();
 		
 		Being firstBeing = new Being();
-		firstBeing.setBeingCode(MessageTests.TEST_BEING_CODE_5);
-		firstBeing.setBeingType(Being.BEING_TYPE_PLAYER);
+		firstBeing.setCode(MessageTests.TEST_BEING_CODE_5);
+		firstBeing.setType(Being.enumBeingType.PLAYABLE);
 
 		Being secondBeing = new Being();
-		secondBeing.setBeingCode(MessageTests.TEST_BEING_CODE_6);
-		secondBeing.setBeingType(Being.BEING_TYPE_PLAYER);
+		secondBeing.setCode(MessageTests.TEST_BEING_CODE_6);
+		secondBeing.setType(Being.enumBeingType.PLAYABLE);
 		
 		testBeingList.add(firstBeing);
 		testBeingList.add(secondBeing);

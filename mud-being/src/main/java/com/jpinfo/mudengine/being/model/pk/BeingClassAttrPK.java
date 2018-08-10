@@ -18,9 +18,9 @@ public class BeingClassAttrPK implements Serializable {
 	//default serial version id, required for serializable classes.
 	private static final long serialVersionUID = 1L;
 
-	@Column(name="being_class_code", insertable=false, updatable=false)
-	private String beingClass;
+	@Column(name="class_code", insertable=false, updatable=false)
+	private String classCode;
 
-	@Column(name="attr_code", insertable=false, updatable=false)
-	private String attrCode;
+	@Column(name="code", insertable=false, updatable=false)
+	private String code;
 }

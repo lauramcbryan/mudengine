@@ -2,7 +2,10 @@ package com.jpinfo.mudengine.being;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+
 import java.util.*;
+
+import javax.annotation.PostConstruct;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,59 +22,28 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.jpinfo.mudengine.being.client.ItemServiceClient;
+import com.jpinfo.mudengine.being.fixture.BeingTemplates;
+import com.jpinfo.mudengine.being.model.MudBeing;
+import com.jpinfo.mudengine.being.model.MudBeingClass;
+import com.jpinfo.mudengine.being.model.MudBeingClassAttr;
+import com.jpinfo.mudengine.being.model.MudBeingClassSkill;
+import com.jpinfo.mudengine.being.repository.BeingClassRepository;
+import com.jpinfo.mudengine.being.repository.BeingRepository;
+import com.jpinfo.mudengine.being.utils.BeingHelper;
 import com.jpinfo.mudengine.common.being.Being;
-import com.jpinfo.mudengine.common.player.Player;
-import com.jpinfo.mudengine.common.player.Session;
+import com.jpinfo.mudengine.common.being.BeingClass;
 import com.jpinfo.mudengine.common.security.TokenService;
 import com.jpinfo.mudengine.common.utils.CommonConstants;
+
+import br.com.six2six.fixturefactory.Fixture;
+import br.com.six2six.fixturefactory.loader.FixtureFactoryLoader;
+
+import static org.mockito.BDDMockito.*;
+
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment=WebEnvironment.RANDOM_PORT)
 public class BeingTests {
-	
-	private static final Integer testBeingType = 1;
-	private static final String testBeingClass = "CLASSA";
-	private static final String testBeingName = "NAMEA";
-	private static final String testWorldName = "aforgotten";
-	private static final Integer testPlaceCode = 1;
-	private static final Integer testQuantity = 2;
-	
-	private static final String testAttrA = "AAA";
-	private static final String testAttrB = "AAB";
-	private static final String testAttrC = "BAA";
-	private static final String testAttrD = "BAB";
-	
-	private static final String testSkillA = "SKLA"; 
-	private static final String testSkillB = "SKLB";
-	private static final String testSkillC = "SKLC";
-	private static final String testSkillD = "SKLD";
-	
-
-	private static final Integer test2BeingType = 2;
-	private static final String test2BeingClass = "CLASSB";
-	private static final String test2BeingName = "NAMEB";
-	private static final String test2WorldName = "fake";
-	private static final Integer test2PlaceCode = 2;
-	private static final Integer test2Quantity = 3;
-	
-	private static final Long testPlayerId = 1L;
-	private static final Long test2PlayerId = 2L;
-	//private static final Long test3PlayerId = 3L;
-	private static final Long test4PlayerId = 4L;
-	private static final Long test5PlayerId = 5L;
-		
-	private static final String testUsername = "test";
-	
-	private static final String test3WorldName = "fake";
-	private static final Integer test3PlaceCode = 3;
-	private static final String test3BeingName = "NAMEC";
-	
-	private static final String test4WorldName = "fake";
-	private static final Integer test4PlaceCode = 4;
-	private static final String test4BeingName = "NAMED";
-	
-	
-	private static final String test5BeingName = "NAMEE";
 	
 	@MockBean
 	private ItemServiceClient mockItem;
@@ -82,505 +54,165 @@ public class BeingTests {
 	@Autowired
 	private TokenService tokenService;
 	
-	/**
-	 * Create the internal authentication token
-	 * and put it in a HttpHeader
-	 * @return
-	 */
-	private HttpHeaders getInternalAuthHeaders() {
+	@MockBean
+	private BeingRepository repository;
+	
+	@MockBean
+	private BeingClassRepository classRepository;
+	
+	
+	private HttpEntity<Object> emptyHttpEntity;
+	
+
+	@PostConstruct
+	private void setup() {
 		HttpHeaders authHeaders = new HttpHeaders();
 		authHeaders.add(CommonConstants.AUTH_TOKEN_HEADER, tokenService.buildInternalToken());
 		
-		return authHeaders;
+		emptyHttpEntity = new HttpEntity<Object>(authHeaders);
+		
+		FixtureFactoryLoader.loadTemplates("com.jpinfo.mudengine.being.fixture");
 	}
 	
-	private HttpHeaders getAuthHeaders(Long playerId) {
-		HttpHeaders authHeaders = new HttpHeaders();
-		
-		Player playerData = new Player();
-		playerData.setUsername(TokenService.INTERNAL_ACCOUNT);
-		playerData.setPlayerId(playerId);
-		playerData.setLocale(TokenService.INTERNAL_LOCALE);
-		
-		Session sessionData = new Session();
-		sessionData.setPlayerId(playerId);
-		sessionData.setSessionId(Long.MAX_VALUE);
-		
-		String usToken = tokenService.buildToken(BeingTests.testUsername, 
-				Optional.of(playerData), Optional.of(sessionData));		
-		
-		authHeaders.add(CommonConstants.AUTH_TOKEN_HEADER, usToken);
-		
-		return authHeaders;
-	}
-
 	@Test
 	public void contextLoads() {
 	}
 	
 	@Test
-	public void testCrud() {
+	public void testCreateSimple() {
 		
-		// Creating the authentication token
-		HttpEntity<Object> authEntity = new HttpEntity<Object>(getInternalAuthHeaders());
+		MudBeing originalMudBeing = Fixture.from(MudBeing.class).gimme(BeingTemplates.VALID);
+		originalMudBeing.setQuantity(BeingHelper.CREATE_DEFAULT_QUANTITY);
+		originalMudBeing.setType(Being.enumBeingType.REGULAR_NON_SENTIENT.ordinal());
+		
+		given(repository.save(originalMudBeing)).willReturn(originalMudBeing);
+		
+		given(classRepository.findById(originalMudBeing.getBeingClass().getCode())).willReturn(Optional.of(originalMudBeing.getBeingClass()));
 		
 		Map<String, Object> urlVariables = new HashMap<String, Object>();
 		
-		// *********** CREATE **********
-		// =============================
-		urlVariables.put("beingType", BeingTests.testBeingType);
-		urlVariables.put("beingClass", BeingTests.testBeingClass);
-		urlVariables.put("worldName", BeingTests.testWorldName);
-		urlVariables.put("placeCode", BeingTests.testPlaceCode);
-		urlVariables.put("quantity", BeingTests.testQuantity);
-		urlVariables.put("beingName", BeingTests.testBeingName);
+		urlVariables.put("beingType", Being.enumBeingType.REGULAR_NON_SENTIENT);
+		urlVariables.put("beingClass", originalMudBeing.getBeingClass().getCode());
+		urlVariables.put("worldName", originalMudBeing.getCurWorld());
+		urlVariables.put("placeCode", originalMudBeing.getCurPlaceCode());
+		urlVariables.put("beingName", originalMudBeing.getName());
 
 		ResponseEntity<Being> responseCreate= restTemplate.exchange(
-				"/being/?beingType={beingType}&beingClass={beingClass}&worldName={worldName}&placeCode={placeCode}&quantity={quantity}&beingName={beingName}", 
-				HttpMethod.PUT, authEntity, Being.class, urlVariables);
+				"/being/?beingType={beingType}&beingClass={beingClass}&worldName={worldName}&placeCode={placeCode}&beingName={beingName}", 
+				HttpMethod.PUT, emptyHttpEntity, Being.class, urlVariables);
 		
 		assertThat(responseCreate.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 		assertThat(responseCreate.getBody()).isNotNull();
 		
 		Being createdBeing = responseCreate.getBody();
 		
-		assertThat(createdBeing.getBeingType()).isEqualTo(BeingTests.testBeingType);
-		assertThat(createdBeing.getBeingClassCode()).isEqualTo(BeingTests.testBeingClass);
-		assertThat(createdBeing.getCurWorld()).isEqualTo(BeingTests.testWorldName);
-		assertThat(createdBeing.getCurPlaceCode()).isEqualTo(BeingTests.testPlaceCode);
-		assertThat(createdBeing.getQuantity()).isEqualTo(BeingTests.testQuantity);
+		assertThat(createdBeing.getType()).isEqualTo(Being.enumBeingType.values()[originalMudBeing.getType()]);
+		assertThat(createdBeing.getCurWorld()).isEqualTo(originalMudBeing.getCurWorld());
+		assertThat(createdBeing.getCurPlaceCode()).isEqualTo(originalMudBeing.getCurPlaceCode());
+		assertThat(createdBeing.getQuantity()).isEqualTo(BeingHelper.CREATE_DEFAULT_QUANTITY);
 	
-		// Check attributes
-		assertThat(createdBeing.getAttrs().get(BeingTests.testAttrA)).isNotNull();
-		assertThat(createdBeing.getAttrs().get(BeingTests.testAttrB)).isNotNull();
-		assertThat(createdBeing.getAttrs().get(BeingTests.testAttrC)).isNull();
-		assertThat(createdBeing.getAttrs().get(BeingTests.testAttrD)).isNull();
+		// Check being class (including attr maps between database and service)
+		assertBeingClass(originalMudBeing.getBeingClass(), createdBeing.getBeingClass());
 		
-		// Check skills
-		assertThat(createdBeing.getSkills().get(BeingTests.testSkillA)).isNotNull();
-		assertThat(createdBeing.getSkills().get(BeingTests.testSkillB)).isNotNull();
-		assertThat(createdBeing.getSkills().get(BeingTests.testSkillC)).isNull();
-		assertThat(createdBeing.getSkills().get(BeingTests.testSkillD)).isNull();
-		
-		// ************ READ ***********
-		// =============================
-
-		urlVariables.put("beingCode", createdBeing.getBeingCode());
-		
-		ResponseEntity<Being> responseRead= restTemplate.exchange(
-				"/being/{beingCode}", HttpMethod.GET, authEntity, Being.class, urlVariables);
-
-		assertThat(responseRead.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(responseRead.getBody()).isNotNull();
-		
-		Being readBeing = responseRead.getBody();
-		
-		assertThat(readBeing.getBeingType()).isEqualTo(BeingTests.testBeingType);
-		assertThat(readBeing.getBeingClassCode()).isEqualTo(BeingTests.testBeingClass);
-		assertThat(readBeing.getCurWorld()).isEqualTo(BeingTests.testWorldName);
-		assertThat(readBeing.getCurPlaceCode()).isEqualTo(BeingTests.testPlaceCode);
-		assertThat(readBeing.getQuantity()).isEqualTo(BeingTests.testQuantity);
-		
-		
-		
-		// *********** UPDATE **********
-		// =============================
-		readBeing.setBeingType(BeingTests.test2BeingType);
-		readBeing.setBeingClassCode(BeingTests.test2BeingClass);
-		readBeing.setCurWorld(BeingTests.test2WorldName);
-		readBeing.setCurPlaceCode(BeingTests.test2PlaceCode);
-		readBeing.setQuantity(BeingTests.test2Quantity);
-		readBeing.setName(BeingTests.test2BeingName);
-		
-		urlVariables.clear();
-		urlVariables.put("beingCode", readBeing.getBeingCode());
-		
-		HttpEntity<Being> requestEntity = new HttpEntity<Being>(readBeing, getInternalAuthHeaders());
-		
-		ResponseEntity<Being> responseUpdate = restTemplate.exchange(
-				"/being/{beingCode}", HttpMethod.POST, requestEntity, Being.class, urlVariables);
-
-		assertThat(responseUpdate.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(responseUpdate.getBody()).isNotNull();
-		
-		Being updatedBeing = responseUpdate.getBody();
-		
-		assertThat(updatedBeing.getBeingType()).isEqualTo(BeingTests.test2BeingType);
-		assertThat(updatedBeing.getBeingClassCode()).isEqualTo(BeingTests.test2BeingClass);
-		assertThat(updatedBeing.getCurWorld()).isEqualTo(BeingTests.test2WorldName);
-		assertThat(updatedBeing.getCurPlaceCode()).isEqualTo(BeingTests.test2PlaceCode);
-		assertThat(updatedBeing.getQuantity()).isEqualTo(BeingTests.test2Quantity);
-		assertThat(updatedBeing.getName()).isEqualTo(BeingTests.test2BeingName);
-
-		// Check attributes
-		assertThat(updatedBeing.getAttrs().get(BeingTests.testAttrA)).isNull();
-		assertThat(updatedBeing.getAttrs().get(BeingTests.testAttrB)).isNull();
-		assertThat(updatedBeing.getAttrs().get(BeingTests.testAttrC)).isNotNull();
-		assertThat(updatedBeing.getAttrs().get(BeingTests.testAttrD)).isNotNull();
-		
-		// Check skills
-		assertThat(updatedBeing.getSkills().get(BeingTests.testSkillA)).isNull();
-		assertThat(updatedBeing.getSkills().get(BeingTests.testSkillB)).isNull();
-		assertThat(updatedBeing.getSkills().get(BeingTests.testSkillC)).isNotNull();
-		assertThat(updatedBeing.getSkills().get(BeingTests.testSkillD)).isNotNull();
-		
-		
-		// *********** DELETE **********
-		// =============================
-		urlVariables.clear();
-		urlVariables.put("beingCode", readBeing.getBeingCode());
-		
-		ResponseEntity<Being> responseDelete = restTemplate.exchange(
-				"/being/{beingCode}", HttpMethod.DELETE, authEntity, Being.class, urlVariables);
-		
-		assertThat(responseDelete.getStatusCode()).isEqualTo(HttpStatus.OK);
+		// Check consistence between class attributes and being attributes
+		assertAttrMap(createdBeing, createdBeing.getBeingClass());
+		assertSkillMap(createdBeing, createdBeing.getBeingClass());
 	}
 	
-	@Test
-	public void testCrudWithPlayer() {
+	public void testCreatePlayable() {
 		
-		// Creating the authentication token
-		HttpEntity<Object> authEntity = new HttpEntity<Object>(getInternalAuthHeaders());
-		
-		
-		Map<String, Object> urlVariables = new HashMap<String, Object>();
-		
-		// *********** CREATE **********
-		// =============================
-		urlVariables.put("beingClass", BeingTests.testBeingClass);
-		urlVariables.put("worldName", BeingTests.testWorldName);
-		urlVariables.put("placeCode", BeingTests.testPlaceCode);
-		urlVariables.put("playerId", BeingTests.testPlayerId);
-		urlVariables.put("beingName", BeingTests.testBeingName);
-
-		ResponseEntity<Being> responseCreate= restTemplate.exchange(
-				"/being/player/{playerId}?beingClass={beingClass}&worldName={worldName}&placeCode={placeCode}&beingName={beingName}", 
-				HttpMethod.PUT, authEntity, Being.class, urlVariables);
-		
-		assertThat(responseCreate.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-		assertThat(responseCreate.getBody()).isNotNull();
-		assertThat(responseCreate.getBody().getPlayerId()).isEqualTo(BeingTests.testPlayerId);
-
-		// *********** CREATE SECOND ***********
-		// =====================================
-		urlVariables.clear();
-		urlVariables.put("beingClass", BeingTests.test2BeingClass);
-		urlVariables.put("worldName", BeingTests.test2WorldName);
-		urlVariables.put("placeCode", BeingTests.test2PlaceCode);
-		urlVariables.put("playerId", BeingTests.testPlayerId);
-		urlVariables.put("beingName", BeingTests.test2BeingName);
-		
-		responseCreate= restTemplate.exchange(
-				"/being/player/{playerId}?beingClass={beingClass}&worldName={worldName}&placeCode={placeCode}&beingName={beingName}", 
-				HttpMethod.PUT, authEntity, Being.class, urlVariables);
-		
-		assertThat(responseCreate.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-		assertThat(responseCreate.getBody()).isNotNull();
-		assertThat(responseCreate.getBody().getPlayerId()).isEqualTo(BeingTests.testPlayerId);
-
-		
-		// *********** CREATE ANOTHER ***********
-		// ======================================
-		urlVariables.clear();
-		urlVariables.put("beingClass", BeingTests.test2BeingClass);
-		urlVariables.put("worldName", BeingTests.test3WorldName);
-		urlVariables.put("placeCode", BeingTests.test3PlaceCode);
-		urlVariables.put("playerId", BeingTests.test2PlayerId);
-		urlVariables.put("beingName", BeingTests.test3BeingName);
-		
-		responseCreate= restTemplate.exchange(
-				"/being/player/{playerId}?beingClass={beingClass}&worldName={worldName}&placeCode={placeCode}&beingName={beingName}", 
-				HttpMethod.PUT, authEntity, Being.class, urlVariables);
-		
-		assertThat(responseCreate.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-		assertThat(responseCreate.getBody()).isNotNull();
-		
-		Being anotherBeing = responseCreate.getBody();
-		
-		assertThat(anotherBeing.getPlayerId()).isEqualTo(BeingTests.test2PlayerId);
-		
-		// *********** READ ALL FROM PLAYER ***********
-		// ==============================================
-		urlVariables.clear();
-		urlVariables.put("playerId", BeingTests.testPlayerId);
-		
-		ResponseEntity<Being[]> responseRead = restTemplate.exchange(
-				"/being/player/{playerId}", 
-				HttpMethod.GET, authEntity, Being[].class, urlVariables);
-		
-		assertThat(responseRead.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(responseRead.getBody().length).isEqualTo(2);
-		
-		
-		// *********** DELETE ALL FROM PLAYER ***********
-		// ==============================================
-		urlVariables.clear();
-		urlVariables.put("playerId", BeingTests.testPlayerId);
-		
-		ResponseEntity<String> responseDelete = restTemplate.exchange(
-				"/being/player/{playerId}", 
-				HttpMethod.DELETE, authEntity, String.class, urlVariables);
-		
-		assertThat(responseDelete.getStatusCode()).isEqualTo(HttpStatus.OK);
-		
-		
-		// *********** READ ALL FROM PLAYER *************
-		// ==============================================
-		urlVariables.clear();
-		urlVariables.put("playerId", BeingTests.testPlayerId);
-		
-		responseRead = restTemplate.exchange(
-				"/being/player/{playerId}", HttpMethod.GET, authEntity, Being[].class, urlVariables);
-		
-		assertThat(responseRead.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(responseRead.getBody().length).isEqualTo(0);
-
-
-		// *********** READ ALL FROM ANOTHER PLAYER *************
-		// ======================================================
-		urlVariables.clear();
-		urlVariables.put("playerId", BeingTests.test2PlayerId);
-		
-		responseRead = restTemplate.exchange(
-				"/being/player/{playerId}", HttpMethod.GET, authEntity, Being[].class, urlVariables);
-		
-		assertThat(responseRead.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(responseRead.getBody().length).isEqualTo(1);
-		assertThat(responseRead.getBody()[0].getBeingCode()).isEqualTo(anotherBeing.getBeingCode());
-		
-		// *********** CLEANUP *************
-		// =================================
-		urlVariables.clear();
-		urlVariables.put("beingCode", anotherBeing.getBeingCode());
-		ResponseEntity<Being> responseCleanup = restTemplate.exchange(
-				"/being/{beingCode}", HttpMethod.DELETE, authEntity, Being.class, urlVariables);
-		
-		assertThat(responseCleanup.getStatusCode()).isEqualTo(HttpStatus.OK);
-	}
-
-	@Test
-	public void testDestroyFromPlace() {
-		
-		// Creating the authentication token
-		HttpEntity<Object> authEntity = new HttpEntity<Object>(getInternalAuthHeaders());
-
-		Map<String, Object> urlVariables = new HashMap<String, Object>();
-		
-		// *********** CREATE **********
-		// =============================
-		urlVariables.put("beingType", BeingTests.testBeingType);
-		urlVariables.put("beingClass", BeingTests.testBeingClass);
-		urlVariables.put("worldName", BeingTests.test3WorldName);
-		urlVariables.put("placeCode", BeingTests.test3PlaceCode);
-		urlVariables.put("quantity", 999);
-		urlVariables.put("beingName", "");
-
-		ResponseEntity<Being> responseCreate= restTemplate.exchange(
-				"/being/?beingType={beingType}&beingClass={beingClass}&worldName={worldName}&placeCode={placeCode}&quantity={quantity}&beingName={beingName}", 
-				HttpMethod.PUT, authEntity, Being.class, urlVariables);
-		
-		assertThat(responseCreate.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-		assertThat(responseCreate.getBody()).isNotNull();
-
-		// *********** CREATE SECOND ***********
-		// =====================================
-		urlVariables.clear();
-		urlVariables.put("beingType", BeingTests.testBeingType);
-		urlVariables.put("beingClass", BeingTests.testBeingClass);
-		urlVariables.put("worldName", BeingTests.test3WorldName);
-		urlVariables.put("placeCode", BeingTests.test3PlaceCode);
-		urlVariables.put("quantity", 999);
-		urlVariables.put("beingName", "");
-		
-		responseCreate= restTemplate.exchange(
-				"/being/?beingType={beingType}&beingClass={beingClass}&worldName={worldName}&placeCode={placeCode}&quantity={quantity}&beingName={beingName}", 
-				HttpMethod.PUT, authEntity, Being.class, urlVariables);
-		
-		assertThat(responseCreate.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-		assertThat(responseCreate.getBody()).isNotNull();
-		
-		// *********** CREATE ANOTHER ***********
-		// ======================================
-		urlVariables.clear();
-		urlVariables.put("beingType", BeingTests.test2BeingType);
-		urlVariables.put("beingClass", BeingTests.test2BeingClass);
-		urlVariables.put("worldName", BeingTests.test4WorldName);
-		urlVariables.put("placeCode", BeingTests.test4PlaceCode);
-		urlVariables.put("quantity", 999);
-		urlVariables.put("beingName", "");
-		
-		responseCreate= restTemplate.exchange(
-				"/being/?beingType={beingType}&beingClass={beingClass}&worldName={worldName}&placeCode={placeCode}&quantity={quantity}&beingName={beingName}", 
-				HttpMethod.PUT, authEntity, Being.class, urlVariables);
-		
-		assertThat(responseCreate.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-		assertThat(responseCreate.getBody()).isNotNull();
-		
-		Being anotherBeing = responseCreate.getBody();
-		
-		// *********** READ ALL FROM PLACE ***********
-		// ==============================================
-		urlVariables.clear();
-		urlVariables.put("worldName", BeingTests.test3WorldName);
-		urlVariables.put("placeCode", BeingTests.test3PlaceCode);
-		
-		ResponseEntity<Being[]> responseRead = restTemplate.exchange(
-				"/being/place/{worldName}/{placeCode}", 
-				HttpMethod.GET, authEntity, Being[].class, urlVariables);
-		
-		assertThat(responseRead.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(responseRead.getBody().length).isEqualTo(2);
-		
-		
-		// *********** DELETE ALL FROM PLACE ***********
-		// ==============================================
-		urlVariables.clear();
-		urlVariables.put("worldName", BeingTests.test3WorldName);
-		urlVariables.put("placeCode", BeingTests.test3PlaceCode);
-		
-		ResponseEntity<String> responseDelete = restTemplate.exchange(
-				"/being/place/{worldName}/{placeCode}", 
-				HttpMethod.DELETE, authEntity, String.class, urlVariables);
-		
-		assertThat(responseDelete.getStatusCode()).isEqualTo(HttpStatus.OK);
-		
-		
-		// *********** READ ALL FROM PLACE *************
-		// ==============================================
-		urlVariables.clear();
-		urlVariables.put("worldName", BeingTests.test3WorldName);
-		urlVariables.put("placeCode", BeingTests.test3PlaceCode);
-		
-		responseRead = restTemplate.exchange(
-				"/being/place/{worldName}/{placeCode}", 
-				HttpMethod.GET, authEntity, Being[].class, urlVariables);
-		
-		assertThat(responseRead.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(responseRead.getBody().length).isEqualTo(0);
-
-
-		// *********** READ ALL FROM ANOTHER PLACE *************
-		// ======================================================
-		urlVariables.clear();
-		urlVariables.put("worldName", BeingTests.test4WorldName);
-		urlVariables.put("placeCode", BeingTests.test4PlaceCode);
-		
-		responseRead = restTemplate.exchange(
-				"/being/place/{worldName}/{placeCode}", 
-				HttpMethod.GET, authEntity, Being[].class, urlVariables);
-		
-		assertThat(responseRead.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(responseRead.getBody().length).isEqualTo(1);
-		assertThat(responseRead.getBody()[0].getBeingCode()).isEqualTo(anotherBeing.getBeingCode());
-		
-		// *********** CLEANUP *************
-		// =================================
-		urlVariables.clear();
-		urlVariables.put("beingCode", anotherBeing.getBeingCode());
-		ResponseEntity<Being> responseCleanup = restTemplate.exchange(
-				"/being/{beingCode}", 
-				HttpMethod.DELETE, authEntity, Being.class, urlVariables);
-		
-		assertThat(responseCleanup.getStatusCode()).isEqualTo(HttpStatus.OK);
 	}
 	
-	@Test
-	public void testGetFromAnotherPlayer() {
+	public void testUpdateHP() {
 		
-		// Creating authentication token for internal account
-		HttpEntity<Object> authEntity = new HttpEntity<Object>(getInternalAuthHeaders());
+	}
+	
+	public void testUpdateDestroyed() {
+		
+	}
+	
+	public void testDestroy() {
+		
+	}
+	
+	public void testDestroyAllFromPlace() {
+		
+	}
+	
+	public void testRead() {
+		
+	}
+	
+	public void testReadFromAnotherPlayer() {
+		
+	}
+	
+	private void assertAttrMap(MudBeingClass mudBeingClass, BeingClass beingClass) {
 
-		Map<String, Object> urlVariables = new HashMap<String, Object>();
+		// Ensure that the attributes map has the same size as returned by database
+		assertThat(beingClass.getAttrs().keySet().size()).isEqualTo(mudBeingClass.getAttrs().size());
 		
-		// *********** CREATE **********
-		// =============================
-		urlVariables.put("beingClass", BeingTests.testBeingClass);
-		urlVariables.put("worldName", BeingTests.testWorldName);
-		urlVariables.put("placeCode", BeingTests.testPlaceCode);
-		urlVariables.put("playerId", BeingTests.test4PlayerId);
-		urlVariables.put("beingName", BeingTests.test4BeingName);
+		// Checking that all attributes in database response are present in result
+		for(MudBeingClassAttr curAttr: mudBeingClass.getAttrs()) {
+			assertThat(beingClass.getAttrs()).containsKey(curAttr.getId().getCode());
+			assertThat(beingClass.getAttrs().get(curAttr.getId().getCode())).isEqualTo(curAttr.getValue());
+		}		
+	}
 
-		ResponseEntity<Being> responseCreate= restTemplate.exchange(
-				"/being/player/{playerId}?beingClass={beingClass}&worldName={worldName}&placeCode={placeCode}&beingName={beingName}", 
-				HttpMethod.PUT, authEntity, Being.class, urlVariables);
-		
-		assertThat(responseCreate.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-		assertThat(responseCreate.getBody()).isNotNull();
-		
-		Being firstBeing = responseCreate.getBody();
-		
+	private void assertAttrMap(Being being, BeingClass beingClass) {
 
-		// *********** CREATE SECOND ***********
-		// =====================================
-		urlVariables.clear();
-		urlVariables.put("beingClass", BeingTests.testBeingClass);
-		urlVariables.put("worldName", BeingTests.testWorldName);
-		urlVariables.put("placeCode", BeingTests.testPlaceCode);
-		urlVariables.put("playerId", BeingTests.test5PlayerId);
-		urlVariables.put("beingName", BeingTests.test5BeingName);
+		// Ensure that the attributes map has the same size as returned by database
+		assertThat(being.getAttrs().keySet().size()).isEqualTo(beingClass.getAttrs().keySet().size());
 		
-		responseCreate= restTemplate.exchange(
-				"/being/player/{playerId}?beingClass={beingClass}&worldName={worldName}&placeCode={placeCode}&beingName={beingName}", 
-				HttpMethod.PUT, authEntity, Being.class, urlVariables);
-		
-		assertThat(responseCreate.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-		assertThat(responseCreate.getBody()).isNotNull();
-		
-		Being secondBeing = responseCreate.getBody();
-		
-		// Creating a security token for playerId 4
-		HttpHeaders authHeaders = getAuthHeaders(BeingTests.test4PlayerId);
-		
-		HttpEntity<Object> playerOneAuthEntity = new HttpEntity<Object>(authHeaders);
-		
-		
-		// ************ READ FIRST PLAYER***********
-		// =========================================
-		urlVariables.put("beingCode", firstBeing.getBeingCode());
-		
-		ResponseEntity<Being> responseRead= restTemplate.exchange(
-				"/being/{beingCode}", HttpMethod.GET, playerOneAuthEntity, Being.class, urlVariables);
+		// Checking that all attributes in database response are present in result
+		for(String curAttr: beingClass.getAttrs().keySet()) {
+			assertThat(being.getAttrs()).containsKey(curAttr);
+			assertThat(being.getAttrs().get(curAttr)).isEqualTo(beingClass.getAttrs().get(curAttr));
+		}		
+	}
+	
+	private void assertSkillMap(MudBeingClass mudBeingClass, BeingClass beingClass) {
 
-		assertThat(responseRead.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(responseRead.getBody()).isNotNull();
+		// Ensure that the attributes map has the same size as returned by database
+		assertThat(beingClass.getSkills().keySet().size()).isEqualTo(mudBeingClass.getSkills().size());
 		
-		Being readBeing = responseRead.getBody();
-		
-		assertThat(readBeing.getAttrModifiers()).isNotNull();
-		assertThat(readBeing.getSkillModifiers()).isNotNull();
-		assertThat(readBeing.getBaseAttrs()).isNotNull();
-		assertThat(readBeing.getBaseSkills()).isNotNull();
+		// Checking that all attributes in database response are present in result
+		for(MudBeingClassSkill curSkill: mudBeingClass.getSkills()) {
+			assertThat(beingClass.getSkills()).containsKey(curSkill.getId().getCode());
+			assertThat(beingClass.getSkills().get(curSkill.getId().getCode())).isEqualTo(curSkill.getValue());
+		}		
+	}
 
-		
-		// ************ READ SECOND PLAYER***********
-		// ==========================================
-		urlVariables.put("beingCode", secondBeing.getBeingCode());
-		
-		responseRead= restTemplate.exchange(
-				"/being/{beingCode}", HttpMethod.GET, playerOneAuthEntity, Being.class, urlVariables);
+	private void assertSkillMap(Being being, BeingClass beingClass) {
 
-		assertThat(responseRead.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(responseRead.getBody()).isNotNull();
+		// Ensure that the attributes map has the same size as returned by database
+		assertThat(being.getSkills().keySet().size()).isEqualTo(beingClass.getSkills().keySet().size());
 		
-		readBeing = responseRead.getBody();
-		
-		assertThat(readBeing.getAttrModifiers()).isNull();
-		assertThat(readBeing.getSkillModifiers()).isNull();
-		assertThat(readBeing.getBaseAttrs()).isNull();
-		assertThat(readBeing.getBaseSkills()).isNull();
-		
+		// Checking that all attributes in database response are present in result
+		for(String curSkill: beingClass.getSkills().keySet()) {
+			assertThat(being.getSkills()).containsKey(curSkill);
+			assertThat(being.getSkills().get(curSkill)).isEqualTo(beingClass.getSkills().get(curSkill));
+		}		
+	}
+	
+	
+	
+	private void assertBeingClass(MudBeingClass mudBeingClass, BeingClass beingClass) {
 
-		// *********** CLEANUP *************
-		// =================================
-		urlVariables.clear();
-		urlVariables.put("worldName", BeingTests.testWorldName);
-		urlVariables.put("placeCode", BeingTests.testPlaceCode);
+		assertThat(beingClass).isNotNull();
+		assertThat(beingClass.getCode()).isEqualTo(mudBeingClass.getCode());
+		assertThat(beingClass.getName()).isEqualTo(mudBeingClass.getName());
+		assertThat(beingClass.getSize()).isEqualTo(mudBeingClass.getSize());
+		assertThat(beingClass.getWeightCapacity()).isEqualTo(mudBeingClass.getWeightCapacity());
+		assertThat(beingClass.getDescription()).isEqualTo(mudBeingClass.getDescription());
+
+		// Ensure that the attributes map has the same size as returned by database
+		assertThat(beingClass.getAttrs().keySet().size()).isEqualTo(mudBeingClass.getAttrs().size());
 		
-		ResponseEntity<String> responseDelete = restTemplate.exchange(
-				"/being/place/{worldName}/{placeCode}", 
-				HttpMethod.DELETE, authEntity, String.class, urlVariables);
+		// Checking that all attributes in database response are present in result		
+		assertAttrMap(mudBeingClass, beingClass);
 		
-		assertThat(responseDelete.getStatusCode()).isEqualTo(HttpStatus.OK);
-		
+		// Checking that all skills in database response are present in result		
+		assertSkillMap(mudBeingClass, beingClass);
 	}
 }

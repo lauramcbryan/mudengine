@@ -56,9 +56,9 @@ public class ActionTests {
 	private Being getBeingOne() {
 		Being beingOne = new Being();
 		
-		beingOne.setBeingType(1);
-		beingOne.setBeingCode(1L);
-		beingOne.setBeingClassCode("HUMAN");
+		beingOne.setType(Being.enumBeingType.REGULAR_SENTIENT);
+		beingOne.setCode(1L);
+		beingOne.setClassCode("HUMAN");
 		beingOne.setName("Tori");
 		beingOne.setPlayerId(1L);
 		beingOne.setCurPlaceCode(ActionTests.START_PLACE_CODE);
@@ -76,9 +76,9 @@ public class ActionTests {
 	private Being getBeingTwo() {
 		Being beingTwo = new Being();
 		
-		beingTwo.setBeingType(1);
-		beingTwo.setBeingCode(2L);
-		beingTwo.setBeingClassCode("HUMAN");
+		beingTwo.setType(Being.enumBeingType.REGULAR_SENTIENT);
+		beingTwo.setCode(2L);
+		beingTwo.setClassCode("HUMAN");
 		beingTwo.setName("Uke");
 		beingTwo.setPlayerId(1L);
 		beingTwo.setCurPlaceCode(ActionTests.START_PLACE_CODE);
