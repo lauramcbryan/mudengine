@@ -96,8 +96,8 @@ public class ActionTests {
 
 	private Place getPlaceOne() {
 		Place placeOne = new Place();
-		placeOne.setPlaceCode(ActionTests.START_PLACE_CODE);
-		placeOne.setPlaceClassCode("PLAIN");
+		placeOne.setCode(ActionTests.START_PLACE_CODE);
+		placeOne.setClassCode("PLAIN");
 		
 		// Adding the north exit to place 2
 		PlaceExit northExit = new PlaceExit();

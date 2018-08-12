@@ -25,7 +25,7 @@ public class MudBeingAttrModifier implements Serializable {
 	private MudBeingAttrModifierPK id;
 
 	@Column(name="attr_offset")
-	private double offset;
+	private float offset;
 
 	@Column(name="end_turn")
 	private Integer endTurn;

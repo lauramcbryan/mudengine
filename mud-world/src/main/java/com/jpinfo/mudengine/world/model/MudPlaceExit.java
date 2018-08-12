@@ -4,7 +4,7 @@ import javax.persistence.*;
 
 import org.hibernate.annotations.ColumnDefault;
 
-import com.jpinfo.mudengine.world.model.pk.PlaceExitPK;
+import com.jpinfo.mudengine.world.model.pk.MudPlaceExitPK;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -16,7 +16,7 @@ import lombok.EqualsAndHashCode;
 public class MudPlaceExit {
 
 	@EmbeddedId
-	private PlaceExitPK pk;
+	private MudPlaceExitPK pk;
 
 	@Column
 	@ColumnDefault(value = "true")	

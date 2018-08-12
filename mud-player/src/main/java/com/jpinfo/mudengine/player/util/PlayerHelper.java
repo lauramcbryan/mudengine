@@ -27,24 +27,26 @@ public class PlayerHelper {
 		response.setLocale(dbPlayer.getLocale());
 		response.setStatus(dbPlayer.getStatus());
 		
+		
+		
 		switch(dbPlayer.getStatus()) {
 			case Player.STATUS_ACTIVE:
-				response.setStrStatus(LocalizedMessages.PLAYER_ACTIVE_STATUS);
+				response.setStrStatus(LocalizedMessages.getMessage(LocalizedMessages.PLAYER_ACTIVE_STATUS));
 				break;				
 			case Player.STATUS_BANNED:
-				response.setStrStatus(LocalizedMessages.PLAYER_BANNED_STATUS);
+				response.setStrStatus(LocalizedMessages.getMessage(LocalizedMessages.PLAYER_BANNED_STATUS));
 				break;				
 			case Player.STATUS_BLOCKED:
-				response.setStrStatus(LocalizedMessages.PLAYER_BLOCKED_STATUS);
+				response.setStrStatus(LocalizedMessages.getMessage(LocalizedMessages.PLAYER_BLOCKED_STATUS));
 				break;				
 			case Player.STATUS_INACTIVE:
-				response.setStrStatus(LocalizedMessages.PLAYER_INACTIVE_STATUS);
+				response.setStrStatus(LocalizedMessages.getMessage(LocalizedMessages.PLAYER_INACTIVE_STATUS));
 				break;				
 			case Player.STATUS_PENDING:
-				response.setStrStatus(LocalizedMessages.PLAYER_PENDING_STATUS);
+				response.setStrStatus(LocalizedMessages.getMessage(LocalizedMessages.PLAYER_PENDING_STATUS));
 				break;
 			default: 
-				response.setStrStatus(LocalizedMessages.PLAYER_UNKNOWN_STATUS);
+				response.setStrStatus(LocalizedMessages.getMessage(LocalizedMessages.PLAYER_UNKNOWN_STATUS));
 		}
 		
 		

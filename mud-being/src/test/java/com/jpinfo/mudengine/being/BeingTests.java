@@ -49,8 +49,8 @@ import static org.mockito.BDDMockito.*;
 @SpringBootTest(webEnvironment=WebEnvironment.RANDOM_PORT)
 public class BeingTests {
 	
-	private static final Long MAX_HP=100L;
-	private static final Long HP=200L;
+	private static final Integer MAX_HP=100;
+	private static final Integer HP=200;
 	
 	@MockBean
 	private ItemServiceClient mockItem;
@@ -252,7 +252,7 @@ public class BeingTests {
 		
 		given(repository.findById(originalMudBeing.getCode())).willReturn(Optional.of(originalMudBeing));
 		
-		originalBeing.getBaseAttrs().put(BeingHelper.BEING_HP_ATTR, 0L);
+		originalBeing.getBaseAttrs().put(BeingHelper.BEING_HP_ATTR, 0);
 		HttpEntity<Being> beingHttpEntity = new HttpEntity<Being>(originalBeing, emptyHttpEntity.getHeaders());
 		
 		Map<String, Object> urlVariables = new HashMap<String, Object>();

@@ -21,5 +21,5 @@ public class MudBeingClassSkill implements Serializable {
 	@EmbeddedId
 	private MudBeingClassSkillPK id;
 
-	private Long value;
+	private Integer value;
 }

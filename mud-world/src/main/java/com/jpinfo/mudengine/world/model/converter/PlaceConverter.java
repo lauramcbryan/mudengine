@@ -23,12 +23,12 @@ public class PlaceConverter {
 		
 		if (originalDbPlace!=null) {
 		
-			result.setPlaceCode(originalDbPlace.getPlaceCode());
+			result.setCode(originalDbPlace.getCode());
 			
-			result.setPlaceClassCode(originalDbPlace.getPlaceClass().getPlaceClassCode());
+			result.setClassCode(originalDbPlace.getPlaceClass().getCode());
 			
-			result.setPlaceName(originalDbPlace.getPlaceName()!=null ? 
-						originalDbPlace.getPlaceName() : 
+			result.setName(originalDbPlace.getName()!=null ? 
+						originalDbPlace.getName() : 
 						originalDbPlace.getPlaceClass().getName());
 					
 			result.setPlaceClass(
@@ -47,8 +47,8 @@ public class PlaceConverter {
 			result.setAttrs(
 				originalDbPlace.getAttrs().stream()
 					.collect(Collectors.toMap(
-							MudPlaceAttr::getAttrCode, 
-							MudPlaceAttr::getAttrValue))
+							MudPlaceAttr::getCode, 
+							MudPlaceAttr::getValue))
 					);
 		}
 		

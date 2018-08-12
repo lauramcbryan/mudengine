@@ -22,9 +22,9 @@ public class MudClientScheduler {
 	
 	private static final Logger log = LoggerFactory.getLogger(MudClientScheduler.class);
 	
-	private static final Long WARN_IDLE_TIMEOUT = 15000L;
+	private static final Long WARN_IDLE_TIMEOUT = 240000L;
 	
-	private static final Long KILL_IDLE_TIMEOUT = 20000L;
+	private static final Long KILL_IDLE_TIMEOUT = 300000L;
 	
 	
 	@Autowired

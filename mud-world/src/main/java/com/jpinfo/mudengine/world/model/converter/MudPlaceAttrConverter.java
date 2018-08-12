@@ -2,7 +2,7 @@ package com.jpinfo.mudengine.world.model.converter;
 
 import com.jpinfo.mudengine.world.model.MudPlaceAttr;
 import com.jpinfo.mudengine.world.model.MudPlaceClassAttr;
-import com.jpinfo.mudengine.world.model.pk.PlaceAttrPK;
+import com.jpinfo.mudengine.world.model.pk.MudPlaceAttrPK;
 
 public class MudPlaceAttrConverter {
 
@@ -11,13 +11,13 @@ public class MudPlaceAttrConverter {
 	public static MudPlaceAttr convert(Integer placeCode, MudPlaceClassAttr classAttr) {
 		
 		MudPlaceAttr response = new MudPlaceAttr();
-		PlaceAttrPK pk = new PlaceAttrPK();
+		MudPlaceAttrPK pk = new MudPlaceAttrPK();
 		
-		pk.setAttrCode(classAttr.getId().getAttrCode());
+		pk.setCode(classAttr.getId().getCode());
 		pk.setPlaceCode(placeCode);
 		
 		response.setId(pk);
-		response.setAttrValue(classAttr.getAttrValue());
+		response.setValue(classAttr.getValue());
 		
 		return response;
 	}
@@ -25,13 +25,13 @@ public class MudPlaceAttrConverter {
 	public static MudPlaceAttr build(Integer placeCode, String attrCode, Integer attrValue) {
 		
 		MudPlaceAttr response = new MudPlaceAttr();
-		PlaceAttrPK pk = new PlaceAttrPK();
+		MudPlaceAttrPK pk = new MudPlaceAttrPK();
 		
-		pk.setAttrCode(attrCode);
+		pk.setCode(attrCode);
 		pk.setPlaceCode(placeCode);
 		
 		response.setId(pk);
-		response.setAttrValue(attrValue);
+		response.setValue(attrValue);
 		
 		return response;
 	}

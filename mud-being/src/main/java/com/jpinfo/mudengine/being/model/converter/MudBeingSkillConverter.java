@@ -11,7 +11,7 @@ public class MudBeingSkillConverter {
 	
 	private MudBeingSkillConverter() { }
 	
-	public static MudBeingSkill build(Long beingCode, String skillCode, Long skillValue) {
+	public static MudBeingSkill build(Long beingCode, String skillCode, Integer skillValue) {
 		
 		MudBeingSkill dbSkill = new MudBeingSkill();
 		MudBeingSkillPK dbSkillPK = new MudBeingSkillPK();
@@ -90,7 +90,7 @@ public class MudBeingSkillConverter {
 		requestBeing.getSkills().keySet().stream()
 			.forEach(requestSkillCode -> {
 
-				Long requestSkillValue = requestBeing.getSkills().get(requestSkillCode);
+				Integer requestSkillValue = requestBeing.getSkills().get(requestSkillCode);
 				
 				MudBeingSkill skill = 
 					dbBeing.getSkills().stream()

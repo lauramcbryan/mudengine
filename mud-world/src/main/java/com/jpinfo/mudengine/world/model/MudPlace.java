@@ -14,14 +14,13 @@ public class MudPlace {
 	
 	@Id
 	@GeneratedValue(generator="mud_place_seq", strategy=GenerationType.SEQUENCE)
-	@Column(name="PLACE_CODE")
-	private Integer placeCode;
+	private Integer code;
 	
 	@Column(name="NAME")
-	private String placeName;
+	private String name;
 
 	@ManyToOne
-	@JoinColumn(name="PLACE_CLASS_CODE", referencedColumnName="PLACE_CLASS_CODE", nullable = false)
+	@JoinColumn(name="CLASS_CODE", referencedColumnName="CODE", nullable = false)
 	private MudPlaceClass placeClass;
 	
 	@OneToMany(mappedBy="pk.placeCode", fetch=FetchType.EAGER, cascade=CascadeType.ALL, orphanRemoval=true)

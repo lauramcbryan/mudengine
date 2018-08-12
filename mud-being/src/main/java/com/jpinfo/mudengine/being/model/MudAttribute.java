@@ -15,14 +15,13 @@ import lombok.EqualsAndHashCode;
 @Entity
 @Table(name="mud_attribute")
 @Data
-@EqualsAndHashCode(of= {"attrCode"})
+@EqualsAndHashCode(of= {"code"})
 public class MudAttribute implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@Column(name="attr_code")
-	private String attrCode;
+	private String code;
 
 	private String description;
 

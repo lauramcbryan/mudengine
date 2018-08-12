@@ -238,7 +238,7 @@ public class ClientHelper {
 		for (String curAttrKey: activeBeing.getAttrs().keySet()) {
 			
 			// Retrieve the attribute effective value
-			Long curAttrValue = activeBeing.getAttrs().get(curAttrKey);
+			Integer curAttrValue = activeBeing.getAttrs().get(curAttrKey);
 			
 			// Calculate the amount of modifiers applied
 			// Last trend new code!  (doing the same stuff)
@@ -320,7 +320,7 @@ public class ClientHelper {
 		for (String curSkillKey: activeBeing.getSkills().keySet()) {
 			
 			// Retrieve the skill effective value
-			Long curSkillValue = activeBeing.getSkills().get(curSkillKey);
+			Integer curSkillValue = activeBeing.getSkills().get(curSkillKey);
 			
 			double curSkillModifiers;
 

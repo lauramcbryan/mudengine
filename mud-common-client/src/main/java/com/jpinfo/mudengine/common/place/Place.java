@@ -9,11 +9,11 @@ import lombok.Data;
 @Data
 public class Place {
 	
-	private Integer placeCode;
+	private Integer code;
 	
-	private String placeName;
+	private String name;
 
-	private String placeClassCode;
+	private String classCode;
 	
 	private PlaceClass placeClass;
 	

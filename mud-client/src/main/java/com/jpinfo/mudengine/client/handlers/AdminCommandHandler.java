@@ -79,8 +79,8 @@ public class AdminCommandHandler extends BaseCommandHandler {
 					.append(", name=").append(d.getName());
 
 					session.getCurPlace().ifPresent(f -> 
-						message.append(", place: (id=").append(f.getPlaceCode())
-							.append(", name=").append(f.getPlaceClassCode())
+						message.append(", place: (id=").append(f.getCode())
+							.append(", name=").append(f.getName())
 							.append(")")
 						);
 				

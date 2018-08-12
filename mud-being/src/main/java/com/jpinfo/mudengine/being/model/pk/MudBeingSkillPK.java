@@ -21,6 +21,6 @@ public class MudBeingSkillPK implements Serializable {
 	@Column(name="being_code", insertable=false, updatable=false)
 	private Long beingCode;
 
-	@Column(name="skill_code")
+	@Column(name="code")
 	private String code;	
 }

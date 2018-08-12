@@ -58,7 +58,7 @@ public class PlaceComposite implements ActionTarget {
 	@Override
 	public void addMessage(Long senderCode, String messageKey, String... args) {
 		
-		this.messages.add(new ActionMessage(senderCode, this.place.getPlaceCode().longValue(), 
+		this.messages.add(new ActionMessage(senderCode, this.place.getCode().longValue(), 
 				EnumTargetType.PLACE, messageKey, args));
 	}
 	

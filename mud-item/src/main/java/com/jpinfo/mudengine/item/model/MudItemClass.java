@@ -30,8 +30,8 @@ public class MudItemClass implements Serializable {
 	
 	private String description;
 	
-	@Column(name="DEMISE_CLASS_CODE", length = 20)
-	private String demiseClassCode;
+	@Column(name="DEMISED_CLASS_CODE", length = 20)
+	private String demisedClassCode;
 
 	//bi-directional many-to-one association to ItemClassAttr
 	@OneToMany(mappedBy="id.classCode", cascade=CascadeType.ALL, orphanRemoval=true)

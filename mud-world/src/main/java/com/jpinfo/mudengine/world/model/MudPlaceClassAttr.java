@@ -8,7 +8,7 @@ import javax.persistence.Transient;
 
 import org.hibernate.annotations.ColumnDefault;
 
-import com.jpinfo.mudengine.world.model.pk.PlaceClassAttrPK;
+import com.jpinfo.mudengine.world.model.pk.MudPlaceClassAttrPK;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -20,16 +20,16 @@ import lombok.EqualsAndHashCode;
 public class MudPlaceClassAttr {
 
 	@EmbeddedId
-	private PlaceClassAttrPK id;
+	private MudPlaceClassAttrPK id;
 	
-	@Column(name="ATTR_VALUE", nullable = false)
+	@Column(name="VALUE", nullable = false)
 	@ColumnDefault(value="0")
-	private Integer attrValue;
+	private Integer value;
 	
 	
 	@Transient
-	public String getAttrCode() {
-		return id.getAttrCode();
+	public String getCode() {
+		return id.getCode();
 	}
 	
 	

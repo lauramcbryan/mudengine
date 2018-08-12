@@ -2,7 +2,7 @@ package com.jpinfo.mudengine.world.model.converter;
 
 import com.jpinfo.mudengine.common.place.PlaceExit;
 import com.jpinfo.mudengine.world.model.MudPlaceExit;
-import com.jpinfo.mudengine.world.model.pk.PlaceExitPK;
+import com.jpinfo.mudengine.world.model.pk.MudPlaceExitPK;
 
 public class MudPlaceExitConverter {
 
@@ -11,7 +11,7 @@ public class MudPlaceExitConverter {
 	public static MudPlaceExit build(Integer placeCode, String direction, Integer targetPlaceCode) {
 		
 		MudPlaceExit newExit = new MudPlaceExit();
-		PlaceExitPK newExitPK = new PlaceExitPK();
+		MudPlaceExitPK newExitPK = new MudPlaceExitPK();
 		
 		newExitPK.setDirection(direction);
 		newExitPK.setPlaceCode(placeCode);
@@ -32,7 +32,7 @@ public class MudPlaceExitConverter {
 		
 		
 		MudPlaceExit newExit = new MudPlaceExit();
-		PlaceExitPK newExitPK = new PlaceExitPK();
+		MudPlaceExitPK newExitPK = new MudPlaceExitPK();
 		
 		newExitPK.setDirection(direction);
 		newExitPK.setPlaceCode(placeCode);

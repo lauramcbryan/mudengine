@@ -8,3 +8,5 @@ DROP TABLE mudengine_world.MUD_PLACE_CLASS_ATTR;
 DROP TABLE mudengine_world.MUD_PLACE_CLASS;
 
 DROP SEQUENCE mudengine_world.MUD_PLACE_SEQ;
+
+reset role;

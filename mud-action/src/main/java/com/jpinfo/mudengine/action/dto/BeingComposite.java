@@ -1,14 +1,13 @@
 package com.jpinfo.mudengine.action.dto;
 
 import java.util.ArrayList;
+
 import java.util.List;
 
 import com.jpinfo.mudengine.action.interfaces.ActionTarget;
 import com.jpinfo.mudengine.action.utils.ActionMessage;
 import com.jpinfo.mudengine.common.action.Action.EnumTargetType;
 import com.jpinfo.mudengine.common.being.Being;
-import com.jpinfo.mudengine.common.being.BeingAttrModifier;
-import com.jpinfo.mudengine.common.being.BeingSkillModifier;
 import com.jpinfo.mudengine.common.item.Item;
 import com.jpinfo.mudengine.common.place.Place;
 
@@ -103,16 +102,9 @@ public class BeingComposite implements ActionTarget  {
 		
 		for(String curAttr: this.getBeing().getAttrs().keySet()) {
 			
-			Double attrModifier = this.getBeing().getAttrModifierAmount(curAttr);
+			Float attrModifier = this.getBeing().getAttrModifierAmount(curAttr);
 			
-			for (BeingAttrModifier curModifier: this.getBeing().getAttrModifiers()) {
-				if (curModifier.getCode().equals(curAttr)) {
-					
-					attrModifier += curModifier.getOffset();
-				}
-			}
-			
-			if (attrModifier == 0.0) {
+			if (attrModifier == 0.0f) {
 				this.addMessage("{str:ATTR}", curAttr, String.valueOf(this.getBeing().getAttrs().get(curAttr)));				
 			}
 			else {
@@ -128,16 +120,9 @@ public class BeingComposite implements ActionTarget  {
 
 		for(String curSkill: this.getBeing().getSkills().keySet()) {
 			
-			Double skillModifier = this.getBeing().getSkillModifierAmount(curSkill);
+			Float skillModifier = this.getBeing().getSkillModifierAmount(curSkill);
 			
-			for(BeingSkillModifier curModifier: this.getBeing().getSkillModifiers()) {
-				
-				if (curModifier.getCode().equals(curSkill)) {
-					skillModifier += curModifier.getOffset();
-				}
-			}
-			
-			if (skillModifier == 0.0) {
+			if (skillModifier == 0.0f) {
 				this.addMessage("{str:SKILL}", curSkill, String.valueOf(this.getBeing().getSkills().get(curSkill)));
 			} else {
 				

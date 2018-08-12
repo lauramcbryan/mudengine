@@ -41,7 +41,7 @@ public abstract class BaseCommandHandler implements CommandHandler {
 			
 			try {
 				newParam.setDynamicDomainValues(
-						api.getBeingsFromPlace(client.getAuthToken(), "aforgotten", e.getPlaceCode()).stream()
+						api.getBeingsFromPlace(client.getAuthToken(), "aforgotten", e.getCode()).stream()
 						.collect(Collectors.toMap(
 								Being::getName, Being::getCode))
 						);
@@ -100,7 +100,7 @@ public abstract class BaseCommandHandler implements CommandHandler {
 				
 				List<Item> itemList = new ArrayList<>();
 				
-				itemList.addAll(api.getItemsFromPlace(client.getAuthToken(), "aforgotten", e.getPlaceCode()));
+				itemList.addAll(api.getItemsFromPlace(client.getAuthToken(), "aforgotten", e.getCode()));
 				itemList.addAll(api.getItemsFromBeing(client.getAuthToken(), client.getActiveBeingCode().get()));
 				
 				newParam.setDynamicDomainValues(

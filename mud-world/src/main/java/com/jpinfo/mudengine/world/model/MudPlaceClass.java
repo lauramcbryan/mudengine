@@ -12,8 +12,8 @@ import lombok.Data;
 public class MudPlaceClass {
 
 	@Id
-	@Column(name="PLACE_CLASS_CODE", length = 20)
-	private String placeClassCode;
+	@Column(name="CODE", length = 20)
+	private String code;
 
 	@Column(nullable = false, length = 30)
 	private String name;
@@ -27,7 +27,7 @@ public class MudPlaceClass {
 	@Column(name="WEIGHT_CAPACITY")
 	private Integer weightCapacity;
 
-	@OneToMany(mappedBy="id.placeClassCode", fetch=FetchType.EAGER, cascade=CascadeType.ALL, orphanRemoval=true)
+	@OneToMany(mappedBy="id.classCode", fetch=FetchType.EAGER, cascade=CascadeType.ALL, orphanRemoval=true)
 	private Set<MudPlaceClassAttr> attrs;
 	
 	@Column(name="PARENT_CLASS_CODE", length = 20)
@@ -39,6 +39,6 @@ public class MudPlaceClass {
 	@Column(name="BUILD_EFFORT")
 	private Integer buildEffort;
 	
-	@Column(name="DEMISE_CLASS_CODE", length = 20)
-	private String demisePlaceClassCode;
+	@Column(name="DEMISED_CLASS_CODE", length = 20)
+	private String demisedPlaceClassCode;
 }

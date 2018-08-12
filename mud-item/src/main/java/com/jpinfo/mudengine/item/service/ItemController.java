@@ -302,8 +302,8 @@ public class ItemController implements ItemService {
 				.findById(itemId)
 				.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.ITEM_NOT_FOUND));
 		
-		if (dbItem.getItemClass().getDemiseClassCode()!=null) {
-			internalUpdateClass(dbItem, dbItem.getItemClass().getDemiseClassCode());
+		if (dbItem.getItemClass().getDemisedClassCode()!=null) {
+			internalUpdateClass(dbItem, dbItem.getItemClass().getDemisedClassCode());
 			
 			response = ItemConverter.convert(dbItem);
 			

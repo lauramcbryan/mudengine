@@ -18,8 +18,7 @@ public class MudSkillCategory implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@Column(name="category_code")
-	private String categoryCode;
+	private String code;
 
 	private String description;
 

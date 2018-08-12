@@ -99,7 +99,7 @@ public class PlaceController implements PlaceService {
 		if (placeToBeDestroyed) {
 			
 			// destroy the place
-			destroyPlace(dbPlace.getPlaceCode());
+			destroyPlace(dbPlace.getCode());
 
 			// Retrieve it again from the database.
 			dbPlace = placeRepository
@@ -114,10 +114,10 @@ public class PlaceController implements PlaceService {
 			// ============================================
 			
 			// if placeClass is changed, resync the attributes of changed place
-			if (!dbPlace.getPlaceClass().getPlaceClassCode().equals(requestPlace.getPlaceClassCode())) {
+			if (!dbPlace.getPlaceClass().getCode().equals(requestPlace.getClassCode())) {
 	
 				// change placeClass			
-				internalUpdateClass(dbPlace, requestPlace.getPlaceClassCode());
+				internalUpdateClass(dbPlace, requestPlace.getClassCode());
 				
 			}
 			
@@ -145,8 +145,8 @@ public class PlaceController implements PlaceService {
 		// if this value is different from zero, it means that this is a place that can be destroyed
 		Integer maxHP = 
 				dbPlace.getAttrs().stream()
-					.filter(d-> d.getId().getAttrCode().equals(WorldHelper.PLACE_MAX_HP_ATTR))
-					.mapToInt(MudPlaceAttr::getAttrValue)
+					.filter(d-> d.getId().getCode().equals(WorldHelper.PLACE_MAX_HP_ATTR))
+					.mapToInt(MudPlaceAttr::getValue)
 					.findFirst()
 					.orElse(0);
 		
@@ -160,9 +160,9 @@ public class PlaceController implements PlaceService {
 			
 			// Adjusts the currentHP to the maximum			
 			dbPlace.getAttrs().stream()
-				.filter(d -> d.getId().getAttrCode().equals(WorldHelper.PLACE_HP_ATTR))
+				.filter(d -> d.getId().getCode().equals(WorldHelper.PLACE_HP_ATTR))
 				.findFirst()
-				.ifPresent(e -> e.setAttrValue(maxHP));
+				.ifPresent(e -> e.setValue(maxHP));
 		}
 		
 		return placeDestroyed;
@@ -179,10 +179,10 @@ public class PlaceController implements PlaceService {
 			dbPlace.getAttrs().removeIf(d -> {
 				
 				boolean existsInOldClass = previousPlaceClass.getAttrs().stream()
-						.anyMatch(e -> e.getAttrCode().equals(d.getAttrCode()));
+						.anyMatch(e -> e.getCode().equals(d.getCode()));
 				
 				boolean existsInNewClass = placeClass.getAttrs().stream()
-						.anyMatch(e -> e.getAttrCode().equals(d.getAttrCode()));
+						.anyMatch(e -> e.getCode().equals(d.getCode()));
 			
 				return existsInOldClass && !existsInNewClass;
 			});
@@ -194,13 +194,13 @@ public class PlaceController implements PlaceService {
 				
 				MudPlaceAttr dbAttr = 
 					dbPlace.getAttrs().stream()
-						.filter(e -> e.getAttrCode().equals(curClassAttr.getAttrCode()))
+						.filter(e -> e.getCode().equals(curClassAttr.getCode()))
 						.findFirst()
-						.orElse(MudPlaceAttrConverter.convert(dbPlace.getPlaceCode(), curClassAttr));
+						.orElse(MudPlaceAttrConverter.convert(dbPlace.getCode(), curClassAttr));
 				
 				// Set the value regardless if the attr came from existing
 				// list or was created now
-				dbAttr.setAttrValue(curClassAttr.getAttrValue());
+				dbAttr.setValue(curClassAttr.getValue());
 				
 				// Update the attribute list in entity
 				dbPlace.getAttrs().add(dbAttr);
@@ -217,7 +217,7 @@ public class PlaceController implements PlaceService {
 				// Filtering all database attributes...
 				.filter(db -> requestPlace.getAttrs().keySet().stream()
 						// ... that isn't in the request
-						.noneMatch(req -> req.equals(db.getId().getAttrCode())))
+						.noneMatch(req -> req.equals(db.getId().getCode())))
 				.collect(Collectors.toSet());
 
 		
@@ -232,19 +232,19 @@ public class PlaceController implements PlaceService {
 			// Looking for existing attribute in db record list
 			Optional<MudPlaceAttr> foundAttr = 
 				dbPlace.getAttrs().stream()
-					.filter(a -> a.getId().getAttrCode().equals(curAttr))
+					.filter(a -> a.getId().getCode().equals(curAttr))
 					.findFirst();
 
 			// If the value exists in db record
 			if (foundAttr.isPresent()) {
 				
 				// Updates the value of existing attribute
-				foundAttr.get().setAttrValue(curValue);
+				foundAttr.get().setValue(curValue);
 			} else {
 				
 				// Creates a new attribute
 				dbPlace.getAttrs().add(
-						MudPlaceAttrConverter.build(dbPlace.getPlaceCode(), curAttr, curValue)
+						MudPlaceAttrConverter.build(dbPlace.getCode(), curAttr, curValue)
 						);
 			}
 		}
@@ -265,7 +265,7 @@ public class PlaceController implements PlaceService {
 				PlaceExit curExit = requestPlace.getExits().get(curDirection);
 				
 				newExits.add(
-						MudPlaceExitConverter.build(curExit, dbPlace.getPlaceCode(), curDirection)
+						MudPlaceExitConverter.build(curExit, dbPlace.getCode(), curDirection)
 						);
 			});
 			
@@ -302,10 +302,10 @@ public class PlaceController implements PlaceService {
 				.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.PLACE_NOT_FOUND));
 
 		// If exists a demise place class for this location
-		if (dbPlace.getPlaceClass().getDemisePlaceClassCode()!=null) {
+		if (dbPlace.getPlaceClass().getDemisedPlaceClassCode()!=null) {
 
 			// Change the placeClass to the demised one
-			internalUpdateClass(dbPlace, dbPlace.getPlaceClass().getDemisePlaceClassCode());
+			internalUpdateClass(dbPlace, dbPlace.getPlaceClass().getDemisedPlaceClassCode());
 			
 			placeRepository.save(dbPlace);
 			
@@ -381,7 +381,7 @@ public class PlaceController implements PlaceService {
 		// Creating the new exit
 		dbPlace.getExits().add(
 				MudPlaceExitConverter.build(
-						dbPlace.getPlaceCode(), 
+						dbPlace.getCode(), 
 						direction, 
 						targetPlaceCode)
 				);
@@ -391,9 +391,9 @@ public class PlaceController implements PlaceService {
 		
 		// Updating the targetPlace exit to have a corresponding exit to new place created
 		MudPlaceExit correspondingExit = MudPlaceExitConverter.build(
-				targetDbPlace.getPlaceCode(), 
+				targetDbPlace.getCode(), 
 				correspondingDirection, 
-				dbPlace.getPlaceCode());
+				dbPlace.getCode());
 		
 		targetDbPlace.getExits().add(correspondingExit);
 		placeRepository.save(targetDbPlace);

@@ -12,7 +12,7 @@ public class MudBeingAttrConverter {
 
 	private MudBeingAttrConverter() { }
 	
-	public static MudBeingAttr build(Long beingCode, String attrCode, Long attrValue) {
+	public static MudBeingAttr build(Long beingCode, String attrCode, Integer attrValue) {
 		
 		MudBeingAttr dbAttr = new MudBeingAttr();
 		MudBeingAttrPK dbAttrPK = new MudBeingAttrPK();
@@ -90,7 +90,7 @@ public class MudBeingAttrConverter {
 		requestBeing.getAttrs().keySet().stream()
 			.forEach(requestAttrCode -> {
 
-				Long requestAttrValue = requestBeing.getAttrs().get(requestAttrCode);
+				Integer requestAttrValue = requestBeing.getAttrs().get(requestAttrCode);
 				
 				MudBeingAttr attr = 
 				dbBeing.getAttrs().stream()

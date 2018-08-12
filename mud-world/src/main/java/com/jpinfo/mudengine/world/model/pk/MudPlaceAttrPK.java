@@ -11,13 +11,13 @@ import lombok.EqualsAndHashCode;
 @Embeddable
 @Data
 @EqualsAndHashCode
-public class PlaceClassAttrPK implements Serializable {
+public class MudPlaceAttrPK implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	@Column(name="PLACE_CLASS_CODE", length = 20)
-	private String placeClassCode;
+	@Column(name="PLACE_CODE")
+	private Integer placeCode;
 
-	@Column(name="ATTR_CODE", length = 5)
-	private String attrCode;
+	@Column(name="CODE", length = 5)
+	private String code;
 }

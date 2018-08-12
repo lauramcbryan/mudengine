@@ -395,7 +395,7 @@ public class ItemTests {
 		MudItemClass newClass = Fixture.from(MudItemClass.class).gimme(ItemTemplates.VALID);
 		
 		// Set the demised class of the original item to the second class
-		originalMudItem.getItemClass().setDemiseClassCode(newClass.getCode());
+		originalMudItem.getItemClass().setDemisedClassCode(newClass.getCode());
 		
 		// The item saved in database will need to contain already the new class
 		MudItem savedItem = (MudItem)SerializationUtils.clone(originalMudItem);
@@ -475,7 +475,7 @@ public class ItemTests {
 		MudItemClass newClass = Fixture.from(MudItemClass.class).gimme(ItemTemplates.VALID);
 		
 		// Set the demised class of the original item to the second class
-		originalMudItem.getItemClass().setDemiseClassCode(newClass.getCode());
+		originalMudItem.getItemClass().setDemisedClassCode(newClass.getCode());
 		
 		// The item saved in database will need to contain already the new class
 		MudItem savedItem = (MudItem)SerializationUtils.clone(originalMudItem);

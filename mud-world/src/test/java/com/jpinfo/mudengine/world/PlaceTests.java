@@ -127,11 +127,11 @@ public class PlaceTests {
 		
 		assertThat(responseCreate.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 		
-		MudPlace dbPlace = repository.findById(responseCreate.getBody().getPlaceCode())
+		MudPlace dbPlace = repository.findById(responseCreate.getBody().getCode())
 				.orElseThrow(() -> new RuntimeException("Created place not found in database"));
 		
 		
-		assertThat(dbPlace.getPlaceClass().getPlaceClassCode()).isEqualTo(PlaceTests.CREATE_PLACE_CLASS);
+		assertThat(dbPlace.getPlaceClass().getCode()).isEqualTo(PlaceTests.CREATE_PLACE_CLASS);
 		
 		// Retrieving the exit
 		MudPlaceExit exit =
@@ -154,7 +154,7 @@ public class PlaceTests {
 
 			MudPlaceAttr attr = 
 					dbPlace.getAttrs().stream()
-						.filter(d -> d.getId().getAttrCode().equals(curAttr))
+						.filter(d -> d.getId().getCode().equals(curAttr))
 						.findFirst()
 						.orElse(null);
 			
@@ -162,7 +162,7 @@ public class PlaceTests {
 			assertThat(attr).isNotNull();
 			
 			// Check if it has the correct value
-			assertThat(attr.getAttrValue()).isEqualTo(curAttrValue);
+			assertThat(attr.getValue()).isEqualTo(curAttrValue);
 		}
 		
 	}
@@ -221,7 +221,7 @@ public class PlaceTests {
 		Place originalPlace = responseGet.getBody();
 		
 		// Change the placeClass
-		originalPlace.setPlaceClassCode(PlaceTests.UPDATE_CLASS_PLACE_CLASS);
+		originalPlace.setClassCode(PlaceTests.UPDATE_CLASS_PLACE_CLASS);
 		
 		//dummyPlace.getAttrs().put(PlaceTests.extraPlaceAttr, new Integer(1));
 		
@@ -237,7 +237,7 @@ public class PlaceTests {
 		Place responsePlace = responseUpdate.getBody();
 		
 		// Check if the placeClass has changed accordingly
-		assertThat(responsePlace.getPlaceClassCode()).isEqualTo(PlaceTests.UPDATE_CLASS_PLACE_CLASS);
+		assertThat(responsePlace.getClassCode()).isEqualTo(PlaceTests.UPDATE_CLASS_PLACE_CLASS);
 
 		// Checking the attributes
 		for (int index=0;index<PlaceTests.UPDATE_CLASS_PLACE_ATTRS.length;index++) {
@@ -283,7 +283,7 @@ public class PlaceTests {
 		Place responsePlace = responseUpdate.getBody();
 		
 		// Check if the placeClass has changed accordingly
-		assertThat(responsePlace.getPlaceClassCode()).isEqualTo(PlaceTests.UPDATE_HP_PLACE_CLASS);
+		assertThat(responsePlace.getClassCode()).isEqualTo(PlaceTests.UPDATE_HP_PLACE_CLASS);
 
 		// Checking the attributes
 		// In this case, the first attribute (HP) need to have this value set to MAXHP
@@ -385,7 +385,7 @@ public class PlaceTests {
 				.orElseThrow(() -> new RuntimeException("Demised place not found in database"));
 		
 		
-		assertThat(dbPlace.getPlaceClass().getPlaceClassCode()).isEqualTo(PlaceTests.DELETE_DEMISED_PLACE_CLASS);
+		assertThat(dbPlace.getPlaceClass().getCode()).isEqualTo(PlaceTests.DELETE_DEMISED_PLACE_CLASS);
 		
 	}
 	

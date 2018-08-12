@@ -14,21 +14,21 @@ public class PlaceClassConverter {
 		
 		PlaceClass response = new PlaceClass();
 		
-		response.setPlaceClassCode(a.getPlaceClassCode());
+		response.setPlaceClassCode(a.getCode());
 		response.setName(a.getName());
 		response.setDescription(a.getDescription());
 		response.setSizeCapacity(a.getSizeCapacity());
 		response.setWeightCapacity(a.getWeightCapacity());
 		response.setParentClassCode(a.getParentClassCode());
-		response.setDemisePlaceClassCode(a.getDemisePlaceClassCode());
+		response.setDemisePlaceClassCode(a.getDemisedPlaceClassCode());
 		response.setBuildEffort(a.getBuildEffort());
 		response.setBuildCost(a.getBuildCost());
 		
 		response.setAttrs(
 			a.getAttrs().stream()
 				.collect(Collectors.toMap(
-						MudPlaceClassAttr::getAttrCode, 
-						MudPlaceClassAttr::getAttrValue)
+						MudPlaceClassAttr::getCode, 
+						MudPlaceClassAttr::getValue)
 						)
 				);
 		

@@ -49,7 +49,7 @@ public class BeingTemplates implements TemplateLoader {
 		
 		Fixture.of(MudBeingClassSkill.class).addTemplate(VALID, new Rule() {{
 			add("id", one(MudBeingClassSkillPK.class, VALID));
-			add("value", random(Long.class, range(1,100)));
+			add("value", random(Integer.class, range(1,100)));
 		}});
 
 		Fixture.of(MudBeingClassAttrPK.class).addTemplate(VALID, new Rule() {{
@@ -58,7 +58,7 @@ public class BeingTemplates implements TemplateLoader {
 		
 		Fixture.of(MudBeingClassAttr.class).addTemplate(VALID, new Rule() {{
 			add("id", one(MudBeingClassAttrPK.class, VALID));
-			add("value", random(Long.class, range(1,100)));
+			add("value", random(Integer.class, range(1,100)));
 		}});
 		
 		Fixture.of(MudBeingClass.class).addTemplate(VALID, new Rule() {{
@@ -88,7 +88,7 @@ public class BeingTemplates implements TemplateLoader {
 		
 		Fixture.of(MudBeingSkill.class).addTemplate(VALID, new Rule() {{
 			add("id", one(MudBeingSkillPK.class, VALID));
-			add("value", random(Integer.class));
+			add("value", random(Integer.class, range(1,100)));
 		}});
 
 		Fixture.of(MudBeingAttrPK.class).addTemplate(VALID, new Rule() {{
@@ -97,7 +97,7 @@ public class BeingTemplates implements TemplateLoader {
 		
 		Fixture.of(MudBeingAttr.class).addTemplate(VALID, new Rule() {{
 			add("id", one(MudBeingAttrPK.class, VALID));
-			add("value", random(Integer.class));
+			add("value", random(Integer.class, range(1,100)));
 		}});
 
 		Fixture.of(MudBeingSkillModifierPK.class).addTemplate(VALID, new Rule() {{

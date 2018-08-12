@@ -139,7 +139,7 @@ public class ActionScheduler {
 		
 		// Update the place where the actor is
 		placeService.updatePlace( 
-				fullState.getActor().getPlace().getPlaceCode(), 
+				fullState.getActor().getPlace().getCode(), 
 				fullState.getActor().getPlace());
 
 		
@@ -167,7 +167,7 @@ public class ActionScheduler {
 			case PLACE: 
 				
 				PlaceComposite targetPlace = (PlaceComposite)fullState.getTarget();
-				placeService.updatePlace(targetPlace.getPlace().getPlaceCode(), targetPlace.getPlace());
+				placeService.updatePlace(targetPlace.getPlace().getCode(), targetPlace.getPlace());
 				
 				break;
 			

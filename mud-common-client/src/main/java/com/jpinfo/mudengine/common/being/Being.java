@@ -31,9 +31,9 @@ public class Being implements Serializable {
 
 	private BeingClass beingClass;
 	
-	private Map<String, Long> baseAttrs;
+	private Map<String, Integer> baseAttrs;
 	
-	private Map<String, Long> baseSkills;
+	private Map<String, Integer> baseSkills;
 
 	private transient List<BeingAttrModifier> attrModifiers;
 	
@@ -64,9 +64,9 @@ public class Being implements Serializable {
 	}
 	
 	@Transient
-	public Map<String, Long> getAttrs() {
+	public Map<String, Integer> getAttrs() {
 		
-		Map<String, Long> response = new HashMap<>();
+		Map<String, Integer> response = new HashMap<>();
 		
 		if (this.baseAttrs!=null) {
 		
@@ -84,9 +84,9 @@ public class Being implements Serializable {
 	}
 	
 	@Transient
-	public Map<String, Long> getSkills() {
+	public Map<String, Integer> getSkills() {
 
-		Map<String, Long> response = new HashMap<>();
+		Map<String, Integer> response = new HashMap<>();
 		
 		if (this.baseSkills!=null) {
 		
@@ -105,44 +105,44 @@ public class Being implements Serializable {
 	}
 	
 	@Transient
-	public Double getAttrModifierAmount(String attrCode) {
+	public Float getAttrModifierAmount(String attrCode) {
 		return attrModifiers.stream()
 				.filter(e -> e.getCode().equals(attrCode))
-				.mapToDouble(BeingAttrModifier::getOffset)
-				.sum();
+				.map(BeingAttrModifier::getOffset)
+				.reduce(0.0f, (a,b) -> a + b);
 	}
 
 	@Transient
-	public Double getSkillModifierAmount(String skillCode) {
+	public Float getSkillModifierAmount(String skillCode) {
 		return skillModifiers.stream()
 				.filter(e -> e.getCode().equals(skillCode))
-				.mapToDouble(BeingSkillModifier::getOffset)
-				.sum();
+				.map(BeingSkillModifier::getOffset)
+				.reduce(0.0f,  (a,b) -> a + b);
 	}
 	
-	private long calcEffectiveAttr(String attrCode, Long baseValue, Collection<BeingAttrModifier> attrModifiers) {
+	private int calcEffectiveAttr(String attrCode, Integer baseValue, Collection<BeingAttrModifier> attrModifiers) {
 
 		if (attrModifiers!=null) {
 			// Traverse all modifier list
-			return Math.round( baseValue + 
+			return Math.round( 
 				attrModifiers.stream()
 					.filter(e -> e.getCode().equals(attrCode))
-					.mapToDouble(BeingAttrModifier::getOffset)
-					.sum()
+					.map(BeingAttrModifier::getOffset)
+					.reduce(baseValue.floatValue(), (a,b) -> a + b)
 				);
 		} else {
 			return baseValue;
 		}
 	}
 
-	private long calcEffectiveSkill(String skillCode, Long baseValue, Collection<BeingSkillModifier> skillModifiers) {
+	private int calcEffectiveSkill(String skillCode, Integer baseValue, Collection<BeingSkillModifier> skillModifiers) {
 		
 		if (skillModifiers!=null) {
-			return Math.round(baseValue + 
+			return Math.round( 
 				skillModifiers.stream()
 					.filter(e -> e.getCode().equals(skillCode))
-					.mapToDouble(BeingSkillModifier::getOffset)
-					.sum()
+					.map(BeingSkillModifier::getOffset)
+					.reduce(baseValue.floatValue(), (a,b) -> a+b)
 					);
 		} else {
 			return baseValue;

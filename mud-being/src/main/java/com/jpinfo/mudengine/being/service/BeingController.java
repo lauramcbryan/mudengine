@@ -252,13 +252,9 @@ public class BeingController implements BeingService {
 
 		List<MudBeing> lstFound = repository.findByCurWorldAndCurPlaceCode(worldName, placeCode);
 		
-		List<Being> response;
-		
-		response = lstFound.stream()
+		return lstFound.stream()
 				.map(BeingConverter::convert)
 				.collect(Collectors.toList());
-		
-		return response;
 	}
 
 	@Override
@@ -324,15 +320,15 @@ public class BeingController implements BeingService {
 		// Check current being health
 		// First, we obtain the max HP for this being
 		// if this value is different from zero, it means that this is a being that can be destroyed
-		Long maxHP = 
+		Integer maxHP = 
 				dbBeing.getAttrs().stream()
 					.filter(d-> d.getCode().equals(BeingHelper.BEING_MAX_HP_ATTR))
-					.mapToLong(MudBeingAttr::getValue)
+					.map(MudBeingAttr::getValue)
 					.findFirst()
-					.orElse(0L);
+					.orElse(0);
 		
 		// Retrieve the current HP of the being.  That value came from the request
-		Long currentHP = requestBeing.getAttrs().getOrDefault(BeingHelper.BEING_HP_ATTR, 0L);
+		Integer currentHP = requestBeing.getAttrs().getOrDefault(BeingHelper.BEING_HP_ATTR, 0);
 		
 		// If the currentBeing has a HP and it is exhausted		
 		beingDestroyed = (maxHP!=0) && (currentHP<=0);

@@ -24,7 +24,7 @@ public class MudBeingSkillModifier implements Serializable {
 	private MudBeingSkillModifierPK id;
 
 	@Column(name="skill_offset")
-	private double offset;
+	private float offset;
 	
 	@Column(name="end_turn")
 	private Integer endTurn;

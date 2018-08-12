@@ -24,8 +24,7 @@ public class MudBeingSkill implements Serializable {
 	@EmbeddedId
 	private MudBeingSkillPK id;
 
-	@Column(name="skill_value")
-	private Long value;
+	private Integer value;
 	
 	@Transient
 	public String getCode() {
