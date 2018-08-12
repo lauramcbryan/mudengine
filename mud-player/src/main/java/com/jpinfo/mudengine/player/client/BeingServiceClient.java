@@ -1,10 +1,13 @@
 package com.jpinfo.mudengine.player.client;
 
-import org.springframework.cloud.openfeign.FeignClient;
+import com.jpinfo.mudengine.common.being.Being;
 
-import com.jpinfo.mudengine.common.service.BeingService;
+public interface BeingServiceClient  {
+	
+	Being getBeing(Long beingCode);
 
-@FeignClient("mud-being")
-public interface BeingServiceClient extends BeingService {
+	Being createPlayerBeing(Long playerId, String beingClass, String worldName,
+			Integer placeCode, String beingName);
 
+	void destroyBeing(Long beingCode);
 }

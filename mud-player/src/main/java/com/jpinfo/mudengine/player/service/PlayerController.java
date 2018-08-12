@@ -3,6 +3,7 @@ package com.jpinfo.mudengine.player.service;
 import java.util.Date;
 
 
+
 import java.util.List;
 import java.util.Optional;
 
@@ -336,13 +337,11 @@ public class PlayerController implements PlayerService {
 					.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.PLAYER_NOT_FOUND));
 			
 			// Create the being
-			ResponseEntity<Being> beingResponse = 
+			Being being = 
 				this.beingClient.createPlayerBeing(
 						dbPlayer.getPlayerId(), beingClass, 
 						worldName, placeCode, beingName);
 			
-			Being being = beingResponse.getBody();
-
 			// Update the dbPlayer entity
 			MudPlayerBeing dbBeing = new MudPlayerBeing();
 			MudPlayerBeingPK pk = new MudPlayerBeingPK();

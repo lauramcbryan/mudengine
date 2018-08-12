@@ -37,11 +37,11 @@ public class WebSecurityAdapter extends WebSecurityConfigurerAdapter {
 			.antMatchers(HttpMethod.PUT, "/player/{\\x+}/session").permitAll()		// allows anonymous access to login service
 			.antMatchers("/player/*").authenticated()								// protected everything else under /player
 			.antMatchers("/action/class/*").permitAll()
-			.antMatchers("/action/*").authenticated()
-			.antMatchers("/item/*").authenticated()
-			.antMatchers("/being/*").authenticated()
-			.antMatchers("/place/*").authenticated()
-			.antMatchers("/message/*").authenticated();
+			.antMatchers("/action/**").authenticated()
+			.antMatchers("/item/**").authenticated()
+			.antMatchers("/being/**").authenticated()
+			.antMatchers("/place/**").authenticated()
+			.antMatchers("/message/**").authenticated();
 		
 		http.addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class);
 	}
