@@ -25,7 +25,7 @@ insert into mud_action_class_cmd_parameter(command_id, name, input_message, type
 insert into mud_action_class(action_class_code, action_type, mediator_type, target_type) values (2, 0, null, 'PLACE');
 
 insert into mud_action_class_prereq(action_class_code, eval_order, check_expression, fail_expression) values (2, 1, 
-	'actor.being.curPlaceCode==target.place.placeCode', 'actor.addMessage(''${str:NOPLACE}'', #root.targetCode)');
+	'actor.being.curPlaceCode==target.place.code', 'actor.addMessage(''${str:NOPLACE}'', #root.targetCode)');
 
 insert into mud_action_class_effect(action_class_code, eval_order, effect_expression) values (2, 1, 'target.describeIt(#root.actor)');
 
@@ -67,7 +67,7 @@ insert into mud_action_class_cmd_parameter(command_id, name, input_message, type
 insert into mud_action_class(action_class_code, action_type, mediator_type, target_type) values (4, 0, null, 'ITEM');
 
 insert into mud_action_class_prereq(action_class_code, eval_order, check_expression, fail_expression) values (4, 1, 
-	'((actor.being.curPlaceCode==target.item.curPlaceCode) || (actor.being.curPlaceCode==target.item.owner))', 
+	'((actor.being.curPlaceCode==target.item.curPlaceCode) || (actor.being.curPlaceCode==target.item.curWwner))', 
 	'actor.addMessage(''${str:NOTHAVE}'', #root.targetCode)');
 
 insert into mud_action_class_effect(action_class_code, eval_order, effect_expression) values (4, 1, 'target.describeIt(#root.actor)');
@@ -92,8 +92,8 @@ insert into mud_action_class(action_class_code, action_type, mediator_type, targ
 
 insert into mud_action_class_prereq(action_class_code, eval_order, check_expression, fail_expression) values (5, 1, 'actor.being.curPlaceCode==target.item.curPlaceCode)', 'actor.addMessage(''${str:NOTITEM}'')');
 
-insert into mud_action_class_effect(action_class_code, eval_order, effect_expression) values (5, 1, 'target.item.owner=actor.being.beingCode');
-insert into mud_action_class_effect(action_class_code, eval_order, effect_expression, message_expression) values (5, 2, 'target.item.curPlaceCode=null', 'actor.addMessage(''${str:YOUTAKE}'', #root.target.item.itemClass.name)');
+insert into mud_action_class_effect(action_class_code, eval_order, effect_expression) values (5, 1, 'target.item.curOwner=actor.being.code');
+insert into mud_action_class_effect(action_class_code, eval_order, effect_expression, message_expression) values (5, 2, 'target.item.curPlaceCode=null', 'actor.addMessage(''${str:YOUTAKE}'', #root.target.item.name)');
 
 insert into mud_action_class_cmd(command_id, action_class_code, verb, description, usage, locale) 
 	values(5, 5, 'TAKE', 'Take an item', 'TAKE <ITEM>', 'en-US');
