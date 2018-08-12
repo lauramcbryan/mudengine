@@ -9,6 +9,6 @@ public class BeingSkillModifier {
 	private String originCode;
 	private String originType;
 
-	private Float offset;
+	private double offset;
 	private Integer endTurn;
 }

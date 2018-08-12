@@ -9,6 +9,6 @@ public class BeingAttrModifier {
 	private String originCode;
 	private String originType;
 	
-	private float offset;
+	private double offset;
 	private Integer endTurn;
 }

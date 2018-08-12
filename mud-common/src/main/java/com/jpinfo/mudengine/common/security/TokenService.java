@@ -115,7 +115,7 @@ public class TokenService {
 		return result;
 	}
 	
-	public String buildInternalToken() {
+	public String buildInternalToken(Long playerId) {
 		
 		Player playerData = new Player();
 		playerData.setPlayerId(TokenService.INTERNAL_PLAYER_ID);
@@ -123,13 +123,17 @@ public class TokenService {
 		
 		Session sessionData = new Session();
 		sessionData.setSessionId(Long.MAX_VALUE);
-		sessionData.setPlayerId(TokenService.INTERNAL_PLAYER_ID);
+		sessionData.setPlayerId(playerId);
 		sessionData.setBeingCode(TokenService.INTERNAL_BEING_CODE);
 		
 		return buildToken(TokenService.INTERNAL_ACCOUNT, 
 				Optional.of(playerData), 
 				Optional.of(sessionData)
 				);
+	}
+	
+	public String buildInternalToken() {
+		return buildInternalToken(TokenService.INTERNAL_PLAYER_ID);
 	}
 	
 	private Jws<Claims> parseToken(String token) {

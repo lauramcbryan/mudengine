@@ -61,7 +61,7 @@ public class ClientHelper {
 		return resultList;
 	}
 
-	private static String padString(int original, int desiredLength) {
+	private static String padString(long original, int desiredLength) {
 		return ClientHelper.padString(String.valueOf(original), desiredLength);
 	}
 	
@@ -238,18 +238,34 @@ public class ClientHelper {
 		for (String curAttrKey: activeBeing.getAttrs().keySet()) {
 			
 			// Retrieve the attribute effective value
-			Integer curAttrValue = activeBeing.getAttrs().get(curAttrKey);
+			Long curAttrValue = activeBeing.getAttrs().get(curAttrKey);
 			
-			float curAttrModifiers = 0.0f;
+			// Calculate the amount of modifiers applied
+			// Last trend new code!  (doing the same stuff)
+			double curAttrModifiers =
+				activeBeing.getAttrModifiers().stream()
+					.filter(e -> e.getCode().equals(curAttrKey))
+					.mapToDouble(BeingAttrModifier::getOffset)
+					.sum();
 
-			// Calculate the amount of modifiers applied			
+			// Last decade code.  And works.			
 			for(BeingAttrModifier curModifier: activeBeing.getAttrModifiers()) {
 				
 				if (curModifier.getCode().equals(curAttrKey)) {
 					curAttrModifiers +=curModifier.getOffset();
 				}
-				
 			}
+
+			// Last century code.  OMG, that STILL WORKS!			
+			for(int k=0;k<activeBeing.getAttrModifiers().size();k++) {
+				
+				BeingAttrModifier curModifier = activeBeing.getAttrModifiers().get(k);
+				
+				if (curModifier.getCode().equals(curAttrKey)) {
+					curAttrModifiers +=curModifier.getOffset();
+				}
+			}
+			
 
 			// Assembly the line
 			m
@@ -304,11 +320,17 @@ public class ClientHelper {
 		for (String curSkillKey: activeBeing.getSkills().keySet()) {
 			
 			// Retrieve the skill effective value
-			Integer curSkillValue = activeBeing.getSkills().get(curSkillKey);
+			Long curSkillValue = activeBeing.getSkills().get(curSkillKey);
 			
-			float curSkillModifiers = 0.0f;
-	
+			double curSkillModifiers;
+
 			// Calculate the amount of modifiers applied			
+			curSkillModifiers =
+				activeBeing.getSkillModifiers().stream()
+					.mapToDouble(BeingSkillModifier::getOffset)
+					.sum();
+	
+			
 			for(BeingSkillModifier curModifier: activeBeing.getSkillModifiers()) {
 				
 				if (curModifier.getCode().equals(curSkillKey)) {

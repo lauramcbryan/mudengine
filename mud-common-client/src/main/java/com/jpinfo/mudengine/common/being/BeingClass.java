@@ -26,9 +26,9 @@ public class BeingClass implements Serializable {
 
 	private Integer weightCapacity;
 
-	private Map<String, Integer> attrs;
+	private Map<String, Long> attrs;
 
-	private Map<String, Integer> skills;
+	private Map<String, Long> skills;
 	
 	
 	public BeingClass() {

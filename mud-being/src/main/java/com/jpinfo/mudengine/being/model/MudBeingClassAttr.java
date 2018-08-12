@@ -23,5 +23,5 @@ public class MudBeingClassAttr implements Serializable {
 	private MudBeingClassAttrPK id;
 
 	@Column(name="attr_value")
-	private Integer value;
+	private Long value;
 }

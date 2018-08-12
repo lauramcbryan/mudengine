@@ -103,7 +103,7 @@ public class BeingComposite implements ActionTarget  {
 		
 		for(String curAttr: this.getBeing().getAttrs().keySet()) {
 			
-			Float attrModifier = 0.0F;
+			Double attrModifier = this.getBeing().getAttrModifierAmount(curAttr);
 			
 			for (BeingAttrModifier curModifier: this.getBeing().getAttrModifiers()) {
 				if (curModifier.getCode().equals(curAttr)) {
@@ -112,7 +112,7 @@ public class BeingComposite implements ActionTarget  {
 				}
 			}
 			
-			if (attrModifier == 0.0F) {
+			if (attrModifier == 0.0) {
 				this.addMessage("{str:ATTR}", curAttr, String.valueOf(this.getBeing().getAttrs().get(curAttr)));				
 			}
 			else {
@@ -128,7 +128,7 @@ public class BeingComposite implements ActionTarget  {
 
 		for(String curSkill: this.getBeing().getSkills().keySet()) {
 			
-			Float skillModifier = 0.0F;
+			Double skillModifier = this.getBeing().getSkillModifierAmount(curSkill);
 			
 			for(BeingSkillModifier curModifier: this.getBeing().getSkillModifiers()) {
 				
@@ -137,7 +137,7 @@ public class BeingComposite implements ActionTarget  {
 				}
 			}
 			
-			if (skillModifier == 0.0F) {
+			if (skillModifier == 0.0) {
 				this.addMessage("{str:SKILL}", curSkill, String.valueOf(this.getBeing().getSkills().get(curSkill)));
 			} else {
 				

@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.jpinfo.mudengine.being.client.ItemServiceClient;
 import com.jpinfo.mudengine.being.model.MudBeing;
+import com.jpinfo.mudengine.being.model.MudBeingAttr;
 import com.jpinfo.mudengine.being.model.MudBeingClass;
 import com.jpinfo.mudengine.being.model.MudBeingSlot;
 import com.jpinfo.mudengine.being.model.converter.BeingConverter;
@@ -93,30 +94,41 @@ public class BeingController implements BeingService {
 			// 2. attributes
 			MudBeingAttrConverter.sync(dbBeing, requestBeing);
 			
-			// 3. skills
-			MudBeingSkillConverter.sync(dbBeing, requestBeing);
+			// Checking HP attributes
+			boolean beingToBeDestroyed = internalSyncBeingHP(dbBeing, requestBeing);
 			
-			// 4. attrModifiers
-			MudBeingAttrModifierConverter.sync(dbBeing, requestBeing);
+			MudBeing changedBeing = null;
 			
-			// 5. skillModifiers
-			MudBeingSkillModifierConverter.sync(dbBeing, requestBeing);
-
-		
-			// if the beingClass is changing, reset the attributes
-			if (!dbBeing.getBeingClass().getCode().equals(requestBeing.getClassCode())) {
+			if (beingToBeDestroyed) {
+				destroyBeing(dbBeing.getCode());
+			} else {
+								
+				// 3. skills
+				MudBeingSkillConverter.sync(dbBeing, requestBeing);
 				
-				MudBeingClass dbClassBeing = classRepository
-						.findById(requestBeing.getClassCode())
-						.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.BEING_CLASS_NOT_FOUND));
+				// 4. attrModifiers
+				MudBeingAttrModifierConverter.sync(dbBeing, requestBeing);
 				
-				updateBeingClass(dbBeing, dbBeing.getBeingClass(), dbClassBeing);
+				// 5. skillModifiers
+				MudBeingSkillModifierConverter.sync(dbBeing, requestBeing);
+	
+			
+				// if the beingClass is changing, reset the attributes
+				if (!dbBeing.getBeingClass().getCode().equals(requestBeing.getClassCode())) {
+					
+					MudBeingClass dbClassBeing = classRepository
+							.findById(requestBeing.getClassCode())
+							.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.BEING_CLASS_NOT_FOUND));
+					
+					updateBeingClass(dbBeing, dbBeing.getBeingClass(), dbClassBeing);
+				}
+							
+				// Updating the entity
+				changedBeing = repository.save(dbBeing);
+				
+				response = BeingConverter.convert(changedBeing, true);
 			}
-						
-			// Updating the entity
-			MudBeing changedBeing = repository.save(dbBeing);
 			
-			response = BeingConverter.convert(changedBeing, true);
 		} else {
 			throw new AccessDeniedException(LocalizedMessages.BEING_ACCESS_DENIED);
 		}
@@ -304,6 +316,40 @@ public class BeingController implements BeingService {
 				repository.delete(d);
 			});
 	}
+	
+	private boolean internalSyncBeingHP(MudBeing dbBeing, Being requestBeing) {
+		
+		boolean beingDestroyed = false;
+		
+		// Check current being health
+		// First, we obtain the max HP for this being
+		// if this value is different from zero, it means that this is a being that can be destroyed
+		Long maxHP = 
+				dbBeing.getAttrs().stream()
+					.filter(d-> d.getCode().equals(BeingHelper.BEING_MAX_HP_ATTR))
+					.mapToLong(MudBeingAttr::getValue)
+					.findFirst()
+					.orElse(0L);
+		
+		// Retrieve the current HP of the being.  That value came from the request
+		Long currentHP = requestBeing.getAttrs().getOrDefault(BeingHelper.BEING_HP_ATTR, 0L);
+		
+		// If the currentBeing has a HP and it is exhausted		
+		beingDestroyed = (maxHP!=0) && (currentHP<=0);
+		
+		// Checks if the current duration is greater than maximum
+		if ((maxHP!=0) && (currentHP > maxHP)) {
+			
+			// Adjusts the current duration to the maximum
+			dbBeing.getAttrs().stream()
+				.filter(d -> d.getCode().equals(BeingHelper.BEING_HP_ATTR))
+				.findFirst()
+				.ifPresent(e -> e.setValue(maxHP));
+		}
+		
+		return beingDestroyed;
+	}
+
 	
 	private MudBeing updateBeingClass(MudBeing dbBeing, MudBeingClass previousClass, MudBeingClass nextClass) {
 		

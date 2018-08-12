@@ -18,6 +18,8 @@ import com.jpinfo.mudengine.being.model.pk.MudBeingClassSlotPK;
 import com.jpinfo.mudengine.being.model.pk.MudBeingSkillModifierPK;
 import com.jpinfo.mudengine.being.model.pk.MudBeingSkillPK;
 import com.jpinfo.mudengine.being.model.pk.MudBeingSlotPK;
+import com.jpinfo.mudengine.being.utils.BeingHelper;
+import com.jpinfo.mudengine.common.being.Being;
 
 import br.com.six2six.fixturefactory.Fixture;
 import br.com.six2six.fixturefactory.Rule;
@@ -47,7 +49,7 @@ public class BeingTemplates implements TemplateLoader {
 		
 		Fixture.of(MudBeingClassSkill.class).addTemplate(VALID, new Rule() {{
 			add("id", one(MudBeingClassSkillPK.class, VALID));
-			add("value", random(Integer.class));
+			add("value", random(Long.class, range(1,100)));
 		}});
 
 		Fixture.of(MudBeingClassAttrPK.class).addTemplate(VALID, new Rule() {{
@@ -56,7 +58,7 @@ public class BeingTemplates implements TemplateLoader {
 		
 		Fixture.of(MudBeingClassAttr.class).addTemplate(VALID, new Rule() {{
 			add("id", one(MudBeingClassAttrPK.class, VALID));
-			add("value", random(Integer.class));
+			add("value", random(Long.class, range(1,100)));
 		}});
 		
 		Fixture.of(MudBeingClass.class).addTemplate(VALID, new Rule() {{
@@ -127,18 +129,21 @@ public class BeingTemplates implements TemplateLoader {
 			add("code", random(Long.class));
 			add("name", regex("name-(\\d{4})"));
 			add("curWorld", regex("world-(\\d{4})"));
+			add("type", Being.enumBeingType.REGULAR_NON_SENTIENT.ordinal());
 			add("curPlaceCode", random(Integer.class));
 			add("type", random(Integer.class, range(0, 3)));
 			add("beingClass", one(MudBeingClass.class, VALID));
-			add("attrs", has(3).of(MudBeingAttr.class, VALID));
-			add("skills", has(3).of(MudBeingSkill.class, VALID));
-			add("attrModifiers", has(3).of(MudBeingAttrModifier.class, VALID));
-			add("skillModifiers", has(3).of(MudBeingSkillModifier.class, VALID));
-			add("slots", has(5).of(MudBeingSlot.class, VALID));
+			add("quantity", BeingHelper.CREATE_DEFAULT_QUANTITY);
+			//add("attrs", has(3).of(MudBeingAttr.class, VALID));
+			//add("skills", has(3).of(MudBeingSkill.class, VALID));
+			//add("attrModifiers", has(3).of(MudBeingAttrModifier.class, VALID));
+			//add("skillModifiers", has(3).of(MudBeingSkillModifier.class, VALID));
+			//add("slots", has(5).of(MudBeingSlot.class, VALID));
 		}});
 		
 		Fixture.of(MudBeing.class).addTemplate(PLAYABLE).inherits(SIMPLE, new Rule() {{
 			add("playerId", random(Long.class));
+			add("type", Being.enumBeingType.PLAYABLE.ordinal());
 		}});
 
 

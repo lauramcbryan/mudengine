@@ -110,9 +110,9 @@ public class ItemController implements ItemService {
 		
 		boolean itemDestroyed = false;
 		
-		// Check current place health
-		// First, we obtain the maxHP for this place
-		// if this value is different from zero, it means that this is a place that can be destroyed
+		// Check current item duration
+		// First, we obtain the max duration for this item
+		// if this value is different from zero, it means that this is an item that can be destroyed
 		Integer maxDuration = 
 				dbItem.getAttrs().stream()
 					.filter(d-> d.getCode().equals(ItemHelper.ITEM_MAX_DURATION_ATTR))
@@ -120,7 +120,7 @@ public class ItemController implements ItemService {
 					.findFirst()
 					.orElse(0);
 		
-		// Retrieve the current HP of the place.  That value came from the request
+		// Retrieve the current duration of the item.  That value came from the request
 		Integer currentDuration = requestItem.getAttrs().getOrDefault(ItemHelper.ITEM_DURATION_ATTR, 0);
 		
 		// If the currentItem has a duration and it is exhausted		
