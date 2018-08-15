@@ -1,11 +1,6 @@
 package com.jpinfo.mudengine.world.client;
 
+public interface ItemServiceClient  {
 
-import org.springframework.cloud.openfeign.FeignClient;
-
-import com.jpinfo.mudengine.common.service.ItemService;
-
-@FeignClient("mud-item")
-public interface ItemServiceClient extends ItemService {
-
+	void destroyAllFromPlace(String worldName, Integer placeCode);
 }

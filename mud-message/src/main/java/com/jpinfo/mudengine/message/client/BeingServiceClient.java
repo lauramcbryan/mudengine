@@ -1,10 +1,10 @@
 package com.jpinfo.mudengine.message.client;
 
-import org.springframework.cloud.openfeign.FeignClient;
+import java.util.List;
 
-import com.jpinfo.mudengine.common.service.BeingService;
+import com.jpinfo.mudengine.common.being.Being;
 
-@FeignClient("mud-being")
-public interface BeingServiceClient extends BeingService {
+public interface BeingServiceClient {
 
+	List<Being> getAllFromPlace(String worldName, Integer placeCode);
 }
