@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 SECRET_FOLDER=/run/secrets
 
