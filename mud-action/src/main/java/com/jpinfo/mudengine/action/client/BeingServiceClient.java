@@ -1,10 +1,11 @@
 package com.jpinfo.mudengine.action.client;
 
-import org.springframework.cloud.openfeign.FeignClient;
+import com.jpinfo.mudengine.common.being.Being;
 
-import com.jpinfo.mudengine.common.service.BeingService;
-
-@FeignClient("mud-being")
-public interface BeingServiceClient extends BeingService {
+public interface BeingServiceClient {
+	
+	Being getBeing(Long beingCode);
+	
+	Being updateBeing(Long beingCode, Being requestBeing);
 
 }

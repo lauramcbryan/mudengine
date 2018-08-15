@@ -3,10 +3,8 @@ package com.jpinfo.mudengine.world.client;
 
 import java.util.HashMap;
 
-
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
@@ -23,8 +21,7 @@ public class BeingServiceClientImpl extends BaseServiceClient implements BeingSe
 	@Value("${being.endpoint}")
 	private String beingEndpoint;
 	
-	@Autowired
-	private RestTemplate restTemplate;
+	private final RestTemplate restTemplate = new RestTemplate();
 	
 	@Override
 	public void destroyAllFromPlace(String worldName, Integer placeCode) {

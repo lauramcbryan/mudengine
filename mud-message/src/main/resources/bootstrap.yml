@@ -8,8 +8,6 @@ spring:
       enabled: false
       config:
         enabled: false
-      discovery:
-        enabled: false
 
 management:
   info:
@@ -20,32 +18,10 @@ management:
     info:
       enabled: true
 
-feign:
-  client:
-    readTimeout: 10000
-    connectionTimeout: 5000
-
-token:
-  secret: a7ac498c7bba59e0eb7c647d2f0197f8    
-    
 ---
 
 spring:
-  profiles: itg
-
-  jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
-    properties:
-      hibernate:
-        jdbc:
-          lob:
-            non_contextual_creation: true
-      
-  datasource:
-    platform: postgres
-    tomcat:
-      max-active: 5
-  
+  profiles: itg, qa, prod 
   cloud:
     vault:
       uri: ${VAULT_ADDR}
@@ -56,50 +32,6 @@ spring:
       enabled: true
       host: ${CONSUL_HOST}
       port: ${CONSUL_PORT}
-      discovery:
-        enabled: true
-        register: false
-      config:
-        enabled: true
-        fail-fast: true
-
-server:
-  port: 8080
-     
----
-
-spring:
-  profiles: qa, prod 
-
-  jpa:
-    hibernate.ddl-auto: validate
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
-    show-sql: false
-    properties:
-      hibernate:
-        jdbc:
-          lob:
-            non_contextual_creation: true
-      
-  datasource:
-    platform: postgres
-    tomcat:
-      max-active: 5
-  
-  cloud:
-    vault:
-      uri: ${VAULT_ADDR}
-      token: ${VAULT_TOKEN}
-      enabled: true      
-      fail-fast: true
-    consul:
-      enabled: true
-      host: ${CONSUL_HOST}
-      port: ${CONSUL_PORT}
-      discovery:
-        enabled: true
-        hostname: ${EXPOSED_HOST:mud-message}
-        port: ${EXPOSED_PORT:8080}
       config:
         enabled: true
         fail-fast: true

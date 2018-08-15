@@ -1,10 +1,9 @@
 package com.jpinfo.mudengine.action.client;
 
-import org.springframework.cloud.openfeign.FeignClient;
+public interface MessageServiceClient {
 
-import com.jpinfo.mudengine.common.service.MessageService;
-
-@FeignClient("mud-message")
-public interface MessageServiceClient extends MessageService {
-
+	public void putMessage( 
+			Long targetCode, String message, 
+			Long senderCode, String senderName, 
+			String...parms);
 }

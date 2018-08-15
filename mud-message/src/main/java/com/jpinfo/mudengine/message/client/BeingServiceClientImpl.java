@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -24,8 +23,7 @@ public class BeingServiceClientImpl extends BaseServiceClient implements BeingSe
 	@Value("${being.endpoint}")
 	private String beingEndpoint;
 	
-	@Autowired
-	private RestTemplate restTemplate;
+	private final RestTemplate restTemplate = new RestTemplate();
 	
 	
 	@Override

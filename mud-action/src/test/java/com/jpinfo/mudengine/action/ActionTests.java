@@ -2,6 +2,7 @@ package com.jpinfo.mudengine.action;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+
 import org.junit.Test;
 
 
@@ -10,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.jpinfo.mudengine.action.client.BeingServiceClient;
@@ -30,8 +30,8 @@ import com.jpinfo.mudengine.common.placeclass.PlaceClass;
 import static org.mockito.BDDMockito.*;
 
 @RunWith(SpringRunner.class)
-@ActiveProfiles("unitTest")
-@SpringBootTest(webEnvironment=WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment=WebEnvironment.RANDOM_PORT,
+	properties= {"token.secret=a7ac498c7bba59e0eb7c647d2f0197f8"})
 public class ActionTests {
 	
 	private static final Integer START_PLACE_CODE = 1;

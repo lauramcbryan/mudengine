@@ -35,7 +35,8 @@ import static org.mockito.BDDMockito.*;
 
 @ActiveProfiles("test")
 @RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment=WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment=WebEnvironment.RANDOM_PORT,
+	properties= {"token.secret=a7ac498c7bba59e0eb7c647d2f0197f8"})
 public class MessageTests {
 	
 	public static final String TEST_USERNAME = "username";

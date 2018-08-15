@@ -8,7 +8,7 @@ services:
       - app_net
   consul-loader:
     build:
-      context: ../../consul/local
+      context: mud-infra/consul/local
       dockerfile: ./Dockerfile  
     image: mudengine/consul-loader
     environment:
@@ -30,7 +30,7 @@ services:
       - app_net
   vault-loader:
     build:
-      context: ../../vault/local
+      context: mud-infra/vault/local
       dockerfile: ./Dockerfile
     image: mudengine/vault-loader
     environment:
@@ -43,7 +43,7 @@ services:
       - app_net
   mud-world:
     build:
-      context: ../../../mud-world/
+      context: mud-world/
       dockerfile: ./Dockerfile  
     image: mudengine/mud-world
     ports:
@@ -61,7 +61,7 @@ services:
       - vault-loader
   mud-item:
     build:
-      context: ../../../mud-item/
+      context: mud-item/
       dockerfile: ./Dockerfile  
     image: mudengine/mud-item
     ports:
@@ -71,7 +71,7 @@ services:
       - CONSUL_PORT=8500
       - VAULT_TOKEN=myroot
       - VAULT_ADDR=http://vault:8200
-      - SPRING_PROFILES_ACTIVE=qa      
+      - SPRING_PROFILES_ACTIVE=itg      
     networks:
       - app_net
     depends_on:
@@ -79,7 +79,7 @@ services:
       - vault-loader
   mud-being:
     build:
-      context: ../../../mud-being/
+      context: mud-being/
       dockerfile: ./Dockerfile  
     image: mudengine/mud-being
     ports:
@@ -89,7 +89,7 @@ services:
       - CONSUL_PORT=8500
       - VAULT_TOKEN=myroot
       - VAULT_ADDR=http://vault:8200
-      - SPRING_PROFILES_ACTIVE=qa      
+      - SPRING_PROFILES_ACTIVE=itg      
     networks:
       - app_net
     depends_on:
@@ -97,7 +97,7 @@ services:
       - vault-loader
   mud-message:
     build:
-      context: ../../../mud-message/
+      context: mud-message/
       dockerfile: ./Dockerfile  
     image: mudengine/mud-message
     ports:
@@ -107,7 +107,7 @@ services:
       - CONSUL_PORT=8500
       - VAULT_TOKEN=myroot
       - VAULT_ADDR=http://vault:8200
-      - SPRING_PROFILES_ACTIVE=qa      
+      - SPRING_PROFILES_ACTIVE=itg      
     networks:
       - app_net
     depends_on:
@@ -115,7 +115,7 @@ services:
       - vault-loader
   mud-action:
     build:
-      context: ../../../mud-action/
+      context: mud-action/
       dockerfile: ./Dockerfile  
     image: mudengine/mud-action
     ports:
@@ -125,7 +125,7 @@ services:
       - CONSUL_PORT=8500
       - VAULT_TOKEN=myroot
       - VAULT_ADDR=http://vault:8200
-      - SPRING_PROFILES_ACTIVE=qa      
+      - SPRING_PROFILES_ACTIVE=itg      
     networks:
       - app_net
     depends_on:
@@ -133,7 +133,7 @@ services:
       - vault-loader
   mud-player:
     build:
-      context: ../../../mud-player/
+      context: mud-player/
       dockerfile: ./Dockerfile  
     image: mudengine/mud-player
     ports:
@@ -143,7 +143,7 @@ services:
       - CONSUL_PORT=8500
       - VAULT_TOKEN=myroot
       - VAULT_ADDR=http://vault:8200
-      - SPRING_PROFILES_ACTIVE=qa      
+      - SPRING_PROFILES_ACTIVE=itg      
     networks:
       - app_net
     depends_on:
@@ -151,7 +151,7 @@ services:
       - vault-loader
   mud-api:
     build:
-      context: ../../../mud-api/
+      context: mud-api/
       dockerfile: ./Dockerfile  
     image: mudengine/mud-api
     ports:
@@ -159,9 +159,11 @@ services:
     environment:
       - CONSUL_HOST=http://consul
       - CONSUL_PORT=8500
-      - SPRING_PROFILES_ACTIVE=qa      
+      - SPRING_PROFILES_ACTIVE=itg      
     networks:
       - app_net  
+    depends_on:
+      - consul-loader
 networks:
   app_net:
     ipam:

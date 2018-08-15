@@ -5,42 +5,9 @@ spring:
   cloud:
     consul:
       enabled: false
-      discovery:
+      config:
         enabled: false
         
-zuul:
-  ignored-services: "*"
-  routes:
-    place:
-      path: /place/**
-      serviceId: mud-world
-      strip-prefix: false
-    item:
-      path: /item/**
-      serviceId: mud-item
-      strip-prefix: false
-    being:
-      path: /being/**
-      serviceId: mud-being
-      strip-prefix: false
-    message:
-      path: /message/**
-      serviceId: mud-message
-      strip-prefix: false
-    player:
-      path: /player/**
-      serviceId: mud-player
-      strip-prefix: false
-    action:
-      path: /action/**
-      serviceId: mud-action
-      strip-prefix: false
-      
-
-ribbon:
-  ReadTimeout: 10000
-
-
 ---
 
 spring:
@@ -51,9 +18,37 @@ spring:
       enabled: true
       host: ${CONSUL_HOST}
       port: ${CONSUL_PORT}
-      discovery:
+      config:
         enabled: true
-        register: false
 
 server:
   port: 8080
+  
+zuul:
+  ignored-services: "*"
+  routes:
+    place:
+      path: /place/**
+      strip-prefix: false
+      url: ${place.endpoint} 
+    item:
+      path: /item/**
+      strip-prefix: false
+      url: ${item.endpoint}
+    being:
+      path: /being/**
+      strip-prefix: false
+      url: ${being.endpoint}
+    message:
+      path: /message/**
+      strip-prefix: false
+      url: ${message.endpoint}
+    player:
+      path: /player/**
+      strip-prefix: false
+      url: ${player.endpoint}
+    action:
+      path: /action/**
+      strip-prefix: false
+      url: ${action.endpoint}
+  

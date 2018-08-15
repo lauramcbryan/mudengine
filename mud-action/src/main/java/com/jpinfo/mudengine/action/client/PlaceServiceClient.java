@@ -1,10 +1,10 @@
 package com.jpinfo.mudengine.action.client;
 
-import org.springframework.cloud.openfeign.FeignClient;
+import com.jpinfo.mudengine.common.place.Place;
 
-import com.jpinfo.mudengine.common.service.PlaceService;
+public interface PlaceServiceClient {
 
-@FeignClient("mud-world")
-public interface PlaceServiceClient extends PlaceService {
-
+	Place getPlace(Integer placeId);
+	
+	Place updatePlace(Integer placeId, Place requestPlace);
 }

@@ -44,7 +44,8 @@ import br.com.six2six.fixturefactory.Fixture;
 import br.com.six2six.fixturefactory.loader.FixtureFactoryLoader;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment=WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment=WebEnvironment.RANDOM_PORT,
+	properties= {"token.secret=a7ac498c7bba59e0eb7c647d2f0197f8"})
 public class ItemTests {
 	
 	private static final Integer MAX_DURATION_VALUE = 100;
