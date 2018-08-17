@@ -3,7 +3,7 @@ package com.jpinfo.mudengine.client.model;
 import java.util.List;
 
 import com.jpinfo.mudengine.client.exception.ClientException;
-import com.jpinfo.mudengine.client.utils.LocalizedMessages;
+import com.jpinfo.mudengine.client.utils.ClientLocalizedMessages;
 import com.jpinfo.mudengine.common.action.Command;
 
 public class VerbDictionary {
@@ -24,7 +24,7 @@ public class VerbDictionary {
 			commandList.stream()
 				.filter(d-> enteredValue.startsWith(d.getVerb()))
 				.findFirst()
-				.orElseThrow(() -> new ClientException(LocalizedMessages.COMMAND_UNKNOWN));
+				.orElseThrow(() -> new ClientException(ClientLocalizedMessages.COMMAND_UNKNOWN));
 	}
 	 
 }

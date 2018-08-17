@@ -15,7 +15,7 @@ import org.springframework.integration.ip.tcp.connection.TcpConnection;
 import org.springframework.messaging.support.MessageBuilder;
 
 import com.jpinfo.mudengine.client.utils.ClientHelper;
-import com.jpinfo.mudengine.client.utils.LocalizedMessages;
+import com.jpinfo.mudengine.client.utils.ClientLocalizedMessages;
 import com.jpinfo.mudengine.common.action.Command;
 import com.jpinfo.mudengine.common.action.CommandParam;
 import com.jpinfo.mudengine.common.being.Being;
@@ -53,7 +53,7 @@ public class ClientConnection {
 	private CommandParamState curParamState;
 	
 	@Setter(AccessLevel.NONE)
-	private LocalizedMessages messages;
+	private ClientLocalizedMessages messages;
 	
 	@Getter(AccessLevel.NONE)
 	@Setter(AccessLevel.NONE)
@@ -69,7 +69,7 @@ public class ClientConnection {
 	public ClientConnection(TcpConnection connection) {
 		this.connection = connection;
 		this.needGreetings = true;
-		this.messages = new LocalizedMessages(ClientHelper.DEFAULT_LOCALE);
+		this.messages = new ClientLocalizedMessages(ClientHelper.DEFAULT_LOCALE);
 		
 		this.playerData = Optional.empty();
 		this.activeBeing = Optional.empty();
@@ -143,7 +143,7 @@ public class ClientConnection {
 		
 		// If it's changing the locale, reload the messages
 		if ((newLocale!=null) && (!messages.getLocale().equals(newLocale))) {
-			this.messages = new LocalizedMessages(newLocale);
+			this.messages = new ClientLocalizedMessages(newLocale);
 		}
 	}
 	

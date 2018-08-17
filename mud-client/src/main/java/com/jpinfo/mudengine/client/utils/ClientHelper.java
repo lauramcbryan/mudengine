@@ -110,7 +110,7 @@ public class ClientHelper {
 		StringBuilder m = new StringBuilder();
 		
 		m
-			.append(c.getLocalizedMessage(LocalizedMessages.COMMAND_WHOAMI_PLAYER))
+			.append(c.getLocalizedMessage(ClientLocalizedMessages.COMMAND_WHOAMI_PLAYER))
 		.append(ClientHelper.CRLF);
 		
 		m
@@ -119,18 +119,18 @@ public class ClientHelper {
 	
 		m
 			.append(ClientHelper.BOX_LEFT)
-				.append(ClientHelper.padString(c.getLocalizedMessage(LocalizedMessages.COMMAND_WHOAMI_USERNAME) + playerData.getUsername(), 36))
+				.append(ClientHelper.padString(c.getLocalizedMessage(ClientLocalizedMessages.COMMAND_WHOAMI_USERNAME) + playerData.getUsername(), 36))
 			.append(ClientHelper.BOX_CENTER)
-				.append(ClientHelper.padString(c.getLocalizedMessage(LocalizedMessages.COMMAND_WHOAMI_STATUS) + playerData.getStrStatus(), 36))
+				.append(ClientHelper.padString(c.getLocalizedMessage(ClientLocalizedMessages.COMMAND_WHOAMI_STATUS) + playerData.getStrStatus(), 36))
 			.append(ClientHelper.BOX_RIGHT)
 		.append(ClientHelper.CRLF);
 
 	
 		m
 			.append(ClientHelper.BOX_LEFT)
-				.append(ClientHelper.padString(c.getLocalizedMessage(LocalizedMessages.COMMAND_WHOAMI_EMAIL)+ playerData.getEmail(), 36))
+				.append(ClientHelper.padString(c.getLocalizedMessage(ClientLocalizedMessages.COMMAND_WHOAMI_EMAIL)+ playerData.getEmail(), 36))
 			.append(ClientHelper.BOX_CENTER)
-				.append(ClientHelper.padString(c.getLocalizedMessage(LocalizedMessages.COMMAND_WHOAMI_LOCALE)+ playerData.getLocale(), 36))
+				.append(ClientHelper.padString(c.getLocalizedMessage(ClientLocalizedMessages.COMMAND_WHOAMI_LOCALE)+ playerData.getLocale(), 36))
 			.append(ClientHelper.BOX_RIGHT)
 		.append(ClientHelper.CRLF);
 
@@ -140,7 +140,7 @@ public class ClientHelper {
 	
 		m
 			.append(ClientHelper.BOX_LEFT)
-				.append(ClientHelper.padString(c.getLocalizedMessage(LocalizedMessages.COMMAND_SELECT_AVAILABLE), 75))
+				.append(ClientHelper.padString(c.getLocalizedMessage(ClientLocalizedMessages.COMMAND_SELECT_AVAILABLE), 75))
 			.append(ClientHelper.BOX_RIGHT)
 		.append(ClientHelper.CRLF);
 	
@@ -155,7 +155,7 @@ public class ClientHelper {
 										d.getBeingName()+ 
 										" (" + d.getBeingClass() + ")" +
 										(activeBeingCode.isPresent() && d.getBeingCode().equals(activeBeingCode.get()) ?
-												c.getLocalizedMessage(LocalizedMessages.COMMAND_SELECT_ACTIVE): "") 
+												c.getLocalizedMessage(ClientLocalizedMessages.COMMAND_SELECT_ACTIVE): "") 
 									, 70))
 					.append(ClientHelper.BOX_RIGHT)
 				.append(ClientHelper.CRLF)
@@ -164,7 +164,7 @@ public class ClientHelper {
 		if (playerData.getBeingList().isEmpty()) {
 			m
 				.append(ClientHelper.BOX_LEFT)
-					.append(ClientHelper.padString("\t" + c.getLocalizedMessage(LocalizedMessages.NONE_MESSAGE), 70))
+					.append(ClientHelper.padString("\t" + c.getLocalizedMessage(ClientLocalizedMessages.NONE_MESSAGE), 70))
 				.append(ClientHelper.BOX_RIGHT)
 			.append(ClientHelper.CRLF);
 		}
@@ -200,7 +200,7 @@ public class ClientHelper {
 		StringBuilder m = new StringBuilder();
 
 		m
-			.append(c.getLocalizedMessage(LocalizedMessages.COMMAND_WHOAMI_BEING))
+			.append(c.getLocalizedMessage(ClientLocalizedMessages.COMMAND_WHOAMI_BEING))
 		.append(ClientHelper.CRLF);
 		
 		m
@@ -209,9 +209,9 @@ public class ClientHelper {
 	
 		m
 			.append(ClientHelper.BOX_LEFT)
-				.append(ClientHelper.padString(c.getLocalizedMessage(LocalizedMessages.COMMAND_WHOAMI_NAME)+ activeBeing.getName(), 36))
+				.append(ClientHelper.padString(c.getLocalizedMessage(ClientLocalizedMessages.COMMAND_WHOAMI_NAME)+ activeBeing.getName(), 36))
 			.append(ClientHelper.BOX_CENTER)
-				.append(ClientHelper.padString(c.getLocalizedMessage(LocalizedMessages.COMMAND_WHOAMI_CLASS)+ activeBeing.getClassCode(), 36))
+				.append(ClientHelper.padString(c.getLocalizedMessage(ClientLocalizedMessages.COMMAND_WHOAMI_CLASS)+ activeBeing.getClassCode(), 36))
 			.append(ClientHelper.BOX_RIGHT)
 		.append(ClientHelper.CRLF);
 	
@@ -221,7 +221,7 @@ public class ClientHelper {
 		
 		m
 			.append(ClientHelper.BOX_LEFT)
-				.append(ClientHelper.padString(c.getLocalizedMessage(LocalizedMessages.COMMAND_WHOAMI_ATTRS), 75))
+				.append(ClientHelper.padString(c.getLocalizedMessage(ClientLocalizedMessages.COMMAND_WHOAMI_ATTRS), 75))
 			.append(ClientHelper.BOX_RIGHT)
 		.append(ClientHelper.CRLF);
 		
@@ -304,7 +304,7 @@ public class ClientHelper {
 		
 		m
 			.append(ClientHelper.BOX_LEFT)
-				.append(ClientHelper.padString(c.getLocalizedMessage(LocalizedMessages.COMMAND_WHOAMI_SKILLS), 75))
+				.append(ClientHelper.padString(c.getLocalizedMessage(ClientLocalizedMessages.COMMAND_WHOAMI_SKILLS), 75))
 			.append(ClientHelper.BOX_RIGHT)
 			.append(ClientHelper.CRLF);
 	
@@ -398,7 +398,7 @@ public class ClientHelper {
 
 		m
 			.append(ClientHelper.CRLF)
-			.append(c.getLocalizedMessage(LocalizedMessages.COMMAND_WHEREAMI_START))
+			.append(c.getLocalizedMessage(ClientLocalizedMessages.COMMAND_WHEREAMI_START))
 			.append(currentPlace.getPlaceClass().getName());
 		
 		
@@ -427,7 +427,7 @@ public class ClientHelper {
 		m
 		.append(ClientHelper.CRLF)
 		.append(ClientHelper.BOX_LEFT)
-			.append(ClientHelper.padString(c.getLocalizedMessage(LocalizedMessages.COMMAND_WHEREAMI_EXITS), 75))
+			.append(ClientHelper.padString(c.getLocalizedMessage(ClientLocalizedMessages.COMMAND_WHEREAMI_EXITS), 75))
 		.append(ClientHelper.BOX_RIGHT);
 		
 		for(String curDirection: currentPlace.getExits().keySet()) {

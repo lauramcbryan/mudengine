@@ -76,7 +76,7 @@
 				{
 					"name": "activationCode",
 					"inputMessage": "Please type the activation code received",
-					"type": "ANY_STRING",
+					"type": "SECURE_STRING",
 					"required": true
 				},
 				{

@@ -16,6 +16,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.jpinfo.mudengine.common.being.Being;
@@ -43,13 +44,13 @@ public class PlayerTests {
 
 	private static final String TEST_USERNAME = "testuser";
 	private static final String TEST_PASSWORD = "pass";
-	private static final String TEST_LOCALE = "pt_BR";
-	private static final String TEST_EMAIL = "email@test.com";
+	private static final String TEST_LOCALE = "pt-BR";
+	private static final String TEST_EMAIL = "josiel.silva.oliveira@gmail.com";
 
 	private static final String TEST_PENDING_USERNAME = "pendinguser";
 	
 	private static final String TEST_USERNAME_2 = "josiel2";
-	private static final String TEST_LOCALE_2 = "en_US";
+	private static final String TEST_LOCALE_2 = "en-US";
 	private static final String TEST_EMAIL_2 = "changed@test.com";
 
 	private static final String TEST_CLIENT_TYPE = "text/plain";
@@ -78,6 +79,9 @@ public class PlayerTests {
 
 	@Autowired
 	private TokenService tokenService;
+	
+	@MockBean
+	private JavaMailSender mailService;
 
 	private void setupMocks() {
 		
@@ -191,6 +195,8 @@ public class PlayerTests {
 	
 	@Test
 	public void testPlayer() {
+		
+		setupMocks();
 	
 		HttpEntity<Object> internalAuthEntity = new HttpEntity<Object>(getInternalAuthHeaders());
 		
@@ -207,6 +213,8 @@ public class PlayerTests {
 				"/player/{username}?email={email}&locale={locale}", HttpMethod.PUT, null, Player.class, urlVariables);
 		
 		assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+		
+		//verify(mailService, times(1)).send(anyObject());
 		
 		Player playerData = createResponse.getBody();
 		

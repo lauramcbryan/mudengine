@@ -16,7 +16,7 @@ import com.jpinfo.mudengine.client.model.ClientConnection;
 import com.jpinfo.mudengine.client.model.CommandState;
 import com.jpinfo.mudengine.client.model.VerbDictionaries;
 import com.jpinfo.mudengine.client.utils.ClientHelper;
-import com.jpinfo.mudengine.client.utils.LocalizedMessages;
+import com.jpinfo.mudengine.client.utils.ClientLocalizedMessages;
 import com.jpinfo.mudengine.common.action.Command.enumCategory;
 import com.jpinfo.mudengine.common.being.Being;
 import com.jpinfo.mudengine.common.place.Place;
@@ -67,12 +67,12 @@ public class SystemCommandHandler extends BaseCommandHandler {
 		String locale = command.getParamValue("locale");
 		
 
-		client.sendMessage(LocalizedMessages.COMMAND_REGISTER_START);
+		client.sendMessage(ClientLocalizedMessages.COMMAND_REGISTER_START);
 		
 		// Call register in PlayerService
 		api.registerPlayer(username, email, locale);
 
-		client.sendMessage(LocalizedMessages.COMMAND_REGISTER_OK);
+		client.sendMessage(ClientLocalizedMessages.COMMAND_REGISTER_OK);
 	}
 	
 	/**
@@ -86,7 +86,7 @@ public class SystemCommandHandler extends BaseCommandHandler {
 
 		Player playerData = 
 				client.getPlayerData()
-					.orElseThrow(()-> new ClientException(LocalizedMessages.COMMAND_ONLY_LOGGED));
+					.orElseThrow(()-> new ClientException(ClientLocalizedMessages.COMMAND_ONLY_LOGGED));
 
 		
 		String oldPassword = command.getParamValue("oldPassword");
@@ -95,7 +95,7 @@ public class SystemCommandHandler extends BaseCommandHandler {
 		// Call setPassword in PlayerService
 		api.setPlayerPassword(playerData.getUsername(), oldPassword, newPassword);
 		
-		client.sendMessage(LocalizedMessages.COMMAND_PASSWORD_OK);
+		client.sendMessage(ClientLocalizedMessages.COMMAND_PASSWORD_OK);
 		
 	}
 	
@@ -108,7 +108,7 @@ public class SystemCommandHandler extends BaseCommandHandler {
 	 */
 	private void handleActivateCommand(ClientConnection client, CommandState command) throws ClientException {
 
-		client.sendMessage(LocalizedMessages.COMMAND_ACTIVATE_START);
+		client.sendMessage(ClientLocalizedMessages.COMMAND_ACTIVATE_START);
 
 		String username = command.getParamValue("username");
 		String activationCode = command.getParamValue("activationCode");
@@ -117,7 +117,7 @@ public class SystemCommandHandler extends BaseCommandHandler {
 		// Call activateAccount in PlayerService
 		api.setPlayerPassword(username, activationCode, newPassword);
 		
-		client.sendMessage(LocalizedMessages.COMMAND_ACTIVATE_OK);
+		client.sendMessage(ClientLocalizedMessages.COMMAND_ACTIVATE_OK);
 	}
 
 	/**
@@ -130,7 +130,7 @@ public class SystemCommandHandler extends BaseCommandHandler {
 	 */
 	private void handleHelpCommand(ClientConnection client) {
 
-		client.sendMessage(LocalizedMessages.COMMAND_HELP_START);
+		client.sendMessage(ClientLocalizedMessages.COMMAND_HELP_START);
 		
 		verbDictionaries
 			.getDictionary(client.getMessages().getLocale())
@@ -146,7 +146,7 @@ public class SystemCommandHandler extends BaseCommandHandler {
 					.append(d.getVerb())
 					.append(" -> ")
 					.append(d.getDescription())
-					.append(client.getLocalizedMessage(LocalizedMessages.COMMAND_HELP_USAGE))
+					.append(client.getLocalizedMessage(ClientLocalizedMessages.COMMAND_HELP_USAGE))
 					.append(d.getUsage())
 					.append("\r\n");
 				
@@ -182,7 +182,7 @@ public class SystemCommandHandler extends BaseCommandHandler {
 		// Login information
 		client.setPlayerData(api.getPlayerDetails(authToken, username));
 		
-		client.sendMessage(client.getLocalizedMessage(LocalizedMessages.COMMAND_LOGIN_OK) + username);
+		client.sendMessage(ClientHelper.CRLF + client.getLocalizedMessage(ClientLocalizedMessages.COMMAND_LOGIN_OK) + username);
 	}
 	
 	/**
@@ -196,7 +196,7 @@ public class SystemCommandHandler extends BaseCommandHandler {
 
 		client.clearState();
 		
-		client.sendMessage(LocalizedMessages.COMMAND_LOGOUT_OK);
+		client.sendMessage(ClientLocalizedMessages.COMMAND_LOGOUT_OK);
 		
 	}
 	
@@ -214,7 +214,7 @@ public class SystemCommandHandler extends BaseCommandHandler {
 	private void handleChangeProfileCommand(ClientConnection client, CommandState command) throws ClientException {
 		Player playerData = 
 				client.getPlayerData()
-					.orElseThrow(()-> new ClientException(LocalizedMessages.COMMAND_ONLY_LOGGED));
+					.orElseThrow(()-> new ClientException(ClientLocalizedMessages.COMMAND_ONLY_LOGGED));
 
 		playerData.setEmail(command.getParamValue("email"));
 		playerData.setLocale(command.getParamValue("locale"));
@@ -271,7 +271,7 @@ public class SystemCommandHandler extends BaseCommandHandler {
 		
 		Player playerData = 
 				client.getPlayerData()
-					.orElseThrow(()-> new ClientException(LocalizedMessages.COMMAND_ONLY_LOGGED));
+					.orElseThrow(()-> new ClientException(ClientLocalizedMessages.COMMAND_ONLY_LOGGED));
 
 		Long beingCode =command.getParamValue("beingCode", Long.class);
 		
@@ -281,7 +281,7 @@ public class SystemCommandHandler extends BaseCommandHandler {
 			if (playerData.getBeingList().stream()
 				.noneMatch(d-> d.getBeingCode().equals(beingCode))) {
 				
-				throw new ClientException(LocalizedMessages.COMMAND_UNKNOWN_BEING);
+				throw new ClientException(ClientLocalizedMessages.COMMAND_UNKNOWN_BEING);
 			}
 			
 			// Set the being as active
@@ -325,7 +325,7 @@ public class SystemCommandHandler extends BaseCommandHandler {
 
 		Player playerData = 
 				client.getPlayerData()
-					.orElseThrow(()-> new ClientException(LocalizedMessages.COMMAND_ONLY_LOGGED ));
+					.orElseThrow(()-> new ClientException(ClientLocalizedMessages.COMMAND_ONLY_LOGGED ));
 
 		Long beingCode =command.getParamValue("beingCode", Long.class);
 		
@@ -337,7 +337,7 @@ public class SystemCommandHandler extends BaseCommandHandler {
 			if (playerData.getBeingList().stream()
 				.noneMatch(d-> d.getBeingCode().equals(beingCode))) {
 				
-				throw new ClientException(LocalizedMessages.COMMAND_UNKNOWN_BEING);
+				throw new ClientException(ClientLocalizedMessages.COMMAND_UNKNOWN_BEING);
 			}
 			
 			// Destroy the being and update the authToken
@@ -378,7 +378,7 @@ public class SystemCommandHandler extends BaseCommandHandler {
 		
 		Player playerData = 
 				client.getPlayerData()
-					.orElseThrow(()-> new ClientException(LocalizedMessages.COMMAND_ONLY_LOGGED ));
+					.orElseThrow(()-> new ClientException(ClientLocalizedMessages.COMMAND_ONLY_LOGGED ));
 		
 		Optional<Being> activeBeing = client.getActiveBeing();
 
@@ -413,7 +413,7 @@ public class SystemCommandHandler extends BaseCommandHandler {
 					ClientHelper.returnFormattedPlaceData(client, curPlace.get()));
 			
 		} else {
-			throw new ClientException(LocalizedMessages.COMMAND_NO_BEING);
+			throw new ClientException(ClientLocalizedMessages.COMMAND_NO_BEING);
 		}
 		
 	}
@@ -516,7 +516,7 @@ public class SystemCommandHandler extends BaseCommandHandler {
 					break;
 				
 				default: 
-					client.sendMessage(LocalizedMessages.COMMAND_NOT_SUPPORTED);
+					client.sendMessage(ClientLocalizedMessages.COMMAND_NOT_SUPPORTED);
 				
 			}
 		} finally {

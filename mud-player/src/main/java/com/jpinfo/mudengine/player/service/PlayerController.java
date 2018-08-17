@@ -3,7 +3,6 @@ package com.jpinfo.mudengine.player.service;
 import java.util.Date;
 
 
-
 import java.util.List;
 import java.util.Optional;
 
@@ -34,6 +33,8 @@ import com.jpinfo.mudengine.player.client.BeingServiceClient;
 import com.jpinfo.mudengine.player.model.MudPlayer;
 import com.jpinfo.mudengine.player.model.MudPlayerBeing;
 import com.jpinfo.mudengine.player.model.MudSession;
+import com.jpinfo.mudengine.player.model.converter.PlayerConverter;
+import com.jpinfo.mudengine.player.model.converter.SessionConverter;
 import com.jpinfo.mudengine.player.model.pk.MudPlayerBeingPK;
 import com.jpinfo.mudengine.player.repository.PlayerRepository;
 import com.jpinfo.mudengine.player.repository.SessionRepository;
@@ -53,7 +54,10 @@ public class PlayerController implements PlayerService {
 	
 	@Autowired
 	private TokenService tokenService;
-
+	
+	@Autowired
+	private MailService mailService;
+	
 	@Override
 	public Player getPlayerDetails(@PathVariable String username) {
 		
@@ -64,7 +68,7 @@ public class PlayerController implements PlayerService {
 			MudPlayer dbPlayer = repository.findByUsername(username)
 					.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.PLAYER_NOT_FOUND));
 		
-			response = PlayerHelper.buildPlayer(dbPlayer);
+			response = PlayerConverter.convert(dbPlayer);
 			
 		} else {
 			throw new AccessDeniedException(LocalizedMessages.PLAYER_ACCESS_DENIED);
@@ -82,19 +86,45 @@ public class PlayerController implements PlayerService {
 			
 			MudPlayer newPlayer = new MudPlayer();
 			newPlayer.setUsername(username);
-			newPlayer.setPassword(PlayerHelper.generatePassword());
 			newPlayer.setEmail(email);
 			newPlayer.setLocale(locale);
 			newPlayer.setStatus(Player.STATUS_PENDING);
 			newPlayer.setCreateDate(new Date());
 			
+			// Check if the email service is configured
+			if (mailService.isEnabled())
+				
+				// In this case, the actual activation code is generated
+				// to be sent by email
+				newPlayer.setPassword(PlayerHelper.generatePassword());
+			else {
+				
+				// Where email is disabled, the activation code is created
+				// with a well-known pattern: pass + <USERNAME>
+				
+				// The user can activate the account without having the email this way
+				
+				newPlayer.setPassword("pass-" + username);
+			}
+			
 			// Persist to have the playerId
 			MudPlayer createdPlayer = repository.save(newPlayer);
 			
-			response = new ResponseEntity<>(PlayerHelper.buildPlayer(createdPlayer), HttpStatus.CREATED);
+			String token = tokenService.buildToken(username, 
+					Optional.of(PlayerConverter.convert(newPlayer)), 
+					Optional.empty());
 			
-			// TODO: Send the password by email
+			SecurityContextHolder.getContext().setAuthentication(
+					tokenService.getAuthenticationFromToken(token)
+					);
 			
+			response = new ResponseEntity<>(PlayerConverter.convert(createdPlayer), HttpStatus.CREATED);
+			
+			if (mailService.isEnabled()) {
+				
+				// Send the password by email
+				mailService.sendActivationEmail(newPlayer.getPassword());
+			}
 			
 		} catch(DataIntegrityViolationException e) {
 			
@@ -135,7 +165,7 @@ public class PlayerController implements PlayerService {
 			
 			MudPlayer changedDbPlayer = repository.save(dbPlayer);
 			
-			Player changedPlayer = PlayerHelper.buildPlayer(changedDbPlayer);
+			Player changedPlayer = PlayerConverter.convert(changedDbPlayer);
 			
 			String authToken = (String)SecurityContextHolder.getContext().getAuthentication().getCredentials();
 			
@@ -180,7 +210,7 @@ public class PlayerController implements PlayerService {
 			
 			if (dbSession.isPresent()) {
 				
-				session = PlayerHelper.buildSession(dbSession.get());
+				session = SessionConverter.convert(dbSession.get());
 			} else {
 				throw new EntityNotFoundException(LocalizedMessages.SESSION_NOT_FOUND);
 			}
@@ -222,9 +252,9 @@ public class PlayerController implements PlayerService {
 				
 				MudSession createdDbSession = sessionRepository.save(dbSession);
 				
-				Session sessionData = PlayerHelper.buildSession(createdDbSession);
+				Session sessionData = SessionConverter.convert(createdDbSession);
 				
-				Player playerData = PlayerHelper.buildPlayer(dbPlayer);
+				Player playerData = PlayerConverter.convert(dbPlayer);
 				
 				
 				// Build the jwts token
@@ -303,14 +333,14 @@ public class PlayerController implements PlayerService {
 			sessionRepository.save(dbSession);
 			
 			// Converts the dbSession object to Session
-			Session sessionData = PlayerHelper.buildSession(dbSession);
+			Session sessionData = SessionConverter.convert(dbSession);
 			
 			if (selectedBeing!=null)
 				sessionData.setCurWorldName(selectedBeing.getCurWorld());
 			
 			
 			// Retrieves the player object
-			Player playerData = PlayerHelper.buildPlayer(dbSession.getPlayer());
+			Player playerData = PlayerConverter.convert(dbSession.getPlayer());
 			
 			String authToken = (String)SecurityContextHolder.getContext().getAuthentication().getCredentials();
 			
@@ -360,7 +390,7 @@ public class PlayerController implements PlayerService {
 			// Save the dbPlayer
 			MudPlayer updatedPlayerData = repository.save(dbPlayer);
 			
-			Player playerData = PlayerHelper.buildPlayer(updatedPlayerData);
+			Player playerData = PlayerConverter.convert(updatedPlayerData);
 			
 			String authToken = (String)SecurityContextHolder.getContext().getAuthentication().getCredentials();
 
@@ -460,5 +490,5 @@ public class PlayerController implements PlayerService {
 
 		
 		return header;
-	}	
+	}
 }

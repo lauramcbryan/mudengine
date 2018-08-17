@@ -15,7 +15,7 @@ import com.jpinfo.mudengine.client.exception.ClientException;
 import com.jpinfo.mudengine.client.model.ClientConnection;
 import com.jpinfo.mudengine.client.model.CommandState;
 import com.jpinfo.mudengine.client.utils.ClientHelper;
-import com.jpinfo.mudengine.client.utils.LocalizedMessages;
+import com.jpinfo.mudengine.client.utils.ClientLocalizedMessages;
 
 @Component
 @Qualifier("admin-commands")
@@ -134,7 +134,7 @@ public class AdminCommandHandler extends BaseCommandHandler {
 					if (client.isAdmin())
 						handleSessionListCommand(client);
 					else
-						throw new ClientException(LocalizedMessages.COMMAND_ONLY_ADMIN);
+						throw new ClientException(ClientLocalizedMessages.COMMAND_ONLY_ADMIN);
 					
 					break;			
 					
@@ -143,7 +143,7 @@ public class AdminCommandHandler extends BaseCommandHandler {
 					if (client.isAdmin())
 						handleSessionDropCommand(command);
 					else
-						throw new ClientException(LocalizedMessages.COMMAND_ONLY_ADMIN);
+						throw new ClientException(ClientLocalizedMessages.COMMAND_ONLY_ADMIN);
 					
 					break;
 					
@@ -151,7 +151,7 @@ public class AdminCommandHandler extends BaseCommandHandler {
 					handleSudoLoginCommand(client, command);
 					break;
 				default: 
-					client.sendMessage(LocalizedMessages.COMMAND_NOT_SUPPORTED);
+					client.sendMessage(ClientLocalizedMessages.COMMAND_NOT_SUPPORTED);
 				
 			}
 		} finally {

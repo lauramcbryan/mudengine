@@ -3,6 +3,7 @@ package com.jpinfo.mudengine.common.utils;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.MissingResourceException;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
@@ -14,6 +15,7 @@ import com.jpinfo.mudengine.common.utils.CommonConstants;
 
 public class LocalizedMessages {
 	
+	public static final String API_ERROR_MESSAGE = "api.error.message";
 	public static final String KEY_NOT_FOUND = "key.not.found";
 	
 	public static final String PLACE_NOT_FOUND = "place.not.found";
@@ -38,6 +40,8 @@ public class LocalizedMessages {
 	public static final String PLAYER_CHANGE_PASSWORD = "player.change.password";
 	public static final String PLAYER_NO_LOGIN = "player.no.login";
 	public static final String PLAYER_LOGIN_ERROR = "player.login.error";
+	public static final String PLAYER_ACTIVATION_SUBJECT = "player.activation.subject";
+	
 	
 	public static final String PLAYER_ACTIVE_STATUS = "player.active.status";
 	public static final String PLAYER_BANNED_STATUS = "player.banned.status";
@@ -53,7 +57,7 @@ public class LocalizedMessages {
 	public static final String ACTION_REFUSED = "action.refused";
 	
 
-	private static final Map<String, ResourceBundle> bundles = new HashMap<>();
+	private static final Map<Locale, ResourceBundle> bundles = new HashMap<>();
 	
 	/**
 	 * Private constructor, just to avoid instantiation
@@ -68,16 +72,18 @@ public class LocalizedMessages {
 	 */
 	public static String getMessage(String key, Object... params) {
 		
-		String locale = getLocale();
+		Locale locale = getLocale();
 		
 		bundles.computeIfAbsent(locale, d ->
-			ResourceBundle.getBundle("messages", Locale.forLanguageTag(d))
+			ResourceBundle.getBundle("messages", d)
 		);
-		
-		if (bundles.get(locale).getString(key)!=null)
+
+		try {
 			return String.format(bundles.get(locale).getString(key), params);
-		else
+		} catch(MissingResourceException e) {
 			return String.format(bundles.get(locale).getString(LocalizedMessages.KEY_NOT_FOUND), key, locale);
+		}
+			
 	}	
 	
 	/**
@@ -86,7 +92,7 @@ public class LocalizedMessages {
 	 * If the call is anonymous, or any other error arrises
 	 * @return
 	 */
-	private static String getLocale() {
+	private static Locale getLocale() {
 		
 		try {
 			MudUserDetails uDetails =  (MudUserDetails)SecurityContextHolder.getContext().getAuthentication().getDetails();
@@ -94,12 +100,12 @@ public class LocalizedMessages {
 			Optional<Player> playerData = uDetails.getPlayerData();
 			
 			if (playerData.isPresent())
-				return playerData.get().getLocale();
+				return Locale.forLanguageTag(playerData.get().getLocale());
 			else
-				return CommonConstants.DEFAULT_LOCALE;
+				return Locale.forLanguageTag(CommonConstants.DEFAULT_LOCALE);
 			
 		} catch(RuntimeException e) {
-			return CommonConstants.DEFAULT_LOCALE;
+			return Locale.forLanguageTag(CommonConstants.DEFAULT_LOCALE);
 		}
 	}
 }

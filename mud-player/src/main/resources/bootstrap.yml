@@ -15,6 +15,8 @@ management:
       enabled: true
       
   endpoint:
+    health:
+      show-details: always
     info:
       enabled: true
 
@@ -39,6 +41,15 @@ spring:
         max-attempts: 6
         initial-interval: 10000   
         max-interval: 10000 
+
+  mail:    
+    host: ${SMTP_HOST:none}
+    port: ${SMTP_PORT:587}
+    username: ${SMTP_USER:nouser}
+    password: ${SMTP_PWD:nopass}
+    properties:
+      mail.smtp.auth: true
+ 
 
 server:
   port: 8080

@@ -32,6 +32,7 @@ public class MudPlayer implements java.io.Serializable {
 	
 	private String password;
 	
+	@Column(length=64)
 	private String email;
 	
 	private String locale;

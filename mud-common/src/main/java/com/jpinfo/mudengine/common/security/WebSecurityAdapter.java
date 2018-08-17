@@ -36,7 +36,7 @@ public class WebSecurityAdapter extends WebSecurityConfigurerAdapter {
 			.antMatchers(HttpMethod.POST, "/player/{\\x+}/password").permitAll()	// allows anonymous access to changePassword
 			.antMatchers(HttpMethod.PUT, "/player/{\\x+}/session").permitAll()		// allows anonymous access to login service
 			.antMatchers("/player/*").authenticated()								// protected everything else under /player
-			.antMatchers("/action/class/*").permitAll()
+			.antMatchers("/action/class/**").permitAll()
 			.antMatchers("/action/**").authenticated()
 			.antMatchers("/item/**").authenticated()
 			.antMatchers("/being/**").authenticated()

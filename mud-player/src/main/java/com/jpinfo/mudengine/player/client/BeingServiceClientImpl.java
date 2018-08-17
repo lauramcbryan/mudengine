@@ -64,7 +64,7 @@ public class BeingServiceClientImpl extends BaseServiceClient implements BeingSe
 		urlVariables.put("beingName", beingName);
 		
 		try {
-			ResponseEntity<Being> responseService= restTemplate.exchange(
+			ResponseEntity<Being> responseService= restTemplate.exchange(beingEndpoint + 
 					"/being/player/{playerId}?beingClass={beingClass}&worldName={worldName}&placeCode={placeCode}&beingName={beingName}", 
 					HttpMethod.PUT, getEmptyHttpEntity(), Being.class, urlVariables);
 			

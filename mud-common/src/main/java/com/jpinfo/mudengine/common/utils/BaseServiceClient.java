@@ -37,10 +37,10 @@ public abstract class BaseServiceClient {
 				case 404:
 					throw new EntityNotFoundException(restError.getMessage());
 				default:
-					throw new GeneralException("api.error.message");
+					throw new GeneralException(LocalizedMessages.API_ERROR_MESSAGE);
 			}
 		} catch(Exception e) {
-			throw new GeneralException("api.error.message");
+			throw new GeneralException(LocalizedMessages.API_ERROR_MESSAGE);
 		}
 	}
 

@@ -14,7 +14,7 @@ import com.jpinfo.mudengine.client.api.MudengineApi;
 import com.jpinfo.mudengine.client.exception.ClientException;
 import com.jpinfo.mudengine.client.model.ClientConnection;
 import com.jpinfo.mudengine.client.utils.ClientHelper;
-import com.jpinfo.mudengine.client.utils.LocalizedMessages;
+import com.jpinfo.mudengine.client.utils.ClientLocalizedMessages;
 import com.jpinfo.mudengine.common.message.Message;
 
 @Component
@@ -101,7 +101,7 @@ public class MudClientScheduler {
 					&& !d.isInactivityWarning())
 			.forEach(d -> {
 				d.sendMessage("");
-				d.sendMessage(LocalizedMessages.WARN_IDLE_TIMEOUT);
+				d.sendMessage(ClientLocalizedMessages.WARN_IDLE_TIMEOUT);
 				d.setInactivityWarning(true);
 			});
 		
@@ -110,7 +110,7 @@ public class MudClientScheduler {
 			.filter(d -> (System.currentTimeMillis() - d.getLastActivity() > MudClientScheduler.KILL_IDLE_TIMEOUT))
 			.forEach(d -> {
 				d.sendMessage("");
-				d.sendMessage(LocalizedMessages.KILL_IDLE_TIMEOUT);
+				d.sendMessage(ClientLocalizedMessages.KILL_IDLE_TIMEOUT);
 				connFactory.closeConnection(d.getConnection().getConnectionId());
 			});
 	}

@@ -1,0 +1,84 @@
+[
+	{
+		"key": "config/application/spring.datasource.platform",
+		"flags": 0,
+		"value": "cG9zdGdyZXM="
+	},
+	{
+		"key": "config/application/spring.datasource.max-active",
+		"flags": 0,
+		"value": "NQ=="
+	},
+	{
+		"key": "config/application/spring.datasource.max-wait",
+		"flags": 0,
+		"value": "MTUwMDA="
+	},
+	{
+		"key": "config/application/spring.jpa.properties.hibernate.temp.use_jdbc_metadata_defaults",
+		"flags": 0,
+		"value": "ZmFsc2U="
+	},
+	{
+		"key": "config/application/action.endpoint",
+		"flags": 0,
+		"value": "aHR0cDovL211ZC1hY3Rpb246ODA4MA=="
+	},
+	{
+		"key": "config/application/player.endpoint",
+		"flags": 0,
+		"value": "aHR0cDovL211ZC1wbGF5ZXI6ODA4MA=="
+	},
+	{
+		"key": "config/application/place.endpoint",
+		"flags": 0,
+		"value": "aHR0cDovL211ZC13b3JsZDo4MDgw"
+	},
+	{
+		"key": "config/application/message.endpoint",
+		"flags": 0,
+		"value": "aHR0cDovL211ZC1tZXNzYWdlOjgwODA="
+	},
+	{
+		"key": "config/application/being.endpoint",
+		"flags": 0,
+		"value": "aHR0cDovL211ZC1iZWluZzo4MDgw"
+	},
+	{
+		"key": "config/application/item.endpoint",
+		"flags": 0,
+		"value": "aHR0cDovL211ZC1pdGVtOjgwODA="
+	},
+	{
+		"key": "config/mud-action/spring.datasource.url",
+		"flags": 0,
+		"value": "amRiYzpwb3N0Z3Jlc3FsOi8vZGF0YWJhc2U6NTQzMi9tdWRlbmdpbmU="
+	},
+	{
+		"key": "config/mud-being/spring.datasource.url",
+		"flags": 0,
+		"value": "amRiYzpwb3N0Z3Jlc3FsOi8vZGF0YWJhc2U6NTQzMi9tdWRlbmdpbmU="
+	},
+	{
+		"key": "config/mud-item/spring.datasource.url",
+		"flags": 0,
+		"value": "amRiYzpwb3N0Z3Jlc3FsOi8vZGF0YWJhc2U6NTQzMi9tdWRlbmdpbmU="
+	},
+	{
+		"key": "config/mud-message/spring.datasource.url",
+		"flags": 0,
+		"value": "amRiYzpwb3N0Z3Jlc3FsOi8vZGF0YWJhc2U6NTQzMi9tdWRlbmdpbmU="
+	},
+	{
+		"key": "config/mud-player/spring.datasource.url",
+		"flags": 0,
+		"value": "amRiYzpwb3N0Z3Jlc3FsOi8vZGF0YWJhc2U6NTQzMi9tdWRlbmdpbmU="
+	},
+	{
+		"key": "config/mud-world/spring.datasource.url",
+		"flags": 0,
+		"value": "amRiYzpwb3N0Z3Jlc3FsOi8vZGF0YWJhc2U6NTQzMi9tdWRlbmdpbmU="
+	}
+]
+
+

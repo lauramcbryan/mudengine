@@ -1,7 +1,6 @@
 spring:
   application:
     name: mud-world
-  
   cloud:
     vault:
       enabled: false
@@ -16,9 +15,9 @@ management:
       enabled: true
       
   endpoint:
+    health:
+      show-details: always
     info:
-      enabled: true
-    env:
       enabled: true
 
 ---

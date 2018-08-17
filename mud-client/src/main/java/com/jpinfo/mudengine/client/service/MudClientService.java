@@ -17,7 +17,7 @@ import com.jpinfo.mudengine.client.model.ClientConnection;
 import com.jpinfo.mudengine.client.model.CommandParamState;
 import com.jpinfo.mudengine.client.model.VerbDictionaries;
 import com.jpinfo.mudengine.client.utils.ClientHelper;
-import com.jpinfo.mudengine.client.utils.LocalizedMessages;
+import com.jpinfo.mudengine.client.utils.ClientLocalizedMessages;
 import com.jpinfo.mudengine.common.action.Command;
 import com.jpinfo.mudengine.common.action.CommandParam.enumParamTypes;
 import com.jpinfo.mudengine.common.being.Being;
@@ -117,7 +117,7 @@ public class MudClientService {
 			} catch(Exception e) {
 				
 				try {			
-					client.sendMessage(LocalizedMessages.GENERAL_ERROR_MESSAGE);
+					client.sendMessage(ClientLocalizedMessages.GENERAL_ERROR_MESSAGE);
 				} catch(Exception ex) {
 					log.error("General error sending message", ex);					
 				}
@@ -138,11 +138,11 @@ public class MudClientService {
 				
 				String username = (playerData.isPresent() ? 
 									playerData.get().getUsername() : 
-									client.getLocalizedMessage(LocalizedMessages.ANONYMOUS_MESSAGE));
+									client.getLocalizedMessage(ClientLocalizedMessages.ANONYMOUS_MESSAGE));
 				
 				String beingName = (activeBeing.isPresent() ? 
 									activeBeing.get().getName(): 
-									client.getLocalizedMessage(LocalizedMessages.NO_BEING_MESSAGE));
+									client.getLocalizedMessage(ClientLocalizedMessages.NO_BEING_MESSAGE));
 				
 				
 				return username + "@" + beingName + ":" + (client.isAdmin() ? "# ":"$ ");
@@ -176,7 +176,7 @@ public class MudClientService {
 						.getCommand(enteredValue);
 			
 			if ((choosenCommand.isLogged()) && (!client.isLogged())) {
-				throw new ClientException(LocalizedMessages.COMMAND_ONLY_LOGGED);
+				throw new ClientException(ClientLocalizedMessages.COMMAND_ONLY_LOGGED);
 			}
 			
 			// Set the current command
@@ -191,7 +191,7 @@ public class MudClientService {
 				client.setCurCommandState(systemHandler.initializeCommand(client, choosenCommand));
 				break;
 			default:
-				throw new ClientException(LocalizedMessages.COMMAND_NOT_SUPPORTED);
+				throw new ClientException(ClientLocalizedMessages.COMMAND_NOT_SUPPORTED);
 			}
 			
 			String remainingCommand = enteredValue
@@ -242,7 +242,7 @@ public class MudClientService {
 		param.setEnteredValue(enteredValue);
 		
 		if (!param.isValid()) {
-			client.sendMessage(LocalizedMessages.COMMAND_INVALID_PARAMETER);
+			client.sendMessage(ClientLocalizedMessages.COMMAND_INVALID_PARAMETER);
 		} else {
 			
 			// if the value just entered was from a secure field, turns on the echo
