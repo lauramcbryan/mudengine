@@ -4,10 +4,8 @@ import java.util.Date;
 import java.util.Map;
 
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
 public class Session implements java.io.Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -27,6 +25,8 @@ public class Session implements java.io.Serializable {
 	private Long beingCode;
 	
 	private String curWorldName;
+	
+	public Session() { }
 	
 	public Session(Map<String, Object> map) {
 		
