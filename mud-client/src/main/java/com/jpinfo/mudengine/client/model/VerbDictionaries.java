@@ -66,7 +66,7 @@ public class VerbDictionaries {
 				// Load the contents
 				VerbDictionary verbDictionary = 
 						jsonMapper.readValue(
-								curDictionary.getFile(), 
+								curDictionary.getInputStream(), 
 								new TypeReference<VerbDictionary>() {});
 
 				log.info("OK");

@@ -254,16 +254,12 @@ public class ClientConnection {
 	 */
 	public void sendFile(String filename) throws IOException  {
 		
-		File f = new ClassPathResource(filename).getFile();
-		
-		BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(f)));
-		
-		try {
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(new ClassPathResource(filename).getInputStream()))) {
+			
 			while (reader.ready()) {
 				sendMessage(reader.readLine());
 			}
-		} finally {
-			reader.close();
+			
 		}
 	}
 
