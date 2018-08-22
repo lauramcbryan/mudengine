@@ -1,43 +1,7 @@
 # MUDEngine
 
-This project was designed with some goals in mind.
-
-The first of them is to be a laboratory to study and try new technologies 
-specially regarding microservice and cloud technologies.
-Here I'm not afraid to kick things out if I feel like they aren't contributing
-for the project in a manner that pays off the trouble they caused.
-
-The second goal, and that's because we must have some fun, is to provide an
-implementation of a Multi User Dungeon (MUD) engine that could be adapted to
-different world games and scenarios.  With a rules engine that work based on
-predicates (pretty much like lambdas, but coded in SpEl for now), the 
-objective is to present a platform from where the administrator can create a 
-brand new game world just through database initial loading.
-
-That being said, please note that:
-
-- THIS ISN'T A HELLO WORLD PROJECT.
-Here we have some serious effort put on architecture, design and implementation
-for the (currently) 10 services distributed among 4 layers and 9 projects.  
-Database was modeled externally before the JPA entities, because I trust that's
-the way to optimize data storage and access strategy.  Each service runs under 
-an isolated schema that can be implemented in Postgre, mySQL, mongoDB, you name
-it.
-
-
-- THIS ISN'T A FINISHED WORK.
-And probably never will be.  There's a long list of new things I wanna try here
-before I can move them for real-life projects.  So, for safe code, stay in the
-master branch (or develop for some finished features) and avoid the inner
-depths of my mind (called the feature branches).  There be dragons.
-
-- I'M NOT A PREACHER of Java, Spring Boot, Docker or any particular technology.
-Although I've used here a variety of tools, some of them beyond necessity, on
-my work (and in my life) I believe that technology is just a way that humans,
-business and corporations created to achieve their dreams.  And more: put them
-in a tangible matter.
-
-
+MUDEngine it's an engine for a Multi User Dungeon written over Spring Boot REST services
+under a microservice architecture.
 
 ## Architecture
 
@@ -120,9 +84,64 @@ the services.
 No Spring Boot, no cloud dependency, just Plain Old Java Objects.
 (Used by MudClient)
 
-[Mud-Infra](mud-infra): simple project used to store the docker files to deploy the solution
-in qa and prod environments.  For local launch, a compose file is available.
-QA and prod launch, uses an swarm file.  For AWS environment, the AWS task
-definition files are spread among the projects.
-Docker files to create and populate the Consul and the Vault images are also
-available.
+[Mud-Infra](mud-infra): simple project used for local launch. Docker files to create and populate
+the Consul and the Vault images are also available.
+
+
+## Running
+
+In order to run this solution:
+
+- Build all the projects using the parent [pom.xml](mud-infra/pom.xml);
+
+- Run the [composite](mud-infra/docker-compose.yml);
+The composite raise and populate his own with Consul, Vault and PostgreSQL services.  
+It will take some time to run, wait for container activity to calm down before proceed;
+
+- Run the [Mud-Client](mud-client) project;
+(as this is technically an external project, it's not included in mudengine docker compose file)
+
+- Connect to the telnet service at 9876 port;
+
+At this time, we only have the administrative services working.  You can register your account,
+activate it and create beings for your player.  The command engine will come in the next release.
+
+
+## Goals and Motivation
+
+This project was designed with some goals in mind.
+
+The first of them is to be a laboratory to study and try new technologies 
+specially regarding microservice and cloud technologies.
+Here I'm not afraid to kick things out if I feel like they aren't contributing
+for the project in a manner that pays off the trouble they caused.
+
+The second goal, and that's because we must have some fun, is to provide an
+implementation of a Multi User Dungeon (MUD) engine that could be adapted to
+different world games and scenarios.  With a rules engine that work based on
+predicates (pretty much like lambdas, but coded in SpEl for now), the 
+objective is to present a platform from where the administrator can create a 
+brand new game world just through database initial loading.
+
+That being said, please note that:
+
+- THIS ISN'T A HELLO WORLD PROJECT.
+Here we have some serious effort put on architecture, design and implementation
+for the (currently) 10 services distributed among 4 layers and 9 projects.  
+Database was modeled externally before the JPA entities, because I trust that's
+the way to optimize data storage and access strategy.  Each service runs under 
+an isolated schema that can be implemented in Postgre, mySQL, mongoDB, you name
+it.
+
+
+- THIS ISN'T A FINISHED WORK.
+And probably never will be.  There's a long list of new things I wanna try here
+before I can move them for real-life projects.  So, for safe code, stay in the
+master branch (or develop for some finished features) and avoid the inner
+depths of my mind (called the feature branches).  There be dragons.
+
+- I'M NOT A PREACHER of Java, Spring Boot, Docker or any particular technology.
+Although I've used here a variety of tools, some of them beyond necessity, on
+my work (and in my life) I believe that technology is just a way that humans,
+business and corporations created to achieve their dreams.  And more: put them
+in a tangible matter.
