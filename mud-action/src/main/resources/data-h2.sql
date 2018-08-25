@@ -1,10 +1,9 @@
 insert into mud_action_class(action_class_code, action_type, mediator_type, target_type, NRO_TURNS_EXPRESSION) values (1, 0, null, 'DIRECTION', '1');
-insert into mud_action_class_prereq(action_class_code, eval_order, check_expression, fail_expression) values (1, 1, 'actor.place.exits[#root.targetCode]!=null', 'actor.addMessage(''${str:NOEXIT}'')');
-insert into mud_action_class_prereq(action_class_code, eval_order, check_expression, fail_expression) values (1, 2, 'actor.place.exits[#root.targetCode].opened', 'actor.addMessage(''${str:EXITCLOSED}'')');
+insert into mud_action_class_prereq(action_class_code, eval_order, check_expression, fail_expression) values (1, 1, 'actor.place.exits[#root.targetCode]!=null', '#root.addMessage(''${str:NOEXIT}'')');
+insert into mud_action_class_prereq(action_class_code, eval_order, check_expression, fail_expression) values (1, 2, 'actor.place.exits[#root.targetCode].opened', '#root.addMessage(''${str:EXITCLOSED}'')');
 
 insert into mud_action_class_effect(action_class_code, eval_order, effect_expression, message_expression) values (1, 1, 'actor.being.curPlaceCode = actor.place.exits[#root.targetCode].targetPlaceCode', null);
 -- insert into mud_action_class_effect(action_class_code, eval_order, expression) values ('WALK', 2, 'actor.being.curWorld = actor.place.exits[#root.targetCode].targetWorld');
-insert into mud_action_class_effect(action_class_code, eval_order, effect_expression) values (1, 2, 'actor.place = null');
 
 insert into mud_action_class_cmd(command_id, action_class_code, verb, description, usage, locale) 
 	values(1, 1, 'WALK', 'Move to another place', 'WALK <DIRECTION>', 'en-US');

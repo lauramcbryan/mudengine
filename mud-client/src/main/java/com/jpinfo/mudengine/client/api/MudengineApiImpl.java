@@ -271,7 +271,7 @@ public class MudengineApiImpl implements MudengineApi {
 	}
 
 	@Override
-	public Action insertCommand(String authToken, Integer commandId, Long actorCode, Optional<String> mediatorCode,
+	public Action insertCommand(String authToken, Integer commandId, Optional<String> mediatorCode,
 			String targetCode) throws ClientException {
 		
 		Action result = null;
@@ -279,13 +279,12 @@ public class MudengineApiImpl implements MudengineApi {
 		Map<String, Object> urlVariables = new HashMap<>();
 		
 		urlVariables.put("commandId", commandId);
-		urlVariables.put("actorCode", actorCode);
 		mediatorCode.ifPresent(d -> urlVariables.put("mediatorCode", d));
 		urlVariables.put("targetCode", targetCode);
 		
 		try {
 			
-			StringBuilder url = new StringBuilder("/action/{commandId}?actorCode={actorCode}&targetCode={targetCode}");
+			StringBuilder url = new StringBuilder("/action/{commandId}?targetCode={targetCode}");
 			
 			mediatorCode.ifPresent(d -> url.append("&mediatorCode={mediatorCode}"));
 			

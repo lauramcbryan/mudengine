@@ -1,7 +1,8 @@
 package com.jpinfo.mudengine.action.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
@@ -11,32 +12,31 @@ import org.springframework.stereotype.Component;
 
 import com.jpinfo.mudengine.action.client.BeingServiceClient;
 import com.jpinfo.mudengine.action.client.ItemServiceClient;
+import com.jpinfo.mudengine.action.client.MessageServiceClient;
 import com.jpinfo.mudengine.action.client.PlaceServiceClient;
 import com.jpinfo.mudengine.action.dto.ActionInfo;
 import com.jpinfo.mudengine.action.dto.BeingComposite;
-import com.jpinfo.mudengine.action.dto.ItemComposite;
 import com.jpinfo.mudengine.action.dto.PlaceComposite;
-import com.jpinfo.mudengine.action.interfaces.ActionTarget;
-import com.jpinfo.mudengine.action.model.MudActionClass;
-import com.jpinfo.mudengine.action.repository.MudActionClassRepository;
-import com.jpinfo.mudengine.action.utils.ActionHelper;
+import com.jpinfo.mudengine.action.model.MudAction;
+import com.jpinfo.mudengine.action.model.converter.ActionInfoConverter;
+import com.jpinfo.mudengine.action.repository.MudActionRepository;
+import com.jpinfo.mudengine.action.utils.ActionMessage;
 import com.jpinfo.mudengine.common.action.Action;
+import com.jpinfo.mudengine.common.action.Action.EnumActionState;
 import com.jpinfo.mudengine.common.action.ActionClass;
 import com.jpinfo.mudengine.common.action.ActionClassEffect;
 import com.jpinfo.mudengine.common.action.ActionClassPrereq;
-import com.jpinfo.mudengine.common.being.Being;
 import com.jpinfo.mudengine.common.exception.ActionRefusedException;
 import com.jpinfo.mudengine.common.exception.EntityNotFoundException;
 import com.jpinfo.mudengine.common.exception.IllegalParameterException;
 import com.jpinfo.mudengine.common.item.Item;
-import com.jpinfo.mudengine.common.place.Place;
 import com.jpinfo.mudengine.common.utils.LocalizedMessages;
 
 @Component
 public class ActionHandler {
-	
+
 	@Autowired
-	private MudActionClassRepository classRepository;	
+	private MudActionRepository repository;
 	
 	@Autowired
 	private BeingServiceClient beingService;
@@ -47,105 +47,194 @@ public class ActionHandler {
 	@Autowired
 	private ItemServiceClient itemService;
 	
-
-	public void updateAction(Long currentTurn, Action curAction, ActionInfo fullActionState) {
-
-		switch (curAction.getCurState()) {
-
-		case NOT_STARTED: 
-
+	@Autowired
+	private MessageServiceClient messageService;
+	
+	@Autowired
+	private ActionInfoConverter actionInfoConverter;
+	
+	public void runActions(Long currentTurn, List<MudAction> actionList) {
+		
+		actionList.stream().forEach(curPendingAction -> {
+			
 			try {
-
-				// Set the start turn to check
-				curAction.setStartTurn(currentTurn);
+				ActionInfo fullState = actionInfoConverter.build(curPendingAction);
 				
-				// Variable to hold the future state of the action
-				Action.EnumActionState futureState = Action.EnumActionState.STARTED;
+				runOneAction(currentTurn, fullState);
+				
+				curPendingAction.setStartTurn(fullState.getStartTurn());
+				curPendingAction.setEndTurn(fullState.getEndTurn());
+				curPendingAction.setCurrState(fullState.getCurState().ordinal());
+				
+			} catch(EntityNotFoundException e) {
+				curPendingAction.setCurrStateEnum(EnumActionState.CANCELLED);
+				curPendingAction.setEndTurn(currentTurn);
+			}
+			
+			repository.save(curPendingAction);
+		});
+		
+	}
+	
+	public void runOneAction(Long currentTurn, ActionInfo fullActionState) {
+		
+		try {
+			
+			// If we are initiating an action right now, update the fields
+			if (!fullActionState.hasInitiated()) {
+				initiateAction(currentTurn, fullActionState);
+			}
+			
+			// Check prerequisites
+			checkPrerequisites(fullActionState);
 
-				// Check the prerequisites
-				checkPrerequisites(fullActionState);
+			// Update the action state to RUNNING
+			fullActionState.setCurState(Action.EnumActionState.STARTED);
 
-				// Set the end turn (except for continuous actions)
-				if (fullActionState.getActionClass().getActionType()!=ActionClass.ACTION_CLASS_CONTINUOUS) {
-					
-					// Set the end turn
-					if (fullActionState.getActionClass().getNroTurnsExpr() != null) {
-						
-						curAction.setEndTurn(calculateEndTurn(currentTurn, fullActionState));
-
-					} else {
-						
-						// If not specified, the endTurn is the same as the initial one (instant action)
-						curAction.setEndTurn(curAction.getStartTurn());
-						
-						// Calculate successRate
-						if (fullActionState.getActionClass().getSuccessRateExpr()!=null) {
-							fullActionState = calculateSuccessRate(fullActionState);
-						} else {
-							fullActionState.setSuccessRate(1.0D);
-						}
-
-						// Reapply effects
-						calculateEffect(fullActionState);
-						
-						// As it is a instant action, it goes straight to COMPLETED status
-						futureState = Action.EnumActionState.COMPLETED;
-						
-					}
-				} 
-
-				// Update the action to Started
-				curAction.setCurState(futureState);
-
-			} catch (ActionRefusedException e) {
-
-				// Update the action to Refused
-				curAction.setCurState(Action.EnumActionState.REFUSED);
-				curAction.setEndTurn(currentTurn);
+			// Apply the effects if needed
+			if (fullActionState.needToApplyEffects(currentTurn))
+			{
+				applyEffects(fullActionState);
+				
+				// Update changed entities
+				updateEntities(fullActionState);
 			}
 
-			break;
-		
-		case STARTED: 
+			// if reach end_turn, complete it
+			if (fullActionState.isFinished(currentTurn)) {
 
-			try {
-				// Recheck prerequisites
-				checkPrerequisites(fullActionState);
-
-				// If the action is continuous, reapply the effects
-
-				if ((fullActionState.getActionClass().getActionType().equals(ActionClass.ACTION_CLASS_CONTINUOUS)) ||
-					(currentTurn >=curAction.getEndTurn()))
-				{
-
-					// Calculate successRate
-					if (fullActionState.getActionClass().getSuccessRateExpr()!=null) {
-						fullActionState = calculateSuccessRate(fullActionState);
-					} else {
-						fullActionState.setSuccessRate(1.0D);
-					}
-
-					// Reapply effects
-					calculateEffect(fullActionState);
-				}
-
-				// if reach end_turn, complete it
-				if ((curAction.getEndTurn() != null) && (curAction.getEndTurn()) <= currentTurn) {
-
-					// Update the effect to completed
-					curAction.setCurState(Action.EnumActionState.COMPLETED);
-				}
-
-			} catch (ActionRefusedException e) {
-
-				// Update the action to Refused
-				curAction.setCurState(Action.EnumActionState.COMPLETED);
-				curAction.setEndTurn(currentTurn);
+				// Update the action to completed
+				fullActionState.setCurState(Action.EnumActionState.COMPLETED);
 			}
+			
+			// Send the message in the message queue
+			sendMessages(fullActionState);
+			
+			
+		} catch (ActionRefusedException e) {
 
-			break;
+			// If the action was not started, update it to REFUSED
+			if (!fullActionState.hasInitiated())
+				fullActionState.setCurState(Action.EnumActionState.REFUSED);
+			else
+				// If it was started, update it to COMPLETE
+				fullActionState.setCurState(Action.EnumActionState.COMPLETED);
+			
+			fullActionState.setEndTurn(currentTurn);
+			
+		} catch(EntityNotFoundException e) {
+			
+			fullActionState.setCurState(EnumActionState.CANCELLED);
+			fullActionState.setEndTurn(currentTurn);
+		}
+			
+	}
+	
+	private void initiateAction(Long currentTurn, ActionInfo fullActionState) {
 		
+		// Set the start turn to check
+		fullActionState.setStartTurn(currentTurn);
+		
+		// Set the end turn
+		if (fullActionState.getActionClass().getActionType()!=ActionClass.ACTION_CLASS_CONTINUOUS) {
+			
+			if (fullActionState.getActionClass().getNroTurnsExpr()!=null)
+				// Calculating the end turn
+				fullActionState.setEndTurn(calculateEndTurn(currentTurn, fullActionState));
+			else
+				// instant action
+				fullActionState.setEndTurn(fullActionState.getStartTurn());
+		}
+	}
+	
+	private void applyEffects(ActionInfo fullActionState) {
+		
+		// Calculate successRate
+		if (fullActionState.getActionClass().getSuccessRateExpr()!=null) {
+			calculateSuccessRate(fullActionState);
+		} else {
+			fullActionState.setSuccessRate(1.0D);
+		}
+
+		// Apply effects
+		calculateEffect(fullActionState);
+	}
+	
+
+	private void updateEntities(ActionInfo fullState) {
+		
+		// Update the actor
+		beingService.updateBeing( 
+					fullState.getActor().getBeing().getCode(), 
+					fullState.getActor().getBeing());
+		
+		// Update the place where the actor is
+		placeService.updatePlace( 
+				fullState.getActor().getPlace().getCode(), 
+				fullState.getActor().getPlace());
+
+		
+		// If the Mediator is used, updated it too
+		if (fullState.getMediator()!=null) {
+			itemService.updateItem(fullState.getMediator().getCode(), fullState.getMediator());
+		}
+
+		// Updating the target
+		switch(fullState.getTargetType()) {
+			case BEING: 
+				
+				BeingComposite targetBeing = (BeingComposite)fullState.getTarget();
+				beingService.updateBeing(targetBeing.getBeing().getCode(), targetBeing.getBeing());
+
+				break;
+			
+			case ITEM: 
+				
+				Item targetItem = (Item)fullState.getTarget();
+				itemService.updateItem(targetItem.getCode(), targetItem);
+				
+				break;
+			
+			case PLACE: 
+				
+				PlaceComposite targetPlace = (PlaceComposite)fullState.getTarget();
+				placeService.updatePlace(targetPlace.getPlace().getCode(), targetPlace.getPlace());
+				
+				break;
+			
+			case DIRECTION: 
+				
+				// Do nothing
+				break;
+			
+		}
+		
+		
+	}
+	
+	private void sendMessages(ActionInfo fullState) {
+		
+		for(ActionMessage curTargetMessage: fullState.getMessages()) {
+
+			// Send message to the target
+			switch (fullState.getTargetType()) {
+			
+			case BEING:
+				this.messageService.putMessage(fullState.getActorCode(), 
+						curTargetMessage.getMessageKey(), 
+						curTargetMessage.getSenderCode(),
+						fullState.getActor().getBeing().getName(),
+						curTargetMessage.getArgs());
+				break;
+			
+			case PLACE:
+				throw new IllegalParameterException("Messages to PLACEs not supported.");
+				
+			case ITEM:
+				throw new IllegalParameterException("Messages to ITEMs not supported.");
+				
 			default:
+			}
 		}
 	}
 
@@ -238,122 +327,5 @@ public class ActionHandler {
 		Long nroTurns = curExpression.getValue(context, Long.class);
 
 		return (nroTurns + currentTurn);
-	}
-	
-	public ActionInfo buildActionInfo(Action a) {
-		
-		ActionInfo result = new ActionInfo();
-		
-		result.setActionId(a.getActionId());
-		result.setActionClassCode(a.getActionClassCode());
-		
-		// Solving the actionClass
-		MudActionClass dbActionClass = classRepository
-				.findById(a.getActionClassCode())
-				.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.BEING_NOT_FOUND));
-
-		result.setActionClass(ActionHelper.buildActionClass(dbActionClass));
-
-		
-		//Actor
-		if (a.getActorCode()!=null) {
-			
-			Being actorBeing = beingService.getBeing(a.getActorCode());
-			
-			if (actorBeing!=null) {
-				
-				// Assemble the composite
-				BeingComposite actor = new BeingComposite(actorBeing);
-				
-				// Set the place
-				Place curPlace = placeService.getPlace(actorBeing.getCurPlaceCode());
-				actor.setPlace(curPlace);
-				
-				result.setActor(actor);
-				
-			} else {
-				throw new EntityNotFoundException(LocalizedMessages.BEING_NOT_FOUND);
-			}
-		}
-		
-		// Mediator
-		if (a.getMediatorCode()!=null) {
-			
-			switch(a.getMediatorType()) {
-			
-			case ITEM: 
-				Item mediator = itemService.getItem(Long.valueOf(a.getMediatorCode()));
-				
-				if (mediator!=null) {
-					result.setMediator(mediator);
-				} else {
-					throw new EntityNotFoundException(LocalizedMessages.ITEM_NOT_FOUND);
-				}
-				
-				break;
-			
-			case PLACE:
-				throw new IllegalParameterException("PLACE Mediators not supported.");
-				
-			case BEING:
-				throw new IllegalParameterException("BEING Mediators not supported.");
-			
-			default:
-			}
-			
-		}
-		
-		if (a.getTargetCode()!=null) {
-			
-			ActionTarget target = null;
-			
-			switch(a.getTargetType()) {
-			case ITEM: 
-				
-					Item targetItem = itemService.getItem(Long.valueOf(a.getTargetCode()));
-					
-					if (targetItem!=null) {
-						target = new ItemComposite(targetItem);
-					} else {
-						throw new EntityNotFoundException(LocalizedMessages.ITEM_NOT_FOUND);
-					}
-					
-					break;
-				
-			case PLACE: 
-				
-					Place targetPlace = placeService.getPlace(Integer.valueOf(a.getTargetCode()));
-				
-					if (targetPlace!=null) {
-						target = new PlaceComposite(targetPlace);
-					} else {
-						throw new EntityNotFoundException(LocalizedMessages.PLACE_NOT_FOUND);
-					}
-					
-					break;
-				
-			case BEING: 
-					Being targetBeing = beingService.getBeing(Long.valueOf(a.getTargetCode()));
-					
-					if (targetBeing!=null) {
-						target = new BeingComposite(targetBeing);
-					} else {
-						throw new EntityNotFoundException("Being " + a.getTargetCode() + " not found");
-					}
-					
-					break;
-				
-			case DIRECTION:
-			default: 
-				result.setTargetCode(a.getTargetCode());
-				
-			}
-			
-			if (target!=null) {
-				result.setTarget(target);
-			}
-		}
-		
-		return result;
 	}	
 }

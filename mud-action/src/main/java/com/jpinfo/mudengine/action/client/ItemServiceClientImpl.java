@@ -1,6 +1,8 @@
 package com.jpinfo.mudengine.action.client;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -70,6 +72,53 @@ public class ItemServiceClientImpl extends BaseServiceClient implements ItemServ
 			
 			if (serviceResponse.getStatusCode().equals(HttpStatus.OK)) {
 				response = serviceResponse.getBody();
+			}
+			
+		} catch(RestClientResponseException e) {
+			handleError(e);
+		}
+		
+		return response;
+	}
+	
+	@Override
+	public List<Item> getAllFromBeing(Long owner) {
+		
+		List<Item> response  = null;
+		
+		Map<String, Object> urlVariables = new HashMap<>();
+		urlVariables.put("owner", owner);
+	
+		try {
+			ResponseEntity<Item[]> serviceResponse = restTemplate.exchange(itemEndpoint + "/item/being/{owner}", 
+					HttpMethod.GET, getEmptyHttpEntity(), Item[].class, urlVariables);
+			
+			if (serviceResponse.getStatusCode().equals(HttpStatus.OK)) {
+				response = Arrays.asList(serviceResponse.getBody());
+			}
+			
+		} catch(RestClientResponseException e) {
+			handleError(e);
+		}
+		
+		return response;
+		
+	}
+	
+	public List<Item> getAllFromPlace(String worldName, Integer placeCode) {
+		
+		List<Item> response  = null;
+		
+		Map<String, Object> urlVariables = new HashMap<>();
+		urlVariables.put("worldName", worldName);
+		urlVariables.put("placeCode", placeCode);
+	
+		try {
+			ResponseEntity<Item[]> serviceResponse = restTemplate.exchange(itemEndpoint + "/item/place/{worldName}/{placeCode}", 
+					HttpMethod.GET, getEmptyHttpEntity(), Item[].class, urlVariables);
+			
+			if (serviceResponse.getStatusCode().equals(HttpStatus.OK)) {
+				response = Arrays.asList(serviceResponse.getBody());
 			}
 			
 		} catch(RestClientResponseException e) {

@@ -2,6 +2,9 @@ package com.jpinfo.mudengine.action.utils;
 
 import com.jpinfo.mudengine.common.action.Action;
 
+import lombok.Getter;
+
+@Getter
 public class ActionMessage {
 	
 	private Long senderCode;
@@ -9,48 +12,27 @@ public class ActionMessage {
 	private Long targetCode;
 	private Action.EnumTargetType targetType;
 	
-	public String messageKey;
-	public String[] args;
+	private String messageKey;
+	private String[] args;
 	
-	public String plainMessage;
+	private boolean plainMessage;
 
-	public ActionMessage(Long senderCode, Long targetCode, Action.EnumTargetType targetType, String messageKey, String... args) {
+	private ActionMessage(Long senderCode, Long targetCode, boolean plainMessage, Action.EnumTargetType targetType, String messageKey, String... args) {
 
 		this.senderCode = senderCode;
 		this.targetCode = targetCode;
 		this.targetType = targetType;
 		
 		this.messageKey = messageKey;
+		this.plainMessage = plainMessage;
 		this.args = args;
 	}
 	
 	public ActionMessage(Long senderCode, Long targetCode, String targetType, String messageKey, String... args) {
-		this(senderCode, targetCode, Action.EnumTargetType.valueOf(targetType), messageKey, args);
+		this(senderCode, targetCode, false, Action.EnumTargetType.valueOf(targetType), messageKey, args);
 	}
 
-	public Long getSenderCode() {
-		return senderCode;
-	}
-
-	public Long getTargetCode() {
-		return targetCode;
-	}
-
-	public Action.EnumTargetType getTargetType() {
-		return targetType;
-	}
-
-	public String getMessageKey() {
-		return messageKey;
-	}
-
-	public Object[] getArgs() {
-		return args;
-	}
-
-	public String getPlainMessage() {
-		return plainMessage;
-	}
-	
-	
+	public ActionMessage(Long senderCode, Long targetCode, String targetType, String plainMessage) {
+		this(senderCode, targetCode, true, Action.EnumTargetType.valueOf(targetType), plainMessage);
+	}	
 }

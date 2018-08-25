@@ -1,11 +1,20 @@
 package com.jpinfo.mudengine.action.dto;
 
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.jpinfo.mudengine.action.interfaces.ActionTarget;
+import com.jpinfo.mudengine.action.utils.ActionMessage;
 import com.jpinfo.mudengine.common.action.Action;
 import com.jpinfo.mudengine.common.action.ActionClass;
 import com.jpinfo.mudengine.common.item.Item;
 
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+@Data
+@EqualsAndHashCode(callSuper=false)
 public class ActionInfo extends Action {
 	
 	private ActionClass actionClass;
@@ -18,45 +27,36 @@ public class ActionInfo extends Action {
 	
 	private Double successRate;
 	
+	private List<ActionMessage> messages;
 	
-	public BeingComposite getActor() {
-		return actor;
-	}
-
-	public void setActor(BeingComposite actor) {
-		this.actor = actor;
-	}
-
-	public Item getMediator() {
-		return mediator;
-	}
-
-	public void setMediator(Item mediator) {
-		this.mediator = mediator;
-	}
-
-	public ActionTarget getTarget() {
-		return target;
-	}
-
-	public void setTarget(ActionTarget target) {
-		this.target = target;
-	}
-
-	public ActionClass getActionClass() {
-		return actionClass;
-	}
-
-	public void setActionClass(ActionClass actionClass) {
-		this.actionClass = actionClass;
-	}
-
-	public Double getSuccessRate() {
-		return successRate;
-	}
-
-	public void setSuccessRate(Double successRate) {
-		this.successRate = successRate;
+	public ActionInfo() {
+		this.messages = new ArrayList<>();
 	}
 	
+	public boolean hasInitiated() {
+		return !getCurState().equals(Action.EnumActionState.NOT_STARTED);
+	}
+	
+	public boolean needToApplyEffects(Long currentTurn) {
+		
+		return this.getActionClass().getActionType().equals(ActionClass.ACTION_CLASS_CONTINUOUS) ||
+				(currentTurn >=super.getEndTurn());
+	}
+	
+	public boolean isFinished(Long currentTurn) {
+		return (super.getEndTurn() != null) && 
+				(super.getEndTurn() <= currentTurn) && 
+				!this.actionClass.getActionType().equals(ActionClass.ACTION_CLASS_CONTINUOUS);
+	}
+	
+	
+	public void addMessage(Long senderCode, Long targetCode, String targetType, String messageKey, String... parms) {
+		
+		this.messages.add(new ActionMessage(senderCode, targetCode, targetType, messageKey, parms));
+	}
+	
+	public void addMessage(Long senderCode, Long targetCode, String targetType, String plainMessage) {
+		
+		this.messages.add(new ActionMessage(senderCode, targetCode, targetType, plainMessage));
+	}
 }

@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 import com.jpinfo.mudengine.client.exception.ClientException;
 import com.jpinfo.mudengine.client.model.ClientConnection;
 import com.jpinfo.mudengine.client.model.CommandState;
-import com.jpinfo.mudengine.client.utils.ClientLocalizedMessages;
 
 @Component
 @Qualifier("game-commands")
@@ -26,16 +25,13 @@ public class GameCommandHandler extends BaseCommandHandler {
 	 */
 	public void handleCommand(ClientConnection client, CommandState command) throws ClientException {
 
-		Long actorCode = client.getActiveBeingCode()
-				.orElseThrow(() -> new ClientException(ClientLocalizedMessages.COMMAND_ONLY_LOGGED));
-		
 		String mediatorCode = command.getParamValue("mediatorCode");
 		String targetCode = command.getParamValue("targetCode");
 		Integer commandId = command.getCommand().getCommandId();
 		
 		
 		// Perform the call to the API gateway
-		api.insertCommand(client.getAuthToken(), commandId, actorCode, 
+		api.insertCommand(client.getAuthToken(), commandId,
 				Optional.ofNullable(mediatorCode), targetCode);
 	}
 	

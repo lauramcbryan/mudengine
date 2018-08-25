@@ -46,6 +46,9 @@ public class MudMessage {
 	@Column(name="READ_FLAG")
 	private Boolean readFlag;
 	
+	@Column(name="PLAIN_FLAG")
+	private Boolean plainFlag;
+	
 	@OneToMany(mappedBy="id.messageId", cascade=CascadeType.ALL, orphanRemoval=true)
 	@OrderBy("eval_order ASC")
 	private Set<MudMessageParm> parms;

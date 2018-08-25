@@ -49,25 +49,22 @@ public class MudAction {
 	
 	@Column(name="SUCCESS_RATE")
 	private Float successRate;
+
+	@Column(name="WORLD_NAME")
+	private String worldName;
 	
 	public MudAction() {
 		this.currState = 0;
 		
 	}
 	
-	public Action.EnumTargetType getTargetTypeEnum() {
-		return Action.EnumTargetType.valueOf(this.targetType);
-	}
-	
+	@Transient
 	public void setTargetTypeEnum(Action.EnumTargetType enumTargetType) {
 		this.targetType = enumTargetType.toString();
 	}
 	
+	@Transient
 	public void setCurrStateEnum(Action.EnumActionState enumState) {
 		this.currState = enumState.ordinal();
-	}
-	
-	public Action.EnumActionState getCurrStateEnum() {
-		return Action.EnumActionState.values()[this.currState];
 	}
 }

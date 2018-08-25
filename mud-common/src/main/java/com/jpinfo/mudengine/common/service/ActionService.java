@@ -21,7 +21,6 @@ public interface ActionService {
 	
 	@RequestMapping(method=RequestMethod.PUT, value="/{commandId}")
 	public Action insertCommand(@PathVariable("commandId") Integer commandId,
-			@RequestParam("actorCode") Long actorCode,
 			@RequestParam("mediatorCode") Optional<String> mediatorCode, 
 			@RequestParam("targetCode") String targetCode);
 
@@ -30,4 +29,7 @@ public interface ActionService {
 	
 	@RequestMapping(method=RequestMethod.DELETE, value="/actor/{actorCode}")
 	public void cancelAllActionFromBeing(@PathVariable("actorCode") Long actorCode);
+	
+	@RequestMapping(method=RequestMethod.POST, value="/update")
+	public void updateActions();
 }

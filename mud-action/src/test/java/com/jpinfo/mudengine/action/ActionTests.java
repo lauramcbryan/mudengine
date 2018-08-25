@@ -3,6 +3,7 @@ package com.jpinfo.mudengine.action;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
+
 import org.junit.Test;
 
 
@@ -17,8 +18,9 @@ import com.jpinfo.mudengine.action.client.BeingServiceClient;
 import com.jpinfo.mudengine.action.client.ItemServiceClient;
 import com.jpinfo.mudengine.action.client.PlaceServiceClient;
 import com.jpinfo.mudengine.action.dto.ActionInfo;
+import com.jpinfo.mudengine.action.model.MudAction;
+import com.jpinfo.mudengine.action.model.converter.ActionInfoConverter;
 import com.jpinfo.mudengine.action.service.ActionHandler;
-import com.jpinfo.mudengine.common.action.Action;
 import com.jpinfo.mudengine.common.action.Action.EnumActionState;
 import com.jpinfo.mudengine.common.action.Action.EnumTargetType;
 import com.jpinfo.mudengine.common.being.Being;
@@ -39,6 +41,10 @@ public class ActionTests {
 	
 	@Autowired
 	private ActionHandler handler;
+	
+	@Autowired
+	private ActionInfoConverter actionInfoConverter;
+	
 	
 	@MockBean
 	private BeingServiceClient beingClient;
@@ -127,26 +133,26 @@ public class ActionTests {
 		
 		setupMocks();
 		
-		Action walkAction = new Action();
+		MudAction walkAction = new MudAction();
 		walkAction.setActorCode(1L);
 		walkAction.setActionClassCode(1);   // WALKDIR
 		walkAction.setTargetCode("NORTH");
-		walkAction.setTargetType(EnumTargetType.DIRECTION);
+		walkAction.setTargetTypeEnum(EnumTargetType.DIRECTION);
 
-		ActionInfo testData = handler.buildActionInfo(walkAction);
+		ActionInfo testData = actionInfoConverter.build(walkAction);
 
 		// ************ UPDATE ACTION *****************
 		// =============================================
-		handler.updateAction(1L, walkAction, testData);
+		handler.runOneAction(1L, testData);
 		
 		// Assert testData values
-		assertThat(walkAction.getEndTurn()).isNotNull();
-		assertThat(walkAction.getCurState()).isEqualTo(EnumActionState.STARTED);
+		assertThat(testData.getEndTurn()).isNotNull();
+		assertThat(testData.getCurState()).isEqualTo(EnumActionState.STARTED);
 		
 		// Finishing the action
-		handler.updateAction(walkAction.getEndTurn(), walkAction, testData);
+		handler.runOneAction(testData.getEndTurn(), testData);
 		
-		assertThat(walkAction.getCurState()).isEqualTo(EnumActionState.COMPLETED);
+		assertThat(testData.getCurState()).isEqualTo(EnumActionState.COMPLETED);
 		assertThat(testData.getActor().getBeing().getCurPlaceCode()).isEqualTo(ActionTests.END_PLACE_CODE);
 	}	
 	
@@ -155,23 +161,23 @@ public class ActionTests {
 		
 		setupMocks();
 		
-		Action lookAction = new Action();
+		MudAction lookAction = new MudAction();
 		lookAction.setActorCode(1L);
 		lookAction.setActionClassCode(2);  // LOOKPLACE
 		lookAction.setTargetCode("1");
-		lookAction.setTargetType(EnumTargetType.PLACE);
+		lookAction.setTargetTypeEnum(EnumTargetType.PLACE);
 
-		ActionInfo testData = handler.buildActionInfo(lookAction);
+		ActionInfo testData = actionInfoConverter.build(lookAction);
 
 		// ************ UPDATE ACTION *****************
 		// =============================================
-		handler.updateAction(1L, lookAction, testData);
+		handler.runOneAction(1L, testData);
 		
 		// Assert testData values
-		assertThat(lookAction.getEndTurn()).isNotNull();
-		assertThat(lookAction.getCurState()).isEqualTo(EnumActionState.COMPLETED);
+		assertThat(testData.getEndTurn()).isNotNull();
+		assertThat(testData.getCurState()).isEqualTo(EnumActionState.COMPLETED);
 
-		assertThat(testData.getActor().getMessages().isEmpty()).isFalse();
+		assertThat(testData.getMessages().isEmpty()).isFalse();
 	}	
 
 	@Test
@@ -179,23 +185,23 @@ public class ActionTests {
 		
 		setupMocks();
 		
-		Action lookAction = new Action();
+		MudAction lookAction = new MudAction();
 		lookAction.setActorCode(1L);
 		lookAction.setActionClassCode(3);   //LOOKBEING
 		lookAction.setTargetCode("2");
-		lookAction.setTargetType(EnumTargetType.BEING);
+		lookAction.setTargetTypeEnum(EnumTargetType.BEING);
 
-		ActionInfo testData = handler.buildActionInfo(lookAction);
+		ActionInfo testData = actionInfoConverter.build(lookAction);
 
 		// ************ UPDATE ACTION *****************
 		// =============================================
-		handler.updateAction(1L, lookAction, testData);
+		handler.runOneAction(1L, testData);
 		
 		// Assert testData values
-		assertThat(lookAction.getEndTurn()).isNotNull();
-		assertThat(lookAction.getCurState()).isEqualTo(EnumActionState.COMPLETED);
+		assertThat(testData.getEndTurn()).isNotNull();
+		assertThat(testData.getCurState()).isEqualTo(EnumActionState.COMPLETED);
 
-		assertThat(testData.getActor().getMessages().isEmpty()).isFalse();
+		assertThat(testData.getMessages().isEmpty()).isFalse();
 	}	
 
 }

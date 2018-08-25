@@ -11,15 +11,16 @@ import com.jpinfo.mudengine.action.model.MudAction;
 
 public interface MudActionRepository extends CrudRepository<MudAction, Long> {
 
-	@Query("select a from MudAction a where a.currState=0 and "
+	@Query("select DISTINCT(a.actorCode) from MudAction a where a.currState=0 and "
 			+ "not exists(select b from MudAction b where b.currState=1 and b.actorCode=a.actorCode) "
 			+ "order by a.actionId")
 	List<MudAction> findPendingActions();
 
-	@Query("select a from MudAction a, MudActionClass b where "
-	+ "    b.actionClassCode = a.actionClassCode and" 
+	@Query("select DISTINCT(a.actorCode) from MudAction a, MudActionClass b where "
+	+ "    b.actionClassCode = a.actionClassCode and " 
 	+ "((a.currState=1 and a.endTurn<= :currentTurn) or "
-	+ "(a.currState=1 and b.actionType=1))")
+	+ "(a.currState=1 and b.actionType=1))"
+	+ "order by a.actionId")
 	List<MudAction> findRunningActions(@Param("currentTurn") Long currentTurn);
 	
 	List<MudAction> findByIssuerCode(Long issuerCode);

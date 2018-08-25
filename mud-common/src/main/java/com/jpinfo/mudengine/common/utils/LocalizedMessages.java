@@ -55,6 +55,7 @@ public class LocalizedMessages {
 	
 	
 	public static final String ACTION_REFUSED = "action.refused";
+	public static final String ACTION_TARGET_NOT_FOUND = "action.target.not.found";
 	
 
 	private static final Map<Locale, ResourceBundle> bundles = new HashMap<>();

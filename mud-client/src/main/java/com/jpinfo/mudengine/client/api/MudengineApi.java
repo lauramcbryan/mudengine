@@ -34,7 +34,7 @@ public interface MudengineApi {
 	
 	String createSession(String username, String password, String clientType, String ipAddress) throws ClientException;
 	
-	Action insertCommand(String authToken, Integer commandId, Long actorCode,
+	Action insertCommand(String authToken, Integer commandId,
 			Optional<String> mediatorCode, String targetCode) throws ClientException;
 	
 	Being getBeing(String authToken, Long beingCode) throws ClientException;
