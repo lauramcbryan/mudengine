@@ -2,8 +2,6 @@ package com.jpinfo.mudengine.action;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
-
 import org.junit.Test;
 
 
@@ -21,6 +19,7 @@ import com.jpinfo.mudengine.action.dto.ActionInfo;
 import com.jpinfo.mudengine.action.model.MudAction;
 import com.jpinfo.mudengine.action.model.converter.ActionInfoConverter;
 import com.jpinfo.mudengine.action.service.ActionHandler;
+import com.jpinfo.mudengine.common.action.Action;
 import com.jpinfo.mudengine.common.action.Action.EnumActionState;
 import com.jpinfo.mudengine.common.action.Action.EnumTargetType;
 import com.jpinfo.mudengine.common.being.Being;
@@ -33,7 +32,8 @@ import static org.mockito.BDDMockito.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment=WebEnvironment.RANDOM_PORT,
-	properties= {"token.secret=a7ac498c7bba59e0eb7c647d2f0197f8"})
+	properties= {"token.secret=a7ac498c7bba59e0eb7c647d2f0197f8",
+			"rule.endpoint=https://2arfb3lhp3.execute-api.us-east-2.amazonaws.com/test"})
 public class ActionTests {
 	
 	private static final Integer START_PLACE_CODE = 1;
@@ -45,7 +45,6 @@ public class ActionTests {
 	@Autowired
 	private ActionInfoConverter actionInfoConverter;
 	
-	
 	@MockBean
 	private BeingServiceClient beingClient;
 	
@@ -54,7 +53,7 @@ public class ActionTests {
 	
 	@MockBean
 	private PlaceServiceClient placeClient;
-
+	
 	@Test
 	public void contextLoads() {
 	}
@@ -98,7 +97,7 @@ public class ActionTests {
 		
 		
 		return beingTwo;
-	}	
+	}
 
 	private Place getPlaceOne() {
 		Place placeOne = new Place();
@@ -135,73 +134,26 @@ public class ActionTests {
 		
 		MudAction walkAction = new MudAction();
 		walkAction.setActorCode(1L);
-		walkAction.setActionClassCode(1);   // WALKDIR
+		walkAction.setActionClassCode("WALK");   // WALKDIR
 		walkAction.setTargetCode("NORTH");
+		walkAction.setRunType(Action.EnumRunningType.SIMPLE.toString());
 		walkAction.setTargetTypeEnum(EnumTargetType.DIRECTION);
 
 		ActionInfo testData = actionInfoConverter.build(walkAction);
 
 		// ************ UPDATE ACTION *****************
 		// =============================================
-		handler.runOneAction(1L, testData);
+		testData = handler.runOneAction(1L, testData);
 		
 		// Assert testData values
 		assertThat(testData.getEndTurn()).isNotNull();
 		assertThat(testData.getCurState()).isEqualTo(EnumActionState.STARTED);
 		
 		// Finishing the action
-		handler.runOneAction(testData.getEndTurn(), testData);
+		testData = handler.runOneAction(testData.getEndTurn(), testData);
 		
 		assertThat(testData.getCurState()).isEqualTo(EnumActionState.COMPLETED);
 		assertThat(testData.getActor().getBeing().getCurPlaceCode()).isEqualTo(ActionTests.END_PLACE_CODE);
-	}	
-	
-	@Test
-	public void testLookPlace() {
-		
-		setupMocks();
-		
-		MudAction lookAction = new MudAction();
-		lookAction.setActorCode(1L);
-		lookAction.setActionClassCode(2);  // LOOKPLACE
-		lookAction.setTargetCode("1");
-		lookAction.setTargetTypeEnum(EnumTargetType.PLACE);
-
-		ActionInfo testData = actionInfoConverter.build(lookAction);
-
-		// ************ UPDATE ACTION *****************
-		// =============================================
-		handler.runOneAction(1L, testData);
-		
-		// Assert testData values
-		assertThat(testData.getEndTurn()).isNotNull();
-		assertThat(testData.getCurState()).isEqualTo(EnumActionState.COMPLETED);
-
-		assertThat(testData.getMessages().isEmpty()).isFalse();
-	}	
-
-	@Test
-	public void testLookBeing() {
-		
-		setupMocks();
-		
-		MudAction lookAction = new MudAction();
-		lookAction.setActorCode(1L);
-		lookAction.setActionClassCode(3);   //LOOKBEING
-		lookAction.setTargetCode("2");
-		lookAction.setTargetTypeEnum(EnumTargetType.BEING);
-
-		ActionInfo testData = actionInfoConverter.build(lookAction);
-
-		// ************ UPDATE ACTION *****************
-		// =============================================
-		handler.runOneAction(1L, testData);
-		
-		// Assert testData values
-		assertThat(testData.getEndTurn()).isNotNull();
-		assertThat(testData.getCurState()).isEqualTo(EnumActionState.COMPLETED);
-
-		assertThat(testData.getMessages().isEmpty()).isFalse();
 	}	
 
 }

@@ -16,6 +16,10 @@ public class ActionMessage {
 	private String[] args;
 	
 	private boolean plainMessage;
+	
+	public ActionMessage() {
+		this.targetType = Action.EnumTargetType.BEING;
+	}
 
 	private ActionMessage(Long senderCode, Long targetCode, boolean plainMessage, Action.EnumTargetType targetType, String messageKey, String... args) {
 

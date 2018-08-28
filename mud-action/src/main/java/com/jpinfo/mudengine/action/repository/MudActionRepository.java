@@ -16,10 +16,9 @@ public interface MudActionRepository extends CrudRepository<MudAction, Long> {
 			+ "order by a.actionId")
 	List<MudAction> findPendingActions();
 
-	@Query("select DISTINCT(a.actorCode) from MudAction a, MudActionClass b where "
-	+ "    b.actionClassCode = a.actionClassCode and " 
-	+ "((a.currState=1 and a.endTurn<= :currentTurn) or "
-	+ "(a.currState=1 and b.actionType=1))"
+	@Query("select DISTINCT(a.actorCode) from MudAction a where "
+	+ "(a.currState=1 and a.endTurn<= :currentTurn) or "
+	+ "(a.currState=1 and a.runType in ('CONTINUOUS', 'PROLONGED'))"
 	+ "order by a.actionId")
 	List<MudAction> findRunningActions(@Param("currentTurn") Long currentTurn);
 	

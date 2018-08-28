@@ -82,7 +82,7 @@ public class LocalizedMessages {
 		try {
 			return String.format(bundles.get(locale).getString(key), params);
 		} catch(MissingResourceException e) {
-			return String.format(bundles.get(locale).getString(LocalizedMessages.KEY_NOT_FOUND), key, locale);
+			return String.format(key, params);
 		}
 			
 	}	

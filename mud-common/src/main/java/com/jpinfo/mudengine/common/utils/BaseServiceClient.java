@@ -28,7 +28,7 @@ public abstract class BaseServiceClient {
 		try {
 			ApiErrorMessage restError = ApiErrorMessage.build(exception.getResponseBodyAsString());
 			
-			switch(restError.getStatus()) {
+			switch(exception.getRawStatusCode()) {
 			
 				case 400:
 					throw new IllegalParameterException(restError.getMessage());
@@ -39,7 +39,10 @@ public abstract class BaseServiceClient {
 				default:
 					throw new GeneralException(LocalizedMessages.API_ERROR_MESSAGE);
 			}
-		} catch(Exception e) {
+		} catch(IllegalParameterException | AccessDeniedException | EntityNotFoundException | GeneralException e) {
+			throw e;
+		}catch(Exception e) {
+		
 			throw new GeneralException(LocalizedMessages.API_ERROR_MESSAGE);
 		}
 	}

@@ -24,7 +24,7 @@ public class MudAction {
 	private Long actorCode;
 
 	@Column(name="ACTION_CLASS_CODE")
-	private Integer actionClassCode;
+	private String actionClassCode;
 	
 	@Column(name="MEDIATOR_CODE")
 	private String mediatorCode;
@@ -52,6 +52,9 @@ public class MudAction {
 
 	@Column(name="WORLD_NAME")
 	private String worldName;
+	
+	@Column(name="ACTION_TYPE")
+	private String runType;
 	
 	public MudAction() {
 		this.currState = 0;

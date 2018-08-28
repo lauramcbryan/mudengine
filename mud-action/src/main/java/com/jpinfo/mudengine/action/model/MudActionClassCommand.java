@@ -20,7 +20,7 @@ public class MudActionClassCommand {
 	private Integer commandId;
 
 	@Column(name="ACTION_CLASS_CODE")
-	private Integer actionClassCode;
+	private String actionClassCode;
 		
 	private String verb;
 	
@@ -28,8 +28,10 @@ public class MudActionClassCommand {
 	
 	private String usage;
 	
-	
 	private String locale;
+	
+	@Column(name="RUN_TYPE")
+	private String runType;
 	
 	@OneToMany(mappedBy="pk.commandId", orphanRemoval=true)
 	private Set<MudActionClassCommandParameter> parameterList;

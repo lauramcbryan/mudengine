@@ -3,11 +3,6 @@ package com.jpinfo.mudengine.action.service;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.expression.EvaluationContext;
-import org.springframework.expression.Expression;
-import org.springframework.expression.ExpressionParser;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
-import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Component;
 
 import com.jpinfo.mudengine.action.client.BeingServiceClient;
@@ -20,17 +15,14 @@ import com.jpinfo.mudengine.action.dto.PlaceComposite;
 import com.jpinfo.mudengine.action.model.MudAction;
 import com.jpinfo.mudengine.action.model.converter.ActionInfoConverter;
 import com.jpinfo.mudengine.action.repository.MudActionRepository;
+import com.jpinfo.mudengine.action.rules.ActionRuleService;
 import com.jpinfo.mudengine.action.utils.ActionMessage;
 import com.jpinfo.mudengine.common.action.Action;
 import com.jpinfo.mudengine.common.action.Action.EnumActionState;
-import com.jpinfo.mudengine.common.action.ActionClass;
-import com.jpinfo.mudengine.common.action.ActionClassEffect;
-import com.jpinfo.mudengine.common.action.ActionClassPrereq;
 import com.jpinfo.mudengine.common.exception.ActionRefusedException;
 import com.jpinfo.mudengine.common.exception.EntityNotFoundException;
 import com.jpinfo.mudengine.common.exception.IllegalParameterException;
 import com.jpinfo.mudengine.common.item.Item;
-import com.jpinfo.mudengine.common.utils.LocalizedMessages;
 
 @Component
 public class ActionHandler {
@@ -53,6 +45,9 @@ public class ActionHandler {
 	@Autowired
 	private ActionInfoConverter actionInfoConverter;
 	
+	@Autowired
+	private ActionRuleService ruleService;
+	
 	public void runActions(Long currentTurn, List<MudAction> actionList) {
 		
 		actionList.stream().forEach(curPendingAction -> {
@@ -60,7 +55,7 @@ public class ActionHandler {
 			try {
 				ActionInfo fullState = actionInfoConverter.build(curPendingAction);
 				
-				runOneAction(currentTurn, fullState);
+				fullState = runOneAction(currentTurn, fullState);
 				
 				curPendingAction.setStartTurn(fullState.getStartTurn());
 				curPendingAction.setEndTurn(fullState.getEndTurn());
@@ -76,40 +71,41 @@ public class ActionHandler {
 		
 	}
 	
-	public void runOneAction(Long currentTurn, ActionInfo fullActionState) {
+	public ActionInfo runOneAction(Long currentTurn, ActionInfo fullActionState) {
 		
 		try {
 			
 			// If we are initiating an action right now, update the fields
 			if (!fullActionState.hasInitiated()) {
 				initiateAction(currentTurn, fullActionState);
+				
+				// Update the action state to RUNNING
+				fullActionState.setCurState(Action.EnumActionState.STARTED);
 			}
 			
 			// Check prerequisites
-			checkPrerequisites(fullActionState);
+			fullActionState = ruleService.prereqCheck(fullActionState.getActionClassCode(), fullActionState);
 
-			// Update the action state to RUNNING
-			fullActionState.setCurState(Action.EnumActionState.STARTED);
 
 			// Apply the effects if needed
 			if (fullActionState.needToApplyEffects(currentTurn))
 			{
-				applyEffects(fullActionState);
+				fullActionState = ruleService.applyEffects(fullActionState.getActionClassCode(), fullActionState);
 				
 				// Update changed entities
 				updateEntities(fullActionState);
 			}
 
+			// Send the message in the message queue
+			sendMessages(fullActionState);
+
+			
 			// if reach end_turn, complete it
 			if (fullActionState.isFinished(currentTurn)) {
 
 				// Update the action to completed
 				fullActionState.setCurState(Action.EnumActionState.COMPLETED);
 			}
-			
-			// Send the message in the message queue
-			sendMessages(fullActionState);
-			
 			
 		} catch (ActionRefusedException e) {
 
@@ -127,6 +123,8 @@ public class ActionHandler {
 			fullActionState.setCurState(EnumActionState.CANCELLED);
 			fullActionState.setEndTurn(currentTurn);
 		}
+		
+		return fullActionState;
 			
 	}
 	
@@ -136,28 +134,21 @@ public class ActionHandler {
 		fullActionState.setStartTurn(currentTurn);
 		
 		// Set the end turn
-		if (fullActionState.getActionClass().getActionType()!=ActionClass.ACTION_CLASS_CONTINUOUS) {
+		switch(fullActionState.getRunType()) {
+		case CONTINUOUS:
+			break;
+		case PROLONGED:
+			Integer nroTurns = ruleService.calculateTurns(fullActionState.getActionClassCode(), fullActionState);
 			
-			if (fullActionState.getActionClass().getNroTurnsExpr()!=null)
-				// Calculating the end turn
-				fullActionState.setEndTurn(calculateEndTurn(currentTurn, fullActionState));
-			else
-				// instant action
-				fullActionState.setEndTurn(fullActionState.getStartTurn());
-		}
-	}
-	
-	private void applyEffects(ActionInfo fullActionState) {
+			fullActionState.setEndTurn(currentTurn + nroTurns);
+			break;
+		case SIMPLE:
+			fullActionState.setEndTurn(currentTurn+1);
+			break;
+		default:
+			break;
 		
-		// Calculate successRate
-		if (fullActionState.getActionClass().getSuccessRateExpr()!=null) {
-			calculateSuccessRate(fullActionState);
-		} else {
-			fullActionState.setSuccessRate(1.0D);
 		}
-
-		// Apply effects
-		calculateEffect(fullActionState);
 	}
 	
 
@@ -237,95 +228,4 @@ public class ActionHandler {
 			}
 		}
 	}
-
-	private void checkPrerequisites(ActionInfo e) {
-
-		ExpressionParser parser = new SpelExpressionParser();
-		EvaluationContext context = new StandardEvaluationContext(e);
-
-		for (ActionClassPrereq curPrereq : e.getActionClass().getPrereqList()) {
-
-			// Running prereq expressions
-			Expression curExpression = parser.parseExpression(curPrereq.getCheckExpression());
-			
-			boolean accepted = false;
-			
-			try {
-				// Evaluate the expression
-				accepted = curExpression.getValue(context, Boolean.class);
-	
-			} catch(Exception ex) {
-				
-				// Do nothing
-			}
-			
-			if (!accepted) {
-				
-				if (curPrereq.getFailExpression()!=null) {
-					
-					// Prepare the fail expression
-					Expression failExpression = parser.parseExpression(curPrereq.getFailExpression());
-					
-					// Just evaluate the expression
-					failExpression.getValue(context);
-				}
-
-				throw new ActionRefusedException(LocalizedMessages.ACTION_REFUSED);
-			}
-			
-		}
-
-	}
-
-	private ActionInfo calculateEffect(ActionInfo e) {
-
-		ExpressionParser parser = new SpelExpressionParser();
-		EvaluationContext context = new StandardEvaluationContext(e);
-
-		for (ActionClassEffect curEffect : e.getActionClass().getEffectList()) {
-
-			// Running effect expressions
-			Expression curExpression = parser.parseExpression(curEffect.getExpression());
-
-			// Just evaluate the expression
-			curExpression.getValue(context);
-		}
-
-		return e;
-	}
-
-	private ActionInfo calculateSuccessRate(ActionInfo e) {
-
-		ExpressionParser parser = new SpelExpressionParser();
-		EvaluationContext context = new StandardEvaluationContext(e);
-
-		// Running successRate expressions
-		Expression curExpression = parser.parseExpression(e.getActionClass().getSuccessRateExpr());
-		
-		try {
-
-			Double successRate = curExpression.getValue(context, Double.class);
-
-			e.setSuccessRate(successRate);
-		} catch(Exception ex) {
-			
-			// Sets the success rate to zero
-			e.setSuccessRate(0D);
-		}
-
-		return e;
-	}
-
-	private Long calculateEndTurn(Long currentTurn, ActionInfo e) {
-
-		ExpressionParser parser = new SpelExpressionParser();
-		EvaluationContext context = new StandardEvaluationContext(e);
-
-		// Running successRate expressions
-		Expression curExpression = parser.parseExpression(e.getActionClass().getNroTurnsExpr());
-
-		Long nroTurns = curExpression.getValue(context, Long.class);
-
-		return (nroTurns + currentTurn);
-	}	
 }

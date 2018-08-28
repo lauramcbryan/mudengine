@@ -1,0 +1,67 @@
+{
+  "issuerCode": 1,
+  "actorCode": 1,
+  "mediatorCode": null,
+  "mediatorType": null,
+  "targetCode": "NORTH",
+  "targetType": "DIRECTION",
+  "curState": "NOT_STARTED",
+  "actor": {
+    "being": {
+      "code": 1,
+      "type": "REGULAR_SENTIENT",
+      "beingClass": {
+        "code": null,
+        "description": null,
+        "name": "Human beings",
+        "size": null,
+        "weightCapacity": null,
+        "attrs": {},
+        "skills": {}
+      },
+      "baseAttrs": null,
+      "baseSkills": null,
+      "attrModifiers": null,
+      "skillModifiers": null,
+      "name": "Tori",
+      "curPlaceCode": 1,
+      "curWorld": "aforgotten",
+      "playerId": 1,
+      "equipment": null,
+      "quantity": 1
+    },
+    "items": [],
+    "place": {
+      "code": 1,
+      "name": null,
+      "classCode": "PLAIN",
+      "placeClass": {
+        "placeClassCode": null,
+        "name": "Plain",
+        "description": "Plain land",
+        "sizeCapacity": null,
+        "weightCapacity": null,
+        "attrs": {},
+        "parentClassCode": null,
+        "demisePlaceClassCode": null,
+        "buildCost": null,
+        "buildEffort": null
+      },
+      "exits": {
+        "NORTH": {
+          "name": null,
+          "opened": false,
+          "visible": false,
+          "locked": false,
+          "lockable": false,
+          "targetPlaceCode": 2
+        }
+      },
+      "attrs": {}
+    }
+  },
+  "mediator": null,
+  "target": null,
+  "successRate": null,
+  "messages": []
+}

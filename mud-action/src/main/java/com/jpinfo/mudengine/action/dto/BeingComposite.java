@@ -2,15 +2,18 @@ package com.jpinfo.mudengine.action.dto;
 
 import java.util.List;
 
+
 import com.jpinfo.mudengine.action.interfaces.ActionTarget;
 import com.jpinfo.mudengine.common.being.Being;
 import com.jpinfo.mudengine.common.item.Item;
 import com.jpinfo.mudengine.common.place.Place;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Getter
+@Data
+@NoArgsConstructor
 @AllArgsConstructor
 public class BeingComposite implements ActionTarget  {
 

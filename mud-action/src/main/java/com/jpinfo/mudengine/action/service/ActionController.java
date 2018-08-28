@@ -1,6 +1,7 @@
 package com.jpinfo.mudengine.action.service;
 
 import java.util.List;
+
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -12,12 +13,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.jpinfo.mudengine.action.model.MudAction;
-import com.jpinfo.mudengine.action.model.MudActionClass;
 import com.jpinfo.mudengine.action.model.MudActionClassCommand;
 import com.jpinfo.mudengine.action.model.converter.ActionConverter;
 import com.jpinfo.mudengine.action.model.converter.MudActionConverter;
 import com.jpinfo.mudengine.action.repository.MudActionClassCommandRepository;
-import com.jpinfo.mudengine.action.repository.MudActionClassRepository;
 import com.jpinfo.mudengine.action.repository.MudActionRepository;
 import com.jpinfo.mudengine.common.action.Action;
 import com.jpinfo.mudengine.common.exception.EntityNotFoundException;
@@ -35,9 +34,6 @@ public class ActionController implements ActionService {
 		
 	@Autowired
 	private MudActionClassCommandRepository commandRepository;
-	
-	@Autowired
-	private MudActionClassRepository classRepository;
 	
 	@Autowired
 	private ActionHandler handler;
@@ -71,17 +67,13 @@ public class ActionController implements ActionService {
 		MudActionClassCommand command = commandRepository.findById(commandId)
 				.orElseThrow(() -> new EntityNotFoundException("Command not recognized"));
 		
-		MudActionClass actionClass = 
-				classRepository.findById(command.getActionClassCode())
-					.orElseThrow(() -> new EntityNotFoundException("Action class not recognized"));
-
 		MudUserDetails uDetails = (MudUserDetails)SecurityContextHolder.getContext().getAuthentication().getDetails();
 		
 		Session sessionData = uDetails.getSessionData()
 				.orElseThrow(() -> new IllegalArgumentException(LocalizedMessages.SESSION_NOT_FOUND));
 		
-		MudAction dbAction = MudActionConverter.build(actionClass, 
-				command, sessionData.getCurWorldName(), sessionData.getBeingCode(), mediatorCode, targetCode);
+		MudAction dbAction = MudActionConverter.build(command, 
+				sessionData.getCurWorldName(), sessionData.getBeingCode(), mediatorCode, targetCode);
 		
 		// Save the new command; obtain an actionId
 		dbAction = repository.save(dbAction);

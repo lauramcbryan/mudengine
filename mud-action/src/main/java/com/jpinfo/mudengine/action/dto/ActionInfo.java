@@ -7,7 +7,6 @@ import java.util.List;
 import com.jpinfo.mudengine.action.interfaces.ActionTarget;
 import com.jpinfo.mudengine.action.utils.ActionMessage;
 import com.jpinfo.mudengine.common.action.Action;
-import com.jpinfo.mudengine.common.action.ActionClass;
 import com.jpinfo.mudengine.common.item.Item;
 
 import lombok.Data;
@@ -16,8 +15,6 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper=false)
 public class ActionInfo extends Action {
-	
-	private ActionClass actionClass;
 	
 	private BeingComposite actor;
 	
@@ -39,14 +36,14 @@ public class ActionInfo extends Action {
 	
 	public boolean needToApplyEffects(Long currentTurn) {
 		
-		return this.getActionClass().getActionType().equals(ActionClass.ACTION_CLASS_CONTINUOUS) ||
+		return this.getRunType().equals(Action.EnumRunningType.CONTINUOUS) ||
 				(currentTurn >=super.getEndTurn());
 	}
 	
 	public boolean isFinished(Long currentTurn) {
 		return (super.getEndTurn() != null) && 
 				(super.getEndTurn() <= currentTurn) && 
-				!this.actionClass.getActionType().equals(ActionClass.ACTION_CLASS_CONTINUOUS);
+				!this.getRunType().equals(Action.EnumRunningType.CONTINUOUS);
 	}
 	
 	

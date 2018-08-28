@@ -1,23 +1,16 @@
 package com.jpinfo.mudengine.action.model.converter;
 
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.stereotype.Component;
 
 import com.jpinfo.mudengine.action.client.ItemServiceClient;
 import com.jpinfo.mudengine.action.dto.ActionInfo;
 import com.jpinfo.mudengine.action.model.MudAction;
-import com.jpinfo.mudengine.action.model.MudActionClass;
-import com.jpinfo.mudengine.action.repository.MudActionClassRepository;
 import com.jpinfo.mudengine.common.action.Action;
-import com.jpinfo.mudengine.common.action.ActionClass;
-import com.jpinfo.mudengine.common.exception.EntityNotFoundException;
-import com.jpinfo.mudengine.common.utils.LocalizedMessages;
 
 @Component
 public class ActionInfoConverter {
-	
-	@Autowired
-	private MudActionClassRepository classRepository;	
 	
 	@Autowired
 	private ItemServiceClient itemService;
@@ -42,10 +35,8 @@ public class ActionInfoConverter {
 		result.setStartTurn(dbAction.getStartTurn());
 		result.setEndTurn(dbAction.getEndTurn());
 		
-		// Solving the actionClass
 		result.setActionClassCode(dbAction.getActionClassCode());
-		result.setActionClass(getActionClass(dbAction));
-
+		result.setRunType(Action.EnumRunningType.valueOf(dbAction.getRunType()));
 		
 		//Actor
 		result.setActorCode(dbAction.getActorCode());
@@ -59,6 +50,7 @@ public class ActionInfoConverter {
 
 		// Target
 		result.setTargetCode(dbAction.getTargetCode());
+		result.setTargetType(Action.EnumTargetType.valueOf(dbAction.getTargetType()));
 		
 		switch(Action.EnumTargetType.valueOf(dbAction.getTargetType())) {
 			case ITEM:
@@ -80,16 +72,5 @@ public class ActionInfoConverter {
 
 		
 		return result;
-	}
-	
-	
-	private ActionClass getActionClass(MudAction dbAction) {
-		
-		MudActionClass dbActionClass = classRepository
-				.findById(dbAction.getActionClassCode())
-				.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.BEING_NOT_FOUND));
-
-		return ActionClassConverter.convert(dbActionClass);
-		
 	}
 }

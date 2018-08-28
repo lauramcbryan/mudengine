@@ -5,6 +5,7 @@ import lombok.Data;
 @Data
 public class Action {
 	
+	public enum EnumRunningType {SIMPLE, CONTINUOUS, PROLONGED}
 	public enum EnumActionState {NOT_STARTED, STARTED, COMPLETED, CANCELLED, REFUSED}
 	public enum EnumTargetType {BEING, ITEM, PLACE, DIRECTION}
 	
@@ -12,7 +13,7 @@ public class Action {
 	
 	private Long actorCode;
 
-	private Integer actionClassCode;
+	private String actionClassCode;
 	
 	private String mediatorCode;
 
@@ -28,9 +29,12 @@ public class Action {
 	
 	private Long endTurn;
 	
+	private EnumRunningType runType;
+	
 	private EnumActionState curState;
 	
 	public Action() {
 		this.curState = EnumActionState.NOT_STARTED;
+		this.runType = EnumRunningType.SIMPLE;
 	}
 }
