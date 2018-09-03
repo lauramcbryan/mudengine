@@ -7,12 +7,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,11 +18,8 @@ import com.jpinfo.mudengine.common.exception.EntityNotFoundException;
 import com.jpinfo.mudengine.common.exception.IllegalParameterException;
 import com.jpinfo.mudengine.common.place.Place;
 import com.jpinfo.mudengine.common.place.PlaceExit;
-import com.jpinfo.mudengine.common.security.MudUserDetails;
 import com.jpinfo.mudengine.common.service.PlaceService;
 import com.jpinfo.mudengine.common.utils.LocalizedMessages;
-import com.jpinfo.mudengine.world.client.BeingServiceClient;
-import com.jpinfo.mudengine.world.client.ItemServiceClient;
 import com.jpinfo.mudengine.world.model.MudPlace;
 import com.jpinfo.mudengine.world.model.MudPlaceAttr;
 import com.jpinfo.mudengine.world.model.MudPlaceClass;
@@ -41,14 +35,6 @@ import io.swagger.annotations.*;
 
 @RestController
 public class PlaceController implements PlaceService {
-	
-	private static final Logger log = LoggerFactory.getLogger(PlaceController.class);
-	
-	@Autowired
-	private ItemServiceClient itemService;
-	
-	@Autowired
-	private BeingServiceClient beingService;
 	
 	@Autowired
 	private PlaceRepository placeRepository;
@@ -261,12 +247,24 @@ public class PlaceController implements PlaceService {
 			
 			requestPlace.getExits().keySet().stream()
 				.forEach(curDirection -> {
-				
-				PlaceExit curExit = requestPlace.getExits().get(curDirection);
-				
-				newExits.add(
-						MudPlaceExitConverter.build(curExit, dbPlace.getCode(), curDirection)
+
+				// Retrieve the exit from the request
+				PlaceExit curRequestExit = requestPlace.getExits().get(curDirection);
+					
+				// Search the exit in current db record
+				MudPlaceExit dbExit = 
+					dbPlace.getExits().stream()
+						.filter(e -> e.getPk().getDirection().equals(curDirection))
+						.findFirst()
+						.orElseGet(()-> 
+							MudPlaceExitConverter.build(curRequestExit, dbPlace.getCode(), curDirection)
 						);
+				
+				// Add the updated exit at list
+				newExits.add(
+						updatePlaceExit(dbExit, curRequestExit)
+						);
+				
 			});
 			
 			// As hibernate manages the child list returned by him, we must not to create
@@ -285,7 +283,6 @@ public class PlaceController implements PlaceService {
 		MudPlaceClass placeClass = placeClassRepository
 				.findById(newPlaceClassCode)
 				.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.PLACE_CLASS_NOT_FOUND));
-		
 
 		internalSyncAttr(original, original.getPlaceClass(), placeClass);
 		original.setPlaceClass(placeClass);
@@ -313,33 +310,6 @@ public class PlaceController implements PlaceService {
 			
 			// Destroy the place
 			placeRepository.delete(dbPlace);
-
-			// Sends a notification for other entities that the current place is being destroyed
-			
-			// First, get the session data from securityContext in order to have the curWorldName recorded there
-			MudUserDetails uDetails = (MudUserDetails)SecurityContextHolder.getContext()
-					.getAuthentication().getDetails();
-			
-			uDetails.getSessionData().ifPresent(d -> {
-
-				try {
-				
-					// Remove all beings from the place
-					// THAT MUST GOES FIRST!!!
-					// This call will drop all items belonging to beings into the place
-					beingService.destroyAllFromPlace(d.getCurWorldName(), placeId);
-					
-					// Remove all items from the place
-					// (That will include items dropped from beings above)
-					itemService.destroyAllFromPlace(d.getCurWorldName(), placeId);
-					
-				} catch(Exception e) {
-					
-					// Any exception on these calls will be disregarded
-					log.error("Error while cascading place delete to being and item", e);
-				}
-				
-			});
 		}
 	}
 
@@ -401,6 +371,16 @@ public class PlaceController implements PlaceService {
 		response = placeConverter.convert(dbPlace);
 		
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
+	}
+	
+	private MudPlaceExit updatePlaceExit(MudPlaceExit dbExit, PlaceExit requestExit) {
+		
+		// Update the record with request information
+		dbExit.setVisible(requestExit.isVisible());
+		dbExit.setOpened(requestExit.isOpened());
+		dbExit.setLocked(requestExit.isLocked());
+		
+		return dbExit;
 	}
 	
 }

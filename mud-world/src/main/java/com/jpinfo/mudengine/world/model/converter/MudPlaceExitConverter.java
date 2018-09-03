@@ -44,7 +44,7 @@ public class MudPlaceExitConverter {
 		newExit.setLockable(requestExit.isLockable());
 		
 		newExit.setTargetPlaceCode(requestExit.getTargetPlaceCode());
-		
+
 		return newExit;
 	}
 }
