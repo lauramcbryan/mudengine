@@ -1,4 +1,4 @@
-package com.jpinfo.mudengine.message.model;
+package com.jpinfo.mudengine.message.model.converter;
 
 import java.text.DateFormat;
 import java.util.List;
@@ -9,9 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.jpinfo.mudengine.common.message.Message;
+import com.jpinfo.mudengine.message.model.MudMessage;
+import com.jpinfo.mudengine.message.model.MudMessageLocale;
 import com.jpinfo.mudengine.message.model.pk.MudMessageLocalePK;
 import com.jpinfo.mudengine.message.repository.MudMessageLocaleRepository;
-import com.jpinfo.mudengine.message.utils.MessageHelper;
 
 @Component
 public class MessageConverter {
@@ -24,7 +25,7 @@ public class MessageConverter {
 	public Message build(MudMessage dbMessage, String callerLocale) {
 		
 		Message result = new Message();
-
+		
 		// Get (and localize) the main message
 		String actualMessage = getLocalizedMessage(dbMessage.getMessageKey(), callerLocale);
 		
@@ -66,7 +67,7 @@ public class MessageConverter {
 	private String getLocalizedMessage(String originalValue, String callerLocale) {
 		
 		MudMessageLocalePK pk = new MudMessageLocalePK();
-		pk.setMessageKey(MessageHelper.getLocalizedKey(originalValue));
+		pk.setMessageKey(originalValue);
 		pk.setLocale(callerLocale);
 	
 		Optional<MudMessageLocale> dbLocalizedMessage = 

@@ -67,22 +67,22 @@ public class MessageTests {
 	public static final String TEST_MESSAGE_1 = "Test Message";
 	
 	// Localized Messages
-	public static final String TEST_MESSAGE_2 = "{str:MESSAGE1}";
+	public static final String TEST_MESSAGE_2 = "MESSAGE1";
 	public static final String TEST_MESSAGE_2_RESULT_US = "Message in en_US";
 	public static final String TEST_MESSAGE_2_RESULT_BR = "Mensagem em pt_BR";
 	
 	// Placeholder Messages
-	public static final String   TEST_MESSAGE_3 = "{str:MESSAGE2}";
+	public static final String   TEST_MESSAGE_3 = "MESSAGE2";
 	public static final String[] TEST_PARAMETER_3 = new String[] {"One"};
 	public static final String   TEST_MESSAGE_3_RESULT = "Message with One parameter";
 	
-	public static final String   TEST_MESSAGE_4 = "{str:MESSAGE3}";
+	public static final String   TEST_MESSAGE_4 = "MESSAGE3";
 	public static final String[] TEST_PARAMETER_4 = new String[] {"Text", "Numeric"};
 	public static final String   TEST_MESSAGE_4_RESULT = "Message with two(Text and Numeric) parameters";
 	
 	// Localized Parameter
-	public static final String TEST_MESSAGE_5 = "{str:MESSAGE4}";
-	public static final String TEST_PARAMETER_5 = "{str:VALUE1}";
+	public static final String TEST_MESSAGE_5 = "MESSAGE4";
+	public static final String TEST_PARAMETER_5 = "VALUE1";
 	public static final String TEST_MESSAGE_5_RESULT_US = "Message with localized parameter: First.";
 	public static final String TEST_MESSAGE_5_RESULT_BR = "Mensagem com parâmetro localizado: Primeiro.";
 

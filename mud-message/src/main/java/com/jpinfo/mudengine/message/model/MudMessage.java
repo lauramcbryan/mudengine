@@ -56,5 +56,6 @@ public class MudMessage {
 	
 	public MudMessage() {
 		this.parms = new HashSet<>();
+		this.plainFlag = Boolean.FALSE;
 	}
 }
