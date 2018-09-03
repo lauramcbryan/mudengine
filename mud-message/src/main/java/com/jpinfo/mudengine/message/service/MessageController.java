@@ -23,9 +23,9 @@ import com.jpinfo.mudengine.common.service.MessageService;
 import com.jpinfo.mudengine.common.utils.CommonConstants;
 import com.jpinfo.mudengine.common.utils.LocalizedMessages;
 import com.jpinfo.mudengine.message.client.BeingServiceClient;
-import com.jpinfo.mudengine.message.model.MessageConverter;
 import com.jpinfo.mudengine.message.model.MudMessage;
 import com.jpinfo.mudengine.message.model.MudMessageParm;
+import com.jpinfo.mudengine.message.model.converter.MessageConverter;
 import com.jpinfo.mudengine.message.model.pk.MudMessageParmPK;
 import com.jpinfo.mudengine.message.repository.MudMessageRepository;
 
