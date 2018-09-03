@@ -32,7 +32,8 @@ import com.jpinfo.mudengine.world.repository.PlaceRepository;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment=WebEnvironment.RANDOM_PORT, 
-	properties= {"token.secret=a7ac498c7bba59e0eb7c647d2f0197f8"})
+	properties= {"token.secret=a7ac498c7bba59e0eb7c647d2f0197f8",
+			"spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration"})
 public class PlaceTests {
 	
 

@@ -78,7 +78,25 @@
 		"key": "config/mud-world/spring.datasource.url",
 		"flags": 0,
 		"value": "amRiYzpwb3N0Z3Jlc3FsOi8vZGF0YWJhc2U6NTQzMi9tdWRlbmdpbmU="
+	},
+	{
+		"key": "config/mud-world/spring.rabbitmq.host",
+		"flags": 0,
+		"value": "cmFiYml0bXE="
+	},
+	{
+		"key": "config/mud-world/spring.rabbitmq.port",
+		"flags": 0,
+		"value": "NTY3Mg=="
+	},
+	{
+		"key": "config/mud-world/spring.rabbitmq.username",
+		"flags": 0,
+		"value": "Z3Vlc3Q="
+	},
+	{
+		"key": "config/mud-world/spring.rabbitmq.password",
+		"flags": 0,
+		"value": "Z3Vlc3Q="
 	}
 ]
-
-

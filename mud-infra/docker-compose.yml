@@ -1,5 +1,13 @@
 version: '3.6'
 services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    hostname: rabbitmq
+    ports:
+      - 15672:15672
+      - 5672:5672
+    networks:
+      - app_net
   database:
     build:
       context: ./postgres/docker
@@ -78,6 +86,7 @@ services:
       - consul-loader
       - vault-loader
       - database
+      - rabbitmq
   mud-item:
     build:
       context: ../mud-item/
@@ -96,7 +105,8 @@ services:
     depends_on:
       - consul-loader
       - vault-loader
-      - database      
+      - database
+      - rabbitmq      
   mud-being:
     build:
       context: ../mud-being/
@@ -116,6 +126,7 @@ services:
       - consul-loader
       - vault-loader
       - database      
+      - rabbitmq
   mud-message:
     build:
       context: ../mud-message/
@@ -153,7 +164,8 @@ services:
     depends_on:
       - consul-loader
       - vault-loader
-      - database      
+      - database
+      - rabbitmq
   mud-player:
     build:
       context: ../mud-player/
