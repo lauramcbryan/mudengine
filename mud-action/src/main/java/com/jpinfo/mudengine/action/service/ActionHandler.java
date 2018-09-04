@@ -88,7 +88,7 @@ public class ActionHandler {
 
 
 			// Apply the effects if needed
-			if (fullActionState.needToApplyEffects(currentTurn))
+			if (fullActionState.shallApplyEffects(currentTurn))
 			{
 				fullActionState = ruleService.applyEffects(fullActionState.getActionClassCode(), fullActionState);
 				

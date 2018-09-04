@@ -34,7 +34,7 @@ public class ActionInfo extends Action {
 		return !getCurState().equals(Action.EnumActionState.NOT_STARTED);
 	}
 	
-	public boolean needToApplyEffects(Long currentTurn) {
+	public boolean shallApplyEffects(Long currentTurn) {
 		
 		return this.getRunType().equals(Action.EnumRunningType.CONTINUOUS) ||
 				(currentTurn >=super.getEndTurn());
