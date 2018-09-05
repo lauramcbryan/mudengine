@@ -122,6 +122,22 @@ public class PlaceController implements PlaceService {
 		return response;
 	}
 	
+	/**
+	 * Check place health attribute and determine when a place is about to be destroyed.
+	 * 
+	 * This check is performed since the current database place has a MAXHP attribute.
+	 * If that happens, the HP attribute is checked in the service request.
+	 * 
+	 * If the HP attribute value is higher than the MAXHP attribute, the HP will be updated to the maximum allowed.
+	 * If the HP attribute value is lower than zero, the place is marked for destruction
+	 * 
+	 * If the HP attribute is not found in service request, it's considered zero (0).
+	 * 
+	 * 
+	 * @param dbPlace - database representation of the place object
+	 * @param requestPlace - service request
+	 * @return
+	 */
 	private boolean internalSyncPlaceHealth(final MudPlace dbPlace, final Place requestPlace) {
 
 		boolean placeDestroyed = false;
@@ -154,7 +170,17 @@ public class PlaceController implements PlaceService {
 		return placeDestroyed;
 	}
 	
-	
+	/**
+	 * Sync the place attributes according to placeClass changes.
+	 * Attributes found in previous class and NOT in the new place class will be removed.
+	 * Attributes in the new place class that doesn't exist in current place will be added.
+	 * Attributes in the new place class that EXISTS in the current place will be updated.
+	 * 
+	 * @param dbPlace - database record representing the place object
+	 * @param previousPlaceClass - previous place class (null during place creation)
+	 * @param placeClass - new place class to be applied
+	 * @return
+	 */
 	private MudPlace internalSyncAttr(MudPlace dbPlace, MudPlaceClass previousPlaceClass, MudPlaceClass placeClass) {
 		
 		if (previousPlaceClass!=null) {
@@ -195,6 +221,19 @@ public class PlaceController implements PlaceService {
 		return dbPlace;
 	}
 	
+	/**
+	 * Sync place attributes between the database record and the service request.
+	 * Any attributes in database record not found in the request will be removed.
+	 * Attributes non existent in database record but in request will be added.
+	 * Attributes found in both database and request will be updated.
+	 * 
+	 * Note: NO persist operation will be performed by this operation
+	 * (it only works on entity)
+	 * 
+	 * @param dbPlace - database record for the place
+	 * @param requestPlace - service request place
+	 * @return
+	 */
 	private MudPlace internalSyncAttr(final MudPlace dbPlace, final Place requestPlace) {
 		
 		// Looking for attributes to remove
@@ -260,10 +299,14 @@ public class PlaceController implements PlaceService {
 							MudPlaceExitConverter.build(curRequestExit, dbPlace.getCode(), curDirection)
 						);
 				
+				
+				// Update the record with request information
+				dbExit.setVisible(curRequestExit.isVisible());
+				dbExit.setOpened(curRequestExit.isOpened());
+				dbExit.setLocked(curRequestExit.isLocked());
+				
 				// Add the updated exit at list
-				newExits.add(
-						updatePlaceExit(dbExit, curRequestExit)
-						);
+				newExits.add(dbExit);
 				
 			});
 			
@@ -278,6 +321,19 @@ public class PlaceController implements PlaceService {
 		
 	}
 	
+	/**
+	 * This method changes a place class.
+	 * A change like this implies in resync the current place attributes with
+	 * the ones in the new place class.
+	 * 
+	 * This method is called from:
+	 * - during destroyPlace flow if the current place class has a designed demised place class
+	 * - during updatePlace flow if the current place class is changed for any reason
+	 * 
+	 * @param original - current place object
+	 * @param newPlaceClassCode - code of the new placeClass
+	 * @return
+	 */
 	private MudPlace internalUpdateClass(MudPlace original, String newPlaceClassCode) {
 		
 		MudPlaceClass placeClass = placeClassRepository
@@ -345,10 +401,10 @@ public class PlaceController implements PlaceService {
 		// Saving in database with minimum information in order to have the placeId
 		MudPlace dbPlace = placeRepository.save(newPlace);
 		
-		// Updating attributes
+		// Updating attributes based on PlaceClass attributes
 		internalSyncAttr(dbPlace, null, dbPlaceClass);
 
-		// Creating the new exit
+		// Creating the exit for the new place
 		dbPlace.getExits().add(
 				MudPlaceExitConverter.build(
 						dbPlace.getCode(), 
@@ -356,7 +412,7 @@ public class PlaceController implements PlaceService {
 						targetPlaceCode)
 				);
 		
-		// Updating the place in database
+		// Updating the new place in database
 		dbPlace = placeRepository.save(dbPlace);
 		
 		// Updating the targetPlace exit to have a corresponding exit to new place created
@@ -368,19 +424,9 @@ public class PlaceController implements PlaceService {
 		targetDbPlace.getExits().add(correspondingExit);
 		placeRepository.save(targetDbPlace);
 		
+		// Converting the response to service-like response
 		response = placeConverter.convert(dbPlace);
 		
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
-	
-	private MudPlaceExit updatePlaceExit(MudPlaceExit dbExit, PlaceExit requestExit) {
-		
-		// Update the record with request information
-		dbExit.setVisible(requestExit.isVisible());
-		dbExit.setOpened(requestExit.isOpened());
-		dbExit.setLocked(requestExit.isLocked());
-		
-		return dbExit;
-	}
-	
 }
