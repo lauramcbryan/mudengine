@@ -10,4 +10,4 @@ if [ -d "$SECRET_FOLDER" ]; then
 	done
 fi
 
-java -jar -Djava.security.egd=file:/dev/./urandom app.jar
+java -jar -Djava.security.egd=file:/dev/./urandom app.jar -Xms256m -Xmx512m
