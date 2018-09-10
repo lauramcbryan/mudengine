@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -48,8 +49,28 @@ public class PlaceServiceClientImpl extends BaseServiceClient implements PlaceSe
 
 	@Override
 	public Place updatePlace(Integer placeId, Place requestPlace) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		Place response  = null;
+		
+		Map<String, Object> urlVariables = new HashMap<>();
+		urlVariables.put("placeId", placeId);
+
+		// Building the request entity
+		HttpEntity<Place> requestEntity = new HttpEntity<>(requestPlace, getEmptyHttpEntity().getHeaders());
+	
+		try {
+			ResponseEntity<Place> serviceResponse = restTemplate.exchange(placeEndpoint + "/place/{placeId}", 
+					HttpMethod.POST, requestEntity, Place.class, urlVariables);
+			
+			if (serviceResponse.getStatusCode().equals(HttpStatus.OK)) {
+				response = serviceResponse.getBody();
+			}
+			
+		} catch(RestClientResponseException e) {
+			handleError(e);
+		}
+		
+		return response;
 	}
 
 }

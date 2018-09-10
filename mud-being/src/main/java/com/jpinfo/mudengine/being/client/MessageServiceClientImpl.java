@@ -1,4 +1,4 @@
-package com.jpinfo.mudengine.action.client;
+package com.jpinfo.mudengine.being.client;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,13 +21,11 @@ public class MessageServiceClientImpl extends BaseServiceClient implements Messa
 
 	
 	@Override
-	public void putMessage(Long targetCode, String message, Long senderCode, String senderName, String... parms) {
+	public void putMessage(Long targetCode, String message, String... parms) {
 		
 		Map<String, Object> urlVariables = new HashMap<>();
 		urlVariables.put("targetCode", targetCode);
 		urlVariables.put("message", message);
-		urlVariables.put("senderCode", senderCode);
-		urlVariables.put("senderName", senderName);
 		
 		if (parms!=null)
 			urlVariables.put("parms", String.join(", ", parms));
@@ -35,8 +33,8 @@ public class MessageServiceClientImpl extends BaseServiceClient implements Messa
 	
 		try {
 			restTemplate.exchange(messageEndpoint + 
-					"/message/being/{targetCode}?senderCode={senderCode}&senderName={senderName}&message={message}&parms={parms}", 
-					HttpMethod.PUT, getEmptyHttpEntity(), Void.class, urlVariables);
+					"/message/being/{targetCode}?message={message}&parms={parms}", HttpMethod.PUT, 
+					getEmptyHttpEntity(), Void.class, urlVariables);
 
 		} catch(RestClientResponseException e) {
 			handleError(e);

@@ -13,7 +13,7 @@
 		"key": "config/application/spring.datasource.max-wait",
 		"flags": 0,
 		"value": "MTUwMDA="
-	},
+	},	
 	{
 		"key": "config/application/spring.jpa.properties.hibernate.temp.use_jdbc_metadata_defaults",
 		"flags": 0,
@@ -60,9 +60,19 @@
 		"value": "amRiYzpwb3N0Z3Jlc3FsOi8vZGF0YWJhc2U6NTQzMi9tdWRlbmdpbmU="
 	},
 	{
+		"key": "config/mud-being/being.exchange",
+		"flags": 0,
+		"value": "YmVpbmcuZXhjaGFuZ2U="
+	},
+	{
 		"key": "config/mud-item/spring.datasource.url",
 		"flags": 0,
 		"value": "amRiYzpwb3N0Z3Jlc3FsOi8vZGF0YWJhc2U6NTQzMi9tdWRlbmdpbmU="
+	},
+	{
+		"key": "config/mud-item/item.exchange",
+		"flags": 0,
+		"value": "aXRlbS5leGNoYW5nZQ=="
 	},
 	{
 		"key": "config/mud-message/spring.datasource.url",
@@ -98,5 +108,10 @@
 		"key": "config/mud-world/spring.rabbitmq.password",
 		"flags": 0,
 		"value": "Z3Vlc3Q="
+	},
+	{
+		"key": "config/mud-world/place.exchange",
+		"flags": 0,
+		"value": "cGxhY2UuZXhjaGFuZ2U="
 	}
 ]

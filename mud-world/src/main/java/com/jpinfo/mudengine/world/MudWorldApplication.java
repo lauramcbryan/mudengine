@@ -34,5 +34,4 @@ public class MudWorldApplication {
 				.paths(PathSelectors.any())
 				.build();
 	}
-
 }

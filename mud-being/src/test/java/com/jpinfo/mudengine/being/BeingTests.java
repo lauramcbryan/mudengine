@@ -23,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.jpinfo.mudengine.being.client.ItemServiceClient;
+import com.jpinfo.mudengine.being.client.MessageServiceClient;
 import com.jpinfo.mudengine.being.fixture.BeingTemplates;
 import com.jpinfo.mudengine.being.fixture.MudBeingProcessor;
 import com.jpinfo.mudengine.being.model.MudBeing;
@@ -67,6 +68,9 @@ public class BeingTests {
 	
 	@MockBean
 	private BeingClassRepository classRepository;
+	
+	@MockBean
+	private MessageServiceClient messageService;
 	
 	
 	private HttpEntity<Object> emptyHttpEntity;
