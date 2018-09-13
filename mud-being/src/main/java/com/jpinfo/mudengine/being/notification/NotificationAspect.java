@@ -92,6 +92,9 @@ public class NotificationAspect {
 	
 	@Around(value = "execution(public * org.springframework.data.repository.Repository+.delete(..)) && args(destroyedBeing)")
 	public void sendDestroyNotification(ProceedingJoinPoint pjp, MudBeing destroyedBeing) throws Throwable {
+
+		// Perform the delete operation
+		pjp.proceed();
 		
 		// Prepare a notification for this change
 		NotificationMessage itemNotification = new NotificationMessage();
@@ -100,7 +103,12 @@ public class NotificationAspect {
 		itemNotification.setEntityId(destroyedBeing.getCode());
 		itemNotification.setEvent(NotificationMessage.EnumNotificationEvent.BEING_DESTROY);
 		
-		pjp.proceed();
+		// Putting the destroyed being location.
+		// Item service will need this data in order to drop all being stuff
+		itemNotification.setTargetEntity(NotificationMessage.EnumEntity.PLACE);
+		itemNotification.setTargetEntityId(destroyedBeing.getCurPlaceCode().longValue());
+		itemNotification.setWorldName(destroyedBeing.getCurWorld());
+		
 		
 		// TODO: Send Notification
 		
@@ -117,7 +125,9 @@ public class NotificationAspect {
 		// Send a message to other playable beings in the place
 		beingListInPlace.stream()
 			// Filtering any playable beings beside the one being destroyed (despite it being playable or not)
-			.filter(curBeing -> !curBeing.getCode().equals(destroyedBeing.getCode()) && curBeing.getPlayerId()!=null)
+			.filter(curBeing -> !curBeing.getCode().equals(destroyedBeing.getCode()))
+			// Filtering only playable characters
+			.filter(curBeing -> curBeing.getPlayerId()!=null)
 			.forEach(curBeing -> 
 				messageService.putMessage(curBeing.getCode(), 
 						BeingHelper.BEING_DESTROY_ANOTHER_MSG, 
