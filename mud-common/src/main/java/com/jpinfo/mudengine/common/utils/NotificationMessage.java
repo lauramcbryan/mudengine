@@ -1,9 +1,14 @@
 package com.jpinfo.mudengine.common.utils;
 
+import java.io.Serializable;
+
 import lombok.Data;
 
 @Data
-public class NotificationMessage {
+public class NotificationMessage implements Serializable {
+	
+	private static final long serialVersionUID = 1L;
+	
 	
 	public enum EnumEntity { PLACE, ITEM, BEING }
 	

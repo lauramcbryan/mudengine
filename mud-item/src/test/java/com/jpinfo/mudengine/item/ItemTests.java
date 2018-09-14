@@ -12,6 +12,8 @@ import javax.annotation.PostConstruct;
 
 import org.junit.runner.RunWith;
 import static org.mockito.BDDMockito.*;
+
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -45,12 +47,16 @@ import br.com.six2six.fixturefactory.loader.FixtureFactoryLoader;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment=WebEnvironment.RANDOM_PORT,
-	properties= {"token.secret=a7ac498c7bba59e0eb7c647d2f0197f8"})
+	properties= {"token.secret=a7ac498c7bba59e0eb7c647d2f0197f8",
+			"item.exchange=item.exchange"})
 public class ItemTests {
 	
 	private static final Integer MAX_DURATION_VALUE = 100;
 	private static final Integer DURATION_VALUE = 500;
 
+	@MockBean
+	private RabbitTemplate rabbit;
+	
 	@Autowired
 	private TestRestTemplate restTemplate;
 	

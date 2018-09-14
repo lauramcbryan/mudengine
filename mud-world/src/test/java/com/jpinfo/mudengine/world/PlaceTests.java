@@ -9,9 +9,11 @@ import javax.annotation.PostConstruct;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -31,7 +33,7 @@ import com.jpinfo.mudengine.world.repository.PlaceRepository;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment=WebEnvironment.RANDOM_PORT, 
 	properties= {"token.secret=a7ac498c7bba59e0eb7c647d2f0197f8",
-			"spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration"})
+			"place.exchange=place.exchange"})
 public class PlaceTests {
 	
 
@@ -73,6 +75,8 @@ public class PlaceTests {
 	
 	private static final Integer DELETE_PLACE_ID = 7;
 
+	@MockBean
+	private RabbitTemplate rabbit;
 	
 	@Autowired
 	private TestRestTemplate restTemplate;

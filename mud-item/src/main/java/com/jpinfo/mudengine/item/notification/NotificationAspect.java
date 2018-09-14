@@ -1,5 +1,7 @@
 package com.jpinfo.mudengine.item.notification;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import javax.persistence.EntityManager;
@@ -8,7 +10,9 @@ import javax.persistence.PersistenceContext;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.jpinfo.mudengine.common.utils.NotificationMessage;
@@ -19,6 +23,12 @@ import com.jpinfo.mudengine.item.utils.ItemHelper;
 @Aspect
 @Component
 public class NotificationAspect {
+	
+	@Autowired
+	private RabbitTemplate rabbit;
+	
+	@Value("${item.exchange}")
+	private String itemExchange;
 	
 	@Autowired
 	private ItemRepository repository;
@@ -34,6 +44,8 @@ public class NotificationAspect {
 		
 		if (afterItem.getCode()!=null) {
 			
+			List<NotificationMessage> notifications = new ArrayList<>();
+			
 			// This operation is important as the entity at this time will be in managed state,
 			// all find calls to database will return the same managed object.
 			// To avoid this and get a fresh database version of the entity, we detached the future-state
@@ -43,8 +55,6 @@ public class NotificationAspect {
 			// Getting the 'before' entity
 			Optional<MudItem> optBeforeItem = repository.findById(afterItem.getCode());
 
-			// Perform the save operation as I already have the before and after entities
-			savedItem = pjp.proceed();
 			
 			if (optBeforeItem.isPresent()) {
 				
@@ -54,15 +64,25 @@ public class NotificationAspect {
 				// Comparing before and after items
 				
 				// Looking for itemClass changes
-				checkItemClassChanges(beforeItem, afterItem);
+				checkItemClassChanges(beforeItem, afterItem, notifications);
 				
 				// Looking for ownership changes
-				checkOwnershipChanges(beforeItem, afterItem);
+				checkOwnershipChanges(beforeItem, afterItem, notifications);
 				
 				// Looking for quantity changes
-				checkQuantityChanges(beforeItem, afterItem);
-				
+				checkIncreaseQuantityChange(beforeItem, afterItem, notifications);
+				checkDecreaseQuantityChange(beforeItem, afterItem, notifications);
 			}
+			
+			// Perform the save operation
+			savedItem = pjp.proceed();
+			
+			notifications.stream()
+				.forEach(itemNotification -> 
+					// Send the notification
+					rabbit.convertAndSend(itemExchange, "", itemNotification)
+				);
+			
 			
 		} else {
 			// Just creating the item; proceed
@@ -91,11 +111,12 @@ public class NotificationAspect {
 						}
 		);
 		
-		// TODO: Send Notification
+		// Send Notification
+		rabbit.convertAndSend(itemExchange, "", itemNotification);
 	}
 
 	
-	private void checkItemClassChanges(MudItem beforeItem, MudItem afterItem) {
+	private void checkItemClassChanges(MudItem beforeItem, MudItem afterItem, List<NotificationMessage> notifications) {
 		
 		if (!beforeItem.getItemClass().getCode().equals(afterItem.getItemClass().getCode())) {
 
@@ -121,11 +142,12 @@ public class NotificationAspect {
 							}
 			);
 
-			// TODO: Send the notification
+			// Enqueue the Notification
+			notifications.add(itemNotification);
 		}
 	}
 	
-	private void checkOwnershipChanges(MudItem beforeItem, MudItem afterItem) {
+	private void checkOwnershipChanges(MudItem beforeItem, MudItem afterItem, List<NotificationMessage> notifications) {
 		
 		if ((beforeItem.getCurOwner()==null) && (afterItem.getCurOwner()!=null)) {
 			// send a item.taken event
@@ -144,7 +166,8 @@ public class NotificationAspect {
 							}
 			);
 
-			// TODO: Send Notification
+			// Enqueue the Notification
+			notifications.add(itemNotification);
 		}
 		
 		if ((beforeItem.getCurOwner()!=null) && (afterItem.getCurOwner()==null)) {
@@ -165,75 +188,77 @@ public class NotificationAspect {
 							}
 			);
 			
-			// TODO: Send Notification
-			
+			// Enqueue the Notification
+			notifications.add(itemNotification);
 		}
 		
 	}
 	
-	private void checkQuantityChanges(MudItem beforeItem, MudItem afterItem) {
+	private void checkIncreaseQuantityChange(MudItem beforeItem, MudItem afterItem, List<NotificationMessage> notifications) {
 		
-		if (afterItem.getCurOwner()!=null) {
-		
-			if (beforeItem.getQuantity() > afterItem.getQuantity()) {
-				
-				NotificationMessage itemNotification = new NotificationMessage();
-				
-				itemNotification.setEntity(NotificationMessage.EnumEntity.ITEM);
-				itemNotification.setEntityId(afterItem.getCode());
+		if (beforeItem.getQuantity() < afterItem.getQuantity()) {
+			
+			NotificationMessage itemNotification = new NotificationMessage();
+			
+			itemNotification.setEntity(NotificationMessage.EnumEntity.ITEM);
+			itemNotification.setEntityId(afterItem.getCode());
+			
+			if (afterItem.getCurOwner()!=null) {
+				itemNotification.setEntity(NotificationMessage.EnumEntity.BEING);
+				itemNotification.setTargetEntityId(afterItem.getCurOwner());
+			} else {
+				itemNotification.setEntity(NotificationMessage.EnumEntity.PLACE);
+				itemNotification.setTargetEntityId(afterItem.getCurPlaceCode().longValue());
+				itemNotification.setWorldName(afterItem.getCurWorld());
+			}
 
-				if (afterItem.getCurOwner()!=null) {
-					itemNotification.setEntity(NotificationMessage.EnumEntity.BEING);
-					itemNotification.setTargetEntityId(afterItem.getCurOwner());
-				} else {
-					itemNotification.setEntity(NotificationMessage.EnumEntity.PLACE);
-					itemNotification.setTargetEntityId(afterItem.getCurPlaceCode().longValue());
-					itemNotification.setWorldName(afterItem.getCurWorld());
-				}
-				
-				itemNotification.setEvent(NotificationMessage.EnumNotificationEvent.ITEM_QTTY_DECREASE);
-				itemNotification.setMessageKey(ItemHelper.ITEM_QTTY_DECREASE_MSG);
-				itemNotification.setArgs(new String[] { 
-						String.valueOf(afterItem.getQuantity()),
-						beforeItem.getName()!=null ? beforeItem.getName() : beforeItem.getItemClass().getName(),
-								afterItem.getItemClass().getName()
-								}
-				);
-				
-				// TODO: Send Notification
-				
+			itemNotification.setEvent(NotificationMessage.EnumNotificationEvent.ITEM_QTTY_INCREASE);
+			itemNotification.setMessageKey(ItemHelper.ITEM_QTTY_INCREASE_MSG);
+			itemNotification.setArgs(new String[] { 
+					String.valueOf(afterItem.getQuantity()),
+					beforeItem.getName()!=null ? beforeItem.getName() : beforeItem.getItemClass().getName(),
+							afterItem.getItemClass().getName()
+							}
+			);
+			
+			// Enqueue the Notification
+			notifications.add(itemNotification);
+			
+		}
+	}
+
+	
+	
+	private void checkDecreaseQuantityChange(MudItem beforeItem, MudItem afterItem, List<NotificationMessage> notifications) {
+		
+		if (beforeItem.getQuantity() > afterItem.getQuantity()) {
+			
+			NotificationMessage itemNotification = new NotificationMessage();
+			
+			itemNotification.setEntity(NotificationMessage.EnumEntity.ITEM);
+			itemNotification.setEntityId(afterItem.getCode());
+
+			if (afterItem.getCurOwner()!=null) {
+				itemNotification.setEntity(NotificationMessage.EnumEntity.BEING);
+				itemNotification.setTargetEntityId(afterItem.getCurOwner());
+			} else {
+				itemNotification.setEntity(NotificationMessage.EnumEntity.PLACE);
+				itemNotification.setTargetEntityId(afterItem.getCurPlaceCode().longValue());
+				itemNotification.setWorldName(afterItem.getCurWorld());
 			}
 			
-			if (beforeItem.getQuantity() < afterItem.getQuantity()) {
-				
-				NotificationMessage itemNotification = new NotificationMessage();
-				
-				itemNotification.setEntity(NotificationMessage.EnumEntity.ITEM);
-				itemNotification.setEntityId(afterItem.getCode());
-				
-				if (afterItem.getCurOwner()!=null) {
-					itemNotification.setEntity(NotificationMessage.EnumEntity.BEING);
-					itemNotification.setTargetEntityId(afterItem.getCurOwner());
-				} else {
-					itemNotification.setEntity(NotificationMessage.EnumEntity.PLACE);
-					itemNotification.setTargetEntityId(afterItem.getCurPlaceCode().longValue());
-					itemNotification.setWorldName(afterItem.getCurWorld());
-				}
-
-				itemNotification.setEvent(NotificationMessage.EnumNotificationEvent.ITEM_QTTY_INCREASE);
-				itemNotification.setMessageKey(ItemHelper.ITEM_QTTY_INCREASE_MSG);
-				itemNotification.setArgs(new String[] { 
-						String.valueOf(afterItem.getQuantity()),
-						beforeItem.getName()!=null ? beforeItem.getName() : beforeItem.getItemClass().getName(),
-								afterItem.getItemClass().getName()
-								}
-				);
-				
-				// TODO: Send Notification
-				
-			}
+			itemNotification.setEvent(NotificationMessage.EnumNotificationEvent.ITEM_QTTY_DECREASE);
+			itemNotification.setMessageKey(ItemHelper.ITEM_QTTY_DECREASE_MSG);
+			itemNotification.setArgs(new String[] { 
+					String.valueOf(afterItem.getQuantity()),
+					beforeItem.getName()!=null ? beforeItem.getName() : beforeItem.getItemClass().getName(),
+							afterItem.getItemClass().getName()
+							}
+			);
+			
+			// Enqueue the Notification
+			notifications.add(itemNotification);
+			
 		}
-		
 	}
-	
 }

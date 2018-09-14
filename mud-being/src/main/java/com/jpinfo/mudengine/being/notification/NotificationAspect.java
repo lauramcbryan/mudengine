@@ -1,5 +1,7 @@
 package com.jpinfo.mudengine.being.notification;
 
+import java.util.ArrayList;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -10,7 +12,9 @@ import javax.persistence.PersistenceContext;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.jpinfo.mudengine.being.client.ItemServiceClient;
@@ -24,10 +28,18 @@ import com.jpinfo.mudengine.being.utils.BeingHelper;
 import com.jpinfo.mudengine.common.item.Item;
 import com.jpinfo.mudengine.common.utils.NotificationMessage;
 
+import lombok.Getter;
+
 @Aspect
 @Component
 public class NotificationAspect {
 
+	@Autowired
+	private RabbitTemplate rabbit;
+	
+	@Value("${being.exchange}")
+	private String beingExchange;
+	
 	@Autowired
 	private BeingRepository repository;
 	
@@ -40,6 +52,24 @@ public class NotificationAspect {
 	@Autowired
 	private ItemServiceClient itemService;
 	
+
+	/**
+	 * Local class to hold the notification messages to be send to the notification service
+	 * after the entity upate is consolidated.
+	 */
+	@Getter
+	class BeingMessage {
+		private Long targetCode;
+		private String message;
+		private String[] parms;
+		
+		public BeingMessage(Long targetCode, String message, String... parms) {
+			this.targetCode = targetCode;
+			this.message = message;
+			this.parms = parms;
+		}
+	}
+	
 	
 	@Around(value = "execution(public * org.springframework.data.repository.Repository+.save(..)) && args(afterBeing)")
 	public Object compareBeing(ProceedingJoinPoint pjp, MudBeing afterBeing) throws Throwable {
@@ -51,6 +81,8 @@ public class NotificationAspect {
 		// is also used to create entities
 		// Additionally, we only throw notification for playable beings.
 		if ((afterBeing.getCode()!=null) && (afterBeing.getPlayerId()!=null)) {
+			
+			List<BeingMessage> notifications = new ArrayList<>();
 
 			// This operation is important as the entity at this time will be in managed state,
 			// all find calls to database will return the same managed object.
@@ -61,9 +93,6 @@ public class NotificationAspect {
 			// Getting the 'before' entity
 			Optional<MudBeing> optBeforeBeing= repository.findById(afterBeing.getCode());
 			
-			// Execute the save operation
-			savedBeing = pjp.proceed();
-			
 			if (optBeforeBeing.isPresent()) {
 				
 				// Isolating the before entity to help in further comparisons
@@ -72,14 +101,28 @@ public class NotificationAspect {
 				// Comparing before and after beings
 				
 				// Check attr modifiers changes
-				checkAttrModifiers(beforeBeing, afterBeing);
+				checkAttrModifiers(beforeBeing, afterBeing, notifications);
 
 				// Check skill modifiers changes
-				checkSkillModifiers(beforeBeing, afterBeing);
+				checkSkillModifiers(beforeBeing, afterBeing, notifications);
 				
 				// Check slot changes
-				checkSlotModifiers(beforeBeing, afterBeing);
+				checkSlotModifiers(beforeBeing, afterBeing, notifications);
 			}
+			
+			// Execute the save operation
+			savedBeing = pjp.proceed();
+			
+			// Pass through the notification list
+			notifications.stream()
+				.forEach(curMessage ->
+				
+					// Send the message
+					messageService.putMessage(curMessage.getTargetCode(), 
+							curMessage.getMessage(),
+							curMessage.getParms())
+				);
+			
 
 		} else {
 			// In this case a place is being created, just proceed
@@ -97,20 +140,22 @@ public class NotificationAspect {
 		pjp.proceed();
 		
 		// Prepare a notification for this change
-		NotificationMessage itemNotification = new NotificationMessage();
+		NotificationMessage beingNotification = new NotificationMessage();
 		
-		itemNotification.setEntity(NotificationMessage.EnumEntity.BEING);
-		itemNotification.setEntityId(destroyedBeing.getCode());
-		itemNotification.setEvent(NotificationMessage.EnumNotificationEvent.BEING_DESTROY);
+		beingNotification.setEntity(NotificationMessage.EnumEntity.BEING);
+		beingNotification.setEntityId(destroyedBeing.getCode());
+		beingNotification.setEvent(NotificationMessage.EnumNotificationEvent.BEING_DESTROY);
 		
 		// Putting the destroyed being location.
 		// Item service will need this data in order to drop all being stuff
-		itemNotification.setTargetEntity(NotificationMessage.EnumEntity.PLACE);
-		itemNotification.setTargetEntityId(destroyedBeing.getCurPlaceCode().longValue());
-		itemNotification.setWorldName(destroyedBeing.getCurWorld());
+		beingNotification.setTargetEntity(NotificationMessage.EnumEntity.PLACE);
+		beingNotification.setTargetEntityId(destroyedBeing.getCurPlaceCode().longValue());
+		beingNotification.setWorldName(destroyedBeing.getCurWorld());
 		
 		
-		// TODO: Send Notification
+		// Send Notification
+		rabbit.convertAndSend(beingExchange, "", beingNotification);
+		
 		
 		// If the destroyed being belongs to a player, send a message to the player
 		if (destroyedBeing.getPlayerId()!=null) {
@@ -137,7 +182,7 @@ public class NotificationAspect {
 		
 	}
 	
-	private void checkAttrModifiers(MudBeing beforeBeing, MudBeing afterBeing) {
+	private void checkAttrModifiers(MudBeing beforeBeing, MudBeing afterBeing, List<BeingMessage> notifications) {
 		
 		// Check attr modifiers that was changed/removed
 		beforeBeing.getAttrModifiers().stream()
@@ -156,20 +201,24 @@ public class NotificationAspect {
 					if (beforeModifier.getOffset() > afterModifier.getOffset()) {
 
 						// increase modifier
-						messageService.putMessage(afterBeing.getCode(), 
-								BeingHelper.BEING_ATTRMOD_INCREASE_MSG, 
-								beforeModifier.getId().getCode(),
-								String.valueOf(afterModifier.getOffset() - beforeModifier.getOffset())
-										);
+						notifications.add(
+								new BeingMessage(afterBeing.getCode(), 
+										BeingHelper.BEING_ATTRMOD_INCREASE_MSG, 
+										beforeModifier.getId().getCode(),
+										String.valueOf(afterModifier.getOffset() - beforeModifier.getOffset())
+										)
+								);
 						
 					} else if (beforeModifier.getOffset() < afterModifier.getOffset()) {
 
 						// decrease modifier
-						messageService.putMessage(afterBeing.getCode(), 
-								BeingHelper.BEING_ATTRMOD_DECREASE_MSG, 
-								beforeModifier.getId().getCode(),
-								String.valueOf(beforeModifier.getOffset() - afterModifier.getOffset())
-										);
+						notifications.add(
+								new BeingMessage(afterBeing.getCode(), 
+										BeingHelper.BEING_ATTRMOD_DECREASE_MSG, 
+										beforeModifier.getId().getCode(),
+										String.valueOf(beforeModifier.getOffset() - afterModifier.getOffset())
+										)
+								);
 					}
 					
 				} else {
@@ -177,17 +226,21 @@ public class NotificationAspect {
 					// attr modifier removed
 					if (beforeModifier.getOffset()>0.0f) {
 						
-						messageService.putMessage(afterBeing.getCode(), 
-								BeingHelper.BEING_ATTRMOD_DECREASE_MSG, 
-								beforeModifier.getId().getCode(),
-								String.valueOf(beforeModifier.getOffset())
-										);
+						notifications.add(
+								new BeingMessage(afterBeing.getCode(), 
+										BeingHelper.BEING_ATTRMOD_DECREASE_MSG, 
+										beforeModifier.getId().getCode(),
+										String.valueOf(beforeModifier.getOffset())
+										)
+								);
 					} else {
-						messageService.putMessage(afterBeing.getCode(), 
-								BeingHelper.BEING_ATTRMOD_INCREASE_MSG, 
-								beforeModifier.getId().getCode(),
-								String.valueOf(Math.abs(beforeModifier.getOffset()))
-										);
+						notifications.add(
+								new BeingMessage(afterBeing.getCode(), 
+										BeingHelper.BEING_ATTRMOD_INCREASE_MSG, 
+										beforeModifier.getId().getCode(),
+										String.valueOf(Math.abs(beforeModifier.getOffset()))
+										)
+								);
 					}
 				}
 				
@@ -203,22 +256,26 @@ public class NotificationAspect {
 				// attr modifier added
 				if (afterModifier.getOffset()>0.0f) {
 					
-					messageService.putMessage(afterBeing.getCode(), 
-							BeingHelper.BEING_ATTRMOD_INCREASE_MSG, 
-							afterModifier.getId().getCode(),
-							String.valueOf(afterModifier.getOffset())
-									);
+					notifications.add(
+							new BeingMessage(afterBeing.getCode(), 
+									BeingHelper.BEING_ATTRMOD_INCREASE_MSG, 
+									afterModifier.getId().getCode(),
+									String.valueOf(afterModifier.getOffset())
+									)
+							);
 				} else {
-					messageService.putMessage(afterBeing.getCode(), 
-							BeingHelper.BEING_ATTRMOD_DECREASE_MSG, 
-							afterModifier.getId().getCode(),
-							String.valueOf(Math.abs(afterModifier.getOffset()))
-									);
+					notifications.add(
+							new BeingMessage(afterBeing.getCode(), 
+									BeingHelper.BEING_ATTRMOD_DECREASE_MSG, 
+									afterModifier.getId().getCode(),
+									String.valueOf(Math.abs(afterModifier.getOffset()))
+									)
+							);
 				}
 			});
 	}
 	
-	private void checkSkillModifiers(MudBeing beforeBeing, MudBeing afterBeing) {
+	private void checkSkillModifiers(MudBeing beforeBeing, MudBeing afterBeing, List<BeingMessage> notifications) {
 		
 		// Check skill modifiers that was changed/removed
 		beforeBeing.getSkillModifiers().stream()
@@ -237,20 +294,24 @@ public class NotificationAspect {
 					if (beforeModifier.getOffset() > afterModifier.getOffset()) {
 
 						// increase modifier
-						messageService.putMessage(afterBeing.getCode(), 
-								BeingHelper.BEING_SKILLMOD_INCREASE_MSG, 
-								beforeModifier.getId().getCode(),
-								String.valueOf(afterModifier.getOffset() - beforeModifier.getOffset())
-										);
+						notifications.add(
+								new BeingMessage(afterBeing.getCode(), 
+										BeingHelper.BEING_SKILLMOD_INCREASE_MSG, 
+										beforeModifier.getId().getCode(),
+										String.valueOf(afterModifier.getOffset() - beforeModifier.getOffset())
+										)
+								);
 						
 					} else if (beforeModifier.getOffset() < afterModifier.getOffset()) {
 
 						// decrease modifier
-						messageService.putMessage(afterBeing.getCode(), 
-								BeingHelper.BEING_SKILLMOD_DECREASE_MSG, 
-								beforeModifier.getId().getCode(),
-								String.valueOf(beforeModifier.getOffset() - afterModifier.getOffset())
-										);
+						notifications.add(
+								new BeingMessage(afterBeing.getCode(), 
+										BeingHelper.BEING_SKILLMOD_DECREASE_MSG, 
+										beforeModifier.getId().getCode(),
+										String.valueOf(beforeModifier.getOffset() - afterModifier.getOffset())
+										)
+								);
 					}
 					
 				} else {
@@ -258,17 +319,21 @@ public class NotificationAspect {
 					// skill modifier removed
 					if (beforeModifier.getOffset()>0.0f) {
 						
-						messageService.putMessage(afterBeing.getCode(), 
-								BeingHelper.BEING_SKILLMOD_DECREASE_MSG, 
-								beforeModifier.getId().getCode(),
-								String.valueOf(beforeModifier.getOffset())
-										);
+						notifications.add(
+								new BeingMessage(afterBeing.getCode(), 
+										BeingHelper.BEING_SKILLMOD_DECREASE_MSG, 
+										beforeModifier.getId().getCode(),
+										String.valueOf(beforeModifier.getOffset())
+										)
+								);
 					} else {
-						messageService.putMessage(afterBeing.getCode(), 
-								BeingHelper.BEING_SKILLMOD_INCREASE_MSG, 
-								beforeModifier.getId().getCode(),
-								String.valueOf(Math.abs(beforeModifier.getOffset()))
-										);
+						notifications.add(
+								new BeingMessage(afterBeing.getCode(), 
+										BeingHelper.BEING_SKILLMOD_INCREASE_MSG, 
+										beforeModifier.getId().getCode(),
+										String.valueOf(Math.abs(beforeModifier.getOffset()))
+										)
+								);
 					}
 				}
 				
@@ -284,22 +349,26 @@ public class NotificationAspect {
 				// skill modifier added
 				if (afterModifier.getOffset()>0.0f) {
 					
-					messageService.putMessage(afterBeing.getCode(), 
-							BeingHelper.BEING_SKILLMOD_INCREASE_MSG, 
-							afterModifier.getId().getCode(),
-							String.valueOf(afterModifier.getOffset())
-									);
+					notifications.add(
+							new BeingMessage(afterBeing.getCode(), 
+									BeingHelper.BEING_SKILLMOD_INCREASE_MSG, 
+									afterModifier.getId().getCode(),
+									String.valueOf(afterModifier.getOffset())
+									)
+							);
 				} else {
-					messageService.putMessage(afterBeing.getCode(), 
-							BeingHelper.BEING_SKILLMOD_DECREASE_MSG, 
-							afterModifier.getId().getCode(),
-							String.valueOf(Math.abs(afterModifier.getOffset()))
-									);
+					notifications.add(
+							new BeingMessage(afterBeing.getCode(), 
+									BeingHelper.BEING_SKILLMOD_DECREASE_MSG, 
+									afterModifier.getId().getCode(),
+									String.valueOf(Math.abs(afterModifier.getOffset()))
+									)
+							);
 				}
 			});		
 	}
 	
-	private void checkSlotModifiers(MudBeing beforeBeing, MudBeing afterBeing) {
+	private void checkSlotModifiers(MudBeing beforeBeing, MudBeing afterBeing, List<BeingMessage> notifications) {
 		
 		// Checking slots that was changed
 		beforeBeing.getSlots().stream()
@@ -320,9 +389,11 @@ public class NotificationAspect {
 						// being.equip
 						Item equippedItem = itemService.getItem(afterSlot.getItemCode());
 						
-						messageService.putMessage(afterBeing.getCode(), 
-								BeingHelper.BEING_EQUIP_MSG, 
-								equippedItem.getName());
+						notifications.add(
+								new BeingMessage(afterBeing.getCode(), 
+										BeingHelper.BEING_EQUIP_MSG, 
+										equippedItem.getName())
+								);
 						
 					} else
 						if ((beforeSlot.getItemCode()!=null) && (afterSlot.getItemCode()==null)) {
@@ -330,25 +401,31 @@ public class NotificationAspect {
 							// being.unequip
 							Item unequippedItem = itemService.getItem(beforeSlot.getItemCode());
 							
-							messageService.putMessage(afterBeing.getCode(), 
-									BeingHelper.BEING_UNEQUIP_MSG, 
-									unequippedItem.getName());
+							notifications.add(
+									new BeingMessage(afterBeing.getCode(), 
+											BeingHelper.BEING_UNEQUIP_MSG, 
+											unequippedItem.getName())
+									);
 							
 						} else
 							if (beforeSlot.getItemCode().equals(afterSlot.getItemCode())) {
 								// being.unequip
 								Item unequippedItem = itemService.getItem(beforeSlot.getItemCode());
 								
-								messageService.putMessage(afterBeing.getCode(), 
-										BeingHelper.BEING_UNEQUIP_MSG, 
-										unequippedItem.getName());
+								notifications.add(
+										new BeingMessage(afterBeing.getCode(), 
+												BeingHelper.BEING_UNEQUIP_MSG, 
+												unequippedItem.getName())
+										);
 
 								// being.equip
 								Item equippedItem = itemService.getItem(afterSlot.getItemCode());
 								
-								messageService.putMessage(afterBeing.getCode(), 
-										BeingHelper.BEING_EQUIP_MSG, 
-										equippedItem.getName());
+								notifications.add(
+										new BeingMessage(afterBeing.getCode(), 
+												BeingHelper.BEING_EQUIP_MSG, 
+												equippedItem.getName())
+										);
 							}
 						
 					

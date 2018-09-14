@@ -1,5 +1,7 @@
 package com.jpinfo.mudengine.world.notification;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 
@@ -53,6 +55,8 @@ public class NotificationAspect {
 		// Checking if the future state entity has a PK as this method
 		// is also used to create entities
 		if (afterPlace.getCode()!=null) {
+			
+			List<NotificationMessage> notifications = new ArrayList<>();
 
 			// This operation is important as the entity at this time will be in managed state,
 			// all find calls to database will return the same managed object.
@@ -63,9 +67,6 @@ public class NotificationAspect {
 			// Getting the 'before' entity
 			Optional<MudPlace> optBeforePlace = repository.findById(afterPlace.getCode());
 			
-			// Execute the save operation (as I already have the before and after entities)
-			savedPlace = pjp.proceed();
-			
 			if (optBeforePlace.isPresent()) {
 				
 				// Isolating the before entity to help in further comparisons
@@ -74,14 +75,25 @@ public class NotificationAspect {
 				// Comparing before and after places
 				
 				// Looking for placeClass changes
-				checkPlaceClassChanges(beforePlace, afterPlace);
+				checkPlaceClassChanges(beforePlace, afterPlace, notifications);
 				
 				// Looking for newly-created exits
-				checkNewlyCreatedExits(beforePlace, afterPlace);
+				checkNewlyCreatedExits(beforePlace, afterPlace, notifications);
 				
 				// Looking for updated exits
-				checkUpdatedExits(beforePlace, afterPlace);
+				checkUpdatedExits(beforePlace, afterPlace, notifications);
 			}
+			
+			// Execute the save operation
+			savedPlace = pjp.proceed();
+			
+			// Pass through the notification list and send the messages
+			notifications.stream()
+				.forEach(placeNotification -> 
+					// Send the notification
+					rabbit.convertAndSend(placeExchange, "", placeNotification)
+				);
+			
 
 		} else {
 			// In this case a place is being created, just proceed
@@ -129,7 +141,7 @@ public class NotificationAspect {
 		);
 		
 		// Send the notification
-		rabbit.convertAndSend(placeExchange, placeNotification);
+		rabbit.convertAndSend(placeExchange, "", placeNotification);
 		
 	}
 
@@ -139,7 +151,7 @@ public class NotificationAspect {
 	 * @param beforePlace - current state of the MudPlace object in database
 	 * @param afterPlace - future state of the MudPlace object
 	 */
-	private void checkPlaceClassChanges(MudPlace beforePlace, MudPlace afterPlace) {
+	private void checkPlaceClassChanges(MudPlace beforePlace, MudPlace afterPlace, List<NotificationMessage> notifications) {
 		
 		if (!beforePlace.getPlaceClass().getCode().equals(afterPlace.getPlaceClass().getCode())) {
 			
@@ -155,8 +167,8 @@ public class NotificationAspect {
 							}
 			);
 			
-			// Send the notification
-			rabbit.convertAndSend(placeExchange, placeNotification);
+			// Enqueue the notification
+			notifications.add(placeNotification);
 		}
 	}
 	
@@ -166,7 +178,7 @@ public class NotificationAspect {
 	 * @param beforePlace - current state of the MudPlace object in database
 	 * @param afterPlace - future state of the MudPlace object
 	 */
-	private void checkNewlyCreatedExits(MudPlace beforePlace, MudPlace afterPlace) {
+	private void checkNewlyCreatedExits(MudPlace beforePlace, MudPlace afterPlace, List<NotificationMessage> notifications) {
 		
 		afterPlace.getExits().stream()
 			.filter(d -> !beforePlace.getExits().contains(d))
@@ -182,8 +194,8 @@ public class NotificationAspect {
 				placeNotification.setArgs(new String[] { d.getPk().getDirection() }
 				);
 
-				// Send the notification
-				rabbit.convertAndSend(placeExchange, placeNotification);
+				// Enqueue the notification
+				notifications.add(placeNotification);
 				
 			});
 		
@@ -196,7 +208,7 @@ public class NotificationAspect {
 	 * @param beforePlace - current state of the MudPlace object in database
 	 * @param afterPlace - future state of the MudPlace object
 	 */
-	private void checkUpdatedExits(MudPlace beforePlace, MudPlace afterPlace) {
+	private void checkUpdatedExits(MudPlace beforePlace, MudPlace afterPlace, List<NotificationMessage> notifications) {
 
 		// Looking for exit changes
 		beforePlace.getExits().stream()
@@ -208,7 +220,7 @@ public class NotificationAspect {
 					.filter(afterExit -> afterExit.equals(beforeExit))
 					.findFirst()
 					.ifPresent(afterExit -> 
-						checkOneUpdatedExit(afterPlace.getCode(), beforeExit, afterExit)
+						checkOneUpdatedExit(afterPlace.getCode(), beforeExit, afterExit, notifications)
 					)
 			);
 	}
@@ -225,14 +237,14 @@ public class NotificationAspect {
 	 * @param beforeExit - current state of the exit.
 	 * @param afterExit - future state of the exit.
 	 */
-	private void checkOneUpdatedExit(Integer placeCode, MudPlaceExit beforeExit, MudPlaceExit afterExit) {
+	private void checkOneUpdatedExit(Integer placeCode, MudPlaceExit beforeExit, MudPlaceExit afterExit, List<NotificationMessage> notifications) {
 		
 		if (beforeExit.isOpened() && !afterExit.isOpened()) {
 
 			// send place.exit.close notification
 			sendExitChangeNotification(placeCode, beforeExit.getDirection(), 
 					NotificationMessage.EnumNotificationEvent.PLACE_EXIT_CLOSE, 
-					WorldHelper.PLACE_EXIT_CLOSE_MSG);
+					WorldHelper.PLACE_EXIT_CLOSE_MSG, notifications);
 		}
 		
 		if (!beforeExit.isOpened() && afterExit.isOpened()) {
@@ -240,7 +252,7 @@ public class NotificationAspect {
 			// send place.exit.open notification
 			sendExitChangeNotification(placeCode, beforeExit.getDirection(), 
 					NotificationMessage.EnumNotificationEvent.PLACE_EXIT_OPEN, 
-					WorldHelper.PLACE_EXIT_OPEN_MSG);
+					WorldHelper.PLACE_EXIT_OPEN_MSG, notifications);
 		}
 		
 		if (beforeExit.isLocked() && !afterExit.isLocked()) {
@@ -248,7 +260,7 @@ public class NotificationAspect {
 			// send place.exit.unlock notification
 			sendExitChangeNotification(placeCode, beforeExit.getDirection(), 
 					NotificationMessage.EnumNotificationEvent.PLACE_EXIT_UNLOCK, 
-					WorldHelper.PLACE_EXIT_UNLOCK_MSG);
+					WorldHelper.PLACE_EXIT_UNLOCK_MSG, notifications);
 		}
 		
 		if (!beforeExit.isLocked() && afterExit.isLocked()) {
@@ -256,7 +268,7 @@ public class NotificationAspect {
 			// send place.exit.lock notification
 			sendExitChangeNotification(placeCode, beforeExit.getDirection(), 
 					NotificationMessage.EnumNotificationEvent.PLACE_EXIT_LOCK, 
-					WorldHelper.PLACE_EXIT_LOCK_MSG);
+					WorldHelper.PLACE_EXIT_LOCK_MSG, notifications);
 			
 		}
 	}
@@ -271,7 +283,7 @@ public class NotificationAspect {
 	 * @param messageKey - message to be presented for this event as defined in WorldHelper
 	 * @return
 	 */
-	private void sendExitChangeNotification(Integer placeId, String direction, NotificationMessage.EnumNotificationEvent event, String messageKey) {
+	private void sendExitChangeNotification(Integer placeId, String direction, NotificationMessage.EnumNotificationEvent event, String messageKey, List<NotificationMessage> notifications) {
 		
 		NotificationMessage placeNotification = new NotificationMessage();
 		
@@ -281,8 +293,8 @@ public class NotificationAspect {
 		placeNotification.setMessageKey(messageKey);
 		placeNotification.setArgs(new String[] {direction} );
 
-		// Send the notification
-		rabbit.convertAndSend(placeExchange, placeNotification);
+		// Enqueue the notification
+		notifications.add(placeNotification);
 	}
 
 }

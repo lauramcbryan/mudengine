@@ -1,11 +1,23 @@
 version: '3.6'
 services:
+  infra:  
+    image: hello-world
+    networks:
+      - app_net
+    depends_on:
+      - consul-loader
+      - vault-loader
+      - database
+      - rabbitmq    
   rabbitmq:
     image: rabbitmq:3-management
     hostname: rabbitmq
     ports:
       - 15672:15672
       - 5672:5672
+    volumes:
+      - ./rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
+      #- ./rabbit/rabbitmq.config:/etc/rabbitmq/rabbitmq.config:rw
     networks:
       - app_net
   database:

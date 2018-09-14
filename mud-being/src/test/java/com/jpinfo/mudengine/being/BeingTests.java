@@ -48,7 +48,8 @@ import static org.mockito.BDDMockito.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment=WebEnvironment.RANDOM_PORT,
-	properties= {"token.secret=a7ac498c7bba59e0eb7c647d2f0197f8"})
+	properties= {"token.secret=a7ac498c7bba59e0eb7c647d2f0197f8",
+			"being.exchange=being.exchange"})
 public class BeingTests {
 	
 	private static final Integer MAX_HP=100;

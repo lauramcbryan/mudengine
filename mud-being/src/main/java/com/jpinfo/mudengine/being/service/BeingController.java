@@ -90,6 +90,9 @@ public class BeingController implements BeingService {
 			
 				dbBeing.setQuantity(requestBeing.getQuantity());
 			}
+
+			// 2. attributes
+			MudBeingAttrConverter.sync(dbBeing, requestBeing);
 			
 			// Checking HP attributes
 			boolean beingToBeDestroyed = internalSyncBeingHP(dbBeing, requestBeing);
@@ -99,9 +102,6 @@ public class BeingController implements BeingService {
 			if (beingToBeDestroyed) {
 				destroyBeing(dbBeing.getCode());
 			} else {
-
-				// 2. attributes
-				MudBeingAttrConverter.sync(dbBeing, requestBeing);
 				
 				// 3. skills
 				MudBeingSkillConverter.sync(dbBeing, requestBeing);
