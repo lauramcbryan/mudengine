@@ -34,7 +34,7 @@ services:
     #      source: ./postgres/data
     #      target: /var/lib/postgresql/data
     ports:
-      - 5432:5432
+      - 5435:5432
     networks:
       - app_net
   consul:
