@@ -12,4 +12,8 @@ public interface ItemRepository extends CrudRepository<MudItem, Long> {
 	
 	List<MudItem> findByCurWorldAndCurPlaceCode(String curWorld, Integer curPlace);
 
+	@Override
+	<S extends MudItem> S save(S entity);
+
+
 }

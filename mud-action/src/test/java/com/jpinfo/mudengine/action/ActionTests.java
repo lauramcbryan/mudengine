@@ -14,6 +14,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import com.jpinfo.mudengine.action.client.BeingServiceClient;
 import com.jpinfo.mudengine.action.client.ItemServiceClient;
+import com.jpinfo.mudengine.action.client.MessageServiceClient;
 import com.jpinfo.mudengine.action.client.PlaceServiceClient;
 import com.jpinfo.mudengine.action.dto.ActionInfo;
 import com.jpinfo.mudengine.action.model.MudAction;
@@ -53,6 +54,9 @@ public class ActionTests {
 	
 	@MockBean
 	private PlaceServiceClient placeClient;
+	
+	@MockBean
+	private MessageServiceClient messageClient;
 	
 	@Test
 	public void contextLoads() {

@@ -2,9 +2,17 @@ package com.jpinfo.mudengine.common.utils;
 
 import java.io.Serializable;
 
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-@Data
+@Getter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode(of= {"entity", "entityId", "event"})
 public class NotificationMessage implements Serializable {
 	
 	private static final long serialVersionUID = 1L;

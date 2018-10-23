@@ -1,6 +1,7 @@
 package com.jpinfo.mudengine.world.notification;
 
 import java.util.ArrayList;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -17,6 +18,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.jpinfo.mudengine.common.utils.NotificationMessage;
+import com.jpinfo.mudengine.common.utils.NotificationMessage.EnumEntity;
+import com.jpinfo.mudengine.common.utils.NotificationMessage.EnumNotificationEvent;
 import com.jpinfo.mudengine.world.model.MudPlace;
 import com.jpinfo.mudengine.world.model.MudPlaceExit;
 import com.jpinfo.mudengine.world.repository.PlaceRepository;
@@ -46,7 +49,7 @@ public class NotificationAspect {
 	 * @param pjp - object that holds the actual call.  Only after this call succeeded we send the notifications
 	 * @param afterPlace - future state of the place being altered
 	 */
-	@Around(value = "execution(public * org.springframework.data.repository.Repository+.save(..)) && args(afterPlace)")
+	@Around(value = "execution(public * com.jpinfo.mudengine.world.repository.PlaceRepository+.save(..)) && args(afterPlace)")
 	public Object comparePlaces(ProceedingJoinPoint pjp, MudPlace afterPlace) throws Throwable {
 
 		// Object returned after save operation
@@ -59,7 +62,7 @@ public class NotificationAspect {
 			List<NotificationMessage> notifications = new ArrayList<>();
 
 			// This operation is important as the entity at this time will be in managed state,
-			// all find calls to database will return the same managed object.
+			// therefore all find calls to database will return the same managed object.
 			// To avoid this and get a fresh database version of the entity, we detached the future-state
 			// MudPlace from persistenceContext in order to force it to retrieve another.
 			em.detach(afterPlace);
@@ -129,16 +132,21 @@ public class NotificationAspect {
 		pjp.proceed();
 		
 		// Prepare a notification for this change
-		NotificationMessage placeNotification = new NotificationMessage();
-		
-		placeNotification.setEntity(NotificationMessage.EnumEntity.PLACE);
-		placeNotification.setEntityId(destroyedPlace.getCode().longValue());
-		placeNotification.setEvent(NotificationMessage.EnumNotificationEvent.PLACE_DESTROY);
-		placeNotification.setMessageKey(WorldHelper.PLACE_DESTROY_MSG);
-		placeNotification.setArgs(new String[] { 
-				destroyedPlace.getName()!=null ? destroyedPlace.getName() : destroyedPlace.getPlaceClass().getName() 
-						}
-		);
+		NotificationMessage placeNotification = NotificationMessage.builder()
+				// Who?
+				.entity(NotificationMessage.EnumEntity.PLACE)
+				.entityId(destroyedPlace.getCode().longValue())
+				// What happened?
+				.event(EnumNotificationEvent.PLACE_DESTROY)
+				// Spread the news!
+				.messageKey(WorldHelper.PLACE_DESTROY_MSG)
+				.args(new String[] {
+						destroyedPlace.getName()!=null ? destroyedPlace.getName() : destroyedPlace.getPlaceClass().getName()
+						})
+				// The guys in the place will take interest on that  :D
+				.targetEntity(EnumEntity.PLACE)
+				.targetEntityId(destroyedPlace.getCode().longValue())
+			.build();
 		
 		// Send the notification
 		rabbit.convertAndSend(placeExchange, "", placeNotification);
@@ -154,18 +162,24 @@ public class NotificationAspect {
 	private void checkPlaceClassChanges(MudPlace beforePlace, MudPlace afterPlace, List<NotificationMessage> notifications) {
 		
 		if (!beforePlace.getPlaceClass().getCode().equals(afterPlace.getPlaceClass().getCode())) {
-			
-			NotificationMessage placeNotification = new NotificationMessage();
-			
-			placeNotification.setEntity(NotificationMessage.EnumEntity.PLACE);
-			placeNotification.setEntityId(afterPlace.getCode().longValue());
-			placeNotification.setEvent(NotificationMessage.EnumNotificationEvent.PLACE_CLASS_CHANGE);
-			placeNotification.setMessageKey(WorldHelper.PLACE_CLASS_CHANGE_MSG);
-			placeNotification.setArgs(new String[] { 
-					beforePlace.getName()!=null ? beforePlace.getName() : beforePlace.getPlaceClass().getName(),
+
+			// Prepare a notification for this change
+			NotificationMessage placeNotification = NotificationMessage.builder()
+					// Who?
+					.entity(NotificationMessage.EnumEntity.PLACE)
+					.entityId(afterPlace.getCode().longValue())
+					// What happened?
+					.event(EnumNotificationEvent.PLACE_CLASS_CHANGE)
+					// Spread the news!
+					.messageKey(WorldHelper.PLACE_CLASS_CHANGE_MSG)
+					.args(new String[] {
+							beforePlace.getName()!=null ? beforePlace.getName() : beforePlace.getPlaceClass().getName(),
 							afterPlace.getPlaceClass().getName()
-							}
-			);
+							})
+					// The guys in the place will take interest on that
+					.targetEntity(EnumEntity.PLACE)
+					.targetEntityId(afterPlace.getCode().longValue())
+				.build();
 			
 			// Enqueue the notification
 			notifications.add(placeNotification);
@@ -185,14 +199,21 @@ public class NotificationAspect {
 			.forEach(d -> {
 				
 				// Create exit notification
-				NotificationMessage placeNotification = new NotificationMessage();
-				
-				placeNotification.setEntity(NotificationMessage.EnumEntity.PLACE);
-				placeNotification.setEntityId(afterPlace.getCode().longValue());
-				placeNotification.setEvent(NotificationMessage.EnumNotificationEvent.PLACE_EXIT_CREATE);
-				placeNotification.setMessageKey(WorldHelper.PLACE_EXIT_CREATE_MSG);
-				placeNotification.setArgs(new String[] { d.getPk().getDirection() }
-				);
+				NotificationMessage placeNotification = NotificationMessage.builder()
+						// Who?
+						.entity(NotificationMessage.EnumEntity.PLACE)
+						.entityId(afterPlace.getCode().longValue())
+						// What happened?
+						.event(EnumNotificationEvent.PLACE_EXIT_CREATE)
+						// Spread the news!
+						.messageKey(WorldHelper.PLACE_EXIT_CREATE_MSG)
+						.args(new String[] {
+								d.getPk().getDirection()
+								})
+						// The guys in the place will take interest on that
+						.targetEntity(EnumEntity.PLACE)
+						.targetEntityId(afterPlace.getCode().longValue())
+					.build();
 
 				// Enqueue the notification
 				notifications.add(placeNotification);
@@ -284,15 +305,19 @@ public class NotificationAspect {
 	 * @return
 	 */
 	private void sendExitChangeNotification(Integer placeId, String direction, NotificationMessage.EnumNotificationEvent event, String messageKey, List<NotificationMessage> notifications) {
-		
-		NotificationMessage placeNotification = new NotificationMessage();
-		
-		placeNotification.setEntity(NotificationMessage.EnumEntity.PLACE);
-		placeNotification.setEntityId(placeId.longValue());
-		placeNotification.setEvent(event);
-		placeNotification.setMessageKey(messageKey);
-		placeNotification.setArgs(new String[] {direction} );
 
+		NotificationMessage placeNotification = NotificationMessage.builder()
+				// Who?
+				.entity(NotificationMessage.EnumEntity.PLACE)
+				.entityId(placeId.longValue())
+				// What happened?
+				.event(event)
+				// Spread the news!
+				.messageKey(messageKey)
+				.args(new String[] {direction})
+				// The guys in the place will take interest on that
+			.build();
+		
 		// Enqueue the notification
 		notifications.add(placeNotification);
 	}

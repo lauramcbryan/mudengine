@@ -30,6 +30,7 @@ public class BeingTemplates implements TemplateLoader {
 	public static final String VALID = "VALID";
 	public static final String SIMPLE = "SIMPLE";
 	public static final String PLAYABLE = "PLAYABLE";
+	public static final String PLAYABLE_WITH_MODIFIERS = "PLAYABLE_WITH_MODIFIERS";
 
 	@Override
 	public void load() {
@@ -144,6 +145,11 @@ public class BeingTemplates implements TemplateLoader {
 		Fixture.of(MudBeing.class).addTemplate(PLAYABLE).inherits(SIMPLE, new Rule() {{
 			add("playerId", random(Long.class));
 			add("type", Being.enumBeingType.PLAYABLE.ordinal());
+		}});
+		
+		Fixture.of(MudBeing.class).addTemplate(PLAYABLE_WITH_MODIFIERS).inherits(PLAYABLE, new Rule() {{
+			add("attrModifiers", has(3).of(MudBeingAttrModifier.class, VALID));
+			add("skillModifiers", has(3).of(MudBeingSkillModifier.class, VALID));
 		}});
 
 

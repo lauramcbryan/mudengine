@@ -1,7 +1,6 @@
 package com.jpinfo.mudengine.being.notification;
 
 import java.util.ArrayList;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -27,6 +26,7 @@ import com.jpinfo.mudengine.being.repository.BeingRepository;
 import com.jpinfo.mudengine.being.utils.BeingHelper;
 import com.jpinfo.mudengine.common.item.Item;
 import com.jpinfo.mudengine.common.utils.NotificationMessage;
+import com.jpinfo.mudengine.common.utils.NotificationMessage.EnumNotificationEvent;
 
 import lombok.Getter;
 
@@ -140,18 +140,22 @@ public class NotificationAspect {
 		pjp.proceed();
 		
 		// Prepare a notification for this change
-		NotificationMessage beingNotification = new NotificationMessage();
-		
-		beingNotification.setEntity(NotificationMessage.EnumEntity.BEING);
-		beingNotification.setEntityId(destroyedBeing.getCode());
-		beingNotification.setEvent(NotificationMessage.EnumNotificationEvent.BEING_DESTROY);
-		
-		// Putting the destroyed being location.
-		// Item service will need this data in order to drop all being stuff
-		beingNotification.setTargetEntity(NotificationMessage.EnumEntity.PLACE);
-		beingNotification.setTargetEntityId(destroyedBeing.getCurPlaceCode().longValue());
-		beingNotification.setWorldName(destroyedBeing.getCurWorld());
-		
+		NotificationMessage beingNotification = NotificationMessage.builder()
+				// Who?
+				.entity(NotificationMessage.EnumEntity.BEING)
+				.entityId(destroyedBeing.getCode())
+				// What happened?
+				.event(EnumNotificationEvent.BEING_DESTROY)
+				// Spread the news!
+				.messageKey(BeingHelper.BEING_DESTROY_ANOTHER_MSG)
+				.args(new String[] {
+						destroyedBeing.getName()!=null ? destroyedBeing.getName() : destroyedBeing.getBeingClass().getName()
+						})
+				// For this guys (the place and the items owned by this being will take interest on that)
+				.targetEntity(NotificationMessage.EnumEntity.PLACE)
+				.targetEntityId(destroyedBeing.getCurPlaceCode().longValue())
+				.worldName(destroyedBeing.getCurWorld())
+			.build();
 		
 		// Send Notification
 		rabbit.convertAndSend(beingExchange, "", beingNotification);
@@ -198,7 +202,7 @@ public class NotificationAspect {
 					// add modifier changed
 					MudBeingAttrModifier afterModifier = optAfterModifier.get();
 					
-					if (beforeModifier.getOffset() > afterModifier.getOffset()) {
+					if (beforeModifier.getOffset() < afterModifier.getOffset()) {
 
 						// increase modifier
 						notifications.add(
@@ -209,7 +213,7 @@ public class NotificationAspect {
 										)
 								);
 						
-					} else if (beforeModifier.getOffset() < afterModifier.getOffset()) {
+					} else if (beforeModifier.getOffset() > afterModifier.getOffset()) {
 
 						// decrease modifier
 						notifications.add(
@@ -291,7 +295,7 @@ public class NotificationAspect {
 					// add modifier changed
 					MudBeingSkillModifier afterModifier = optAfterModifier.get();
 					
-					if (beforeModifier.getOffset() > afterModifier.getOffset()) {
+					if (beforeModifier.getOffset() < afterModifier.getOffset()) {
 
 						// increase modifier
 						notifications.add(
@@ -302,7 +306,7 @@ public class NotificationAspect {
 										)
 								);
 						
-					} else if (beforeModifier.getOffset() < afterModifier.getOffset()) {
+					} else if (beforeModifier.getOffset() > afterModifier.getOffset()) {
 
 						// decrease modifier
 						notifications.add(

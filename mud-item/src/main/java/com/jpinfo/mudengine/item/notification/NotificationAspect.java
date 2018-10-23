@@ -16,6 +16,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.jpinfo.mudengine.common.utils.NotificationMessage;
+import com.jpinfo.mudengine.common.utils.NotificationMessage.EnumEntity;
+import com.jpinfo.mudengine.common.utils.NotificationMessage.EnumNotificationEvent;
 import com.jpinfo.mudengine.item.model.MudItem;
 import com.jpinfo.mudengine.item.repository.ItemRepository;
 import com.jpinfo.mudengine.item.utils.ItemHelper;
@@ -36,7 +38,7 @@ public class NotificationAspect {
 	@PersistenceContext
 	private EntityManager em;
 	
-	@Around(value = "execution(public * org.springframework.data.repository.Repository+.save(..)) && args(afterItem)")
+	@Around(value = "execution(public * com.jpinfo.mudengine.item.repository.ItemRepository+.save(..)) && args(afterItem)")
 	public Object compareItems(ProceedingJoinPoint pjp, MudItem afterItem) throws Throwable {
 		
 		// Object returned by the save operation
@@ -100,16 +102,22 @@ public class NotificationAspect {
 		pjp.proceed();
 
 		// Prepare a notification for this change
-		NotificationMessage itemNotification = new NotificationMessage();
-		
-		itemNotification.setEntity(NotificationMessage.EnumEntity.ITEM);
-		itemNotification.setEntityId(destroyedItem.getCode());
-		itemNotification.setEvent(NotificationMessage.EnumNotificationEvent.ITEM_DESTROY);
-		itemNotification.setMessageKey(ItemHelper.ITEM_DESTROY_MSG);
-		itemNotification.setArgs(new String[] { 
-				destroyedItem.getName()!=null ? destroyedItem.getName() : destroyedItem.getItemClass().getName() 
-						}
-		);
+		NotificationMessage itemNotification = NotificationMessage.builder()
+				// Who ?
+				.entity(NotificationMessage.EnumEntity.ITEM)
+				.entityId(destroyedItem.getCode())
+				// What happened?
+				.event(NotificationMessage.EnumNotificationEvent.ITEM_DESTROY)
+				// Spread the news!
+				.messageKey(ItemHelper.ITEM_DESTROY_MSG)
+				.args(new String[] { 
+					destroyedItem.getName()!=null ? destroyedItem.getName() : destroyedItem.getItemClass().getName() 
+					})
+				// To this guys (the holder or the place)
+				.targetEntity(destroyedItem.getCurOwner()!=null ? EnumEntity.BEING: EnumEntity.PLACE)
+				.targetEntityId(destroyedItem.getCurOwner()!=null ? destroyedItem.getCurOwner(): destroyedItem.getCurPlaceCode().longValue())
+				.worldName(destroyedItem.getCurWorld())
+			.build();
 		
 		// Send Notification
 		rabbit.convertAndSend(itemExchange, "", itemNotification);
@@ -120,27 +128,23 @@ public class NotificationAspect {
 		
 		if (!beforeItem.getItemClass().getCode().equals(afterItem.getItemClass().getCode())) {
 
-			NotificationMessage itemNotification = new NotificationMessage();
-			
-			itemNotification.setEntity(NotificationMessage.EnumEntity.ITEM);
-			itemNotification.setEntityId(afterItem.getCode());
-			
-			if (afterItem.getCurOwner()!=null) {
-				itemNotification.setEntity(NotificationMessage.EnumEntity.BEING);
-				itemNotification.setTargetEntityId(afterItem.getCurOwner());
-			} else {
-				itemNotification.setEntity(NotificationMessage.EnumEntity.PLACE);
-				itemNotification.setTargetEntityId(afterItem.getCurPlaceCode().longValue());
-				itemNotification.setWorldName(afterItem.getCurWorld());
-			}
-			
-			itemNotification.setEvent(NotificationMessage.EnumNotificationEvent.ITEM_CLASS_CHANGE);
-			itemNotification.setMessageKey(ItemHelper.ITEM_CLASS_CHANGE_MSG);
-			itemNotification.setArgs(new String[] { 
-					beforeItem.getName()!=null ? beforeItem.getName() : beforeItem.getItemClass().getName(),
+			NotificationMessage itemNotification = NotificationMessage.builder()
+					// Who?
+					.entity(NotificationMessage.EnumEntity.ITEM)
+					.entityId(afterItem.getCode())
+					// What happened?
+					.event(EnumNotificationEvent.ITEM_CLASS_CHANGE)
+					// Spread the news!
+					.messageKey(ItemHelper.ITEM_CLASS_CHANGE_MSG)
+					.args(new String[] { 
+							beforeItem.getName()!=null ? beforeItem.getName() : beforeItem.getItemClass().getName(),
 							afterItem.getItemClass().getName()
-							}
-			);
+							})
+					// For this guys (the holder or the place)
+					.targetEntity(afterItem.getCurOwner()!=null ? EnumEntity.BEING: EnumEntity.PLACE)
+					.targetEntityId(afterItem.getCurOwner()!=null ? afterItem.getCurOwner(): afterItem.getCurPlaceCode().longValue())
+					.worldName(afterItem.getCurWorld())
+				.build();
 
 			// Enqueue the Notification
 			notifications.add(itemNotification);
@@ -152,19 +156,21 @@ public class NotificationAspect {
 		if ((beforeItem.getCurOwner()==null) && (afterItem.getCurOwner()!=null)) {
 			// send a item.taken event
 			
-			NotificationMessage itemNotification = new NotificationMessage();
-			
-			itemNotification.setEntity(NotificationMessage.EnumEntity.ITEM);
-			itemNotification.setEntityId(afterItem.getCode());
-			itemNotification.setTargetEntity(NotificationMessage.EnumEntity.BEING);
-			itemNotification.setTargetEntityId(afterItem.getCurOwner());
-			itemNotification.setEvent(NotificationMessage.EnumNotificationEvent.ITEM_TAKEN);
-			itemNotification.setMessageKey(ItemHelper.ITEM_TAKEN_MSG);
-			itemNotification.setArgs(new String[] { 
-					beforeItem.getName()!=null ? beforeItem.getName() : beforeItem.getItemClass().getName(),
-							afterItem.getItemClass().getName()
-							}
-			);
+			NotificationMessage itemNotification = NotificationMessage.builder()
+					// Who?
+					.entity(EnumEntity.ITEM)
+					.entityId(afterItem.getCode())
+					// What happened?
+					.event(EnumNotificationEvent.ITEM_TAKEN)
+					// Spread the news!
+					.messageKey(ItemHelper.ITEM_TAKEN_MSG)
+					.args(new String[] { 
+							beforeItem.getName()!=null ? beforeItem.getName() : beforeItem.getItemClass().getName()
+							})
+					// To this guy! (the taker)
+					.targetEntity(EnumEntity.BEING)
+					.targetEntityId(afterItem.getCurOwner())
+				.build();
 
 			// Enqueue the Notification
 			notifications.add(itemNotification);
@@ -173,20 +179,21 @@ public class NotificationAspect {
 		if ((beforeItem.getCurOwner()!=null) && (afterItem.getCurOwner()==null)) {
 			// send a item.drop event
 
-			NotificationMessage itemNotification = new NotificationMessage();
-			
-			itemNotification.setEntity(NotificationMessage.EnumEntity.ITEM);
-			itemNotification.setEntityId(afterItem.getCode());
-			itemNotification.setTargetEntity(NotificationMessage.EnumEntity.BEING);
-			itemNotification.setTargetEntityId(afterItem.getCurOwner());
-			
-			itemNotification.setEvent(NotificationMessage.EnumNotificationEvent.ITEM_DROP);
-			itemNotification.setMessageKey(ItemHelper.ITEM_DROP_MSG);
-			itemNotification.setArgs(new String[] { 
-					beforeItem.getName()!=null ? beforeItem.getName() : beforeItem.getItemClass().getName(),
-							afterItem.getItemClass().getName()
-							}
-			);
+			NotificationMessage itemNotification = NotificationMessage.builder()
+					// Who ?
+					.entity(EnumEntity.ITEM)
+					.entityId(afterItem.getCode())
+					// What happened?
+					.event(EnumNotificationEvent.ITEM_DROP)
+					// Spread the news!
+					.messageKey(ItemHelper.ITEM_DROP_MSG)
+					.args(new String[] { 
+							beforeItem.getName()!=null ? beforeItem.getName() : beforeItem.getItemClass().getName()
+									})
+					// To this guy (the former holder)
+					.targetEntity(EnumEntity.BEING)
+					.targetEntityId(afterItem.getCurOwner())
+				.build();
 			
 			// Enqueue the Notification
 			notifications.add(itemNotification);
@@ -198,28 +205,23 @@ public class NotificationAspect {
 		
 		if (beforeItem.getQuantity() < afterItem.getQuantity()) {
 			
-			NotificationMessage itemNotification = new NotificationMessage();
-			
-			itemNotification.setEntity(NotificationMessage.EnumEntity.ITEM);
-			itemNotification.setEntityId(afterItem.getCode());
-			
-			if (afterItem.getCurOwner()!=null) {
-				itemNotification.setEntity(NotificationMessage.EnumEntity.BEING);
-				itemNotification.setTargetEntityId(afterItem.getCurOwner());
-			} else {
-				itemNotification.setEntity(NotificationMessage.EnumEntity.PLACE);
-				itemNotification.setTargetEntityId(afterItem.getCurPlaceCode().longValue());
-				itemNotification.setWorldName(afterItem.getCurWorld());
-			}
-
-			itemNotification.setEvent(NotificationMessage.EnumNotificationEvent.ITEM_QTTY_INCREASE);
-			itemNotification.setMessageKey(ItemHelper.ITEM_QTTY_INCREASE_MSG);
-			itemNotification.setArgs(new String[] { 
-					String.valueOf(afterItem.getQuantity()),
-					beforeItem.getName()!=null ? beforeItem.getName() : beforeItem.getItemClass().getName(),
-							afterItem.getItemClass().getName()
-							}
-			);
+			NotificationMessage itemNotification = NotificationMessage.builder()
+					// Who?
+					.entity(EnumEntity.ITEM)
+					.entityId(afterItem.getCode())
+					// What happened?
+					.event(EnumNotificationEvent.ITEM_QTTY_INCREASE)
+					// Spread the news!
+					.messageKey(ItemHelper.ITEM_QTTY_INCREASE_MSG)
+					.args(new String[] { 
+									String.valueOf(afterItem.getQuantity()),
+									beforeItem.getName()!=null ? beforeItem.getName() : beforeItem.getItemClass().getName()
+								})
+					// To this guys (the holder or the place)
+					.targetEntity(afterItem.getCurOwner()!=null ? EnumEntity.BEING: EnumEntity.PLACE)
+					.targetEntityId(afterItem.getCurOwner()!=null ? afterItem.getCurOwner(): afterItem.getCurPlaceCode().longValue())
+					.worldName(afterItem.getCurWorld())
+				.build();
 			
 			// Enqueue the Notification
 			notifications.add(itemNotification);
@@ -233,28 +235,23 @@ public class NotificationAspect {
 		
 		if (beforeItem.getQuantity() > afterItem.getQuantity()) {
 			
-			NotificationMessage itemNotification = new NotificationMessage();
-			
-			itemNotification.setEntity(NotificationMessage.EnumEntity.ITEM);
-			itemNotification.setEntityId(afterItem.getCode());
-
-			if (afterItem.getCurOwner()!=null) {
-				itemNotification.setEntity(NotificationMessage.EnumEntity.BEING);
-				itemNotification.setTargetEntityId(afterItem.getCurOwner());
-			} else {
-				itemNotification.setEntity(NotificationMessage.EnumEntity.PLACE);
-				itemNotification.setTargetEntityId(afterItem.getCurPlaceCode().longValue());
-				itemNotification.setWorldName(afterItem.getCurWorld());
-			}
-			
-			itemNotification.setEvent(NotificationMessage.EnumNotificationEvent.ITEM_QTTY_DECREASE);
-			itemNotification.setMessageKey(ItemHelper.ITEM_QTTY_DECREASE_MSG);
-			itemNotification.setArgs(new String[] { 
-					String.valueOf(afterItem.getQuantity()),
-					beforeItem.getName()!=null ? beforeItem.getName() : beforeItem.getItemClass().getName(),
-							afterItem.getItemClass().getName()
-							}
-			);
+			NotificationMessage itemNotification = NotificationMessage.builder()
+					// Who?
+					.entity(EnumEntity.ITEM)
+					.entityId(afterItem.getCode())
+					// What happened?
+					.event(EnumNotificationEvent.ITEM_QTTY_DECREASE)
+					// Spread the news!
+					.messageKey(ItemHelper.ITEM_QTTY_DECREASE_MSG)
+					.args(new String[] { 
+									String.valueOf(afterItem.getQuantity()),
+									beforeItem.getName()!=null ? beforeItem.getName() : beforeItem.getItemClass().getName()
+								})
+					// To this guys (the holder or the place)
+					.targetEntity(afterItem.getCurOwner()!=null ? EnumEntity.BEING: EnumEntity.PLACE)
+					.targetEntityId(afterItem.getCurOwner()!=null ? afterItem.getCurOwner(): afterItem.getCurPlaceCode().longValue())
+					.worldName(afterItem.getCurWorld())
+				.build();
 			
 			// Enqueue the Notification
 			notifications.add(itemNotification);

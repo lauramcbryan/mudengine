@@ -1,7 +1,7 @@
 package com.jpinfo.mudengine.world;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
+import static org.mockito.Mockito.verify;
 
 import java.util.*;
 
@@ -25,17 +25,20 @@ import org.springframework.test.context.junit4.SpringRunner;
 import com.jpinfo.mudengine.common.place.Place;
 import com.jpinfo.mudengine.common.security.TokenService;
 import com.jpinfo.mudengine.common.utils.CommonConstants;
+import com.jpinfo.mudengine.common.utils.NotificationMessage;
+import com.jpinfo.mudengine.common.utils.NotificationMessage.EnumNotificationEvent;
 import com.jpinfo.mudengine.world.model.MudPlace;
-import com.jpinfo.mudengine.world.model.MudPlaceAttr;
 import com.jpinfo.mudengine.world.model.MudPlaceExit;
 import com.jpinfo.mudengine.world.repository.PlaceRepository;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment=WebEnvironment.RANDOM_PORT, 
 	properties= {"token.secret=a7ac498c7bba59e0eb7c647d2f0197f8",
-			"place.exchange=place.exchange"})
+			"place.exchange=" + PlaceTests.PLACE_EXCHANGE})
 public class PlaceTests {
 	
+	
+	public static final String PLACE_EXCHANGE = "place.exchange";
 
 	private static final String CREATE_PLACE_CLASS = "TEST";
 	private static final String CREATE_PLACE_EXIT_DIRECTION = "UP";
@@ -149,18 +152,28 @@ public class PlaceTests {
 			String curAttr = PlaceTests.CREATE_PLACE_CLASS_ATTRS[index];
 			Integer curAttrValue = PlaceTests.CREATE_PLACE_CLASS_ATTR_VALUES[index];
 
-			MudPlaceAttr attr = 
-					dbPlace.getAttrs().stream()
-						.filter(d -> d.getId().getCode().equals(curAttr))
-						.findFirst()
-						.orElse(null);
-			
-			// Check if attribute exists
-			assertThat(attr).isNotNull();
-			
-			// Check if it has the correct value
-			assertThat(attr.getValue()).isEqualTo(curAttrValue);
+			// Checking if the attribute exists in database
+			assertThat(dbPlace.getAttrs().stream()
+						.anyMatch(d -> d.getId().getCode().equals(curAttr) && 
+										d.getValue().equals(curAttrValue)))
+					.isTrue();
 		}
+		
+		//  Check if correct notification was sent
+		NotificationMessage placeExitNotification = NotificationMessage.builder()
+				.entity(NotificationMessage.EnumEntity.PLACE)
+				.entityId(responseCreate.getBody().getCode().longValue())
+				.event(EnumNotificationEvent.PLACE_EXIT_CREATE)
+			.build();
+		
+		NotificationMessage placeExit2Notification = NotificationMessage.builder()
+				.entity(NotificationMessage.EnumEntity.PLACE)
+				.entityId(PlaceTests.CREATE_PLACE_EXIT_TARGET.longValue())
+				.event(EnumNotificationEvent.PLACE_EXIT_CREATE)
+			.build();
+		
+		verify(rabbit).convertAndSend(PLACE_EXCHANGE, "", placeExitNotification);
+		verify(rabbit).convertAndSend(PLACE_EXCHANGE, "", placeExit2Notification);
 		
 	}
 	
@@ -249,6 +262,15 @@ public class PlaceTests {
 			assertThat(responsePlace.getAttrs().get(curAttr)).isEqualTo(curAttrValue);
 		}
 		
+		//  Check if correct notification was sent
+		NotificationMessage placeClassNotification = NotificationMessage.builder()
+				.entity(NotificationMessage.EnumEntity.PLACE)
+				.entityId(responsePlace.getCode().longValue())
+				.event(EnumNotificationEvent.PLACE_CLASS_CHANGE)
+			.build();
+		
+		verify(rabbit).convertAndSend(PLACE_EXCHANGE, "", placeClassNotification);
+		
 	}
 
 	@Test
@@ -318,6 +340,16 @@ public class PlaceTests {
 		
 		// Checking in the database if the place was destroyed
 		assertThat(repository.findById(PlaceTests.UPDATE_DESTROYED_PLACE_ID).isPresent()).isFalse();
+		
+		//  Check if correct notification was sent
+		NotificationMessage placeNotification = NotificationMessage.builder()
+				.entity(NotificationMessage.EnumEntity.PLACE)
+				.entityId(PlaceTests.UPDATE_DESTROYED_PLACE_ID.longValue())
+				.event(EnumNotificationEvent.PLACE_DESTROY)
+			.build();
+		
+		verify(rabbit).convertAndSend(PLACE_EXCHANGE, "", placeNotification);
+
 	}
 
 	@Test
@@ -377,10 +409,19 @@ public class PlaceTests {
 				"/place/{placeId}", HttpMethod.DELETE, authEntity, Place.class, urlVariables);
 		
 		assertThat(responseFirstDelete.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+		
+		//  Check if correct notification was sent
+		NotificationMessage placeClassNotification = NotificationMessage.builder()
+				.entity(NotificationMessage.EnumEntity.PLACE)
+				.entityId(PlaceTests.DELETE_DEMISED_PLACE_ID.longValue())
+				.event(EnumNotificationEvent.PLACE_CLASS_CHANGE)
+			.build();
+		
+		verify(rabbit).convertAndSend(PLACE_EXCHANGE, "", placeClassNotification);
 		
 		MudPlace dbPlace = repository.findById(DELETE_DEMISED_PLACE_ID)
 				.orElseThrow(() -> new RuntimeException("Demised place not found in database"));
-		
 		
 		assertThat(dbPlace.getPlaceClass().getCode()).isEqualTo(PlaceTests.DELETE_DEMISED_PLACE_CLASS);
 		
@@ -399,6 +440,15 @@ public class PlaceTests {
 		assertThat(responseSecondDelete.getStatusCode()).isEqualTo(HttpStatus.OK);
 		
 		assertThat(repository.findById(DELETE_PLACE_ID).isPresent()).isFalse();
+		
+		//  Check if correct notification was sent
+		NotificationMessage placeNotification = NotificationMessage.builder()
+				.entity(NotificationMessage.EnumEntity.PLACE)
+				.entityId(PlaceTests.DELETE_PLACE_ID.longValue())
+				.event(EnumNotificationEvent.PLACE_DESTROY)
+			.build();
+		
+		verify(rabbit).convertAndSend(PLACE_EXCHANGE, "", placeNotification);
 	}
 	
 }
