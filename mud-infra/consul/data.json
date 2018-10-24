@@ -52,12 +52,12 @@
 	{
 		"key": "config/mud-action/spring.datasource.url",
 		"flags": 0,
-		"value": "amRiYzpwb3N0Z3Jlc3FsOi8vZGF0YWJhc2U6NTQzMi9tdWRlbmdpbmU="
+		"value": "amRiYzpwb3N0Z3Jlc3FsOi8vZGF0YWJhc2U6NTQzNS9tdWRlbmdpbmU="
 	},
 	{
 		"key": "config/mud-being/spring.datasource.url",
 		"flags": 0,
-		"value": "amRiYzpwb3N0Z3Jlc3FsOi8vZGF0YWJhc2U6NTQzMi9tdWRlbmdpbmU="
+		"value": "amRiYzpwb3N0Z3Jlc3FsOi8vZGF0YWJhc2U6NTQzNS9tdWRlbmdpbmU="
 	},
 	{
 		"key": "config/mud-being/being.exchange",
@@ -67,7 +67,7 @@
 	{
 		"key": "config/mud-item/spring.datasource.url",
 		"flags": 0,
-		"value": "amRiYzpwb3N0Z3Jlc3FsOi8vZGF0YWJhc2U6NTQzMi9tdWRlbmdpbmU="
+		"value": "amRiYzpwb3N0Z3Jlc3FsOi8vZGF0YWJhc2U6NTQzNS9tdWRlbmdpbmU="
 	},
 	{
 		"key": "config/mud-item/item.exchange",
@@ -77,17 +77,17 @@
 	{
 		"key": "config/mud-message/spring.datasource.url",
 		"flags": 0,
-		"value": "amRiYzpwb3N0Z3Jlc3FsOi8vZGF0YWJhc2U6NTQzMi9tdWRlbmdpbmU="
+		"value": "amRiYzpwb3N0Z3Jlc3FsOi8vZGF0YWJhc2U6NTQzNS9tdWRlbmdpbmU="
 	},
 	{
 		"key": "config/mud-player/spring.datasource.url",
 		"flags": 0,
-		"value": "amRiYzpwb3N0Z3Jlc3FsOi8vZGF0YWJhc2U6NTQzMi9tdWRlbmdpbmU="
+		"value": "amRiYzpwb3N0Z3Jlc3FsOi8vZGF0YWJhc2U6NTQzNS9tdWRlbmdpbmU="
 	},
 	{
 		"key": "config/mud-world/spring.datasource.url",
 		"flags": 0,
-		"value": "amRiYzpwb3N0Z3Jlc3FsOi8vZGF0YWJhc2U6NTQzMi9tdWRlbmdpbmU="
+		"value": "amRiYzpwb3N0Z3Jlc3FsOi8vZGF0YWJhc2U6NTQzNS9tdWRlbmdpbmU="
 	},
 	{
 		"key": "config/mud-world/spring.rabbitmq.host",

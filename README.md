@@ -92,11 +92,19 @@ the Consul and the Vault images are also available.
 
 In order to run this solution:
 
-- Build all the projects using the parent [pom.xml](mud-infra/pom.xml);
+- Build all the projects using the parent [pom.xml](mud-infra/app/pom.xml);
 
-- Run the [composite](mud-infra/docker-compose.yml);
+- Run the infra [composite](mud-infra/docker-compose.yml).
 The composite raise and populate his own with Consul, Vault and PostgreSQL services.  
 It will take some time to run, wait for container activity to calm down before proceed;
+(you can run this composite in another machine if your memory restrictions are severe)
+
+- Update the [.env file](mud-infra/app/.env)  to point to the server where the infra composite
+is running.  Doesn't use localhost or 127.0.0.1, even if the infra composite is running in 
+the same machine (in these cases, use the machine IP instead);
+
+- Run the app [composite](mud-infra/app/docker-compose.yml);
+Same as before, allow some time for the apps finish starting;
 
 - Run the [Mud-Client](mud-client) project;
 (as this is technically an external project, it's not included in mudengine docker compose file)

@@ -3,7 +3,7 @@ services:
   infra:  
     image: hello-world
     networks:
-      - app_net
+      - net
     depends_on:
       - consul-loader
       - vault-loader
@@ -19,7 +19,7 @@ services:
       - ./rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
       #- ./rabbit/rabbitmq.config:/etc/rabbitmq/rabbitmq.config:rw
     networks:
-      - app_net
+      - net
   database:
     build:
       context: ./postgres/docker
@@ -36,13 +36,13 @@ services:
     ports:
       - 5435:5432
     networks:
-      - app_net
+      - net
   consul:
     image: consul:latest
     ports:
       - 8500:8500
     networks:
-      - app_net
+      - net
   consul-loader:
     build:
       context: ./consul
@@ -52,7 +52,7 @@ services:
       - CONSUL_HTTP_ADDR=http://consul:8500
     command: consul kv import @data.json      
     networks:
-      - app_net
+      - net
     depends_on:
       - consul
       - database      
@@ -65,7 +65,7 @@ services:
     cap_add:
       - IPC_LOCK      
     networks:
-      - app_net
+      - net
   vault-loader:
     build:
       context: ./vault
@@ -78,148 +78,9 @@ services:
     depends_on:
       - vault
     networks:
-      - app_net
-  mud-world:
-    build:
-      context: ../mud-world/
-      dockerfile: ./Dockerfile  
-    image: mudengine/mud-world
-    ports:
-      - 8082:8080
-    environment:
-      - CONSUL_HOST=http://consul
-      - CONSUL_PORT=8500
-      - VAULT_TOKEN=myroot
-      - VAULT_ADDR=http://vault:8200
-      - SPRING_PROFILES_ACTIVE=itg
-    networks:
-      - app_net
-    depends_on:
-      - consul-loader
-      - vault-loader
-      - database
-      - rabbitmq
-  mud-item:
-    build:
-      context: ../mud-item/
-      dockerfile: ./Dockerfile  
-    image: mudengine/mud-item
-    ports:
-      - 8084:8080
-    environment:
-      - CONSUL_HOST=http://consul
-      - CONSUL_PORT=8500
-      - VAULT_TOKEN=myroot
-      - VAULT_ADDR=http://vault:8200
-      - SPRING_PROFILES_ACTIVE=itg      
-    networks:
-      - app_net
-    depends_on:
-      - consul-loader
-      - vault-loader
-      - database
-      - rabbitmq      
-  mud-being:
-    build:
-      context: ../mud-being/
-      dockerfile: ./Dockerfile  
-    image: mudengine/mud-being
-    ports:
-      - 8086:8080
-    environment:
-      - CONSUL_HOST=http://consul
-      - CONSUL_PORT=8500
-      - VAULT_TOKEN=myroot
-      - VAULT_ADDR=http://vault:8200
-      - SPRING_PROFILES_ACTIVE=itg      
-    networks:
-      - app_net
-    depends_on:
-      - consul-loader
-      - vault-loader
-      - database      
-      - rabbitmq
-  mud-message:
-    build:
-      context: ../mud-message/
-      dockerfile: ./Dockerfile  
-    image: mudengine/mud-message
-    ports:
-      - 8088:8080
-    environment:
-      - CONSUL_HOST=http://consul
-      - CONSUL_PORT=8500
-      - VAULT_TOKEN=myroot
-      - VAULT_ADDR=http://vault:8200
-      - SPRING_PROFILES_ACTIVE=itg      
-    networks:
-      - app_net
-    depends_on:
-      - consul-loader
-      - vault-loader
-      - database      
-  mud-action:
-    build:
-      context: ../mud-action/
-      dockerfile: ./Dockerfile  
-    image: mudengine/mud-action
-    ports:
-      - 8090:8080
-    environment:          
-      - CONSUL_HOST=http://consul
-      - CONSUL_PORT=8500
-      - VAULT_TOKEN=myroot
-      - VAULT_ADDR=http://vault:8200
-      - SPRING_PROFILES_ACTIVE=itg      
-    networks:
-      - app_net
-    depends_on:
-      - consul-loader
-      - vault-loader
-      - database
-      - rabbitmq
-  mud-player:
-    build:
-      context: ../mud-player/
-      dockerfile: ./Dockerfile  
-    image: mudengine/mud-player
-    ports:
-      - 8092:8080
-    environment:
-      - CONSUL_HOST=http://consul
-      - CONSUL_PORT=8500
-      - VAULT_TOKEN=myroot
-      - VAULT_ADDR=http://vault:8200
-      - SPRING_PROFILES_ACTIVE=itg      
-      # To enable email sending, uncomment the lines below and provide valid credentials
-      #- SMTP_HOST=smtp.email.com
-      #- SMTP_PORT=587
-      #- SMTP_FROM=someemail@email.com
-      #- SMTP_USER=someemail@email.com
-      #- SMTP_PWD=
-    networks:
-      - app_net
-    depends_on:
-      - consul-loader
-      - vault-loader
-      - database      
-  mud-api:
-    build:
-      context: ../mud-api/
-      dockerfile: ./Dockerfile  
-    image: mudengine/mud-api
-    ports:
-      - 8080:8080
-    environment:
-      - CONSUL_HOST=http://consul
-      - CONSUL_PORT=8500
-      - SPRING_PROFILES_ACTIVE=itg      
-    networks:
-      - app_net  
-    depends_on:
-      - consul-loader
+      - net
 networks:
-  app_net:
+  net:
     ipam:
       driver: default
       config:
