@@ -9,6 +9,16 @@ services:
       - vault-loader
       - database
       - rabbitmq    
+  nosqldb:
+    image: mongo
+    hostname: mongodb
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=mudmongo
+      - MONGO_INITDB_ROOT_PASSWORD=mudmongo
+    ports:
+      - 27017:27017
+    networks:
+      - net
   rabbitmq:
     image: rabbitmq:3-management
     hostname: rabbitmq
