@@ -1,22 +1,26 @@
 version: '3.6'
 services:
-  infra:  
-    image: hello-world
-    networks:
-      - net
-    depends_on:
-      - consul-loader
-      - vault-loader
-      - database
-      - rabbitmq    
   nosqldb:
-    image: mongo
+    build:
+      context: ./mongodb
+      dockerfile: ./Dockerfile
+    image: mudengine/mongodb
     hostname: mongodb
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=mudmongo
-      - MONGO_INITDB_ROOT_PASSWORD=mudmongo
+      - MONGO_INITDB_ROOT_USERNAME=myuser
+      - MONGO_INITDB_ROOT_PASSWORD=mypassword
     ports:
       - 27017:27017
+    networks:
+      - net
+  nosqladmin:
+    image: mongo-express
+    environment:
+      - ME_CONFIG_MONGODB_SERVER=nosqldb
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=myuser
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=mypassword
+    ports:
+      - 8081:8081
     networks:
       - net
   rabbitmq:
