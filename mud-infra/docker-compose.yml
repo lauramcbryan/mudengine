@@ -13,16 +13,39 @@ services:
       - 27017:27017
     networks:
       - net
-  nosqladmin:
-    image: mongo-express
+  elsearch:
+    image: elasticsearch:5.6.12
     environment:
-      - ME_CONFIG_MONGODB_SERVER=nosqldb
-      - ME_CONFIG_MONGODB_ADMINUSERNAME=myuser
-      - ME_CONFIG_MONGODB_ADMINPASSWORD=mypassword
+      - node.name=mud-search
+      - discovery_type=single-node
+      - xpack.security.enabled=false
     ports:
-      - 8081:8081
+      - 9200:9200
+      - 9300:9300
+    ulimits:
+      memlock:
+        hard: -1
+        soft: -1
     networks:
       - net
+  graylog:
+    image: graylog/graylog:2.4
+    environment:
+      - GRAYLOG_PASSWORD_SECRET=ThisIsASecretHandGenerated
+      - GRAYLOG_ROOT_USERNAME=mudlog
+      - GRAYLOG_ROOT_PASSWORD_SHA2=850334960E17F8656CF2BA135D9044FA0C9F9C593589C5699BB0C0CBB325145A
+      - GRAYLOG_MONGODB_URI=mongodb://mudlog:mudlog@nosqldb:27017/graylog
+      - GRAYLOG_ELASTICSEARCH_HOSTS=http://elsearch:9200
+    ports:
+      # Graylog web interface and REST API
+      - 9000:9000
+      - 12201:12201
+      - 12201:12201/udp
+    networks:
+      - net
+    depends_on:
+      - nosqldb
+      - elsearch
   rabbitmq:
     image: rabbitmq:3-management
     hostname: rabbitmq

@@ -10,15 +10,15 @@ spring:
   profiles: dev
   datasource:
     platform: postgres
-    url: jdbc:postgresql://localhost:5432/mudengine
+    url: jdbc:postgresql://localhost:5435/mudengine
     username: mudengine_world_app
     password: mudengine_world_app
 
   rabbitmq:
     host: localhost
     port: 5672
-    username: mudengine
-    password: mudengine
+    username: guest
+    password: guest
     
       
 spring.jpa.properties.hibernate.temp.use_jdbc_metadata_defaults: false

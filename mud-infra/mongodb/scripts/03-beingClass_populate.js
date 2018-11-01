@@ -31,7 +31,7 @@ db.skill.insertMany(
 			{
 				"$ref":"skillCategory", 
 				"$id":"ADM"
-			}
+			},
 			"name": "Farmer", 
 			"description": "Tender the fields" 
 		},
@@ -41,7 +41,7 @@ db.skill.insertMany(
 			{
 				"$ref":"skillCategory", 
 				"$id":"FIGHT"
-			}
+			},
 			"name": "Fighter", 
 			"description": "Fight with base hands" 
 		},
@@ -51,7 +51,7 @@ db.skill.insertMany(
 			{
 				"$ref":"skillCategory", 
 				"$id":"SHOOT"
-			}
+			},
 			"name": "Shooter", 
 			"description": "Shoot with projectile gun" 
 		},
@@ -61,7 +61,7 @@ db.skill.insertMany(
 			{
 				"$ref":"skillCategory", 
 				"$id":"ENG"
-			}
+			},
 			"name": "Builder", 
 			"description": "Construct buildings" 
 		},
@@ -71,7 +71,7 @@ db.skill.insertMany(
 			{
 				"$ref":"skillCategory", 
 				"$id":"MIND"
-			}
+			},
 			"name": "Scholar", 
 			"description": "Improved knowledge" 
 		},

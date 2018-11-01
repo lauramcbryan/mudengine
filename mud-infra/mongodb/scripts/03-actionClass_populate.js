@@ -13,7 +13,7 @@ db.actionClass.insertMany(
 			"runType": "SIMPLE",
 			"parameters": [
 				{
-					"name": "direction",
+					"name": "targetCode",
 					"inputMessage": "Please enter the direction",
 					"type": "DIRECTION",
 					"required": true

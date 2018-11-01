@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+	<consolePlugin />
+
+	<include resource="org/springframework/boot/logging/logback/default.xml"/>
+	
+    <property name="APP_NAME" value="mud-world"/>
+    <property name="APP_BASE_PACKAGE" value="com.jpinfo.mudengine.world"/>
+
+    <springProfile name="dev">
+        <property name="GRAYLOG_HOST" value="localhost"/>
+        <property name="GRAYLOG_PORT" value="12201"/>
+    </springProfile>
+
+    <springProfile name="ti">
+        <property name="GRAYLOG_HOST" value="graylog"/>
+        <property name="GRAYLOG_PORT" value="12201"/>
+    </springProfile>
+
+    <springProfile name="qa">
+        <property name="GRAYLOG_HOST" value="jeremias"/>
+        <property name="GRAYLOG_PORT" value="12201"/>
+    </springProfile>
+
+    <springProfile name="prod">
+        <property name="GRAYLOG_HOST" value="aws-path-of-graylog"/>
+        <property name="GRAYLOG_PORT" value="12201"/>
+    </springProfile>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} – %m%n</pattern>
+        </encoder>
+    </appender>
+    
+    <appender name="LILITH" class="ch.qos.logback.classic.net.SocketAppender">
+      <RemoteHost>localhost</RemoteHost>
+      <Port>4560</Port>
+      <ReconnectionDelay>170</ReconnectionDelay>
+      <IncludeCallerData>true</IncludeCallerData>
+   </appender>
+    
+    <appender name="AWSLOGS" class="io.github.dibog.AwsLogAppender">
+	    <awsConfig>
+	        <credentials>
+	            <accessKeyId>${AWS_ACCESS_KEY}</accessKeyId>
+	            <secretAccessKey>${AWS_SECRET}</secretAccessKey>
+	        </credentials>
+	        <region>us-east-2</region>
+	    </awsConfig>
+    	<createLogGroup>false</createLogGroup>
+    	<groupName>/app/mudengine</groupName>
+    	<streamName>mud-world</streamName>
+    	<dateFormat>yyyyMMdd_HHmm</dateFormat>
+     	<layout>
+        	<pattern>[%thread] %-5level %logger{35} - %msg %n</pattern>
+     	</layout>
+    </appender>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~-->
+    <!-- Appender especifico para logar no Graylog -->
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~-->
+    <appender name="GELF" class="de.siegmar.logbackgelf.GelfUdpAppender">
+        <graylogHost>${GRAYLOG_HOST}</graylogHost>
+        <graylogPort>${GRAYLOG_PORT}</graylogPort>
+        <maxChunkSize>508</maxChunkSize>
+        <useCompression>true</useCompression>
+        <layout class="de.siegmar.logbackgelf.GelfLayout">
+            <includeRawMessage>false</includeRawMessage>
+            <includeMarker>true</includeMarker>
+            <includeMdcData>true</includeMdcData>
+            <includeCallerData>false</includeCallerData>
+            <includeRootCauseData>false</includeRootCauseData>
+            <includeLevelName>true</includeLevelName>
+            <shortPatternLayout class="ch.qos.logback.classic.PatternLayout">
+                <pattern>%m%nopex</pattern>
+            </shortPatternLayout>
+            <fullPatternLayout class="ch.qos.logback.classic.PatternLayout">
+                <pattern>%m</pattern>
+            </fullPatternLayout>
+            <staticField>app_name:${APP_NAME}</staticField>
+        </layout>
+    </appender>
+    
+    <logger name="${APP_BASE_PACKAGE}" level="DEBUG" additivity="false">
+           <appender-ref ref="STDOUT"/>
+    </logger>  
+    
+    <root level="INFO">
+           <appender-ref ref="STDOUT"/>
+    </root>
+    
+    <springProfile name="dev">
+	    <logger name="${APP_BASE_PACKAGE}" level="DEBUG" additivity="false">
+	        <appender-ref ref="LILITH"/>
+	        <appender-ref ref="STDOUT"/>
+	    </logger>  
+
+	    <root level="INFO">
+	        <appender-ref ref="LILITH"/>
+            <appender-ref ref="STDOUT"/>
+	    </root>
+    </springProfile>
+    
+    <springProfile name="ti">
+
+	    <logger name="${APP_BASE_PACKAGE}" level="DEBUG" additivity="false">
+        	<appender-ref ref="GELF"/>
+            <appender-ref ref="STDOUT"/>       
+	    </logger>    
+
+	    <root level="INFO">
+	        <appender-ref ref="GELF"/>
+            <appender-ref ref="STDOUT"/>
+	    </root>
+
+	
+	</springProfile>
+	
+    <springProfile name="qa,prod">
+	    <root level="INFO">
+	        <appender-ref ref="GELF"/>
+	    </root>
+	</springProfile>
+
+</configuration>
