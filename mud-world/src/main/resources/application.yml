@@ -4,25 +4,3 @@ spring:
   datasource:
     platform: h2
 
----
-
-spring:
-  profiles: dev
-  datasource:
-    platform: postgres
-    url: jdbc:postgresql://localhost:5435/mudengine
-    username: mudengine_world_app
-    password: mudengine_world_app
-
-  rabbitmq:
-    host: localhost
-    port: 5672
-    username: guest
-    password: guest
-    
-      
-spring.jpa.properties.hibernate.temp.use_jdbc_metadata_defaults: false
-
-token.secret: a7ac498c7bba59e0eb7c647d2f0197f8
-
-place.exchange: place.exchange

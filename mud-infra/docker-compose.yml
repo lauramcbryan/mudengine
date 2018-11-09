@@ -1,46 +1,5 @@
 version: '3.6'
 services:
-  nosqldb:
-    build:
-      context: ./mongodb
-      dockerfile: ./Dockerfile
-    image: mudengine/mongodb
-    hostname: mongodb
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=myuser
-      - MONGO_INITDB_ROOT_PASSWORD=mypassword
-    ports:
-      - 27017:27017
-    networks:
-      - net
-  rabbitmq:
-    image: rabbitmq:3-management
-    hostname: rabbitmq
-    ports:
-      - 15672:15672
-      - 5672:5672
-    volumes:
-      - ./rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
-      #- ./rabbit/rabbitmq.config:/etc/rabbitmq/rabbitmq.config:rw
-    networks:
-      - net
-  database:
-    build:
-      context: ./postgres/docker
-      dockerfile: ./Dockerfile
-    image: mudengine/postgres
-    environment:
-      - POSTGRES_PASSWORD=mypassword
-      - POSTGRES_USER=myuser
-      - POSTGRES_DB=mudengine
-    #volumes:
-    #    - type: bind
-    #      source: ./postgres/data
-    #      target: /var/lib/postgresql/data
-    ports:
-      - 5435:5432
-    networks:
-      - net
   consul:
     image: consul:latest
     ports:
@@ -59,7 +18,6 @@ services:
       - net
     depends_on:
       - consul
-      - database      
   vault:
     image: vault:0.8.3
     ports:
