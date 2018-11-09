@@ -3,31 +3,3 @@ spring:
     name: mud-being
   datasource:
     platform: h2
-
----
-
-spring:
-  profiles: dev
-  datasource:
-    platform: postgres
-    url: jdbc:postgresql://localhost:5432/mudengine
-    username: mudengine_being_app
-    password: mudengine_being_app
-
-  rabbitmq:
-    host: localhost
-    port: 5672
-    username: mudengine
-    password: mudengine
-    
-      
-spring.jpa.properties.hibernate.temp.use_jdbc_metadata_defaults: false
-
-token.secret: a7ac498c7bba59e0eb7c647d2f0197f8
-
-being.exchange: being.exchange
-
-message.endpoint: http://localhost:8088
-
-item.endpoint: http://localhost:8084
-    

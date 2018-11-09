@@ -23,7 +23,7 @@ management:
 ---
 
 spring:
-  profiles: itg, qa, prod 
+  profiles: dev, itg, qa, prod 
   cloud:
     vault:
       uri: ${VAULT_ADDR}
@@ -41,6 +41,3 @@ spring:
         max-attempts: 6
         initial-interval: 10000   
         max-interval: 10000 
-
-server:
-  port: 8080

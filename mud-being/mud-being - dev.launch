@@ -1,19 +1,21 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <launchConfiguration type="org.springframework.ide.eclipse.boot.launch">
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
-<listEntry value="/mud-world"/>
+<listEntry value="/mud-being/src/main/java/com/jpinfo/mudengine/being/MudBeingApplication.java"/>
 </listAttribute>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
-<listEntry value="4"/>
+<listEntry value="1"/>
 </listAttribute>
 <mapAttribute key="org.eclipse.debug.core.environmentVariables">
-<mapEntry key="AWS_ACCESS_KEY" value="AKIAJIHL4JCGZXZZQNHQ"/>
-<mapEntry key="AWS_SECRET" value="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"/>
+<mapEntry key="CONSUL_HOST" value="http://localhost"/>
+<mapEntry key="CONSUL_PORT" value="8500"/>
 <mapEntry key="SPRING_PROFILES_ACTIVE" value="dev"/>
+<mapEntry key="VAULT_ADDR" value="http://localhost:8200"/>
+<mapEntry key="VAULT_TOKEN" value="myroot"/>
 </mapAttribute>
 <stringAttribute key="org.eclipse.jdt.launching.CLASSPATH_PROVIDER" value="org.springframework.ide.eclipse.boot.launch.BootMavenClassPathProvider"/>
-<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="com.jpinfo.mudengine.world.MudWorldApplication"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="mud-world"/>
+<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="com.jpinfo.mudengine.being.MudBeingApplication"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="mud-being"/>
 <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.springframework.ide.eclipse.boot.launch.BootMavenSourcePathProvider"/>
 <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Djava.security.egd=file:/dev/./urandom"/>
 <stringAttribute key="process_factory_id" value="org.springframework.ide.eclipse.boot.launch.process.BootProcessFactory"/>

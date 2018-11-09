@@ -3,7 +3,4 @@ spring:
     name: mud-action
   datasource:
     platform: h2
-  jpa:
-    properties:
-      hibernate.enable_lazy_load_no_trans: true
 

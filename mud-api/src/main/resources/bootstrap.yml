@@ -11,7 +11,7 @@ spring:
 ---
 
 spring:
-  profiles: itg, qa, prod
+  profiles: dev, itg, qa, prod
   
   cloud:
     consul:

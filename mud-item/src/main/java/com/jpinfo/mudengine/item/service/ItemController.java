@@ -347,31 +347,4 @@ public class ItemController implements ItemService {
 		
 		return responseList;
 	}
-
-	@Override
-	public void destroyAllFromPlace(@PathVariable String worldName, @PathVariable Integer placeCode) {
-		
-		List<MudItem> dbResponse = itemRepository.findByCurWorldAndCurPlaceCode(worldName, placeCode);
-		
-		// We don't have any check for demisedItemClass here... it's assumed that the item is being destroyed
-		// due to the place being destroyed.
-		
-		itemRepository.deleteAll(dbResponse);
-	}
-
-	@Override
-	public void dropAllFromBeing(@PathVariable Long owner, @RequestParam String worldName, @RequestParam Integer placeCode) {
-		
-		List<MudItem> dbResponse = itemRepository.findByCurOwner(owner);
-
-		dbResponse.stream().forEach(d-> {
-			
-			d.setCurOwner(null);
-			d.setCurWorld(worldName);
-			d.setCurPlaceCode(placeCode);
-			
-			itemRepository.save(d);
-		});
-	}
-	
 }

@@ -37,6 +37,7 @@ CREATE TABLE MUDENGINE_ACTION.MUD_ACTION_CLASS_CMD (
 		DESCRIPTION			varchar(200) not null,
 		USAGE   			varchar(50) not null,
 		LOCALE   			varchar(30) not null,
+		RUN_TYPE			varchar(20) default 'SIMPLE' not null,
 		CONSTRAINT MUD_ACTION_CLASS_CMD_PK PRIMARY KEY (COMMAND_ID),
 		FOREIGN KEY (ACTION_CLASS_CODE) REFERENCES MUDENGINE_ACTION.MUD_ACTION_CLASS(ACTION_CLASS_CODE)
 );
@@ -63,6 +64,7 @@ CREATE TABLE MUDENGINE_ACTION.MUD_ACTION (
 		MEDIATOR_TYPE		varchar(20),
 		TARGET_CODE			varchar(20) not null,
 		TARGET_TYPE			varchar(20) not null,
+		ACTION_TYPE			varchar(20),
 		
 		START_TURN			bigint,
 		END_TURN			bigint,

@@ -23,7 +23,7 @@ management:
 ---
 
 spring:
-  profiles: itg, qa, prod 
+  profiles: dev, itg, qa, prod 
   cloud:
     vault:
       uri: ${VAULT_ADDR}
@@ -49,7 +49,3 @@ spring:
     password: ${SMTP_PWD:nopass}
     properties:
       mail.smtp.auth: true
- 
-
-server:
-  port: 8080

@@ -45,24 +45,4 @@ public class ItemServiceClientImpl extends BaseServiceClient implements ItemServ
 		
 		return response;
 	}
-
-	@Override
-	public void dropAllFromBeing(Long owner, String worldName, Integer placeCode) {
-		
-		Map<String, Object> urlVariables = new HashMap<>();
-		urlVariables.put("owner", owner);
-		urlVariables.put("worldName", worldName);
-		urlVariables.put("placeCode", placeCode);
-	
-		try {
-			restTemplate.exchange(itemEndpoint + "/item/being/{owner}?worldName={worldName}&placeCode={placeCode}", 
-					HttpMethod.DELETE, getEmptyHttpEntity(), Void.class, urlVariables);
-			
-		} catch(RestClientResponseException e) {
-			handleError(e);
-		}
-
-		
-	}
-
 }

@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -43,8 +41,6 @@ import com.jpinfo.mudengine.common.utils.LocalizedMessages;
 
 @RestController
 public class BeingController implements BeingService {
-	
-	private static final Logger log = LoggerFactory.getLogger(BeingController.class);
 	
 	@Autowired
 	private ItemServiceClient itemService;
@@ -264,53 +260,14 @@ public class BeingController implements BeingService {
 				.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.BEING_NOT_FOUND));
 		
 		if (canAccess(dbBeing.getPlayerId())) {
-			
-			try {
-		
-				// Update Item service to drop all items of this being
-				itemService.dropAllFromBeing(beingCode, dbBeing.getCurWorld(), dbBeing.getCurPlaceCode());
-			} catch(Exception e) {
-				
-				// as this is a *should have* feature, errors at this point
-				// are being disregarded and just logged.
-				log.error("Error while cascading destroyBeing to dropAllFromBeing", e);
-				
-			}
-			
+
+			// Initially we had a call to itemService here to drop all being items.
+			// Currently this is done asynchronously through AOP pointcut
 			repository.delete(dbBeing);
 			
 		} else {
 			throw new AccessDeniedException(LocalizedMessages.BEING_ACCESS_DENIED);
 		}
-	}
-	
-	@Override
-	public void destroyAllFromPlace(@PathVariable String worldName, @PathVariable Integer placeCode) {
-		
-		List<MudBeing> lstFound = repository.findByCurWorldAndCurPlaceCode(worldName, placeCode);
-		
-		lstFound.stream()
-			.forEach(d -> {
-				
-				itemService.dropAllFromBeing(d.getCode(), worldName, placeCode);
-				repository.delete(d);
-			});
-	}
-	
-	@Override
-	public void destroyAllFromPlayer(@PathVariable Long playerId) {
-		
-		List<MudBeing> lstFound = repository.findByPlayerId(playerId);
-		
-		lstFound.stream()
-			.forEach(d -> {
-				
-				// Drop items carried by that being
-				itemService.dropAllFromBeing(d.getCode(), d.getCurWorld(), d.getCurPlaceCode());
-				
-				// Delete the being in database
-				repository.delete(d);
-			});
 	}
 	
 	private boolean internalSyncBeingHP(MudBeing dbBeing, Being requestBeing) {

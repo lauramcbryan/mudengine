@@ -53,9 +53,11 @@ public class NotificationListener {
 				.stream()
 				.forEach(curItem -> {
 					
-					msg.getWorldName();
-					msg.getTargetEntityId();
+					curItem.setCurOwner(null);
+					curItem.setCurWorld(msg.getWorldName());
+					curItem.setCurPlaceCode(msg.getTargetEntityId().intValue());
 					
+					repository.save(curItem);
 				});
 			
 		}
