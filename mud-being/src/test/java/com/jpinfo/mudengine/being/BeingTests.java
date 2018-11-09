@@ -324,41 +324,6 @@ public class BeingTests {
 	}
 	
 	@Test
-	public void testDestroyAllFromPlace() {
-		
-		MudBeing firstMudBeing = Fixture.from(MudBeing.class)
-				.uses(new MudBeingProcessor())
-				.gimme(BeingTemplates.SIMPLE);
-		
-		MudBeing secondMudBeing = Fixture.from(MudBeing.class)
-				.uses(new MudBeingProcessor())
-				.gimme(BeingTemplates.SIMPLE);
-
-		MudBeing thirdMudBeing = Fixture.from(MudBeing.class)
-				.uses(new MudBeingProcessor())
-				.gimme(BeingTemplates.SIMPLE);
-		
-		given(repository.findByCurWorldAndCurPlaceCode(firstMudBeing.getCurWorld(), firstMudBeing.getCurPlaceCode()))
-			.willReturn(Arrays.asList(firstMudBeing, secondMudBeing, thirdMudBeing));
-		
-		Map<String, Object> urlVariables = new HashMap<String, Object>();
-		
-		urlVariables.put("worldName", firstMudBeing.getCurWorld());
-		urlVariables.put("placeCode", firstMudBeing.getCurPlaceCode());
-
-		ResponseEntity<Void> responseService= restTemplate.exchange(
-				"/being/place/{worldName}/{placeCode}", 
-				HttpMethod.DELETE, emptyHttpEntity, Void.class, urlVariables);
-		
-		assertThat(responseService.getStatusCode()).isEqualTo(HttpStatus.OK);
-
-		verify(repository, times(1)).delete(firstMudBeing);
-		verify(repository, times(1)).delete(secondMudBeing);
-		verify(repository, times(1)).delete(thirdMudBeing);
-		
-	}
-	
-	@Test
 	public void testRead() {
 		
 		MudBeing originalMudBeing = Fixture.from(MudBeing.class)
