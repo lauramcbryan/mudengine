@@ -151,8 +151,6 @@ public class BeingTemplates implements TemplateLoader {
 			add("attrModifiers", has(3).of(MudBeingAttrModifier.class, VALID));
 			add("skillModifiers", has(3).of(MudBeingSkillModifier.class, VALID));
 		}});
-
-
 	}
 
 }

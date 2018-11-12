@@ -174,7 +174,7 @@ public class NotificationListener {
 					if (actingBeing.getPlayerId()!=null) {
 						// Send a message to the being owning the item
 						messageService.putMessage(msg.getTargetEntityId(), 
-								msg.getMessageKey(), msg.getArgs());
+								BeingHelper.BEING_TAKE_YOURS_MSG, msg.getArgs());
 					}
 				});
 				
