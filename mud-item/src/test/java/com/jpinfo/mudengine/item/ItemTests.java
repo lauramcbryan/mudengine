@@ -1,7 +1,7 @@
 package com.jpinfo.mudengine.item;
 
 import org.apache.commons.lang.SerializationUtils;
-import org.aspectj.lang.ProceedingJoinPoint;
+
 import org.junit.Test;
 
 
@@ -15,7 +15,6 @@ import org.junit.runner.RunWith;
 import static org.mockito.BDDMockito.*;
 import static org.mockito.Mockito.verify;
 
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -32,8 +31,6 @@ import com.jpinfo.mudengine.common.item.Item;
 import com.jpinfo.mudengine.common.itemclass.ItemClass;
 import com.jpinfo.mudengine.common.security.TokenService;
 import com.jpinfo.mudengine.common.utils.CommonConstants;
-import com.jpinfo.mudengine.common.utils.NotificationMessage;
-import com.jpinfo.mudengine.common.utils.NotificationMessage.EnumNotificationEvent;
 import com.jpinfo.mudengine.item.fixture.ItemTemplates;
 import com.jpinfo.mudengine.item.fixture.MudItemProcessor;
 import com.jpinfo.mudengine.item.model.MudItem;
@@ -42,7 +39,6 @@ import com.jpinfo.mudengine.item.model.MudItemClass;
 import com.jpinfo.mudengine.item.model.MudItemClassAttr;
 import com.jpinfo.mudengine.item.model.converter.ItemConverter;
 import com.jpinfo.mudengine.item.model.converter.MudItemAttrConverter;
-import com.jpinfo.mudengine.item.notification.NotificationAspect;
 import com.jpinfo.mudengine.item.repository.ItemClassRepository;
 import com.jpinfo.mudengine.item.repository.ItemRepository;
 import com.jpinfo.mudengine.item.utils.ItemHelper;
@@ -58,19 +54,9 @@ public class ItemTests {
 	
 	public static final String ITEM_EXCHANGE = "item.exchange";
 	
-	private static final String  WORLD_NAME = "test";
-	private static final Integer PLACE_CODE = (int)System.currentTimeMillis();
-	private static final Long    CUR_OWNER = System.currentTimeMillis();
-	
 	private static final Integer MAX_DURATION_VALUE = 100;
 	private static final Integer DURATION_VALUE = 500;
-	
-	private static final Integer SMALL_QUANTITY_VALUE = 100;
-	private static final Integer BIG_QUANTITY_VALUE = 1000;
 
-	@MockBean
-	private RabbitTemplate rabbit;
-	
 	@Autowired
 	private TestRestTemplate restTemplate;
 	
@@ -82,12 +68,6 @@ public class ItemTests {
 	
 	@MockBean
 	private ItemClassRepository classRepository;
-	
-	@Autowired
-	private NotificationAspect aspect;
-	
-	@MockBean
-	private ProceedingJoinPoint pjp;
 	
 	private HttpEntity<Object> emptyHttpEntity;
 	
@@ -576,147 +556,6 @@ public class ItemTests {
 
 		
 	}
-	
-	@Test
-	public void testChangeItemClassNotification() throws Throwable {
-
-		MudItemClass newClass = Fixture.from(MudItemClass.class).gimme(ItemTemplates.VALID);
-		
-		MudItem mockBeforeItem = Fixture.from(MudItem.class).gimme(ItemTemplates.RESPONSE_WITH_OWNER);
-		MudItem mockAfterItem = (MudItem) SerializationUtils.clone(mockBeforeItem);
-		
-		// Changing the item class
-		mockAfterItem.setItemClass(newClass);
-		
-		given(repository.findById(mockBeforeItem.getCode())).willReturn(Optional.of(mockBeforeItem));
-		
-		
-		aspect.compareItems(pjp, mockAfterItem);
-		
-		NotificationMessage itemNotification = NotificationMessage.builder()
-				.entity(NotificationMessage.EnumEntity.ITEM)
-				.entityId(mockBeforeItem.getCode())
-				.event(EnumNotificationEvent.ITEM_CLASS_CHANGE)
-			.build();
-		
-		verify(rabbit).convertAndSend(ITEM_EXCHANGE, "", itemNotification);
-	}
-
-	@Test
-	public void testItemTakenNotification() throws Throwable {
-
-		MudItem mockBeforeItem = Fixture.from(MudItem.class).gimme(ItemTemplates.RESPONSE_WITH_PLACE);
-		MudItem mockAfterItem = (MudItem) SerializationUtils.clone(mockBeforeItem);
-		
-		// Changing the item owner
-		mockAfterItem.setCurPlaceCode(null);
-		mockAfterItem.setCurWorld(null);
-		mockAfterItem.setCurOwner(ItemTests.CUR_OWNER);
-		
-		given(repository.findById(mockBeforeItem.getCode())).willReturn(Optional.of(mockBeforeItem));
-		
-		
-		aspect.compareItems(pjp, mockAfterItem);
-		
-		NotificationMessage itemNotification = NotificationMessage.builder()
-				.entity(NotificationMessage.EnumEntity.ITEM)
-				.entityId(mockBeforeItem.getCode())
-				.event(EnumNotificationEvent.ITEM_TAKEN)
-			.build();
-		
-		verify(rabbit).convertAndSend(ITEM_EXCHANGE, "", itemNotification);
-	}
-	
-
-	@Test
-	public void testItemDropNotification() throws Throwable {
-
-		MudItem mockBeforeItem = Fixture.from(MudItem.class).gimme(ItemTemplates.RESPONSE_WITH_OWNER);
-		MudItem mockAfterItem = (MudItem) SerializationUtils.clone(mockBeforeItem);
-		
-		// Changing the item owner
-		mockAfterItem.setCurPlaceCode(ItemTests.PLACE_CODE);
-		mockAfterItem.setCurWorld(ItemTests.WORLD_NAME);
-		mockAfterItem.setCurOwner(null);
-		
-		given(repository.findById(mockBeforeItem.getCode())).willReturn(Optional.of(mockBeforeItem));
-		
-		
-		aspect.compareItems(pjp, mockAfterItem);
-		
-		NotificationMessage itemNotification = NotificationMessage.builder()
-				.entity(NotificationMessage.EnumEntity.ITEM)
-				.entityId(mockBeforeItem.getCode())
-				.event(EnumNotificationEvent.ITEM_DROP)
-			.build();
-		
-		verify(rabbit).convertAndSend(ITEM_EXCHANGE, "", itemNotification);
-	}
-	
-	@Test
-	public void testItemIncreaseQttyNotification() throws Throwable {
-
-		MudItem mockBeforeItem = Fixture.from(MudItem.class).gimme(ItemTemplates.RESPONSE_FULL);
-		MudItem mockAfterItem = (MudItem) SerializationUtils.clone(mockBeforeItem);
-		
-		// Changing the item quantity
-		mockBeforeItem.setQuantity(ItemTests.SMALL_QUANTITY_VALUE);
-		mockAfterItem.setQuantity(ItemTests.BIG_QUANTITY_VALUE);
-		
-		given(repository.findById(mockBeforeItem.getCode())).willReturn(Optional.of(mockBeforeItem));
-		
-		
-		aspect.compareItems(pjp, mockAfterItem);
-		
-		NotificationMessage itemNotification = NotificationMessage.builder()
-				.entity(NotificationMessage.EnumEntity.ITEM)
-				.entityId(mockBeforeItem.getCode())
-				.event(EnumNotificationEvent.ITEM_QTTY_INCREASE)
-			.build();
-		
-		verify(rabbit).convertAndSend(ITEM_EXCHANGE, "", itemNotification);
-	}
-
-	@Test
-	public void testItemDecreaseQttyNotification() throws Throwable {
-
-		MudItem mockBeforeItem = Fixture.from(MudItem.class).gimme(ItemTemplates.RESPONSE_FULL);
-		MudItem mockAfterItem = (MudItem) SerializationUtils.clone(mockBeforeItem);
-		
-		// Changing the item quantity
-		mockBeforeItem.setQuantity(ItemTests.BIG_QUANTITY_VALUE);
-		mockAfterItem.setQuantity(ItemTests.SMALL_QUANTITY_VALUE);
-		
-		given(repository.findById(mockBeforeItem.getCode())).willReturn(Optional.of(mockBeforeItem));
-		
-		
-		aspect.compareItems(pjp, mockAfterItem);
-		
-		NotificationMessage itemNotification = NotificationMessage.builder()
-				.entity(NotificationMessage.EnumEntity.ITEM)
-				.entityId(mockBeforeItem.getCode())
-				.event(EnumNotificationEvent.ITEM_QTTY_DECREASE)
-			.build();
-		
-		verify(rabbit).convertAndSend(ITEM_EXCHANGE, "", itemNotification);
-	}
-	
-	@Test
-	public void testItemDestroyNotification() throws Throwable {
-
-		MudItem mockDestroyedItem = Fixture.from(MudItem.class).gimme(ItemTemplates.RESPONSE_FULL);
-		
-		aspect.sendDestroyNotification(pjp, mockDestroyedItem);
-		
-		NotificationMessage itemNotification = NotificationMessage.builder()
-				.entity(NotificationMessage.EnumEntity.ITEM)
-				.entityId(mockDestroyedItem.getCode())
-				.event(EnumNotificationEvent.ITEM_DESTROY)
-			.build();
-		
-		verify(rabbit).convertAndSend(ITEM_EXCHANGE, "", itemNotification);
-	}
-	
 
 	private void assertAttrMap(MudItem mudItem, Item item) {
 
