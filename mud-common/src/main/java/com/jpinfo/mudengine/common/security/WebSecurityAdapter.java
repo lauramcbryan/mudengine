@@ -9,6 +9,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.jpinfo.mudengine.common.security.CommonSecurityFilter;
+import com.jpinfo.mudengine.common.utils.LogFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -44,6 +45,8 @@ public class WebSecurityAdapter extends WebSecurityConfigurerAdapter {
 			.antMatchers("/message/**").authenticated();
 		
 		http.addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class);
+		
+		http.addFilterAfter(new LogFilter(), CommonSecurityFilter.class);
 	}
 
 }
