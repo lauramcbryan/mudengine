@@ -1,6 +1,7 @@
 package com.jpinfo.mudengine.item.notification;
 
 import java.util.ArrayList;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -10,6 +11,8 @@ import javax.persistence.PersistenceContext;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,6 +28,8 @@ import com.jpinfo.mudengine.item.utils.ItemHelper;
 @Aspect
 @Component
 public class NotificationAspect {
+	
+	private static final Logger log = LoggerFactory.getLogger(NotificationAspect.class);
 	
 	@Autowired
 	private RabbitTemplate rabbit;
@@ -80,10 +85,17 @@ public class NotificationAspect {
 			savedItem = pjp.proceed();
 			
 			notifications.stream()
-				.forEach(itemNotification -> 
+				.forEach(itemNotification -> { 
 					// Send the notification
-					rabbit.convertAndSend(itemExchange, "", itemNotification)
-				);
+					rabbit.convertAndSend(itemExchange, "", itemNotification);
+					
+					log.info("world: {}, entityId: {}, event: {}",
+							itemNotification.getWorldName(),
+							itemNotification.getEntityId(),
+							itemNotification.getEvent()
+							);
+					
+				});
 			
 			
 		} else {
@@ -121,6 +133,12 @@ public class NotificationAspect {
 		
 		// Send Notification
 		rabbit.convertAndSend(itemExchange, "", itemNotification);
+		
+		log.info("world: {}, entityId: {}, event: {}",
+				itemNotification.getWorldName(),
+				itemNotification.getEntityId(),
+				itemNotification.getEvent()
+				);
 	}
 
 	

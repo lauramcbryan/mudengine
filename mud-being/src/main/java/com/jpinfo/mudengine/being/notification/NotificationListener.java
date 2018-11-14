@@ -1,8 +1,11 @@
 package com.jpinfo.mudengine.being.notification;
 
 import java.util.List;
+
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -14,6 +17,8 @@ import com.jpinfo.mudengine.common.utils.NotificationMessage;
 
 @Component
 public class NotificationListener {
+	
+	private static final Logger log = LoggerFactory.getLogger(NotificationListener.class);
 	
 	@Autowired
 	private BeingRepository repository;
@@ -67,23 +72,28 @@ public class NotificationListener {
 
 				// Send a message to all beings in the same place
 				beingListInPlace.stream()
-					.forEach(curBeing -> 
+					.forEach(curBeing -> {
 
 						messageService.putMessage(curBeing.getCode(), 
-								msg.getMessageKey(), msg.getArgs())
+								msg.getMessageKey(), msg.getArgs());
 						
-					);
+						log.info("world: {}, entityId: {}, message: {} ",
+								msg.getWorldName(), curBeing.getCode(), msg.getMessageKey());
+						
+					});
 				
 				break;
 			case PLACE_DESTROY:
 
 				// Destroy all the beings in the same place
 				beingListInPlace.stream()
-					.forEach(curBeing -> 
+					.forEach(curBeing -> {
 						
 						// (That will trigger a BEING_DESTROY notification)
-						repository.delete(curBeing)
-					);
+						repository.delete(curBeing);
+						
+						log.info("world: {}, entityId: {}, DESTROYED", msg.getWorldName(), curBeing.getCode());
+					});
 				
 				break;
 				
@@ -120,6 +130,9 @@ public class NotificationListener {
 					// Send a message to the being owning the item
 					messageService.putMessage(msg.getTargetEntityId(), 
 							msg.getMessageKey(), msg.getArgs());
+					
+					log.info("world: {}, entityId: {} (owner), message: {}",
+							msg.getWorldName(), msg.getTargetEntityId(), msg.getMessageKey());
 				} else {
 
 					// Gathering all beings in the same place
@@ -127,12 +140,15 @@ public class NotificationListener {
 							msg.getWorldName(), 
 							msg.getTargetEntityId().intValue())
 						.stream()
-						.forEach(curBeing -> 
+						.forEach(curBeing -> {
 
 						// Send a message to all other beings in the same place
 						messageService.putMessage(curBeing.getCode(), 
-								msg.getMessageKey(), msg.getArgs())
-						);
+								msg.getMessageKey(), msg.getArgs());
+						
+						log.info("world: {}, entityId: {}, message: {}  ",
+								msg.getWorldName(), curBeing.getCode(), msg.getMessageKey());
+						});
 				}
 				
 				break;
@@ -146,6 +162,9 @@ public class NotificationListener {
 							// Send a message to the being dropping the item (if it's a playable being)
 							messageService.putMessage(msg.getTargetEntityId(), 
 									BeingHelper.BEING_DROP_YOURS_MSG, msg.getArgs());
+							
+							log.info("world: {}, entityId: {} (owner), message: {}",
+									msg.getWorldName(), msg.getTargetEntityId(), BeingHelper.BEING_DROP_YOURS_MSG);
 						}
 					
 						// Gathering all beings in the same place than the acting being
@@ -157,13 +176,16 @@ public class NotificationListener {
 							.filter(curBeing -> !curBeing.getCode().equals(actingBeing.getCode()))
 							// excluding non-playable beings
 							.filter(curBeing -> curBeing.getPlayerId()!=null)
-							.forEach(curBeing -> 
+							.forEach(curBeing -> {
 	
 								// Send a message to all other beings in the same place
 								messageService.putMessage(curBeing.getCode(), 
-										BeingHelper.BEING_DROP_ANOTHER_MSG, msg.getArgs())
-							);
-					});
+										BeingHelper.BEING_DROP_ANOTHER_MSG, msg.getArgs());
+								
+								log.info("world: {}, entityId: {}, message: {}",
+										msg.getWorldName(), curBeing.getCode(), BeingHelper.BEING_DROP_ANOTHER_MSG);
+								});
+						});
 				
 				break;
 				
@@ -175,6 +197,9 @@ public class NotificationListener {
 						// Send a message to the being owning the item
 						messageService.putMessage(msg.getTargetEntityId(), 
 								BeingHelper.BEING_TAKE_YOURS_MSG, msg.getArgs());
+						
+						log.info("world: {}, entityId: {}, message: {}",
+								msg.getWorldName(), msg.getTargetEntityId(), BeingHelper.BEING_TAKE_YOURS_MSG);
 					}
 				});
 				

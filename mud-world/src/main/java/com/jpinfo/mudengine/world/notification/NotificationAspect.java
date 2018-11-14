@@ -12,6 +12,8 @@ import javax.persistence.PersistenceContext;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,6 +30,8 @@ import com.jpinfo.mudengine.world.util.WorldHelper;
 @Aspect
 @Component
 public class NotificationAspect {
+	
+	private static final Logger log = LoggerFactory.getLogger(NotificationAspect.class);
 	
 	@Autowired
 	private RabbitTemplate rabbit;
@@ -92,10 +96,16 @@ public class NotificationAspect {
 			
 			// Pass through the notification list and send the messages
 			notifications.stream()
-				.forEach(placeNotification -> 
+				.forEach(placeNotification -> {
 					// Send the notification
-					rabbit.convertAndSend(placeExchange, "", placeNotification)
-				);
+					rabbit.convertAndSend(placeExchange, "", placeNotification);
+					
+					log.info("world: {}, entityId: {}, event: {}",
+							placeNotification.getWorldName(),
+							placeNotification.getEntityId(),
+							placeNotification.getEvent()
+							);
+				});
 			
 
 		} else {
@@ -150,7 +160,12 @@ public class NotificationAspect {
 		
 		// Send the notification
 		rabbit.convertAndSend(placeExchange, "", placeNotification);
-		
+
+		log.info("world: {}, entityId: {}, event: {}",
+				placeNotification.getWorldName(),
+				placeNotification.getEntityId(),
+				placeNotification.getEvent()
+				);
 	}
 
 	/**

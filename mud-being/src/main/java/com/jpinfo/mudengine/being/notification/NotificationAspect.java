@@ -1,6 +1,7 @@
 package com.jpinfo.mudengine.being.notification;
 
 import java.util.ArrayList;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -11,6 +12,8 @@ import javax.persistence.PersistenceContext;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,6 +36,8 @@ import lombok.Getter;
 @Aspect
 @Component
 public class NotificationAspect {
+	
+	private static final Logger log = LoggerFactory.getLogger(NotificationAspect.class);
 
 	@Autowired
 	private RabbitTemplate rabbit;
@@ -55,7 +60,7 @@ public class NotificationAspect {
 
 	/**
 	 * Local class to hold the notification messages to be send to the notification service
-	 * after the entity upate is consolidated.
+	 * after the entity update is consolidated.
 	 */
 	@Getter
 	class BeingMessage {
@@ -115,13 +120,19 @@ public class NotificationAspect {
 			
 			// Pass through the notification list
 			notifications.stream()
-				.forEach(curMessage ->
+				.forEach(curMessage -> {
 				
 					// Send the message
 					messageService.putMessage(curMessage.getTargetCode(), 
 							curMessage.getMessage(),
-							curMessage.getParms())
-				);
+							curMessage.getParms());
+					
+					log.info("world: {}, entityId: {}, message: {}",
+							afterBeing.getCurWorld(),
+							afterBeing.getCode(),
+							curMessage.getMessage()
+							);
+				});
 			
 
 		} else {
@@ -164,6 +175,12 @@ public class NotificationAspect {
 		// If the destroyed being belongs to a player, send a message to the player
 		if (destroyedBeing.getPlayerId()!=null) {
 			messageService.putMessage(destroyedBeing.getCode(), BeingHelper.BEING_DESTROY_YOURS_MSG);
+			
+			log.info("world: {}, entityId: {}, message: {}",
+					destroyedBeing.getCurWorld(),
+					destroyedBeing.getCode(),
+					BeingHelper.BEING_DESTROY_YOURS_MSG
+					);
 		}
 		
 		List<MudBeing> beingListInPlace =
@@ -177,12 +194,19 @@ public class NotificationAspect {
 			.filter(curBeing -> !curBeing.getCode().equals(destroyedBeing.getCode()))
 			// Filtering only playable characters
 			.filter(curBeing -> curBeing.getPlayerId()!=null)
-			.forEach(curBeing -> 
+			.forEach(curBeing -> {
+				
 				messageService.putMessage(curBeing.getCode(), 
 						BeingHelper.BEING_DESTROY_ANOTHER_MSG, 
 						destroyedBeing.getName()!=null ? destroyedBeing.getName() : destroyedBeing.getBeingClass().getName()
-								)
-			);
+								);
+				log.info("world: {}, entityId: {}, message: {} ",
+						destroyedBeing.getCurWorld(),
+						curBeing.getCode(),
+						BeingHelper.BEING_DESTROY_ANOTHER_MSG
+						);
+				
+			});
 		
 	}
 	
