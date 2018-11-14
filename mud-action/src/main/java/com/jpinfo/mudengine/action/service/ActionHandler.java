@@ -165,7 +165,7 @@ public class ActionHandler {
 				fullState.getActor().getPlace());
 
 		
-		// If the Mediator is used, updated it too
+		// If the Mediator is used, update it too
 		if (fullState.getMediator()!=null) {
 			itemService.updateItem(fullState.getMediator().getCode(), fullState.getMediator());
 		}
@@ -219,7 +219,17 @@ public class ActionHandler {
 				break;
 			
 			case PLACE:
-				throw new IllegalParameterException("Messages to PLACEs not supported.");
+				
+				PlaceComposite targetPlace = (PlaceComposite)fullState.getTarget();
+				
+				this.messageService.broadcastMessage(targetPlace.getPlace().getCode(),
+						curTargetMessage.getMessageKey(), 
+						curTargetMessage.getSenderCode(),
+						fullState.getActor().getBeing().getName(),
+						curTargetMessage.getArgs()
+						);
+				
+				break;
 				
 			case ITEM:
 				throw new IllegalParameterException("Messages to ITEMs not supported.");

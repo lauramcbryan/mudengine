@@ -42,5 +42,28 @@ public class MessageServiceClientImpl extends BaseServiceClient implements Messa
 			handleError(e);
 		}
 	}
+	
+	@Override
+	public void broadcastMessage(Integer placeCode, String message, Long senderCode, String senderName, String... parms) {
+		
+		Map<String, Object> urlVariables = new HashMap<>();
+		urlVariables.put("placeCode", placeCode);
+		urlVariables.put("message", message);
+		urlVariables.put("senderCode", senderCode);
+		urlVariables.put("senderName", senderName);
+		
+		if (parms!=null)
+			urlVariables.put("parms", String.join(", ", parms));
+
+	
+		try {
+			restTemplate.exchange(messageEndpoint + 
+					"/message/place/{placeCode}?senderCode={senderCode}&senderName={senderName}&message={message}&parms={parms}", 
+					HttpMethod.PUT, getEmptyHttpEntity(), Void.class, urlVariables);
+
+		} catch(RestClientResponseException e) {
+			handleError(e);
+		}
+	}
 
 }

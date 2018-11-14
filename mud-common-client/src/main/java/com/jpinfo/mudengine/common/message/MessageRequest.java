@@ -5,15 +5,15 @@ import java.util.List;
 import lombok.Data;
 
 @Data
-public class Message {
+public class MessageRequest {
 
-	private String messageDate;
-	
 	private Long senderCode;
 	
 	private String senderName;
 	
-	private String content;
+	private String messageKey;
+	
+	private String[] args;
 	
 	private List<MessageEntity> changedEntities;
 }

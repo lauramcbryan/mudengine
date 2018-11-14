@@ -10,12 +10,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.jpinfo.mudengine.common.being.Being;
 import com.jpinfo.mudengine.common.exception.IllegalParameterException;
 import com.jpinfo.mudengine.common.message.Message;
+import com.jpinfo.mudengine.common.message.MessageRequest;
 import com.jpinfo.mudengine.common.player.Player;
 import com.jpinfo.mudengine.common.player.Session;
 import com.jpinfo.mudengine.common.security.MudUserDetails;
@@ -24,9 +26,9 @@ import com.jpinfo.mudengine.common.utils.CommonConstants;
 import com.jpinfo.mudengine.common.utils.LocalizedMessages;
 import com.jpinfo.mudengine.message.client.BeingServiceClient;
 import com.jpinfo.mudengine.message.model.MudMessage;
-import com.jpinfo.mudengine.message.model.MudMessageParm;
 import com.jpinfo.mudengine.message.model.converter.MessageConverter;
-import com.jpinfo.mudengine.message.model.pk.MudMessageParmPK;
+import com.jpinfo.mudengine.message.model.converter.MudMessageEntityConverter;
+import com.jpinfo.mudengine.message.model.converter.MudMessageParmConverter;
 import com.jpinfo.mudengine.message.repository.MudMessageRepository;
 
 @RestController
@@ -41,61 +43,41 @@ public class MessageController implements MessageService {
 	@Autowired
 	private MessageConverter messageConverter;
 	
-
-	@Override
-	public void putPlainMessage(Long targetCode, String message, Long senderCode, String senderName) {
-		
-		MudMessage dbMessage = new MudMessage();
-		
-		dbMessage.setBeingCode(targetCode);
-		dbMessage.setMessageKey(message);
-		dbMessage.setReadFlag(false);
-		dbMessage.setPlainFlag(true);
-		dbMessage.setInsertDate(new java.sql.Timestamp(System.currentTimeMillis()));
-		
-		dbMessage.setSenderCode(senderCode);
-		dbMessage.setSenderName(senderName);
-		
-		repository.save(dbMessage);
-	}
-	
 	@Override
 	public void putMessage( 
-			@PathVariable("targetCode") Long targetCode, @RequestParam("message") String message, 
-			@RequestParam(name="senderCode", required=false) Long senderCode, @RequestParam(name="senderName", required=false) String senderName, 
-			@RequestParam(name="parms", required=false) String...parms) {
+			@PathVariable("targetCode") Long targetCode,
+			@RequestBody MessageRequest request) {
 		
 		MudMessage dbMessage = new MudMessage();
 		
 		dbMessage.setBeingCode(targetCode);
-		dbMessage.setMessageKey(message);
+		dbMessage.setMessageKey(request.getMessageKey());
 		dbMessage.setReadFlag(false);
 		dbMessage.setInsertDate(new java.sql.Timestamp(System.currentTimeMillis()));
 		
-		dbMessage.setSenderCode(senderCode);
-		dbMessage.setSenderName(senderName);
+		dbMessage.setSenderCode(request.getSenderCode());
+		dbMessage.setSenderName(request.getSenderName());
 		
 		dbMessage = repository.save(dbMessage);
 		
+		// Declaring a final variable just to be able to use it in
+		// streams below
+		final Long messageId = dbMessage.getMessageId();
 		
-		int evalOrder = 0;
+		// Set the params, if the exist
+		dbMessage.setParms(MudMessageParmConverter.build(messageId, request.getArgs()));
 		
-		if (parms!=null) {
-
-			for(String curParam: parms) {
-				
-				MudMessageParm dbParm = new MudMessageParm();
-				MudMessageParmPK pk = new MudMessageParmPK();
-				
-				pk.setMessageId(dbMessage.getMessageId());
-				pk.setEvalOrder(evalOrder);
-				dbParm.setValue(curParam);
-				dbParm.setId(pk);
-				
-				dbMessage.getParms().add(dbParm);
-				
-				evalOrder++;
-			}
+		
+		// Set the changed entities, if they exist
+		if (request.getChangedEntities()!=null) {
+			
+			dbMessage.setEntities(
+					request.getChangedEntities().stream()
+						.map(d -> 
+							MudMessageEntityConverter.build(messageId, d)
+							)
+					.collect(Collectors.toList())
+			);
 		}
 		
 		repository.save(dbMessage);
@@ -103,20 +85,24 @@ public class MessageController implements MessageService {
 
 	@Override
 	public void broadcastMessage( 
-			@PathVariable("placeCode") Integer placeCode, @RequestParam("message") String message, 
-			@RequestParam(name="senderCode", required=false) Long senderCode, @RequestParam(name="senderName", required=false) String senderName, 
-			@RequestParam(name="parms", required=false) String...parms) {
+			@PathVariable("placeCode") Integer placeCode, 
+			@RequestBody MessageRequest request) {
 		
-		// Select all beings from a place
-		// @TODO Solve the worldName
-		List<Being> allBeingFromPlace = beingService.getAllFromPlace("aforgotten", placeCode);
 		
-		for(Being curBeing: allBeingFromPlace) {
+		MudUserDetails uDetails = (MudUserDetails)
+				SecurityContextHolder.getContext().getAuthentication().getDetails();
+		
+		uDetails.getSessionData().ifPresent(d -> {
 			
-			if (curBeing.getType().equals(Being.enumBeingType.PLAYABLE)) {
-				putMessage(curBeing.getCode(), message, senderCode, senderName, parms);
-			}
-		}
+			// Select all beings from a place
+			List<Being> allBeingsFromPlace = beingService.getAllFromPlace(d.getCurWorldName(), placeCode);
+			
+			allBeingsFromPlace.stream()
+				.filter(e -> e.getPlayerId()!=null)
+				.forEach(e -> 
+					putMessage(e.getCode(), request)
+				);
+		});
 	}
 	
 	
@@ -164,7 +150,7 @@ public class MessageController implements MessageService {
 						d.setReadFlag(true);
 						
 						// Convert (and localizes) the message
-						return d.getPlainFlag() ? messageConverter.build(d) : messageConverter.build(d, callerLocale);
+						return messageConverter.build(d, callerLocale);
 					})
 					.collect(Collectors.toList());
 			

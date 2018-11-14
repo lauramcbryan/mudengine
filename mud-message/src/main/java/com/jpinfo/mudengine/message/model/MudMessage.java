@@ -1,7 +1,9 @@
 package com.jpinfo.mudengine.message.model;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -46,16 +48,16 @@ public class MudMessage {
 	@Column(name="READ_FLAG")
 	private Boolean readFlag;
 	
-	@Column(name="PLAIN_FLAG")
-	private Boolean plainFlag;
-	
 	@OneToMany(mappedBy="id.messageId", cascade=CascadeType.ALL, orphanRemoval=true)
 	@OrderBy("eval_order ASC")
 	private Set<MudMessageParm> parms;
 	
+	@OneToMany(mappedBy="id.messageId", cascade=CascadeType.ALL, orphanRemoval=true)
+	private List<MudMessageEntity> entities;
+	
 	
 	public MudMessage() {
 		this.parms = new HashSet<>();
-		this.plainFlag = Boolean.FALSE;
+		this.entities = new ArrayList<>();
 	}
 }

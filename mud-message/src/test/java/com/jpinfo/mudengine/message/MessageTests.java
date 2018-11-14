@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.annotation.PostConstruct;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,11 +27,16 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import com.jpinfo.mudengine.common.being.Being;
 import com.jpinfo.mudengine.common.message.Message;
+import com.jpinfo.mudengine.common.message.MessageRequest;
 import com.jpinfo.mudengine.common.player.Player;
 import com.jpinfo.mudengine.common.player.Session;
 import com.jpinfo.mudengine.common.security.TokenService;
 import com.jpinfo.mudengine.common.utils.CommonConstants;
 import com.jpinfo.mudengine.message.client.BeingServiceClient;
+import com.jpinfo.mudengine.message.fixture.MessageTemplates;
+
+import br.com.six2six.fixturefactory.Fixture;
+import br.com.six2six.fixturefactory.loader.FixtureFactoryLoader;
 
 import static org.mockito.BDDMockito.*;
 
@@ -144,9 +151,35 @@ public class MessageTests {
 		return brAuthEntity;
 	}
 	
+	@PostConstruct
+	public void setup() {
+		FixtureFactoryLoader.loadTemplates("com.jpinfo.mudengine.message.fixture");
+	}
+	
 
 	@Test
 	public void contextLoads() {
+	}
+	
+	
+	public void testPutMessage() {
+		
+		Map<String, Object> urlVariables = new HashMap<String, Object>();
+		
+		MessageRequest msgRequest = 
+				Fixture.from(MessageRequest.class).gimme(MessageTemplates.VALID);
+		
+		// PUT a message
+		urlVariables.put("targetCode", MessageTests.TEST_BEING_CODE);
+		
+		ResponseEntity<Void> responsePut = restTemplate.exchange(
+				"/message/being/{targetCode}", HttpMethod.PUT, 
+				getUsAuthHeader(), Void.class, urlVariables);
+		
+	}
+	
+	public void testBroadcastMessage() {
+		
 	}
 	
 	@Test

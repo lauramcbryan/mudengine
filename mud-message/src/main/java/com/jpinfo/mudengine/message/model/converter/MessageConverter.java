@@ -44,25 +44,16 @@ public class MessageConverter {
 		result.setSenderName(dbMessage.getSenderName());
 
 		result.setMessageDate(df.format(dbMessage.getInsertDate()));
-
-		return result;
-
-	}
-	
-	public Message build(MudMessage dbMessage) {
 		
-		Message result = new Message();
-
-		// Get the main message without localization
-		result.setContent(dbMessage.getMessageKey());
-		result.setSenderCode(dbMessage.getSenderCode());
-		result.setSenderName(dbMessage.getSenderName());
-
-		result.setMessageDate(df.format(dbMessage.getInsertDate()));
+		result.setChangedEntities(
+			dbMessage.getEntities().stream()
+				.map(MessageEntityConverter::build)
+				.collect(Collectors.toList())
+			);
 
 		return result;
+
 	}
-	
 	
 	private String getLocalizedMessage(String originalValue, String callerLocale) {
 		
