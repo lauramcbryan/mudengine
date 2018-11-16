@@ -45,15 +45,4 @@ public class ActionInfo extends Action {
 				(super.getEndTurn() <= currentTurn) && 
 				!this.getRunType().equals(Action.EnumRunningType.CONTINUOUS);
 	}
-	
-	
-	public void addMessage(Long senderCode, Long targetCode, String targetType, String messageKey, String... parms) {
-		
-		this.messages.add(new ActionMessage(senderCode, targetCode, targetType, messageKey, parms));
-	}
-	
-	public void addMessage(Long senderCode, Long targetCode, String targetType, String plainMessage) {
-		
-		this.messages.add(new ActionMessage(senderCode, targetCode, targetType, plainMessage));
-	}
 }

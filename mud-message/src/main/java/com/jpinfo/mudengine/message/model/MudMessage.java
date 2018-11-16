@@ -9,6 +9,7 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -48,11 +49,11 @@ public class MudMessage {
 	@Column(name="READ_FLAG")
 	private Boolean readFlag;
 	
-	@OneToMany(mappedBy="id.messageId", cascade=CascadeType.ALL, orphanRemoval=true)
+	@OneToMany(mappedBy="id.messageId", cascade=CascadeType.ALL, orphanRemoval=true, fetch=FetchType.EAGER)
 	@OrderBy("eval_order ASC")
 	private Set<MudMessageParm> parms;
 	
-	@OneToMany(mappedBy="id.messageId", cascade=CascadeType.ALL, orphanRemoval=true)
+	@OneToMany(mappedBy="id.messageId", cascade=CascadeType.ALL, orphanRemoval=true, fetch=FetchType.EAGER)
 	private List<MudMessageEntity> entities;
 	
 	

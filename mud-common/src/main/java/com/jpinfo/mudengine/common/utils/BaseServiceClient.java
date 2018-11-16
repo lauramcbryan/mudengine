@@ -12,14 +12,18 @@ import com.jpinfo.mudengine.common.exception.IllegalParameterException;
 
 public abstract class BaseServiceClient {
 	
-
-	protected HttpEntity<Object> getEmptyHttpEntity() {
+	protected HttpHeaders getAuthHeaders() {
 		
 		String authToken = (String)SecurityContextHolder.getContext().getAuthentication().getCredentials();
 		HttpHeaders authHeaders = new HttpHeaders();
 		authHeaders.add(CommonConstants.AUTH_TOKEN_HEADER, authToken);
 		
-		return new HttpEntity<>(authHeaders);
+		return authHeaders;
+	}
+
+	protected HttpEntity<Object> getEmptyHttpEntity() {
+		
+		return new HttpEntity<>(getAuthHeaders());
 	}
 	
 	

@@ -208,25 +208,19 @@ public class ActionHandler {
 		for(ActionMessage curTargetMessage: fullState.getMessages()) {
 
 			// Send message to the target
-			switch (fullState.getTargetType()) {
+			switch (curTargetMessage.getTargetType()) {
 			
 			case BEING:
-				this.messageService.putMessage(fullState.getActorCode(), 
-						curTargetMessage.getMessageKey(), 
-						curTargetMessage.getSenderCode(),
-						fullState.getActor().getBeing().getName(),
-						curTargetMessage.getArgs());
+				this.messageService.putMessage(
+						curTargetMessage.getTargetCode(),
+						curTargetMessage);
 				break;
 			
 			case PLACE:
 				
-				PlaceComposite targetPlace = (PlaceComposite)fullState.getTarget();
-				
-				this.messageService.broadcastMessage(targetPlace.getPlace().getCode(),
-						curTargetMessage.getMessageKey(), 
-						curTargetMessage.getSenderCode(),
-						fullState.getActor().getBeing().getName(),
-						curTargetMessage.getArgs()
+				this.messageService.broadcastMessage(
+						curTargetMessage.getTargetCode().intValue(),
+						curTargetMessage
 						);
 				
 				break;

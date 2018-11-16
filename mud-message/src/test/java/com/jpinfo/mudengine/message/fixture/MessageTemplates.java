@@ -1,9 +1,9 @@
 package com.jpinfo.mudengine.message.fixture;
 
-import java.util.List;
-
+import com.jpinfo.mudengine.common.being.Being;
 import com.jpinfo.mudengine.common.message.MessageEntity;
 import com.jpinfo.mudengine.common.message.MessageEntity.EnumEntityType;
+import com.jpinfo.mudengine.message.model.MudMessage;
 import com.jpinfo.mudengine.common.message.MessageRequest;
 
 import br.com.six2six.fixturefactory.Fixture;
@@ -19,6 +19,11 @@ public class MessageTemplates implements TemplateLoader {
 	
 	@Override
 	public void load() {
+		
+		Fixture.of(Being.class).addTemplate(VALID, new Rule() {{
+			add("code", random(Long.class));
+			add("playerId", random(Long.class));
+		}});
 		
 		Fixture.of(MessageEntity.class).addTemplate(VALID, new Rule() {{
 			add("entityType", random(EnumEntityType.ITEM, EnumEntityType.BEING, EnumEntityType.PLACE));
@@ -41,6 +46,17 @@ public class MessageTemplates implements TemplateLoader {
 		
 		Fixture.of(MessageRequest.class).addTemplate(ENTITIES).inherits(VALID, new Rule() {{
 			add("changedEntities", has(2).of(MessageEntity.class, VALID));
+		}});
+		
+		Fixture.of(MudMessage.class).addTemplate(VALID, new Rule() {{
+			
+			add("messageId", random(Long.class));
+			add("beingCode", random(Long.class));
+			add("senderCode", random(Long.class));
+			add("senderName", regex("Sender-(\\d{4})"));
+			add("messageKey", regex("mkey-(\\d{4})"));
+			add("readFlag", random(Boolean.class));
+			add("insertDate", new java.sql.Timestamp(System.currentTimeMillis()));
 		}});
 		
 	}

@@ -1,5 +1,6 @@
 package com.jpinfo.mudengine.message.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -8,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -44,7 +47,7 @@ public class MessageController implements MessageService {
 	private MessageConverter messageConverter;
 	
 	@Override
-	public void putMessage( 
+	public ResponseEntity<Long> putMessage( 
 			@PathVariable("targetCode") Long targetCode,
 			@RequestBody MessageRequest request) {
 		
@@ -58,6 +61,7 @@ public class MessageController implements MessageService {
 		dbMessage.setSenderCode(request.getSenderCode());
 		dbMessage.setSenderName(request.getSenderName());
 		
+		// Persisting the record to have the messageId
 		dbMessage = repository.save(dbMessage);
 		
 		// Declaring a final variable just to be able to use it in
@@ -65,29 +69,33 @@ public class MessageController implements MessageService {
 		final Long messageId = dbMessage.getMessageId();
 		
 		// Set the params, if the exist
-		dbMessage.setParms(MudMessageParmConverter.build(messageId, request.getArgs()));
+		dbMessage.getParms().addAll(MudMessageParmConverter.build(messageId, request.getArgs()));
 		
 		
 		// Set the changed entities, if they exist
 		if (request.getChangedEntities()!=null) {
 			
-			dbMessage.setEntities(
+			dbMessage.getEntities().addAll(
 					request.getChangedEntities().stream()
-						.map(d -> 
+						.map(d ->
 							MudMessageEntityConverter.build(messageId, d)
-							)
+						)
 					.collect(Collectors.toList())
 			);
 		}
 		
+		// Update the record in database, now fully formed
 		repository.save(dbMessage);
+		
+		return new ResponseEntity<>(dbMessage.getMessageId(), HttpStatus.CREATED);
 	}
 
 	@Override
-	public void broadcastMessage( 
+	public ResponseEntity<List<Long>> broadcastMessage( 
 			@PathVariable("placeCode") Integer placeCode, 
 			@RequestBody MessageRequest request) {
 		
+		List<Long> resultList = new ArrayList<>();
 		
 		MudUserDetails uDetails = (MudUserDetails)
 				SecurityContextHolder.getContext().getAuthentication().getDetails();
@@ -99,10 +107,15 @@ public class MessageController implements MessageService {
 			
 			allBeingsFromPlace.stream()
 				.filter(e -> e.getPlayerId()!=null)
-				.forEach(e -> 
-					putMessage(e.getCode(), request)
+				.forEach(e ->
+					resultList.add(
+							putMessage(e.getCode(), request).getBody()
+							)
 				);
 		});
+		
+		
+		return new ResponseEntity<>(resultList, HttpStatus.CREATED);
 	}
 	
 	

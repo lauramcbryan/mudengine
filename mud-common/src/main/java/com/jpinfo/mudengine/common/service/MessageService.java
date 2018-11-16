@@ -2,6 +2,7 @@ package com.jpinfo.mudengine.common.service;
 
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,12 +17,12 @@ public interface MessageService {
 	
 	
 	@RequestMapping(method=RequestMethod.PUT, path="/being/{targetCode}")
-	public void putMessage( 
+	public ResponseEntity<Long> putMessage( 
 			@PathVariable("targetCode") Long targetCode, 
 			@RequestBody MessageRequest request);
 	
 	@RequestMapping(method=RequestMethod.PUT, path="/place/{placeCode}")
-	public void broadcastMessage( 
+	public ResponseEntity<List<Long>> broadcastMessage( 
 			@PathVariable("placeCode") Integer placeCode, 
 			@RequestBody MessageRequest request);
 	

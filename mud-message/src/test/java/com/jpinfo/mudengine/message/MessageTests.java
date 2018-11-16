@@ -2,7 +2,6 @@ package com.jpinfo.mudengine.message;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +21,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.jpinfo.mudengine.common.being.Being;
@@ -33,81 +31,64 @@ import com.jpinfo.mudengine.common.player.Session;
 import com.jpinfo.mudengine.common.security.TokenService;
 import com.jpinfo.mudengine.common.utils.CommonConstants;
 import com.jpinfo.mudengine.message.client.BeingServiceClient;
+import com.jpinfo.mudengine.message.fixture.MessageProcessor;
 import com.jpinfo.mudengine.message.fixture.MessageTemplates;
+import com.jpinfo.mudengine.message.model.MudMessage;
+import com.jpinfo.mudengine.message.model.MudMessageLocale;
+import com.jpinfo.mudengine.message.model.pk.MudMessageLocalePK;
+import com.jpinfo.mudengine.message.repository.MudMessageLocaleRepository;
+import com.jpinfo.mudengine.message.repository.MudMessageRepository;
 
 import br.com.six2six.fixturefactory.Fixture;
 import br.com.six2six.fixturefactory.loader.FixtureFactoryLoader;
 
 import static org.mockito.BDDMockito.*;
 
-@ActiveProfiles("test")
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment=WebEnvironment.RANDOM_PORT,
 	properties= {"token.secret=a7ac498c7bba59e0eb7c647d2f0197f8"})
 public class MessageTests {
 	
-	public static final String TEST_USERNAME = "username";
-	public static final Long TEST_PLAYER_ID = 1L;
+	private static final String TEST_WORLD = "aforgotten";
 	
-	public static final String TEST_LOCALE_US = "en_US";
-	public static final String TEST_LOCALE_PT = "pt_BR";
-
-	public static final Long TEST_BEING_CODE = 1L;
-	public static final String TEST_BEING_NAME = "Test Being";
+	private static final String TEST_USERNAME = "username";
+	private static final Long TEST_PLAYER_ID = 1L;
 	
-	public static final Long TEST_BEING_CODE_2 = 2L;
-	public static final Integer TEST_PAGE_COUNT = 0;
-	public static final Integer TEST_PAGE_SIZE = 10;
+	private static final String TEST_LOCALE_US = "en_US";
 
-	public static final Long TEST_BEING_CODE_3 = 3L;
+	private static final Long TEST_BEING_CODE = 1L;
+	
+	private static final Long TEST_BEING_CODE_2 = 2L;
+	private static final Integer TEST_PAGE_COUNT = 1;
+	private static final Integer TEST_PAGE_SIZE = 10;
 
-	public static final Long TEST_BEING_CODE_4 = 4L;
+	private static final Long TEST_BEING_CODE_3 = 3L;
 
 
 	// For broadcast messages
-	public static final Integer TEST_PLACE_ID = 999;
-	public static final Long TEST_BEING_CODE_5 = 5L;
-	public static final Long TEST_BEING_CODE_6 = 6L;
+	private static final Integer TEST_PLACE_ID = 999;
 	
-	
-	// Plain Message
-	public static final String TEST_MESSAGE_1 = "Test Message";
 	
 	// Localized Messages
-	public static final String TEST_MESSAGE_2 = "MESSAGE1";
-	public static final String TEST_MESSAGE_2_RESULT_US = "Message in en_US";
-	public static final String TEST_MESSAGE_2_RESULT_BR = "Mensagem em pt_BR";
-	
-	// Placeholder Messages
-	public static final String   TEST_MESSAGE_3 = "MESSAGE2";
-	public static final String[] TEST_PARAMETER_3 = new String[] {"One"};
-	public static final String   TEST_MESSAGE_3_RESULT = "Message with One parameter";
-	
-	public static final String   TEST_MESSAGE_4 = "MESSAGE3";
-	public static final String[] TEST_PARAMETER_4 = new String[] {"Text", "Numeric"};
-	public static final String   TEST_MESSAGE_4_RESULT = "Message with two(Text and Numeric) parameters";
-	
-	// Localized Parameter
-	public static final String TEST_MESSAGE_5 = "MESSAGE4";
-	public static final String TEST_PARAMETER_5 = "VALUE1";
-	public static final String TEST_MESSAGE_5_RESULT_US = "Message with localized parameter: First.";
-	public static final String TEST_MESSAGE_5_RESULT_BR = "Mensagem com parâmetro localizado: Primeiro.";
-
-
-	// For pagination
-	public static final String TEST_MESSAGE_6 = "Test Message %s";
+	private static final String TEST_MESSAGE_2_RESULT_US = "Message in en_US";
 
 	@MockBean
 	private BeingServiceClient beingClient;
+
+	@MockBean
+	private MudMessageLocaleRepository localeRepository;
 	
 	@Autowired
 	private TestRestTemplate restTemplate;
 	
 	@Autowired
 	private TokenService tokenService;
+	
+	@Autowired
+	private MudMessageRepository repository;
 
 	
-	public String getToken(Long beingCode, String locale) {
+	private String getToken(Long beingCode, String locale) {
 		Player playerData = new Player();
 		playerData.setUsername(TEST_USERNAME);
 		playerData.setPlayerId(TEST_PLAYER_ID);
@@ -117,6 +98,7 @@ public class MessageTests {
 		sessionData.setSessionId(Long.MAX_VALUE);
 		sessionData.setBeingCode(beingCode);
 		sessionData.setPlayerId(MessageTests.TEST_PLAYER_ID);
+		sessionData.setCurWorldName(MessageTests.TEST_WORLD);
 		
 		String usToken = tokenService.buildToken(MessageTests.TEST_USERNAME, 
 				Optional.of(playerData), 
@@ -125,356 +107,294 @@ public class MessageTests {
 		return usToken;
 	}
 	
-	public HttpEntity<Object> getUsAuthHeader() {
-		
-		String usToken = getToken(MessageTests.TEST_BEING_CODE, MessageTests.TEST_LOCALE_US);		
-		
-		HttpHeaders usHeaders = new HttpHeaders();
-		usHeaders.add(CommonConstants.AUTH_TOKEN_HEADER, usToken);
-		
-		HttpEntity<Object> usAuthEntity = new HttpEntity<Object>(usHeaders);
 
-		return usAuthEntity;
-	}
-	
-	
-	public HttpEntity<Object> getBrAuthHeader() {
-
-		
-		String brToken = getToken(MessageTests.TEST_BEING_CODE, MessageTests.TEST_LOCALE_PT);		
-		
-		HttpHeaders brHeaders = new HttpHeaders();
-		brHeaders.add(CommonConstants.AUTH_TOKEN_HEADER, brToken);
-		
-		HttpEntity<Object> brAuthEntity = new HttpEntity<Object>(brHeaders);
-
-		return brAuthEntity;
-	}
-	
 	@PostConstruct
 	public void setup() {
 		FixtureFactoryLoader.loadTemplates("com.jpinfo.mudengine.message.fixture");
 	}
+	
+	private HttpEntity<Object> getRequestEntity(Long beingCode, String locale) {
+		
+		String usToken = getToken(beingCode, locale);		
+		
+		HttpHeaders usHeaders = new HttpHeaders();
+		usHeaders.add(CommonConstants.AUTH_TOKEN_HEADER, usToken);
+		
+		return new HttpEntity<Object>(usHeaders);
+	}
+	
+	private HttpEntity<MessageRequest> getRequestEntity(Long beingCode, String locale, MessageRequest request) {
+		
+		String usToken = getToken(beingCode, locale);		
+		
+		HttpHeaders usHeaders = new HttpHeaders();
+		usHeaders.add(CommonConstants.AUTH_TOKEN_HEADER, usToken);
+		
+		return new HttpEntity<MessageRequest>(request, usHeaders);
+	}	
 	
 
 	@Test
 	public void contextLoads() {
 	}
 	
-	
+	@Test
 	public void testPutMessage() {
-		
-		Map<String, Object> urlVariables = new HashMap<String, Object>();
-		
+
+		// Creating the request object
 		MessageRequest msgRequest = 
 				Fixture.from(MessageRequest.class).gimme(MessageTemplates.VALID);
+	
+		HttpEntity<MessageRequest> requestEntity = getRequestEntity(
+				MessageTests.TEST_BEING_CODE, MessageTests.TEST_LOCALE_US, msgRequest);
 		
-		// PUT a message
+		// Preparing the parameters
+		Map<String, Object> urlVariables = new HashMap<String, Object>();
 		urlVariables.put("targetCode", MessageTests.TEST_BEING_CODE);
 		
-		ResponseEntity<Void> responsePut = restTemplate.exchange(
+		// Launching the service
+		ResponseEntity<Long> responsePut = restTemplate.exchange(
 				"/message/being/{targetCode}", HttpMethod.PUT, 
-				getUsAuthHeader(), Void.class, urlVariables);
+				requestEntity, Long.class, urlVariables);
 		
-	}
-	
-	public void testBroadcastMessage() {
+		// Check the service response code
+		assertThat(responsePut.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 		
+		// Check if message is recorded in database
+		MudMessage responseMessage = repository.findById(responsePut.getBody())
+				.orElse(null);
+
+		// Check if message exists
+		assertThat(responseMessage).isNotNull();
+		
+		// Check message fields
+		assertThat(responseMessage.getBeingCode()).isEqualTo(MessageTests.TEST_BEING_CODE);
+		assertThat(responseMessage.getMessageKey()).isEqualTo(msgRequest.getMessageKey());
+		
+		// Check if all args passed are persisted in database
+		for(String curArg: msgRequest.getArgs()) {
+		
+			assertThat(responseMessage.getParms().stream()
+				.anyMatch(d -> d.getValue().equals(curArg))
+				).isTrue();
+		}
 	}
 	
 	@Test
-	public void testPlainMessages() {
+	public void testBroadcastMessage() {
+
+		// Creating the request object
+		MessageRequest msgRequest = 
+				Fixture.from(MessageRequest.class).gimme(MessageTemplates.VALID);
+	
+		HttpEntity<MessageRequest> requestEntity = getRequestEntity(
+				MessageTests.TEST_BEING_CODE, MessageTests.TEST_LOCALE_US, msgRequest);
 		
+		// Preparing the parameters
 		Map<String, Object> urlVariables = new HashMap<String, Object>();
+		urlVariables.put("placeCode", MessageTests.TEST_PLACE_ID);
 		
-		// PUT a message
-		urlVariables.put("targetCode", MessageTests.TEST_BEING_CODE);
-		urlVariables.put("message", MessageTests.TEST_MESSAGE_1);
+		// Creating the beings in place
+		List<Being> beingsInPlace = Fixture.from(Being.class).gimme(3, MessageTemplates.VALID);
 		
-		ResponseEntity<Void> responsePut = restTemplate.exchange(
-				"/message/being/{targetCode}?message={message}", HttpMethod.PUT, 
-				getUsAuthHeader(), Void.class, urlVariables);
+		given(beingClient.getAllFromPlace(MessageTests.TEST_WORLD, MessageTests.TEST_PLACE_ID))
+			.willReturn(beingsInPlace);
+		
+		// Launching the service
+		ResponseEntity<Long[]> responsePut = restTemplate.exchange(
+				"/message/place/{placeCode}", HttpMethod.PUT, 
+				requestEntity, Long[].class, urlVariables);
+		
+		// Check the service response code
+		assertThat(responsePut.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+		
+		// Check if message is recorded in database
+		for(Long curMessageId: responsePut.getBody()) {
+		
+			MudMessage responseMessage = repository.findById(curMessageId)
+					.orElse(null);
 
-		assertThat(responsePut.getStatusCode()).isEqualTo(HttpStatus.OK);
-		
-		// GET the message
-		urlVariables.clear();
-
-		ResponseEntity<Message[]> responseRead = restTemplate.exchange(
-				"/message", HttpMethod.GET, getUsAuthHeader(), Message[].class, urlVariables);
-		
-		assertThat(responseRead.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(responseRead.getBody().length).isEqualTo(1);
-
-		Message resultMessage = responseRead.getBody()[0];
-		
-		assertThat(resultMessage.getSenderCode()).isNull();
-		assertThat(resultMessage.getSenderName()).isNull();
-		assertThat(resultMessage.getContent()).isEqualTo(MessageTests.TEST_MESSAGE_1);
+			// Check if message exists
+			assertThat(responseMessage).isNotNull();
+			
+			// Check message fields
+			assertThat(beingsInPlace.stream()
+					.anyMatch(d -> d.getCode().equals(responseMessage.getBeingCode()))
+					).isTrue();
+			
+			assertThat(responseMessage.getMessageKey()).isEqualTo(msgRequest.getMessageKey());
+			
+			// Check if all args passed are persisted in database
+			for(String curArg: msgRequest.getArgs()) {
+			
+				assertThat(responseMessage.getParms().stream()
+					.anyMatch(d -> d.getValue().equals(curArg))
+					).isTrue();
+			}
+		}
 	}
 
 	@Test
 	public void testSender() {
 		
+		// Creating the request object
+		MessageRequest msgRequest = 
+				Fixture.from(MessageRequest.class).gimme(MessageTemplates.VALID);
+	
+		HttpEntity<MessageRequest> requestEntity = getRequestEntity(
+				MessageTests.TEST_BEING_CODE, MessageTests.TEST_LOCALE_US, msgRequest);
+		
+		// Preparing the parameters
 		Map<String, Object> urlVariables = new HashMap<String, Object>();
-		
-		// PUT a message
 		urlVariables.put("targetCode", MessageTests.TEST_BEING_CODE);
-		urlVariables.put("message", MessageTests.TEST_MESSAGE_1);
-		urlVariables.put("senderCode", MessageTests.TEST_BEING_CODE);
-		urlVariables.put("senderName", MessageTests.TEST_BEING_NAME);
 		
-		ResponseEntity<Void> responsePut = restTemplate.exchange(
-				"/message/being/{targetCode}?message={message}&senderName={senderName}&senderCode={senderCode}", 
-				HttpMethod.PUT, getUsAuthHeader(), Void.class, urlVariables);
+		// Launching the service
+		ResponseEntity<Long> responsePut = restTemplate.exchange(
+				"/message/being/{targetCode}", HttpMethod.PUT, 
+				requestEntity, Long.class, urlVariables);
+		
+		// Check the service response code
+		assertThat(responsePut.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+		
+		// Check if message is recorded in database
+		MudMessage responseMessage = repository.findById(responsePut.getBody())
+				.orElse(null);
 
-		assertThat(responsePut.getStatusCode()).isEqualTo(HttpStatus.OK);
+		// Check if message exists
+		assertThat(responseMessage).isNotNull();
 		
-		// GET the message
-		urlVariables.clear();
-
-		ResponseEntity<Message[]> responseRead = restTemplate.exchange(
-				"/message", HttpMethod.GET, getUsAuthHeader(), Message[].class, urlVariables);
-		
-		assertThat(responseRead.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(responseRead.getBody().length).isEqualTo(1);
-
-		Message resultMessage = responseRead.getBody()[0];
-		
-		assertThat(resultMessage.getSenderCode()).isEqualTo(MessageTests.TEST_BEING_CODE);
-		assertThat(resultMessage.getSenderName()).isEqualTo(MessageTests.TEST_BEING_NAME);
+		// Check message fields (only the ones that matter for this test)
+		assertThat(responseMessage.getSenderCode()).isEqualTo(msgRequest.getSenderCode());
+		assertThat(responseMessage.getSenderName()).isEqualTo(msgRequest.getSenderName());
 	}
 
 	@Test
-	public void testUsLocalizedMessage() {
+	public void testChangedEntities() {
 		
+		// Creating the request object
+		MessageRequest msgRequest = 
+				Fixture.from(MessageRequest.class).gimme(MessageTemplates.ENTITIES);
+	
+		HttpEntity<MessageRequest> requestEntity = getRequestEntity(
+				MessageTests.TEST_BEING_CODE, MessageTests.TEST_LOCALE_US, msgRequest);
+		
+		// Preparing the parameters
 		Map<String, Object> urlVariables = new HashMap<String, Object>();
-		
-		// PUT a message
 		urlVariables.put("targetCode", MessageTests.TEST_BEING_CODE);
-		urlVariables.put("message", MessageTests.TEST_MESSAGE_2);
 		
-		ResponseEntity<Void> responsePut = restTemplate.exchange(
-				"/message/being/{targetCode}?message={message}", HttpMethod.PUT, 
-				getUsAuthHeader(), Void.class, urlVariables);
+		// Launching the service
+		ResponseEntity<Long> responsePut = restTemplate.exchange(
+				"/message/being/{targetCode}", HttpMethod.PUT, 
+				requestEntity, Long.class, urlVariables);
+		
+		// Check the service response code
+		assertThat(responsePut.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+		
+		// Check if message is recorded in database
+		MudMessage responseMessage = repository.findById(responsePut.getBody())
+				.orElse(null);
 
-		assertThat(responsePut.getStatusCode()).isEqualTo(HttpStatus.OK);
+		// Check if message exists
+		assertThat(responseMessage).isNotNull();
 		
-		// GET the message
-		urlVariables.clear();
-
-		ResponseEntity<Message[]> responseRead = restTemplate.exchange(
-				"/message", HttpMethod.GET, getUsAuthHeader(), Message[].class, urlVariables);
-		
-		assertThat(responseRead.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(responseRead.getBody().length).isEqualTo(1);
-
-		Message usResultMessage = responseRead.getBody()[0];
-		
-		assertThat(usResultMessage.getSenderCode()).isNull();
-		assertThat(usResultMessage.getSenderName()).isNull();
-		assertThat(usResultMessage.getContent()).isEqualTo(MessageTests.TEST_MESSAGE_2_RESULT_US);
-
-		
+		// Check if all entities passed are persisted in database
+		msgRequest.getChangedEntities().stream()
+			.forEach(d -> 
+				assertThat(responseMessage.getEntities().stream()
+						.anyMatch(e -> (
+								d.getEntityId().equals(e.getId().getEntityId()) &&
+								d.getEntityType().toString().equals(e.getId().getEntityType())
+									)
+								)
+						).isTrue()
+			);
 	}
+	
 
 	@Test
-	public void testBrLocalizedMessage() {
+	public void testLocalizedMessage() {
 		
-		Map<String, Object> urlVariables = new HashMap<String, Object>();
-		
-		// PUT a message
-		urlVariables.put("targetCode", MessageTests.TEST_BEING_CODE);
-		urlVariables.put("message", MessageTests.TEST_MESSAGE_2);
-		
-		ResponseEntity<Void> responsePut = restTemplate.exchange(
-				"/message/being/{targetCode}?message={message}", HttpMethod.PUT, 
-				getUsAuthHeader(), Void.class, urlVariables);
-
-		assertThat(responsePut.getStatusCode()).isEqualTo(HttpStatus.OK);
-		
-		// GET the message
-		urlVariables.clear();
-
-		ResponseEntity<Message[]> responseRead = restTemplate.exchange(
-				"/message", HttpMethod.GET, getBrAuthHeader(), Message[].class, urlVariables);
-		
-		assertThat(responseRead.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(responseRead.getBody().length).isEqualTo(1);
-
-		Message brResultMessage = responseRead.getBody()[0];
-		
-		assertThat(brResultMessage.getSenderCode()).isNull();
-		assertThat(brResultMessage.getSenderName()).isNull();
-		assertThat(brResultMessage.getContent()).isEqualTo(MessageTests.TEST_MESSAGE_2_RESULT_BR);
+		// Creating the request object
+		MessageRequest msgRequest = 
+				Fixture.from(MessageRequest.class).gimme(MessageTemplates.VALID);
 	
-	}
-
-	
-	@Test
-	public void testPlaceholderMessages() {
+		HttpEntity<MessageRequest> requestEntity = getRequestEntity(
+				MessageTests.TEST_BEING_CODE, MessageTests.TEST_LOCALE_US, msgRequest);
 		
+		// Preparing the parameters
 		Map<String, Object> urlVariables = new HashMap<String, Object>();
-		
-		// PUT a message
 		urlVariables.put("targetCode", MessageTests.TEST_BEING_CODE);
-		urlVariables.put("message", MessageTests.TEST_MESSAGE_3);
-		urlVariables.put("parms", String.join(", ", MessageTests.TEST_PARAMETER_3));
-		
-		ResponseEntity<Void> responsePut = restTemplate.exchange(
-				"/message/being/{targetCode}?message={message}&parms={parms}", HttpMethod.PUT, 
-				getUsAuthHeader(), Void.class, urlVariables);
 
-		assertThat(responsePut.getStatusCode()).isEqualTo(HttpStatus.OK);
-		
-		// GET the message
-		urlVariables.clear();
+		// Creating the mocked locale message
+		MudMessageLocale localeMessage = new MudMessageLocale();
+		localeMessage.setPk(new MudMessageLocalePK(msgRequest.getMessageKey(),TEST_LOCALE_US));
+		localeMessage.setMessageText(TEST_MESSAGE_2_RESULT_US);
 
-		ResponseEntity<Message[]> responseRead = restTemplate.exchange(
-				"/message", HttpMethod.GET, getUsAuthHeader(), Message[].class, urlVariables);
+		// Instructing the mocked repository to return the correct message
+		given(localeRepository.findById(localeMessage.getPk()))
+			.willReturn(Optional.of(localeMessage));
 		
-		assertThat(responseRead.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(responseRead.getBody().length).isEqualTo(1);
-
-		Message resultMessage = responseRead.getBody()[0];
+		// Launching the service
+		ResponseEntity<Long> responsePut = restTemplate.exchange(
+				"/message/being/{targetCode}", HttpMethod.PUT, 
+				requestEntity, Long.class, urlVariables);
 		
-		assertThat(resultMessage.getSenderCode()).isNull();
-		assertThat(resultMessage.getSenderName()).isNull();
-		assertThat(resultMessage.getContent()).isEqualTo(MessageTests.TEST_MESSAGE_3_RESULT);
+		// Check the service response code
+		assertThat(responsePut.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+		
+		// Creating the request entities:
+		
+		// US profile request
+		HttpEntity<Object> usRequestEntity = getRequestEntity(
+				MessageTests.TEST_BEING_CODE, MessageTests.TEST_LOCALE_US);
 
+		// Reading the message with a US profile token
+		ResponseEntity<Message[]> usResponse = restTemplate.exchange(
+				"/message", HttpMethod.GET, usRequestEntity, Message[].class, urlVariables);
+		
+		// Check the service response code
+		assertThat(usResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+		
+		// Check if the message is localized according to US profile
+		assertThat(usResponse.getBody()[0].getContent()).isEqualTo(MessageTests.TEST_MESSAGE_2_RESULT_US);		
 	}
 	
-	@Test
-	public void testTwoPlaceholderMessage() {
-
-		Map<String, Object> urlVariables = new HashMap<String, Object>();
 	
-		// PUT another message
-		urlVariables.put("targetCode", MessageTests.TEST_BEING_CODE);
-		urlVariables.put("message", MessageTests.TEST_MESSAGE_4);
-		urlVariables.put("parms", String.join(", ", MessageTests.TEST_PARAMETER_4));
-		
-		ResponseEntity<Void> responsePut = restTemplate.exchange(
-				"/message/being/{targetCode}?message={message}&parms={parms}", HttpMethod.PUT, 
-				getUsAuthHeader(), Void.class, urlVariables);
-
-		assertThat(responsePut.getStatusCode()).isEqualTo(HttpStatus.OK);
-		
-		// GET the message
-		urlVariables.clear();
-
-		ResponseEntity<Message[]> responseRead = restTemplate.exchange(
-				"/message", HttpMethod.GET, getUsAuthHeader(), Message[].class, urlVariables);
-		
-		assertThat(responseRead.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(responseRead.getBody().length).isEqualTo(1);
-
-		Message resultMessage = responseRead.getBody()[0];
-		
-		assertThat(resultMessage.getSenderCode()).isNull();
-		assertThat(resultMessage.getSenderName()).isNull();
-		assertThat(resultMessage.getContent()).isEqualTo(MessageTests.TEST_MESSAGE_4_RESULT);	
-	}
-
-	@Test
-	public void testUsLocalizedParameter() {
-
-		Map<String, Object> urlVariables = new HashMap<String, Object>();
-	
-		// PUT another message
-		urlVariables.put("targetCode", MessageTests.TEST_BEING_CODE);
-		urlVariables.put("message", MessageTests.TEST_MESSAGE_5);
-		urlVariables.put("parms", String.join(", ", MessageTests.TEST_PARAMETER_5));
-		
-		ResponseEntity<Void> responsePut = restTemplate.exchange(
-				"/message/being/{targetCode}?message={message}&parms={parms}", HttpMethod.PUT, 
-				getUsAuthHeader(), Void.class, urlVariables);
-
-		assertThat(responsePut.getStatusCode()).isEqualTo(HttpStatus.OK);
-		
-		// GET the message
-		urlVariables.clear();
-
-		ResponseEntity<Message[]> responseRead = restTemplate.exchange(
-				"/message", HttpMethod.GET, getUsAuthHeader(), Message[].class, urlVariables);
-		
-		assertThat(responseRead.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(responseRead.getBody().length).isEqualTo(1);
-
-		Message resultMessage = responseRead.getBody()[0];
-		
-		assertThat(resultMessage.getSenderCode()).isNull();
-		assertThat(resultMessage.getSenderName()).isNull();
-		assertThat(resultMessage.getContent()).isEqualTo(MessageTests.TEST_MESSAGE_5_RESULT_US);	
-	}
-
-	@Test
-	public void testBrLocalizedParameter() {
-
-		Map<String, Object> urlVariables = new HashMap<String, Object>();
-	
-		// PUT another message
-		urlVariables.put("targetCode", MessageTests.TEST_BEING_CODE);
-		urlVariables.put("message", MessageTests.TEST_MESSAGE_5);
-		urlVariables.put("parms", String.join(", ", MessageTests.TEST_PARAMETER_5));
-		
-		ResponseEntity<Void> responsePut = restTemplate.exchange(
-				"/message/being/{targetCode}?message={message}&parms={parms}", HttpMethod.PUT, 
-				getBrAuthHeader(), Void.class, urlVariables);
-
-		assertThat(responsePut.getStatusCode()).isEqualTo(HttpStatus.OK);
-		
-		// GET the message
-		urlVariables.clear();
-
-		ResponseEntity<Message[]> responseRead = restTemplate.exchange(
-				"/message", HttpMethod.GET, getBrAuthHeader(), Message[].class, urlVariables);
-		
-		assertThat(responseRead.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(responseRead.getBody().length).isEqualTo(1);
-
-		Message resultMessage = responseRead.getBody()[0];
-		
-		assertThat(resultMessage.getSenderCode()).isNull();
-		assertThat(resultMessage.getSenderName()).isNull();
-		assertThat(resultMessage.getContent()).isEqualTo(MessageTests.TEST_MESSAGE_5_RESULT_BR);	
-	}
 
 	@Test
 	public void testPagination() {
-		
-		String usToken = getToken(MessageTests.TEST_BEING_CODE_2, MessageTests.TEST_LOCALE_US);		
-			
-		HttpHeaders usHeaders = new HttpHeaders();
-		usHeaders.add(CommonConstants.AUTH_TOKEN_HEADER, usToken);
-		
-		HttpEntity<Object> usAuthEntity = new HttpEntity<Object>(usHeaders);
-		
-		
+
 		Map<String, Object> urlVariables = new HashMap<String, Object>();
 		
 		// PUT several messages
-		urlVariables.put("targetCode", MessageTests.TEST_BEING_CODE_2);
+		urlVariables.put("targetCode", MessageTests.TEST_BEING_CODE);
 		
 		for(int i=1;i<=20;i++) {
-		
-			urlVariables.put("message", String.format(MessageTests.TEST_MESSAGE_6, i));
 			
-			ResponseEntity<Void> responsePut = restTemplate.exchange(
-					"/message/being/{targetCode}?message={message}", HttpMethod.PUT, 
-					usAuthEntity, Void.class, urlVariables);
+			MessageRequest msgRequest = 
+					Fixture.from(MessageRequest.class).gimme(MessageTemplates.VALID);
+			
+			HttpEntity<MessageRequest> requestEntity =
+					getRequestEntity(MessageTests.TEST_BEING_CODE, MessageTests.TEST_LOCALE_US, msgRequest);
+		
+			ResponseEntity<Long> responsePut = restTemplate.exchange(
+					"/message/being/{targetCode}", HttpMethod.PUT, 
+					requestEntity, Long.class, urlVariables);
 	
-			assertThat(responsePut.getStatusCode()).isEqualTo(HttpStatus.OK);
+			assertThat(responsePut.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 		}
 		
-		// GET the message
+		// GET the messages
 		urlVariables.clear();
 		urlVariables.put("pageCount", MessageTests.TEST_PAGE_COUNT);
 		urlVariables.put("pageSize", MessageTests.TEST_PAGE_SIZE);
+		
+		HttpEntity<Object> emptyRequestEntity =
+				getRequestEntity(MessageTests.TEST_BEING_CODE, MessageTests.TEST_LOCALE_US);
 
 		ResponseEntity<Message[]> responseRead = restTemplate.exchange(
 				"/message?pageSize={pageSize}&pageCount={pageCount}", 
-				HttpMethod.GET, usAuthEntity, Message[].class, urlVariables);
+				HttpMethod.GET, emptyRequestEntity, Message[].class, urlVariables);
 		
 		assertThat(responseRead.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(responseRead.getBody().length).isEqualTo(MessageTests.TEST_PAGE_SIZE);
@@ -483,153 +403,76 @@ public class MessageTests {
 	@Test
 	public void testUnreadMessages() {
 		
-		String usToken = getToken(MessageTests.TEST_BEING_CODE_3, MessageTests.TEST_LOCALE_US);		
+		// Do not exceed the page size while doing this test, or the pagination
+		// will mess up with your test logic
+		List<MudMessage> dbMessages = Fixture.from(MudMessage.class)
+				.uses(new MessageProcessor(MessageTests.TEST_BEING_CODE_3))
+				.gimme(TEST_PAGE_SIZE, MessageTemplates.VALID);
 		
-		HttpHeaders usHeaders = new HttpHeaders();
-		usHeaders.add(CommonConstants.AUTH_TOKEN_HEADER, usToken);
+		// Putting the messages in database
+		repository.saveAll(dbMessages);
 		
-		HttpEntity<Object> usAuthEntity = new HttpEntity<Object>(usHeaders);
+		// Reading
+		long unreadCount = dbMessages.stream().filter(d -> !d.getReadFlag()).count();
 		
-		Map<String, Object> urlVariables = new HashMap<String, Object>();
+		HttpEntity<Object> emptyRequestEntity =  getRequestEntity(MessageTests.TEST_BEING_CODE_3, MessageTests.TEST_LOCALE_US);
 		
-		// PUT a message
-		urlVariables.put("targetCode", MessageTests.TEST_BEING_CODE_3);
-		urlVariables.put("message", MessageTests.TEST_MESSAGE_1);
-		
-		ResponseEntity<Void> responsePut = restTemplate.exchange(
-				"/message/being/{targetCode}?message={message}", HttpMethod.PUT, 
-				usAuthEntity, Void.class, urlVariables);
-
-		assertThat(responsePut.getStatusCode()).isEqualTo(HttpStatus.OK);
-		
-		// GET the ONE message recorded
-		urlVariables.clear();
-
 		ResponseEntity<Message[]> responseRead = restTemplate.exchange(
-				"/message", HttpMethod.GET, usAuthEntity, Message[].class, urlVariables);
+				"/message", HttpMethod.GET, emptyRequestEntity, Message[].class, new HashMap<String, Object>());
 		
 		assertThat(responseRead.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(responseRead.getBody().length).isEqualTo(1);
+		assertThat(responseRead.getBody().length).isEqualTo(unreadCount);
 
 		// Getting ZERO messages (all read)
-
 		responseRead = restTemplate.exchange(
-				"/message", HttpMethod.GET, usAuthEntity, Message[].class, urlVariables);
+				"/message", HttpMethod.GET, emptyRequestEntity, Message[].class, new HashMap<String, Object>());
 		
 		assertThat(responseRead.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(responseRead.getBody().length).isEqualTo(0);
 		
 
-		// Getting ONE message again (allMessages = true)
-		urlVariables.clear();
+		// Getting ALL messages again (allMessages = true)
+		Map<String, Object> urlVariables = new HashMap<String, Object>();
 		urlVariables.put("allMessages", Boolean.TRUE);
 
 		responseRead = restTemplate.exchange(
-				"/message?allMessages={allMessages}", HttpMethod.GET, usAuthEntity, Message[].class, urlVariables);
+				"/message?allMessages={allMessages}", HttpMethod.GET, emptyRequestEntity, Message[].class, urlVariables);
 		
 		assertThat(responseRead.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(responseRead.getBody().length).isEqualTo(1);
+		assertThat(responseRead.getBody().length).isEqualTo(dbMessages.size());
 	}
 
 
 	@Test
 	public void testIsolation() {
 		
-		String anotherBeingToken = getToken(MessageTests.TEST_BEING_CODE_3, MessageTests.TEST_LOCALE_US);		
+		// Creating the request object
+		MessageRequest msgRequest = 
+				Fixture.from(MessageRequest.class).gimme(MessageTemplates.VALID);
+	
+		HttpEntity<MessageRequest> requestEntity = getRequestEntity(
+				MessageTests.TEST_BEING_CODE, MessageTests.TEST_LOCALE_US, msgRequest);
 		
-		HttpHeaders anotherBeingHeaders = new HttpHeaders();
-		anotherBeingHeaders.add(CommonConstants.AUTH_TOKEN_HEADER, anotherBeingToken);
-		
-		HttpEntity<Object> anotherBeingAuthEntity = new HttpEntity<Object>(anotherBeingHeaders);
-		
+		// Preparing the parameters
 		Map<String, Object> urlVariables = new HashMap<String, Object>();
+		urlVariables.put("targetCode", MessageTests.TEST_BEING_CODE);
 		
-		// PUT a message
-		urlVariables.put("targetCode", MessageTests.TEST_BEING_CODE_4);
-		urlVariables.put("message", MessageTests.TEST_MESSAGE_1);
+		// Launching the service
+		ResponseEntity<Long> responsePut = restTemplate.exchange(
+				"/message/being/{targetCode}", HttpMethod.PUT, 
+				requestEntity, Long.class, urlVariables);
 		
-		ResponseEntity<Void> responsePut = restTemplate.exchange(
-				"/message/being/{targetCode}?message={message}", HttpMethod.PUT, 
-				getUsAuthHeader(), Void.class, urlVariables);
+		// Check the service response code
+		assertThat(responsePut.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
-		assertThat(responsePut.getStatusCode()).isEqualTo(HttpStatus.OK);
+		HttpEntity<Object> anotherBeingRequestEntity = getRequestEntity(MessageTests.TEST_BEING_CODE_2, MessageTests.TEST_LOCALE_US);
 		
-		// GET NONE message with other being
-		urlVariables.clear();
 
 		ResponseEntity<Message[]> responseRead = restTemplate.exchange(
-				"/message", HttpMethod.GET, anotherBeingAuthEntity, Message[].class, urlVariables);
+				"/message", HttpMethod.GET, anotherBeingRequestEntity, Message[].class, urlVariables);
 		
 		assertThat(responseRead.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(responseRead.getBody().length).isEqualTo(0);
 		
-	}
-
-	@Test
-	public void testBroadcastMessage() {
-		
-		// Configure the mock placeService to return two expected beings when called
-		List<Being> testBeingList = new ArrayList<Being>();
-		
-		Being firstBeing = new Being();
-		firstBeing.setCode(MessageTests.TEST_BEING_CODE_5);
-		firstBeing.setType(Being.enumBeingType.PLAYABLE);
-
-		Being secondBeing = new Being();
-		secondBeing.setCode(MessageTests.TEST_BEING_CODE_6);
-		secondBeing.setType(Being.enumBeingType.PLAYABLE);
-		
-		testBeingList.add(firstBeing);
-		testBeingList.add(secondBeing);
-		
-		given(this.beingClient.getAllFromPlace("aforgotten", MessageTests.TEST_PLACE_ID))
-		.willReturn(testBeingList);
-
-		String firstToken = getToken(MessageTests.TEST_BEING_CODE_5, MessageTests.TEST_LOCALE_US);		
-		
-		HttpHeaders firstHeaders = new HttpHeaders();
-		firstHeaders.add(CommonConstants.AUTH_TOKEN_HEADER, firstToken);
-		
-		HttpEntity<Object> firstAuthEntity = new HttpEntity<Object>(firstHeaders);		
-
-		String secondToken = getToken(MessageTests.TEST_BEING_CODE_6, MessageTests.TEST_LOCALE_US);
-		
-		HttpHeaders secondHeaders = new HttpHeaders();
-		secondHeaders.add(CommonConstants.AUTH_TOKEN_HEADER, secondToken);
-		
-		HttpEntity<Object> secondAuthEntity = new HttpEntity<Object>(secondHeaders);		
-		
-		
-		Map<String, Object> urlVariables = new HashMap<String, Object>();
-		
-		// PUT a message
-		urlVariables.put("placeCode", MessageTests.TEST_PLACE_ID);
-		urlVariables.put("message", MessageTests.TEST_MESSAGE_1);
-		
-		ResponseEntity<Void> responsePut = restTemplate.exchange(
-				"/message/place/{placeCode}?message={message}", HttpMethod.PUT, 
-				getUsAuthHeader(), Void.class, urlVariables);
-
-		assertThat(responsePut.getStatusCode()).isEqualTo(HttpStatus.OK);
-		
-		// GET the message with one being
-		urlVariables.clear();
-
-		ResponseEntity<Message[]> responseRead = restTemplate.exchange(
-				"/message", HttpMethod.GET, firstAuthEntity, Message[].class, urlVariables);
-		
-		assertThat(responseRead.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(responseRead.getBody().length).isEqualTo(1);
-	
-
-		// GET the message with other
-		urlVariables.clear();
-
-		responseRead = restTemplate.exchange(
-				"/message", HttpMethod.GET, secondAuthEntity, Message[].class, urlVariables);
-		
-		assertThat(responseRead.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(responseRead.getBody().length).isEqualTo(1);
-
 	}
 }

@@ -1,14 +1,12 @@
 package com.jpinfo.mudengine.action.client;
 
+import com.jpinfo.mudengine.common.message.MessageRequest;
+
 public interface MessageServiceClient {
 
 	public void putMessage( 
-			Long targetCode, String message, 
-			Long senderCode, String senderName, 
-			String...parms);
+			Long targetCode, MessageRequest request);
 	
 	public void broadcastMessage( 
-			Integer placeCode, String message, 
-			Long senderCode, String senderName, 
-			String...parms);
+			Integer placeCode, MessageRequest request);
 }
