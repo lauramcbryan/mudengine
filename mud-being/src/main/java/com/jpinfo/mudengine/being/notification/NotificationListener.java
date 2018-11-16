@@ -13,6 +13,9 @@ import com.jpinfo.mudengine.being.client.MessageServiceClient;
 import com.jpinfo.mudengine.being.model.MudBeing;
 import com.jpinfo.mudengine.being.repository.BeingRepository;
 import com.jpinfo.mudengine.being.utils.BeingHelper;
+import com.jpinfo.mudengine.common.message.MessageEntity;
+import com.jpinfo.mudengine.common.message.MessageEntity.EnumEntityType;
+import com.jpinfo.mudengine.common.message.MessageRequest;
 import com.jpinfo.mudengine.common.utils.NotificationMessage;
 
 @Component
@@ -73,9 +76,16 @@ public class NotificationListener {
 				// Send a message to all beings in the same place
 				beingListInPlace.stream()
 					.forEach(curBeing -> {
+						
+						MessageRequest request = new MessageRequest();
+						
+						request.setMessageKey(msg.getMessageKey());
+						request.setArgs(msg.getArgs());
+						
+						// Adding the place in the changed list
+						request.addChangedEntity(EnumEntityType.PLACE, msg.getEntityId()); 
 
-						messageService.putMessage(curBeing.getCode(), 
-								msg.getMessageKey(), msg.getArgs());
+						messageService.putMessage(curBeing.getCode(), request);
 						
 						log.info("world: {}, entityId: {}, message: {} ",
 								msg.getWorldName(), curBeing.getCode(), msg.getMessageKey());
@@ -104,50 +114,58 @@ public class NotificationListener {
 		
 	}
 	
-	private void handleItemNotification(NotificationMessage msg) {
+	private void handleItemNotification(NotificationMessage notification) {
 
 		// Gathering the being performing the action (if it exists)
 		Optional<MudBeing> optActingBeing;
 
-		if (msg.getTargetEntity().equals(NotificationMessage.EnumEntity.BEING)) {
-			optActingBeing = repository.findById(msg.getTargetEntityId());
+		if (notification.getTargetEntity().equals(NotificationMessage.EnumEntity.BEING)) {
+			optActingBeing = repository.findById(notification.getTargetEntityId());
 		} else {
 			optActingBeing = Optional.empty();
 		}
 
+		// Preparing the message request
+		MessageRequest userMessage = new MessageRequest();
+		
+		userMessage.setArgs(notification.getArgs());
+		
+		// Adding the item in the changed list
+		userMessage.addChangedEntity(EnumEntityType.ITEM, notification.getEntityId()); 
+		
 		
 
-		switch(msg.getEvent()) {
+		switch(notification.getEvent()) {
 			case ITEM_QTTY_INCREASE:
 			case ITEM_QTTY_DECREASE:
 			case ITEM_ATTR_CHANGE:
 			case ITEM_DESTROY:
 			case ITEM_CLASS_CHANGE:
 
+				userMessage.setMessageKey(notification.getMessageKey());
+
 				// Check where the item have an owner
 				if (optActingBeing.isPresent() && optActingBeing.get().getPlayerId()!=null) {
 					
 					// Send a message to the being owning the item
-					messageService.putMessage(msg.getTargetEntityId(), 
-							msg.getMessageKey(), msg.getArgs());
+					messageService.putMessage(optActingBeing.get().getCode(), userMessage);
 					
 					log.info("world: {}, entityId: {} (owner), message: {}",
-							msg.getWorldName(), msg.getTargetEntityId(), msg.getMessageKey());
+							notification.getWorldName(), optActingBeing.get().getCode(), notification.getMessageKey());
 				} else {
 
 					// Gathering all beings in the same place
 					repository.findByCurWorldAndCurPlaceCode(
-							msg.getWorldName(), 
-							msg.getTargetEntityId().intValue())
+							notification.getWorldName(), 
+							notification.getTargetEntityId().intValue())
 						.stream()
 						.forEach(curBeing -> {
 
-						// Send a message to all other beings in the same place
-						messageService.putMessage(curBeing.getCode(), 
-								msg.getMessageKey(), msg.getArgs());
+						// Send a message to all beings in the same place
+						messageService.putMessage(curBeing.getCode(), userMessage);
 						
 						log.info("world: {}, entityId: {}, message: {}  ",
-								msg.getWorldName(), curBeing.getCode(), msg.getMessageKey());
+								notification.getWorldName(), curBeing.getCode(), notification.getMessageKey());
 						});
 				}
 				
@@ -157,14 +175,17 @@ public class NotificationListener {
 				// Get the being performing the action (the one who drop the item)
 				optActingBeing
 					.ifPresent(actingBeing -> {
-					
+						
+						// Send a message to the being dropping the item (if it's a playable being)					
 						if (actingBeing.getPlayerId()!=null) {
-							// Send a message to the being dropping the item (if it's a playable being)
-							messageService.putMessage(msg.getTargetEntityId(), 
-									BeingHelper.BEING_DROP_YOURS_MSG, msg.getArgs());
+
+							// Setting the message to owner
+							userMessage.setMessageKey(BeingHelper.BEING_DROP_YOURS_MSG);
+							
+							messageService.putMessage(actingBeing.getCode(), userMessage);
 							
 							log.info("world: {}, entityId: {} (owner), message: {}",
-									msg.getWorldName(), msg.getTargetEntityId(), BeingHelper.BEING_DROP_YOURS_MSG);
+									actingBeing.getCurWorld(), actingBeing.getCode(), userMessage.getMessageKey());
 						}
 					
 						// Gathering all beings in the same place than the acting being
@@ -177,13 +198,15 @@ public class NotificationListener {
 							// excluding non-playable beings
 							.filter(curBeing -> curBeing.getPlayerId()!=null)
 							.forEach(curBeing -> {
+								
+								// Setting the message for other beings
+								userMessage.setMessageKey(BeingHelper.BEING_DROP_ANOTHER_MSG);
 	
 								// Send a message to all other beings in the same place
-								messageService.putMessage(curBeing.getCode(), 
-										BeingHelper.BEING_DROP_ANOTHER_MSG, msg.getArgs());
+								messageService.putMessage(curBeing.getCode(), userMessage);
 								
 								log.info("world: {}, entityId: {}, message: {}",
-										msg.getWorldName(), curBeing.getCode(), BeingHelper.BEING_DROP_ANOTHER_MSG);
+										curBeing.getCurWorld(), curBeing.getCode(), userMessage.getMessageKey());
 								});
 						});
 				
@@ -194,12 +217,14 @@ public class NotificationListener {
 				optActingBeing.ifPresent(actingBeing -> {
 					
 					if (actingBeing.getPlayerId()!=null) {
+						
+						userMessage.setMessageKey(BeingHelper.BEING_TAKE_YOURS_MSG);
+						
 						// Send a message to the being owning the item
-						messageService.putMessage(msg.getTargetEntityId(), 
-								BeingHelper.BEING_TAKE_YOURS_MSG, msg.getArgs());
+						messageService.putMessage(actingBeing.getCode(), userMessage);
 						
 						log.info("world: {}, entityId: {}, message: {}",
-								msg.getWorldName(), msg.getTargetEntityId(), BeingHelper.BEING_TAKE_YOURS_MSG);
+								actingBeing.getCurWorld(), actingBeing.getCode(), userMessage.getMessageKey());
 					}
 				});
 				
