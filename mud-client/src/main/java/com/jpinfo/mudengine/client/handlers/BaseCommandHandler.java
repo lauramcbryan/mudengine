@@ -2,6 +2,7 @@ package com.jpinfo.mudengine.client.handlers;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -20,6 +21,7 @@ import com.jpinfo.mudengine.common.action.CommandParam;
 import com.jpinfo.mudengine.common.being.Being;
 import com.jpinfo.mudengine.common.being.BeingClass;
 import com.jpinfo.mudengine.common.item.Item;
+import com.jpinfo.mudengine.common.place.Place;
 import com.jpinfo.mudengine.common.player.PlayerBeing;
 
 @Component
@@ -32,25 +34,20 @@ public abstract class BaseCommandHandler implements CommandHandler {
 	protected MudengineApi api;
 
 	
-	private CommandParamState initializeBeingParameter(ClientConnection client, CommandParam paramTemplate) {
+	private CommandParamState initializeBeingParameter(ClientConnection client, CommandParam paramTemplate) throws ClientException {
 		
 		CommandParamState newParam = new CommandParamState(paramTemplate);
 
 		// Populate with all being in this place
-		client.getCurPlace().ifPresent(e -> {
+		Optional<Place> optPlace = client.getCurPlace();
+		if (optPlace.isPresent()) {
 			
-			try {
-				newParam.setDynamicDomainValues(
-						api.getBeingsFromPlace(client.getAuthToken(), "aforgotten", e.getCode()).stream()
-						.collect(Collectors.toMap(
-								Being::getName, Being::getCode))
-						);
-				
-			} catch(ClientException f) {
-				log.error("Error while initializing commandState", f);
-			}
-		});
-		
+			newParam.setDynamicDomainValues(
+					api.getBeingsFromPlace(client.getAuthToken(), "aforgotten", optPlace.get().getCode()).stream()
+					.collect(Collectors.toMap(
+							Being::getName, Being::getCode))
+					);
+		}
 		
 		return newParam;
 	}
@@ -60,15 +57,13 @@ public abstract class BaseCommandHandler implements CommandHandler {
 		CommandParamState newParam = new CommandParamState(paramTemplate);
 		
 		// The being class is not provided, show the being class list
-		List<BeingClass> beingClassList = api.getBeingClasses(client.getAuthToken());
-		
 		newParam.setDynamicDomainValues(
-				beingClassList.stream()
+				api.getBeingClasses(client.getAuthToken()).stream()
 					.collect(Collectors.toMap(
 							BeingClass::getName, BeingClass::getCode)
 							)
 				);
-		
+
 		return newParam;
 	}
 	
@@ -77,42 +72,48 @@ public abstract class BaseCommandHandler implements CommandHandler {
 		CommandParamState newParam = new CommandParamState(paramTemplate);
 		
 		client.getCurPlace().ifPresent(e ->
-		newParam.setDynamicDomainValues(
-				e.getExits().keySet().stream()
-				.collect(Collectors.toMap(
-						String::toString, String::toString))
-				)
-		);
+			newParam.setDynamicDomainValues(
+					e.getExits().keySet().stream()
+					.collect(Collectors.toMap(
+							String::toString, String::toString))
+					)
+				);
 		
 		
 		return newParam;
 
 	}
 	
-	private CommandParamState initializeItemParameter(ClientConnection client, CommandParam paramTemplate) {
+	private CommandParamState initializeItemParameter(ClientConnection client, CommandParam paramTemplate) throws ClientException {
 
 		CommandParamState newParam = new CommandParamState(paramTemplate);
 		
-		// Populate with all being in this place
-		client.getCurPlace().ifPresent(e -> {
+		// Starting with an empty item list
+		List<Item> itemList = new ArrayList<>();
+		
+		// Checking if the being is present
+		Optional<Being> optBeing = client.getActiveBeing();
+		if (optBeing.isPresent()) {
 			
-			try {
-				
-				List<Item> itemList = new ArrayList<>();
-				
-				itemList.addAll(api.getItemsFromPlace(client.getAuthToken(), "aforgotten", e.getCode()));
-				itemList.addAll(api.getItemsFromBeing(client.getAuthToken(), client.getActiveBeingCode().get()));
-				
-				newParam.setDynamicDomainValues(
-						itemList.stream()
-						.collect(Collectors.toMap(
-								Item::getClassCode, Item::getCode))
-						);
-				
-			} catch(ClientException f) {
-				log.error("Error while initializing commandState", f);
-			}
-		});
+			// Gather all items with current being
+			itemList.addAll(api.getItemsFromBeing(client.getAuthToken(), optBeing.get().getCode()));
+		}
+		
+		// Checking if the place is present
+		Optional<Place> optPlace = client.getCurPlace();
+		if (optPlace.isPresent()) {
+			
+			// Gather all items in the current place
+			itemList.addAll(api.getItemsFromPlace(client.getAuthToken(), "aforgotten", optPlace.get().getCode()));
+		}
+		
+
+		// Populate the parameter with all items found
+		newParam.setDynamicDomainValues(
+				itemList.stream()
+				.collect(Collectors.toMap(
+						Item::getClassCode, Item::getCode))
+				);
 		
 		return newParam;
 		
@@ -147,9 +148,6 @@ public abstract class BaseCommandHandler implements CommandHandler {
 	}
 	
 	
-	/* (non-Javadoc)
-	 * @see com.jpinfo.mudengine.client.service.CommandHandler#initializeCommand(com.jpinfo.mudengine.client.model.ClientConnection, com.jpinfo.mudengine.common.action.Command)
-	 */
 	@Override
 	public CommandState initializeCommand(ClientConnection client, Command command) {
 		
