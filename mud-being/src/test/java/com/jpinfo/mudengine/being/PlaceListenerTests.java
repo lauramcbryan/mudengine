@@ -22,6 +22,8 @@ import com.jpinfo.mudengine.being.fixture.PlaceNotificationTemplates;
 import com.jpinfo.mudengine.being.model.MudBeing;
 import com.jpinfo.mudengine.being.notification.NotificationListener;
 import com.jpinfo.mudengine.being.repository.BeingRepository;
+import com.jpinfo.mudengine.common.message.MessageRequest;
+import com.jpinfo.mudengine.common.message.MessageEntity.EnumEntityType;
 import com.jpinfo.mudengine.common.utils.NotificationMessage;
 
 import br.com.six2six.fixturefactory.Fixture;
@@ -142,9 +144,16 @@ public class PlaceListenerTests {
 		// Check if proper message was sent to other beings
 		otherMudBeings.stream()
 			.filter(d -> d.getPlayerId()!=null)
-			.forEach(d -> 
-				verify(messageService).putMessage(d.getCode(), msg.getMessageKey(), msg.getArgs())
-					);
+			.forEach(d -> {
+				
+				// Preparing the message request to compare against
+				MessageRequest msgRequest = new MessageRequest();
+				msgRequest.setMessageKey(msg.getMessageKey());
+				msgRequest.setArgs(msg.getArgs());
+				msgRequest.addChangedEntity(EnumEntityType.PLACE, msg.getEntityId());
+				
+				verify(messageService).putMessage(d.getCode(), msgRequest);
+			});
 		
 	}
 	

@@ -32,6 +32,8 @@ import com.jpinfo.mudengine.being.model.pk.MudBeingSkillModifierPK;
 import com.jpinfo.mudengine.being.notification.NotificationAspect;
 import com.jpinfo.mudengine.being.repository.BeingRepository;
 import com.jpinfo.mudengine.being.utils.BeingHelper;
+import com.jpinfo.mudengine.common.message.MessageRequest;
+import com.jpinfo.mudengine.common.message.MessageEntity.EnumEntityType;
 import com.jpinfo.mudengine.common.utils.NotificationMessage;
 import com.jpinfo.mudengine.common.utils.NotificationMessage.EnumNotificationEvent;
 
@@ -101,6 +103,13 @@ public class BeingNotificationTests {
 		
 		
 		aspect.compareBeing(pjp, changedMudBeing);
+		
+		MessageRequest yoursMsgRequest = new MessageRequest();
+		yoursMsgRequest.setMessageKey(BeingHelper.BEING_SKILLMOD_INCREASE_MSG);
+		yoursMsgRequest.setArgs(new String[] {
+				originalSkillMod.getId().getCode()
+		});
+		yoursMsgRequest.addChangedEntity(EnumEntityType.BEING, originalMudBeing.getCode());
 		
 		verify(messageService).putMessage(eq(originalMudBeing.getCode()), 
 				eq(BeingHelper.BEING_SKILLMOD_INCREASE_MSG), eq(originalSkillMod.getId().getCode()),

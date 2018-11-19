@@ -33,8 +33,6 @@ import com.jpinfo.mudengine.common.message.MessageEntity.EnumEntityType;
 import com.jpinfo.mudengine.common.utils.NotificationMessage;
 import com.jpinfo.mudengine.common.utils.NotificationMessage.EnumNotificationEvent;
 
-import lombok.Getter;
-
 @Aspect
 @Component
 public class NotificationAspect {
@@ -93,7 +91,8 @@ public class NotificationAspect {
 				checkAddedAttrModifiers(beforeBeing, afterBeing, msgList);
 
 				// Check skill modifiers changes
-				checkSkillModifiers(beforeBeing, afterBeing, msgList);
+				checkChangedSkillModifiers(beforeBeing, afterBeing, msgList);
+				checkAddedSkillModifiers(beforeBeing, afterBeing, msgList);
 				
 				// Check slot changes
 				checkSlotModifiers(beforeBeing, afterBeing, msgList);
@@ -205,11 +204,6 @@ public class NotificationAspect {
 	}
 	
 	private void checkChangedAttrModifiers(MudBeing beforeBeing, MudBeing afterBeing, List<MessageRequest> msgList) {
-
-		// Preparing the message request
-		MessageRequest mRequest = new MessageRequest();
-		mRequest.addChangedEntity(EnumEntityType.BEING, afterBeing.getCode());
-		
 		
 		// Check attr modifiers that was changed/removed
 		beforeBeing.getAttrModifiers().stream()
@@ -248,6 +242,10 @@ public class NotificationAspect {
 				
 				// If we have a value changed...
 				if ((modifierValue!=null) && (modifierValue!=0.0f)) {
+
+					// Preparing the message request
+					MessageRequest mRequest = new MessageRequest();
+					mRequest.addChangedEntity(EnumEntityType.BEING, afterBeing.getCode());
 					
 					// set the appropriate message
 					mRequest.setMessageKey(modifierValue > 0 ?  		
@@ -308,166 +306,166 @@ public class NotificationAspect {
 			});
 	}
 	
-	private void checkSkillModifiers(MudBeing beforeBeing, MudBeing afterBeing, List<MessageRequest> msgList) {
-		
-		// Preparing the message request
-		MessageRequest mRequest = new MessageRequest();
-		mRequest.addChangedEntity(EnumEntityType.BEING, afterBeing.getCode());
+	private void checkChangedSkillModifiers(MudBeing beforeBeing, MudBeing afterBeing, List<MessageRequest> msgList) {
 		
 		// Check skill modifiers that was changed/removed
 		beforeBeing.getSkillModifiers().stream()
 			.forEach(beforeModifier -> {
-				
+			
 				Optional<MudBeingSkillModifier> optAfterModifier=
 					afterBeing.getSkillModifiers().stream()
 						.filter(afterModifier -> afterModifier.equals(beforeModifier))
 						.findFirst();
+
+				String modifierCode = beforeModifier.getId().getCode();
+				Float modifierValue = null;
 				
 				if (optAfterModifier.isPresent()) {
 					
-					// add modifier changed
-					MudBeingSkillModifier afterModifier = optAfterModifier.get();
-					
-					if (beforeModifier.getOffset() < afterModifier.getOffset()) {
-
-						// increase modifier
-						msgList.add(
-								new BeingMessage(afterBeing.getCode(), 
-										BeingHelper.BEING_SKILLMOD_INCREASE_MSG, 
-										beforeModifier.getId().getCode(),
-										String.valueOf(afterModifier.getOffset() - beforeModifier.getOffset())
-										)
-								);
-						
-					} else if (beforeModifier.getOffset() > afterModifier.getOffset()) {
-
-						// decrease modifier
-						msgList.add(
-								new BeingMessage(afterBeing.getCode(), 
-										BeingHelper.BEING_SKILLMOD_DECREASE_MSG, 
-										beforeModifier.getId().getCode(),
-										String.valueOf(beforeModifier.getOffset() - afterModifier.getOffset())
-										)
-								);
-					}
+					// if the modifier is present, calculate value changed
+					modifierValue = optAfterModifier.get().getOffset() - beforeModifier.getOffset();
 					
 				} else {
+					
+					// The modifier is being removed
+					// That can be a good thing (beforeModifier was a penalty) or bad thing (losing a bonus)
 
-					// skill modifier removed
+					// If the previous modifier was a bonus
 					if (beforeModifier.getOffset()>0.0f) {
-						
-						msgList.add(
-								new BeingMessage(afterBeing.getCode(), 
-										BeingHelper.BEING_SKILLMOD_DECREASE_MSG, 
-										beforeModifier.getId().getCode(),
-										String.valueOf(beforeModifier.getOffset())
-										)
-								);
+
+						// The change is bad
+						modifierValue = -beforeModifier.getOffset();
+
 					} else {
-						msgList.add(
-								new BeingMessage(afterBeing.getCode(), 
-										BeingHelper.BEING_SKILLMOD_INCREASE_MSG, 
-										beforeModifier.getId().getCode(),
-										String.valueOf(Math.abs(beforeModifier.getOffset()))
-										)
-								);
+						
+						// The change is good
+						modifierValue = Math.abs(beforeModifier.getOffset());
 					}
+				}
+				
+				// If we have a value changed...
+				if ((modifierValue!=null) && (modifierValue!=0.0f)) {
+
+					// Preparing the message request
+					MessageRequest mRequest = new MessageRequest();
+					mRequest.addChangedEntity(EnumEntityType.BEING, afterBeing.getCode());
+					
+					// set the appropriate message
+					mRequest.setMessageKey(modifierValue > 0 ?  		
+										BeingHelper.BEING_SKILLMOD_INCREASE_MSG:
+										BeingHelper.BEING_SKILLMOD_DECREASE_MSG
+										);
+
+					// Put the values in the arguments
+					mRequest.setArgs(new String[] {
+							modifierCode,
+							String.valueOf(Math.abs(modifierValue))
+					});
+
+					// Add in the message list
+					msgList.add(mRequest);
 				}
 				
 				
 				
 			});
-		
-		// Check skill modifiers that was added
+	}
+	
+	private void checkAddedSkillModifiers(MudBeing beforeBeing, MudBeing afterBeing, List<MessageRequest> msgList) {
+
+		// Check attr modifiers that was added
 		afterBeing.getSkillModifiers().stream()
 			.filter(afterModifier -> !beforeBeing.getSkillModifiers().contains(afterModifier))
 			.forEach(afterModifier -> {
+
+				// Preparing the message request
+				MessageRequest mRequest = new MessageRequest();
+				mRequest.addChangedEntity(EnumEntityType.BEING, afterBeing.getCode());
 				
-				// skill modifier added
+				
+				// We are adding a modifier here
+				// It can be a bonus (positive modifier) or a penalty (negative modifier)
+				
+				// attr modifier added
 				if (afterModifier.getOffset()>0.0f) {
 					
-					msgList.add(
-							new BeingMessage(afterBeing.getCode(), 
-									BeingHelper.BEING_SKILLMOD_INCREASE_MSG, 
-									afterModifier.getId().getCode(),
-									String.valueOf(afterModifier.getOffset())
-									)
-							);
+					// The logic is straightforward here
+					
+					mRequest.setMessageKey(BeingHelper.BEING_SKILLMOD_INCREASE_MSG);
+					mRequest.setArgs(new String[] {
+							afterModifier.getId().getCode(),
+							String.valueOf(afterModifier.getOffset())
+					});
+					
+					msgList.add(mRequest);
+					
 				} else {
-					msgList.add(
-							new BeingMessage(afterBeing.getCode(), 
-									BeingHelper.BEING_SKILLMOD_DECREASE_MSG, 
-									afterModifier.getId().getCode(),
-									String.valueOf(Math.abs(afterModifier.getOffset()))
-									)
-							);
+					
+					mRequest.setMessageKey(BeingHelper.BEING_SKILLMOD_DECREASE_MSG);
+					mRequest.setArgs(new String[] {
+							afterModifier.getId().getCode(),
+							String.valueOf(Math.abs(afterModifier.getOffset()))
+					});
+					
+					msgList.add(mRequest);
 				}
-			});		
+			});
 	}
 	
-	private void checkSlotModifiers(MudBeing beforeBeing, MudBeing afterBeing, List<BeingMessage> notifications) {
+	
+	private void checkSlotModifiers(MudBeing beforeBeing, MudBeing afterBeing, List<MessageRequest> msgList) {
 		
-		// Checking slots that was changed
+		// Checking slots
 		beforeBeing.getSlots().stream()
 			.forEach(beforeSlot -> {
 				
+				// Gathering the same slot after change
 				Optional<MudBeingSlot> optAfterSlot =
 				afterBeing.getSlots().stream()
 					.filter(afterSlot -> afterSlot.equals(beforeSlot))
 					.findFirst();
 				
-				if (optAfterSlot.isPresent()) {
+				optAfterSlot.ifPresent(afterSlot -> {
 					
-					MudBeingSlot afterSlot = optAfterSlot.get();
-					
-					// If the slot changed content
-					if ((beforeSlot.getItemCode()==null) && (afterSlot.getItemCode()!=null)) {
-
-						// being.equip
-						Item equippedItem = itemService.getItem(afterSlot.getItemCode());
+					if ((afterSlot.getItemCode()!=null) &&   // we have an item in future slot
+							(beforeSlot.getItemCode()==null ||  // we didn't have an item in previous slot
+							(!beforeSlot.getItemCode().equals(afterSlot.getItemCode())))) { // or we had a different item
 						
-						notifications.add(
-								new BeingMessage(afterBeing.getCode(), 
+						msgList.add(
+								buildSlotItemMessage(afterBeing.getCode(), 
 										BeingHelper.BEING_EQUIP_MSG, 
-										equippedItem.getName())
-								);
-						
-					} else
-						if ((beforeSlot.getItemCode()!=null) && (afterSlot.getItemCode()==null)) {
-
-							// being.unequip
-							Item unequippedItem = itemService.getItem(beforeSlot.getItemCode());
-							
-							notifications.add(
-									new BeingMessage(afterBeing.getCode(), 
-											BeingHelper.BEING_UNEQUIP_MSG, 
-											unequippedItem.getName())
-									);
-							
-						} else
-							if (beforeSlot.getItemCode().equals(afterSlot.getItemCode())) {
-								// being.unequip
-								Item unequippedItem = itemService.getItem(beforeSlot.getItemCode());
-								
-								notifications.add(
-										new BeingMessage(afterBeing.getCode(), 
-												BeingHelper.BEING_UNEQUIP_MSG, 
-												unequippedItem.getName())
-										);
-
-								// being.equip
-								Item equippedItem = itemService.getItem(afterSlot.getItemCode());
-								
-								notifications.add(
-										new BeingMessage(afterBeing.getCode(), 
-												BeingHelper.BEING_EQUIP_MSG, 
-												equippedItem.getName())
-										);
-							}
-						
+										afterSlot.getItemCode())
+							);
+					}
 					
-				}
+					if ((beforeSlot.getItemCode()!=null) &&   // we had an item in previous slot
+						(afterSlot.getItemCode()==null ||     // we don't have any item in future slot
+						(!afterSlot.getItemCode().equals(beforeSlot.getItemCode())))) {  // or we have a different item
+
+						msgList.add(
+								buildSlotItemMessage(afterBeing.getCode(), 
+										BeingHelper.BEING_UNEQUIP_MSG, 
+										beforeSlot.getItemCode())
+							);
+					}
+				});
 			});
+	}
+	
+	private MessageRequest buildSlotItemMessage(Long beingCode, String messageKey, Long itemCode) {
 		
+		// Preparing the message request
+		MessageRequest mRequest = new MessageRequest();
+		mRequest.addChangedEntity(EnumEntityType.BEING, beingCode);
+		
+		// Calling the item service to get the itemName
+		Item item = itemService.getItem(itemCode);
+		
+		mRequest.setMessageKey(messageKey);
+		mRequest.setArgs(new String[] {
+				item.getName()
+		});
+
+		return mRequest;
 	}
 }

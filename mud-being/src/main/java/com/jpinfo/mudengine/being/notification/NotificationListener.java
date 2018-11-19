@@ -13,7 +13,6 @@ import com.jpinfo.mudengine.being.client.MessageServiceClient;
 import com.jpinfo.mudengine.being.model.MudBeing;
 import com.jpinfo.mudengine.being.repository.BeingRepository;
 import com.jpinfo.mudengine.being.utils.BeingHelper;
-import com.jpinfo.mudengine.common.message.MessageEntity;
 import com.jpinfo.mudengine.common.message.MessageEntity.EnumEntityType;
 import com.jpinfo.mudengine.common.message.MessageRequest;
 import com.jpinfo.mudengine.common.utils.NotificationMessage;
@@ -28,8 +27,7 @@ public class NotificationListener {
 	
 	@Autowired
 	private MessageServiceClient messageService;
-
-
+	
 	public void receiveNotification(NotificationMessage msg) {
 
 		switch(msg.getEntity()) {
@@ -181,6 +179,7 @@ public class NotificationListener {
 
 							// Setting the message to owner
 							userMessage.setMessageKey(BeingHelper.BEING_DROP_YOURS_MSG);
+							userMessage.setArgs(notification.getArgs());
 							
 							messageService.putMessage(actingBeing.getCode(), userMessage);
 							
@@ -201,6 +200,11 @@ public class NotificationListener {
 								
 								// Setting the message for other beings
 								userMessage.setMessageKey(BeingHelper.BEING_DROP_ANOTHER_MSG);
+								userMessage.setArgs(new String[] {
+										actingBeing.getName(),
+										notification.getArgs()[0]
+								});
+								
 	
 								// Send a message to all other beings in the same place
 								messageService.putMessage(curBeing.getCode(), userMessage);

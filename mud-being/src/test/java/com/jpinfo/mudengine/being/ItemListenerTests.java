@@ -9,6 +9,7 @@ import static org.mockito.BDDMockito.*;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.lang.SerializationUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,8 @@ import com.jpinfo.mudengine.being.model.MudBeing;
 import com.jpinfo.mudengine.being.notification.NotificationListener;
 import com.jpinfo.mudengine.being.repository.BeingRepository;
 import com.jpinfo.mudengine.being.utils.BeingHelper;
+import com.jpinfo.mudengine.common.message.MessageRequest;
+import com.jpinfo.mudengine.common.message.MessageEntity.EnumEntityType;
 import com.jpinfo.mudengine.common.utils.NotificationMessage;
 
 import br.com.six2six.fixturefactory.Fixture;
@@ -90,14 +93,27 @@ public class ItemListenerTests {
 		// Launch the notification!
 		mockListener.receiveNotification(msg);
 		
+		// Preparing the message request to compare against
+		MessageRequest yoursMsgRequest = new MessageRequest();
+		yoursMsgRequest.setMessageKey(BeingHelper.BEING_DROP_YOURS_MSG);
+		yoursMsgRequest.setArgs(msg.getArgs());
+		yoursMsgRequest.addChangedEntity(EnumEntityType.ITEM, msg.getEntityId());		
+		
 		// Check if proper message was sent to item's owner
-		verify(messageService).putMessage(msg.getTargetEntityId(), BeingHelper.BEING_DROP_YOURS_MSG, msg.getArgs());
+		verify(messageService).putMessage(msg.getTargetEntityId(), yoursMsgRequest);
+		
+		MessageRequest anotherMsgRequest = (MessageRequest)SerializationUtils.clone(yoursMsgRequest);
+		anotherMsgRequest.setMessageKey(BeingHelper.BEING_DROP_ANOTHER_MSG);
+		anotherMsgRequest.setArgs(new String[] {
+				owningMudBeing.getName(),
+				msg.getArgs()[0]
+		});
 		
 		// Check if proper message was sent to other beings as well
 		otherMudBeings.stream()
 			.filter(d -> d.getPlayerId()!=null)
 			.forEach(d -> 
-				verify(messageService).putMessage(d.getCode(), BeingHelper.BEING_DROP_ANOTHER_MSG, msg.getArgs())
+				verify(messageService).putMessage(d.getCode(), anotherMsgRequest)
 					);
 		
 	}
@@ -123,8 +139,15 @@ public class ItemListenerTests {
 		// Launch the notification!
 		mockListener.receiveNotification(msg);
 		
+		// Preparing the message request to compare against
+		MessageRequest yoursMsgRequest = new MessageRequest();
+		yoursMsgRequest.setMessageKey(BeingHelper.BEING_TAKE_YOURS_MSG);
+		yoursMsgRequest.setArgs(msg.getArgs());
+		yoursMsgRequest.addChangedEntity(EnumEntityType.ITEM, msg.getEntityId());		
+		
+		
 		// Check if proper message was sent to item's owner
-		verify(messageService).putMessage(msg.getTargetEntityId(), BeingHelper.BEING_TAKE_YOURS_MSG, msg.getArgs());
+		verify(messageService).putMessage(msg.getTargetEntityId(), yoursMsgRequest);
 	}
 	
 	@Test
@@ -208,8 +231,13 @@ public class ItemListenerTests {
 		// Launch the notification!
 		mockListener.receiveNotification(msg);
 		
+		MessageRequest yoursMsgRequest = new MessageRequest();
+		yoursMsgRequest.setMessageKey(msg.getMessageKey());
+		yoursMsgRequest.setArgs(msg.getArgs());
+		yoursMsgRequest.addChangedEntity(EnumEntityType.ITEM, msg.getEntityId());
+		
 		// Check if proper message was sent to item's owner
-		verify(messageService).putMessage(msg.getTargetEntityId(), msg.getMessageKey(), msg.getArgs());
+		verify(messageService).putMessage(msg.getTargetEntityId(), yoursMsgRequest);
 	}
 	
 	private void testUnownedNotification(String label) {
@@ -231,11 +259,16 @@ public class ItemListenerTests {
 		// Launch the notification!
 		mockListener.receiveNotification(msg);
 		
+		MessageRequest placeMsgRequest = new MessageRequest();
+		placeMsgRequest.setMessageKey(msg.getMessageKey());
+		placeMsgRequest.setArgs(msg.getArgs());
+		placeMsgRequest.addChangedEntity(EnumEntityType.ITEM, msg.getEntityId());
+		
 		// Check if proper message was sent to other beings
 		otherMudBeings.stream()
 			.filter(d -> d.getPlayerId()!=null)
 			.forEach(d -> 
-				verify(messageService).putMessage(d.getCode(), msg.getMessageKey(), msg.getArgs())
+				verify(messageService).putMessage(d.getCode(), placeMsgRequest)
 					);
 	}
 	
