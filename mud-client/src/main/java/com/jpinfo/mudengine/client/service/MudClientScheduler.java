@@ -1,6 +1,8 @@
 package com.jpinfo.mudengine.client.service;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +17,10 @@ import com.jpinfo.mudengine.client.exception.ClientException;
 import com.jpinfo.mudengine.client.model.ClientConnection;
 import com.jpinfo.mudengine.client.utils.ClientHelper;
 import com.jpinfo.mudengine.client.utils.ClientLocalizedMessages;
+import com.jpinfo.mudengine.common.being.Being;
 import com.jpinfo.mudengine.common.message.Message;
+import com.jpinfo.mudengine.common.message.MessageEntity;
+import com.jpinfo.mudengine.common.place.Place;
 
 @Component
 public class MudClientScheduler {
@@ -57,23 +62,82 @@ public class MudClientScheduler {
 			.filter(ClientConnection::hasBeingSelected)
 			.forEach(d -> {
 			
-				// Check the messages of this being					
 				try {
+
+					// Check the messages of this being					
 					List<Message> messageList= api.getMessages(d.getAuthToken());
+					
+					// Gather the entity list to be changed
+					// We have it grouped to avoid having to update the same entity twice
+					Set<MessageEntity> changedEntitySet = new HashSet<>();
 					
 					// Sending all the messages received
 					for(Message curMessage: messageList) {
 	
 						// Send the message over tcp
 						d.sendMessage(curMessage);
+						
+						// In this message we can have changed entities 
+						// that need to be updated.
+						if (curMessage.getChangedEntities()!=null) {
+							
+							changedEntitySet.addAll(curMessage.getChangedEntities());
+						}
 					}
 					
+					// Checking and updating the changed entities
+					checkChangedEntities(changedEntitySet, d);
 					
 				} catch (ClientException e) {
 					log.error("Error while updating messages: ", e);
 				}
 		});
 		
+	}
+	
+	private void checkChangedEntities(Set<MessageEntity> changedEntitySet, ClientConnection client) throws ClientException {
+		
+		Being activeBeing = client.getActiveBeing().orElse(new Being());
+		Place curPlace = client.getCurPlace().orElse(new Place());
+
+		for(MessageEntity changedEntity: changedEntitySet) {
+			
+			switch(changedEntity.getEntityType()) {
+			case BEING:
+				
+				// If current active being is changing
+				if (changedEntity.getEntityId().equals(activeBeing.getCode())) {
+					
+					// Update current being
+					client.setActiveBeing(api.getBeing(client.getAuthToken(), changedEntity.getEntityId()));
+				}
+				
+				break;
+			case ITEM:
+				
+				// Check if the changed item is in active being possession
+				if (activeBeing.getEquipment().values().stream()
+					.anyMatch(equippedItem -> equippedItem.getCode().equals(changedEntity.getEntityId()))) {
+
+					// Update current being (the equipment will be updated along)
+					client.setActiveBeing(api.getBeing(client.getAuthToken(), changedEntity.getEntityId()));
+				}
+				
+				break;
+			case PLACE:
+				
+				if (changedEntity.getEntityId().equals(curPlace.getCode().longValue())) {
+					
+					// Update current place
+					client.setCurPlace(api.getPlace(client.getAuthToken(), changedEntity.getEntityId().intValue()));
+				}
+				
+				break;
+				
+			default:
+				break;
+			}
+		}
 	}
 	
 	private void saluteNewConnections() {

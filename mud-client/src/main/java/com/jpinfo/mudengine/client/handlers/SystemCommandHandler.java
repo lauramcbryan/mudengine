@@ -100,7 +100,7 @@ public class SystemCommandHandler extends BaseCommandHandler {
 	}
 	
 	/**
-	 * Activates a PENDING account changing it password.
+	 * Activates a PENDING account changing its password.
 	 * 
 	 * @param client
 	 * @param command

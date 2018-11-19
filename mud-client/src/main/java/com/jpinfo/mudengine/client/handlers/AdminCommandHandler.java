@@ -104,7 +104,7 @@ public class AdminCommandHandler extends BaseCommandHandler {
 		} catch(IOException e) {
 			
 			// Disregard this exception, just log it
-			log.error("Error trying to drop session");
+			log.error("Error trying to send goodbye message");
 		}
 		
 		connFactory.closeConnection(session.getConnection().getConnectionId());
