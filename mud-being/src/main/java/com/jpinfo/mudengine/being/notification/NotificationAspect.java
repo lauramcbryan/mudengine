@@ -9,6 +9,7 @@ import javax.persistence.EntityManager;
 
 import javax.persistence.PersistenceContext;
 
+import org.apache.commons.lang.SerializationUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -154,22 +155,22 @@ public class NotificationAspect {
 		rabbit.convertAndSend(beingExchange, "", beingNotification);
 		
 		// Preparing message request
-		MessageRequest destroyedMessage = new MessageRequest();
+		MessageRequest yoursDestroyedMessage = new MessageRequest();
 
 		// Add the destroyed being to the list of changed entities
-		destroyedMessage.addChangedEntity(EnumEntityType.BEING, destroyedBeing.getCode());
+		yoursDestroyedMessage.addChangedEntity(EnumEntityType.BEING, destroyedBeing.getCode());
 		
 		// If the destroyed being belongs to a player, send a message to the player
 		if (destroyedBeing.getPlayerId()!=null) {
 			
-			destroyedMessage.setMessageKey(BeingHelper.BEING_DESTROY_YOURS_MSG);
+			yoursDestroyedMessage.setMessageKey(BeingHelper.BEING_DESTROY_YOURS_MSG);
 			
-			messageService.putMessage(destroyedBeing.getCode(), destroyedMessage);
+			messageService.putMessage(destroyedBeing.getCode(), yoursDestroyedMessage);
 			
 			log.info("world: {}, entityId: {}, message: {}",
 					destroyedBeing.getCurWorld(),
 					destroyedBeing.getCode(),
-					destroyedMessage.getMessageKey()
+					yoursDestroyedMessage.getMessageKey()
 					);
 		}
 		
@@ -177,6 +178,13 @@ public class NotificationAspect {
 				repository.findByCurWorldAndCurPlaceCode(
 						destroyedBeing.getCurWorld(), 
 						destroyedBeing.getCurPlaceCode());
+		
+		// Preparing the message request
+		MessageRequest anotherDestroyedMessage = (MessageRequest)SerializationUtils.clone(yoursDestroyedMessage);
+		anotherDestroyedMessage.setMessageKey(BeingHelper.BEING_DESTROY_ANOTHER_MSG);
+		anotherDestroyedMessage.setArgs( new String[] {
+				destroyedBeing.getName()!=null ? destroyedBeing.getName() : destroyedBeing.getBeingClass().getName()
+		});
 
 		// Send a message to other playable beings in the place
 		beingListInPlace.stream()
@@ -186,17 +194,13 @@ public class NotificationAspect {
 			.filter(curBeing -> curBeing.getPlayerId()!=null)
 			.forEach(curBeing -> {
 				
-				destroyedMessage.setMessageKey(BeingHelper.BEING_DESTROY_ANOTHER_MSG);
-				destroyedMessage.setArgs( new String[] {
-						destroyedBeing.getName()!=null ? destroyedBeing.getName() : destroyedBeing.getBeingClass().getName()
-				});
-				
-				messageService.putMessage(curBeing.getCode(), destroyedMessage);
+				// Send the message
+				messageService.putMessage(curBeing.getCode(), anotherDestroyedMessage);
 				
 				log.info("world: {}, entityId: {}, message: {} ",
 						destroyedBeing.getCurWorld(),
 						curBeing.getCode(),
-						destroyedMessage.getMessageKey()
+						anotherDestroyedMessage.getMessageKey()
 						);
 				
 			});

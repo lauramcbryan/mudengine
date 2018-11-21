@@ -1,10 +1,9 @@
 package com.jpinfo.mudengine.being;
 
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
+import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.PostConstruct;
@@ -83,68 +82,61 @@ public class BeingNotificationTests {
 	@Test
 	public void testSkillIncreaseNotification() throws Throwable {
 		
+		// Get a mudBeing with modifiers
 		MudBeing originalMudBeing = Fixture.from(MudBeing.class)
 				.uses(new MudBeingProcessor())
 				.gimme(BeingTemplates.PLAYABLE_WITH_MODIFIERS);
 		
+		// Get some random modifier (the first one, in fact) and set it's value
 		MudBeingSkillModifier originalSkillMod = originalMudBeing.getSkillModifiers().iterator().next();
 		originalSkillMod.setOffset(SMALL_OFFSET_VALUE);
 		
+		// Instruct the repository to return this being (the original)
 		given(repository.findById(originalMudBeing.getCode())).willReturn(Optional.of(originalMudBeing));
 		
-		
+		// Clone it to have a second, unattached instance
 		MudBeing changedMudBeing = (MudBeing)SerializationUtils.clone(originalMudBeing);
 		
-		// increase skill
+		// find the modifier and changed it's value
 		changedMudBeing.getSkillModifiers().stream()
 			.filter(d -> d.getId().getCode().equals(originalSkillMod.getId().getCode()))
 			.findFirst()
 			.ifPresent(d -> d.setOffset(BIG_OFFSET_VALUE));
 		
-		
-		aspect.compareBeing(pjp, changedMudBeing);
-		
-		MessageRequest yoursMsgRequest = new MessageRequest();
-		yoursMsgRequest.setMessageKey(BeingHelper.BEING_SKILLMOD_INCREASE_MSG);
-		yoursMsgRequest.setArgs(new String[] {
-				originalSkillMod.getId().getCode()
-		});
-		yoursMsgRequest.addChangedEntity(EnumEntityType.BEING, originalMudBeing.getCode());
-		
-		verify(messageService).putMessage(eq(originalMudBeing.getCode()), 
-				eq(BeingHelper.BEING_SKILLMOD_INCREASE_MSG), eq(originalSkillMod.getId().getCode()),
-				anyString());
-
+		// Launch and check
+		testNotification(changedMudBeing, originalSkillMod.getId().getCode(), 
+				(BIG_OFFSET_VALUE - SMALL_OFFSET_VALUE), 
+				BeingHelper.BEING_SKILLMOD_INCREASE_MSG);
 	}
 	
 	@Test
 	public void testSkillDecreaseNotification() throws Throwable {
 		
+		// Get a MudBeing with modifiers
 		MudBeing originalMudBeing = Fixture.from(MudBeing.class)
 				.uses(new MudBeingProcessor())
 				.gimme(BeingTemplates.PLAYABLE_WITH_MODIFIERS);
 		
+		// Pick a random modifier and set it's value
 		MudBeingSkillModifier originalSkillMod = originalMudBeing.getSkillModifiers().iterator().next();
 		originalSkillMod.setOffset(BIG_OFFSET_VALUE);
 		
+		// Instruct the repository to return this original being
 		given(repository.findById(originalMudBeing.getCode())).willReturn(Optional.of(originalMudBeing));
 		
-		
+		// Clone it
 		MudBeing changedMudBeing = (MudBeing)SerializationUtils.clone(originalMudBeing);
 		
-		// increase skill
+		// change modifier
 		changedMudBeing.getSkillModifiers().stream()
 			.filter(d -> d.getId().getCode().equals(originalSkillMod.getId().getCode()))
 			.findFirst()
 			.ifPresent(d -> d.setOffset(SMALL_OFFSET_VALUE));
-		
-		
-		aspect.compareBeing(pjp, changedMudBeing);
-		
-		verify(messageService).putMessage(eq(originalMudBeing.getCode()), 
-				eq(BeingHelper.BEING_SKILLMOD_DECREASE_MSG), eq(originalSkillMod.getId().getCode()),
-				anyString());
 
+		// Launch and check
+		testNotification(changedMudBeing, originalSkillMod.getId().getCode(), 
+				(BIG_OFFSET_VALUE - SMALL_OFFSET_VALUE), 
+				BeingHelper.BEING_SKILLMOD_DECREASE_MSG);
 	}
 	
 	@Test
@@ -170,12 +162,10 @@ public class BeingNotificationTests {
 			.removeIf(d -> d.getId().getCode().equals(originalSkillMod.getId().getCode()));
 		
 		
-		aspect.compareBeing(pjp, changedMudBeing);
-		
-		// Check if correct message was created
-		verify(messageService).putMessage(eq(originalMudBeing.getCode()), 
-				eq(BeingHelper.BEING_SKILLMOD_DECREASE_MSG), eq(originalSkillMod.getId().getCode()),
-				anyString());
+		// Launch and check
+		testNotification(changedMudBeing, originalSkillMod.getId().getCode(), 
+				SMALL_OFFSET_VALUE, 
+				BeingHelper.BEING_SKILLMOD_DECREASE_MSG);
 	}
 	
 
@@ -206,13 +196,10 @@ public class BeingNotificationTests {
 		// adds the skill modifier
 		changedMudBeing.getSkillModifiers().add(newModifier);
 		
-		
-		aspect.compareBeing(pjp, changedMudBeing);
-		
-		// Check if correct message was created
-		verify(messageService).putMessage(eq(originalMudBeing.getCode()), 
-				eq(BeingHelper.BEING_SKILLMOD_INCREASE_MSG), eq(newModifier.getId().getCode()),
-				anyString());
+		// Launch and check
+		testNotification(changedMudBeing, newModifier.getId().getCode(), 
+				BIG_OFFSET_VALUE, 
+				BeingHelper.BEING_SKILLMOD_INCREASE_MSG);
 	}
 
 	@Test
@@ -238,12 +225,10 @@ public class BeingNotificationTests {
 			.removeIf(d -> d.getId().getCode().equals(originalSkillMod.getId().getCode()));
 		
 		
-		aspect.compareBeing(pjp, changedMudBeing);
-		
-		// Check if correct message was created
-		verify(messageService).putMessage(eq(originalMudBeing.getCode()), 
-				eq(BeingHelper.BEING_SKILLMOD_INCREASE_MSG), eq(originalSkillMod.getId().getCode()),
-				anyString());
+		// Launch and check
+		testNotification(changedMudBeing, originalSkillMod.getId().getCode(), 
+				SMALL_OFFSET_VALUE, 
+				BeingHelper.BEING_SKILLMOD_INCREASE_MSG);
 	}
 
 	@Test
@@ -272,13 +257,10 @@ public class BeingNotificationTests {
 		// adds the skill modifier
 		changedMudBeing.getSkillModifiers().add(newModifier);
 		
-		
-		aspect.compareBeing(pjp, changedMudBeing);
-		
-		// Check if correct message was created
-		verify(messageService).putMessage(eq(originalMudBeing.getCode()), 
-				eq(BeingHelper.BEING_SKILLMOD_DECREASE_MSG), eq(newModifier.getId().getCode()),
-				anyString());
+		// Launch and check
+		testNotification(changedMudBeing, newModifier.getId().getCode(), 
+				BIG_OFFSET_VALUE, 
+				BeingHelper.BEING_SKILLMOD_DECREASE_MSG);
 	}
 	
 	
@@ -306,13 +288,11 @@ public class BeingNotificationTests {
 			.findFirst()
 			.ifPresent(d -> d.setOffset(BIG_OFFSET_VALUE));
 		
-		
-		aspect.compareBeing(pjp, changedMudBeing);
-		
-		// Check if correct message was created
-		verify(messageService).putMessage(eq(originalMudBeing.getCode()), 
-				eq(BeingHelper.BEING_ATTRMOD_INCREASE_MSG), eq(originalAttrMod.getId().getCode()),
-				anyString());
+
+		// Launch and check
+		testNotification(changedMudBeing, originalAttrMod.getId().getCode(), 
+				(BIG_OFFSET_VALUE - SMALL_OFFSET_VALUE), 
+				BeingHelper.BEING_ATTRMOD_INCREASE_MSG);
 	}
 	
 	@Test
@@ -337,12 +317,10 @@ public class BeingNotificationTests {
 			.ifPresent(d -> d.setOffset(SMALL_OFFSET_VALUE));
 		
 		
-		aspect.compareBeing(pjp, changedMudBeing);
-		
-		verify(messageService).putMessage(eq(originalMudBeing.getCode()), 
-				eq(BeingHelper.BEING_ATTRMOD_DECREASE_MSG), eq(originalAttrMod.getId().getCode()),
-				anyString());
-
+		// Launch and check
+		testNotification(changedMudBeing, originalAttrMod.getId().getCode(), 
+				(BIG_OFFSET_VALUE - SMALL_OFFSET_VALUE), 
+				BeingHelper.BEING_ATTRMOD_DECREASE_MSG);
 	}
 	
 	
@@ -368,13 +346,11 @@ public class BeingNotificationTests {
 		changedMudBeing.getAttrModifiers()
 			.removeIf(d -> d.getId().getCode().equals(originalAttrMod.getId().getCode()));
 		
-		
-		aspect.compareBeing(pjp, changedMudBeing);
-		
-		// Check if correct message was created
-		verify(messageService).putMessage(eq(originalMudBeing.getCode()), 
-				eq(BeingHelper.BEING_ATTRMOD_DECREASE_MSG), eq(originalAttrMod.getId().getCode()),
-				anyString());
+
+		// Launch and check
+		testNotification(changedMudBeing, originalAttrMod.getId().getCode(), 
+				SMALL_OFFSET_VALUE, 
+				BeingHelper.BEING_ATTRMOD_DECREASE_MSG);
 	}
 	
 
@@ -405,13 +381,10 @@ public class BeingNotificationTests {
 		// adds the attr modifier
 		changedMudBeing.getAttrModifiers().add(newModifier);
 		
-		
-		aspect.compareBeing(pjp, changedMudBeing);
-		
-		// Check if correct message was created
-		verify(messageService).putMessage(eq(originalMudBeing.getCode()), 
-				eq(BeingHelper.BEING_ATTRMOD_INCREASE_MSG), eq(newModifier.getId().getCode()),
-				anyString());
+		// Launch and check
+		testNotification(changedMudBeing, newModifier.getId().getCode(), 
+				BIG_OFFSET_VALUE, 
+				BeingHelper.BEING_ATTRMOD_INCREASE_MSG);
 	}
 	
 	@Test
@@ -436,13 +409,10 @@ public class BeingNotificationTests {
 		changedMudBeing.getAttrModifiers()
 			.removeIf(d -> d.getId().getCode().equals(originalAttrMod.getId().getCode()));
 		
-		
-		aspect.compareBeing(pjp, changedMudBeing);
-		
-		// Check if correct message was created
-		verify(messageService).putMessage(eq(originalMudBeing.getCode()), 
-				eq(BeingHelper.BEING_ATTRMOD_INCREASE_MSG), eq(originalAttrMod.getId().getCode()),
-				anyString());
+		// Launch and check
+		testNotification(changedMudBeing, originalAttrMod.getId().getCode(), 
+				SMALL_OFFSET_VALUE, 
+				BeingHelper.BEING_ATTRMOD_INCREASE_MSG);
 	}
 	
 
@@ -473,13 +443,10 @@ public class BeingNotificationTests {
 		// adds the attr modifier
 		changedMudBeing.getAttrModifiers().add(newModifier);
 		
-		
-		aspect.compareBeing(pjp, changedMudBeing);
-		
-		// Check if correct message was created
-		verify(messageService).putMessage(eq(originalMudBeing.getCode()), 
-				eq(BeingHelper.BEING_ATTRMOD_DECREASE_MSG), eq(newModifier.getId().getCode()),
-				anyString());
+		// Launch and check
+		testNotification(changedMudBeing, newModifier.getId().getCode(), 
+				BIG_OFFSET_VALUE, 
+				BeingHelper.BEING_ATTRMOD_DECREASE_MSG);
 	}
 
 	
@@ -491,9 +458,18 @@ public class BeingNotificationTests {
 				.uses(new MudBeingProcessor())
 				.gimme(BeingTemplates.PLAYABLE);
 		
+		// Create another beings and put them in the same place
+		List<MudBeing> anotherMudBeings = Fixture.from(MudBeing.class)
+				.gimme(3, BeingTemplates.PLAYABLE, BeingTemplates.SIMPLE, BeingTemplates.PLAYABLE);
 		
+		// Instruct the repository to return the other beings in place
+		given(repository.findByCurWorldAndCurPlaceCode(destroyedMudBeing.getCurWorld(), destroyedMudBeing.getCurPlaceCode()))
+			.willReturn(anotherMudBeings);
+		
+		// Launch the notification
 		aspect.sendDestroyNotification(pjp, destroyedMudBeing);
 		
+		// Check the message sent
 		NotificationMessage beingNotification = NotificationMessage.builder()
 				.entity(NotificationMessage.EnumEntity.BEING)
 				.entityId(destroyedMudBeing.getCode())
@@ -503,8 +479,48 @@ public class BeingNotificationTests {
 		// Check if correct notification was sent		
 		verify(rabbit).convertAndSend(BEING_EXCHANGE, "", beingNotification);
 		
-		// Check if correct message was created
-		verify(messageService).putMessage(eq(destroyedMudBeing.getCode()), 
-				eq(BeingHelper.BEING_DESTROY_YOURS_MSG));
+		
+		// Preparing the expected message result for the destroyed being
+		MessageRequest yoursMsgRequest = new MessageRequest();
+		yoursMsgRequest.setMessageKey(BeingHelper.BEING_DESTROY_YOURS_MSG);
+		yoursMsgRequest.addChangedEntity(EnumEntityType.BEING, destroyedMudBeing.getCode());
+
+		// Check if correct message was sent
+		verify(messageService).putMessage(destroyedMudBeing.getCode(), yoursMsgRequest);
+		
+		// Preparing the expected message result for other beings
+		MessageRequest anotherMsgRequest = new MessageRequest();
+		anotherMsgRequest.setMessageKey(BeingHelper.BEING_DESTROY_ANOTHER_MSG);
+		anotherMsgRequest.setArgs(new String[] {
+				destroyedMudBeing.getName()
+		});
+		anotherMsgRequest.addChangedEntity(EnumEntityType.BEING, destroyedMudBeing.getCode());
+
+		// Check if correct message was sent
+		anotherMudBeings.stream()
+			.filter(d -> d.getPlayerId()!=null)
+			.forEach(d ->
+			verify(messageService).putMessage(d.getCode(), anotherMsgRequest)
+			);
 	}
+	
+	private void testNotification(MudBeing changedMudBeing, String changedModifier, float changedValue, String messageKey) throws Throwable {
+		
+		// Launch the notification
+		aspect.compareBeing(pjp, changedMudBeing);
+		
+		// Preparing the expected message result
+		MessageRequest yoursMsgRequest = new MessageRequest();
+		yoursMsgRequest.setMessageKey(messageKey);
+		yoursMsgRequest.setArgs(new String[] {
+				changedModifier,
+				String.valueOf(changedValue)
+		});
+		yoursMsgRequest.addChangedEntity(EnumEntityType.BEING, changedMudBeing.getCode());
+
+		// Check if correct message was sent
+		verify(messageService).putMessage(changedMudBeing.getCode(), yoursMsgRequest);
+
+	}
+
 }
