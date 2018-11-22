@@ -18,7 +18,7 @@ public class MudPlaceClass {
 	@Column(nullable = false, length = 30)
 	private String name;
 	
-	@Column(length = 500)
+	@Column(length = 50, name="DEFAULT_DESCRIPTION")
 	private String description;
 	
 	@Column(name="SIZE_CAPACITY")

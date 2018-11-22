@@ -30,6 +30,10 @@ public class PlaceConverter {
 			result.setName(originalDbPlace.getName()!=null ? 
 						originalDbPlace.getName() : 
 						originalDbPlace.getPlaceClass().getName());
+			
+			result.setDescription(originalDbPlace.getDescription()!=null ?
+						originalDbPlace.getDescription() :
+						originalDbPlace.getPlaceClass().getDescription());
 					
 			result.setPlaceClass(
 					PlaceClassConverter.convert(originalDbPlace.getPlaceClass())

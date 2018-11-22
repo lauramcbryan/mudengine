@@ -18,6 +18,9 @@ public class MudPlace {
 	
 	@Column(name="NAME")
 	private String name;
+	
+	@Column(length = 500)
+	private String description;
 
 	@ManyToOne
 	@JoinColumn(name="CLASS_CODE", referencedColumnName="CODE", nullable = false)

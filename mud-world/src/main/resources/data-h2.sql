@@ -1,7 +1,7 @@
-insert into mud_place_class(code, name, description) values('RUIN', 'Ruin', 'Demised PlaceClass');
-insert into mud_place_class(code, name, description) values('TEST', 'Test', 'Test PlaceClass');
-insert into mud_place_class(code, name, description) values('TESTBLDG', 'Test Building', 'Test Building PlaceClass');
-insert into mud_place_class(code, name, description, demised_class_code) values('ATEST', 'Test', 'Demisable PlaceClass', 'RUIN');
+insert into mud_place_class(code, name, default_description) values('RUIN', 'Ruin', 'Demised PlaceClass');
+insert into mud_place_class(code, name, default_description) values('TEST', 'Test', 'Test PlaceClass');
+insert into mud_place_class(code, name, default_description) values('TESTBLDG', 'Test Building', 'Test Building PlaceClass');
+insert into mud_place_class(code, name, default_description, demised_class_code) values('ATEST', 'Test', 'Demisable PlaceClass', 'RUIN');
 
 insert into mud_place_class_attr(class_code, code, value) values('TEST', 'HP', 50);
 insert into mud_place_class_attr(class_code, code, value) values('TEST', 'MAXHP', 500);

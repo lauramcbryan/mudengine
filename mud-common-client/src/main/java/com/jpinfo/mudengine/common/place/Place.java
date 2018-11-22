@@ -12,6 +12,8 @@ public class Place {
 	private Integer code;
 	
 	private String name;
+	
+	private String description;
 
 	private String classCode;
 	
