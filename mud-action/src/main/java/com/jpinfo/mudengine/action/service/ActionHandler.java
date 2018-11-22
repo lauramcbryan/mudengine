@@ -2,7 +2,11 @@ package com.jpinfo.mudengine.action.service;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import com.jpinfo.mudengine.action.client.BeingServiceClient;
@@ -26,6 +30,8 @@ import com.jpinfo.mudengine.common.item.Item;
 
 @Component
 public class ActionHandler {
+	
+	private static final Logger log = LoggerFactory.getLogger(ActionHandler.class);
 
 	@Autowired
 	private MudActionRepository repository;
@@ -79,12 +85,27 @@ public class ActionHandler {
 			if (!fullActionState.hasInitiated()) {
 				initiateAction(currentTurn, fullActionState);
 				
+				log.info("turn: {}, world: {}, actor: {}, action: {}, status: STARTED, phase: INITIATED",
+						currentTurn,
+						fullActionState.getActor().getBeing().getCurWorld(),
+						fullActionState.getActor().getBeing().getCode(),
+						fullActionState.getActionClassCode()
+						);
+				
 				// Update the action state to RUNNING
 				fullActionState.setCurState(Action.EnumActionState.STARTED);
 			}
 			
 			// Check prerequisites
 			fullActionState = ruleService.prereqCheck(fullActionState.getActionClassCode(), fullActionState);
+			
+			log.info("turn: {}, world: {}, actor: {}, action: {}, status:{}, phase: PREREQ_CHECK",
+					currentTurn,
+					fullActionState.getActor().getBeing().getCurWorld(),
+					fullActionState.getActor().getBeing().getCode(),
+					fullActionState.getActionClassCode(),
+					fullActionState.getCurState()
+					);
 
 
 			// Apply the effects if needed
@@ -92,12 +113,20 @@ public class ActionHandler {
 			{
 				fullActionState = ruleService.applyEffects(fullActionState.getActionClassCode(), fullActionState);
 				
+				log.info("turn: {}, world: {}, actor: {}, action: {}, status:{}, phase: APPLY_EFFECTS",
+						currentTurn,
+						fullActionState.getActor().getBeing().getCurWorld(),
+						fullActionState.getActor().getBeing().getCode(),
+						fullActionState.getActionClassCode(),
+						fullActionState.getCurState()
+						);
+				
 				// Update changed entities
-				updateEntities(fullActionState);
+				updateEntities(currentTurn, fullActionState);
 			}
 
 			// Send the message in the message queue
-			sendMessages(fullActionState);
+			sendMessages(currentTurn, fullActionState);
 
 			
 			// if reach end_turn, complete it
@@ -105,6 +134,14 @@ public class ActionHandler {
 
 				// Update the action to completed
 				fullActionState.setCurState(Action.EnumActionState.COMPLETED);
+				
+				log.info("turn: {}, world: {}, actor: {}, action: {}, status:{}, phase: COMPLETED",
+						currentTurn,
+						fullActionState.getActor().getBeing().getCurWorld(),
+						fullActionState.getActor().getBeing().getCode(),
+						fullActionState.getActionClassCode(),
+						fullActionState.getCurState()
+						);
 			}
 			
 		} catch (ActionRefusedException e) {
@@ -116,12 +153,29 @@ public class ActionHandler {
 				// If it was started, update it to COMPLETE
 				fullActionState.setCurState(Action.EnumActionState.COMPLETED);
 			
+			log.info("turn: {}, world: {}, actor: {}, action: {}, status:{}, phase: ACTION_REFUSED_EXCEPTION",
+					currentTurn,
+					fullActionState.getActor().getBeing().getCurWorld(),
+					fullActionState.getActor().getBeing().getCode(),
+					fullActionState.getActionClassCode(),
+					fullActionState.getCurState()
+					);
+			
 			fullActionState.setEndTurn(currentTurn);
 			
 		} catch(EntityNotFoundException e) {
 			
 			fullActionState.setCurState(EnumActionState.CANCELLED);
 			fullActionState.setEndTurn(currentTurn);
+			
+			log.info("turn: {}, world: {}, actor: {}, action: {}, status:{}, phase: ENTITY_NOT_FOUND_EXCEPTION",
+					currentTurn,
+					fullActionState.getActor().getBeing().getCurWorld(),
+					fullActionState.getActor().getBeing().getCode(),
+					fullActionState.getActionClassCode(),
+					fullActionState.getCurState()
+					);
+			
 		}
 		
 		return fullActionState;
@@ -152,14 +206,30 @@ public class ActionHandler {
 	}
 	
 
-	private void updateEntities(ActionInfo fullState) {
+	private void updateEntities(Long currentTurn, ActionInfo fullState) {
 		
 		// Update the actor
+		log.info("turn: {}, world: {}, actor: {}, action: {}, status:{}, phase: UPDATE_ACTOR",
+				currentTurn,
+				fullState.getActor().getBeing().getCurWorld(),
+				fullState.getActor().getBeing().getCode(),
+				fullState.getActionClassCode(),
+				fullState.getCurState()
+				);
+		
 		beingService.updateBeing( 
 					fullState.getActor().getBeing().getCode(), 
 					fullState.getActor().getBeing());
 		
 		// Update the place where the actor is
+		log.info("turn: {}, world: {}, actor: {}, action: {}, status:{}, phase: UPDATE_PLACE",
+				currentTurn,
+				fullState.getActor().getBeing().getCurWorld(),
+				fullState.getActor().getBeing().getCode(),
+				fullState.getActionClassCode(),
+				fullState.getCurState()
+				);
+		
 		placeService.updatePlace( 
 				fullState.getActor().getPlace().getCode(), 
 				fullState.getActor().getPlace());
@@ -167,10 +237,26 @@ public class ActionHandler {
 		
 		// If the Mediator is used, update it too
 		if (fullState.getMediator()!=null) {
+			log.info("turn: {}, world: {}, actor: {}, action: {}, status:{}, phase: UPDATE_MEDIATOR",
+					currentTurn,
+					fullState.getActor().getBeing().getCurWorld(),
+					fullState.getActor().getBeing().getCode(),
+					fullState.getActionClassCode(),
+					fullState.getCurState()
+					);
+
 			itemService.updateItem(fullState.getMediator().getCode(), fullState.getMediator());
 		}
 
 		// Updating the target
+		log.info("turn: {}, world: {}, actor: {}, action: {}, status:{}, phase: UPDATE_TARGET",
+				currentTurn,
+				fullState.getActor().getBeing().getCurWorld(),
+				fullState.getActor().getBeing().getCode(),
+				fullState.getActionClassCode(),
+				fullState.getCurState()
+				);
+		
 		switch(fullState.getTargetType()) {
 			case BEING: 
 				
@@ -203,10 +289,18 @@ public class ActionHandler {
 		
 	}
 	
-	private void sendMessages(ActionInfo fullState) {
+	private void sendMessages(Long currentTurn, ActionInfo fullState) {
 		
 		for(ActionMessage curTargetMessage: fullState.getMessages()) {
 
+			log.info("turn: {}, world: {}, actor: {}, action: {}, status:{}, phase: SEND_MESSAGE",
+					currentTurn,
+					fullState.getActor().getBeing().getCurWorld(),
+					fullState.getActor().getBeing().getCode(),
+					fullState.getActionClassCode(),
+					fullState.getCurState()
+					);
+			
 			// Send message to the target
 			switch (curTargetMessage.getTargetType()) {
 			
@@ -217,7 +311,6 @@ public class ActionHandler {
 				break;
 			
 			case PLACE:
-				
 				this.messageService.broadcastMessage(
 						curTargetMessage.getTargetCode().intValue(),
 						curTargetMessage

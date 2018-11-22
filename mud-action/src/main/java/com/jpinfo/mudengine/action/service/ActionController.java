@@ -1,5 +1,6 @@
 package com.jpinfo.mudengine.action.service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import java.util.Optional;
@@ -14,10 +15,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.jpinfo.mudengine.action.model.MudAction;
 import com.jpinfo.mudengine.action.model.MudActionClassCommand;
+import com.jpinfo.mudengine.action.model.MudActionTurn;
 import com.jpinfo.mudengine.action.model.converter.ActionConverter;
 import com.jpinfo.mudengine.action.model.converter.MudActionConverter;
 import com.jpinfo.mudengine.action.repository.MudActionClassCommandRepository;
 import com.jpinfo.mudengine.action.repository.MudActionRepository;
+import com.jpinfo.mudengine.action.repository.MudActionTurnRepository;
 import com.jpinfo.mudengine.common.action.Action;
 import com.jpinfo.mudengine.common.exception.EntityNotFoundException;
 import com.jpinfo.mudengine.common.player.Session;
@@ -34,6 +37,9 @@ public class ActionController implements ActionService {
 		
 	@Autowired
 	private MudActionClassCommandRepository commandRepository;
+	
+	@Autowired
+	private MudActionTurnRepository turnRepository;
 	
 	@Autowired
 	private ActionHandler handler;
@@ -109,18 +115,26 @@ public class ActionController implements ActionService {
 	
 	@Override
 	public void updateActions() {
+
+		// Prepare the new turn
+		MudActionTurn currentTurn = new MudActionTurn();
 		
-		// Get the current turn
-		Long currentTurn = getCurrentTurn();
+		// set start processing time
+		currentTurn.setStartedAt(LocalDate.now());
+		
+		// Saves in database (will generate the turn number from sequence)
+		currentTurn = turnRepository.save(currentTurn);
 
 		// Get the list of running actions and update them.
-		handler.runActions(currentTurn, repository.findRunningActions(currentTurn));
+		handler.runActions(currentTurn.getNroTurn(), repository.findRunningActions(currentTurn.getNroTurn()));
 		
 		// Find and start not started actions		
-		handler.runActions(currentTurn, repository.findPendingActions());
-	}
-	
-	private Long getCurrentTurn() {
-		return System.currentTimeMillis();
+		handler.runActions(currentTurn.getNroTurn(), repository.findPendingActions());
+		
+		// Set end processing time
+		currentTurn.setFinishedAt(LocalDate.now());
+		
+		// Update in database
+		turnRepository.save(currentTurn);
 	}
 }
