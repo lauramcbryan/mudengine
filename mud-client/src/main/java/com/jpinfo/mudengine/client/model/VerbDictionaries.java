@@ -102,7 +102,7 @@ public class VerbDictionaries {
 		
 			// Call the API to retrieve game list
 			List<Command> gameCommandList = 
-					api.getGameCommandList(locale.toString());
+					api.getGameCommandList(locale.toLanguageTag());
 			
 			verbDictionary.getCommandList().addAll(gameCommandList);
 			

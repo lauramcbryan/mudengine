@@ -1,12 +1,15 @@
 package com.jpinfo.mudengine.common.action;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import lombok.Data;
 
 @Data
-public class Command {
+public class Command implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	public enum enumCategory {GAME, SYSTEM, ADMIN}
 	

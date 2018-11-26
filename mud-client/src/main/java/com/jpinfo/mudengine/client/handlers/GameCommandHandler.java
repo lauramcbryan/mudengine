@@ -25,14 +25,14 @@ public class GameCommandHandler extends BaseCommandHandler {
 	 */
 	public void handleCommand(ClientConnection client, CommandState command) throws ClientException {
 
-		String mediatorCode = command.getParamValue("mediatorCode");
+		//String mediatorCode = command.getParamValue("mediatorCode");
 		String targetCode = command.getParamValue("targetCode");
 		Integer commandId = command.getCommand().getCommandId();
 		
 		
 		// Perform the call to the API gateway
 		api.insertCommand(client.getAuthToken(), commandId,
-				Optional.ofNullable(mediatorCode), targetCode);
+				Optional.empty(), targetCode);
 	}
 	
 }

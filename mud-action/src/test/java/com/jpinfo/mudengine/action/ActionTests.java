@@ -1,6 +1,5 @@
 package com.jpinfo.mudengine.action;
 
-import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.Test;
 
@@ -10,6 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.jpinfo.mudengine.action.client.BeingServiceClient;
@@ -21,6 +24,7 @@ import com.jpinfo.mudengine.action.model.MudAction;
 import com.jpinfo.mudengine.action.model.converter.ActionInfoConverter;
 import com.jpinfo.mudengine.action.service.ActionHandler;
 import com.jpinfo.mudengine.common.action.Action;
+import com.jpinfo.mudengine.common.action.Command;
 import com.jpinfo.mudengine.common.action.Action.EnumActionState;
 import com.jpinfo.mudengine.common.action.Action.EnumTargetType;
 import com.jpinfo.mudengine.common.being.Being;
@@ -29,7 +33,13 @@ import com.jpinfo.mudengine.common.place.Place;
 import com.jpinfo.mudengine.common.place.PlaceExit;
 import com.jpinfo.mudengine.common.placeclass.PlaceClass;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.*;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment=WebEnvironment.RANDOM_PORT,
@@ -57,6 +67,10 @@ public class ActionTests {
 	
 	@MockBean
 	private MessageServiceClient messageClient;
+	
+	@Autowired
+	private TestRestTemplate restTemplate;
+
 	
 	@Test
 	public void contextLoads() {
@@ -158,6 +172,22 @@ public class ActionTests {
 		
 		assertThat(testData.getCurState()).isEqualTo(EnumActionState.COMPLETED);
 		assertThat(testData.getActor().getBeing().getCurPlaceCode()).isEqualTo(ActionTests.END_PLACE_CODE);
-	}	
+	}
+	
+	@Test
+	public void testCommands() {
+		
+		Map<String, Object> urlVariables = new HashMap<>();
+		urlVariables.put("locale", "en-US");
+
+		ResponseEntity<Command[]> response = restTemplate.exchange(
+				"/action/class/commands/{locale}", 
+				HttpMethod.GET, null, Command[].class, urlVariables);
+		
+		
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+		
+		assertThat(response.getBody().length).isGreaterThan(0);
+	}
 
 }

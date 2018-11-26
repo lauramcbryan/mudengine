@@ -1,14 +1,19 @@
 package com.jpinfo.mudengine.common.action;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import lombok.Data;
 
 @Data
-public class CommandParam {
+public class CommandParam implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	public enum enumParamTypes {
 		ANY_STRING, SECURE_STRING, EMAIL, ANY_NUMBER, // General command parameters 
@@ -19,8 +24,10 @@ public class CommandParam {
 	private String inputMessage;
 	private enumParamTypes type;
 	private boolean required;
-	
+
+	@JsonIgnore
 	private Map<String, Object> staticDomainValues;
+	
 	private String defaultValue;
 	
 
