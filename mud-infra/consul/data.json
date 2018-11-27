@@ -22,22 +22,22 @@
 	{
 		"key": "config/application/spring.rabbitmq.host",
 		"flags": 0,
-		"value": "MTguMjIxLjg0LjIyNA=="
+		"value": "bG9jYWxob3N0"
 	},
 	{
 		"key": "config/application/spring.rabbitmq.port",
 		"flags": 0,
-		"value": "NTY3MQ=="
+		"value": "NTY3Mg=="
 	},
 	{
 		"key": "config/application/spring.rabbitmq.username",
 		"flags": 0,
-		"value": "bXVkZW5naW5lX21x"
+		"value": "bXVkZW5naW5l"
 	},
 	{
 		"key": "config/application/spring.rabbitmq.password",
 		"flags": 0,
-		"value": "bXVkZW5naW5lX21x"
+		"value": "bXVkZW5naW5l"
 	},
 	{
 		"key": "config/application/item.exchange",
