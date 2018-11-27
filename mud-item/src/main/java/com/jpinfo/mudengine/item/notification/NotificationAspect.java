@@ -16,8 +16,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import com.jpinfo.mudengine.common.utils.CommonConstants;
 import com.jpinfo.mudengine.common.utils.NotificationMessage;
 import com.jpinfo.mudengine.common.utils.NotificationMessage.EnumEntity;
 import com.jpinfo.mudengine.common.utils.NotificationMessage.EnumNotificationEvent;
@@ -87,7 +89,12 @@ public class NotificationAspect {
 			notifications.stream()
 				.forEach(itemNotification -> { 
 					// Send the notification
-					rabbit.convertAndSend(itemExchange, "", itemNotification);
+					rabbit.convertAndSend(itemExchange, "", itemNotification, m -> {
+						m.getMessageProperties().getHeaders()
+						.put(CommonConstants.AUTH_TOKEN_HEADER, 
+								SecurityContextHolder.getContext().getAuthentication().getCredentials());
+						return m;
+					});
 					
 					log.info("world: {}, entityId: {}, event: {}",
 							itemNotification.getWorldName(),
@@ -132,7 +139,12 @@ public class NotificationAspect {
 			.build();
 		
 		// Send Notification
-		rabbit.convertAndSend(itemExchange, "", itemNotification);
+		rabbit.convertAndSend(itemExchange, "", itemNotification, m -> {
+			m.getMessageProperties().getHeaders()
+			.put(CommonConstants.AUTH_TOKEN_HEADER, 
+					SecurityContextHolder.getContext().getAuthentication().getCredentials());
+			return m;
+		});
 		
 		log.info("world: {}, entityId: {}, event: {}",
 				itemNotification.getWorldName(),

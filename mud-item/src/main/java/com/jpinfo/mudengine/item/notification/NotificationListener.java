@@ -3,9 +3,15 @@ package com.jpinfo.mudengine.item.notification;
 import org.slf4j.Logger;
 
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.handler.annotation.Header;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import com.jpinfo.mudengine.common.security.TokenService;
+import com.jpinfo.mudengine.common.utils.CommonConstants;
 import com.jpinfo.mudengine.common.utils.NotificationMessage;
 import com.jpinfo.mudengine.item.repository.ItemRepository;
 
@@ -16,8 +22,18 @@ public class NotificationListener {
 	
 	@Autowired
 	private ItemRepository repository;
+	
+	@Autowired
+	private TokenService tokenService;
 
-	public void receiveNotification(NotificationMessage msg) {
+	@RabbitListener(queues = {"item.queue"})
+	public void receiveNotification(
+			@Header(name=CommonConstants.AUTH_TOKEN_HEADER) String authToken, 
+			@Payload NotificationMessage msg) {
+		
+		SecurityContextHolder.getContext().setAuthentication(
+				tokenService.getAuthenticationFromToken(authToken)
+				);
 
 		switch(msg.getEntity()) {
 		case ITEM:

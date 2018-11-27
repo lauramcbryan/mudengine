@@ -15,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import com.jpinfo.mudengine.common.security.TokenService;
 import com.jpinfo.mudengine.common.utils.NotificationMessage;
 import com.jpinfo.mudengine.item.fixture.ItemNotificationTemplates;
 import com.jpinfo.mudengine.item.fixture.ItemTemplates;
@@ -38,6 +39,9 @@ public class ItemListenerTests {
 	
 	@Autowired
 	private NotificationListener mockListener;
+	
+	@Autowired
+	private TokenService tokenService;
 
 	@PostConstruct
 	private void setup() {
@@ -59,7 +63,7 @@ public class ItemListenerTests {
 			.willReturn(itemsInPlace);
 		
 		// Launch the notification!
-		mockListener.receiveNotification(msg);
+		mockListener.receiveNotification(tokenService.buildInternalToken(), msg);
 		
 		// Check if all items was deleted
 		itemsInPlace.stream()
@@ -82,7 +86,7 @@ public class ItemListenerTests {
 			.willReturn(itemsOwned);
 
 		// Launch the notification!
-		mockListener.receiveNotification(msg);
+		mockListener.receiveNotification(tokenService.buildInternalToken(), msg);
 
 		// Check if all items was deleted
 		itemsOwned.stream()

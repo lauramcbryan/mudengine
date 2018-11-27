@@ -6,7 +6,11 @@ import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.handler.annotation.Header;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import com.jpinfo.mudengine.being.client.MessageServiceClient;
@@ -15,6 +19,8 @@ import com.jpinfo.mudengine.being.repository.BeingRepository;
 import com.jpinfo.mudengine.being.utils.BeingHelper;
 import com.jpinfo.mudengine.common.message.MessageEntity.EnumEntityType;
 import com.jpinfo.mudengine.common.message.MessageRequest;
+import com.jpinfo.mudengine.common.security.TokenService;
+import com.jpinfo.mudengine.common.utils.CommonConstants;
 import com.jpinfo.mudengine.common.utils.NotificationMessage;
 
 @Component
@@ -28,7 +34,18 @@ public class NotificationListener {
 	@Autowired
 	private MessageServiceClient messageService;
 	
-	public void receiveNotification(NotificationMessage msg) {
+	@Autowired
+	private TokenService tokenService;
+	
+	
+	@RabbitListener(queues = {"being.queue"})
+	public void receiveNotification(
+			@Header(name=CommonConstants.AUTH_TOKEN_HEADER) String authToken, 
+			@Payload NotificationMessage msg) {
+		
+		SecurityContextHolder.getContext().setAuthentication(
+				tokenService.getAuthenticationFromToken(authToken)
+				);
 
 		switch(msg.getEntity()) {
 		case ITEM:
@@ -186,6 +203,19 @@ public class NotificationListener {
 							log.info("world: {}, entityId: {} (owner), message: {}",
 									actingBeing.getCurWorld(), actingBeing.getCode(), userMessage.getMessageKey());
 						}
+						
+						// Preparing the message for other beings						
+						MessageRequest otherMessage = new MessageRequest();
+						
+						otherMessage.setMessageKey(BeingHelper.BEING_DROP_ANOTHER_MSG);
+						otherMessage.setArgs(new String[] {
+								actingBeing.getName(),
+								notification.getArgs()[0]
+						});
+						
+						// Adding the item in the changed list
+						otherMessage.addChangedEntity(EnumEntityType.ITEM, notification.getEntityId()); 
+						
 					
 						// Gathering all beings in the same place than the acting being
 						repository.findByCurWorldAndCurPlaceCode(
@@ -198,19 +228,11 @@ public class NotificationListener {
 							.filter(curBeing -> curBeing.getPlayerId()!=null)
 							.forEach(curBeing -> {
 								
-								// Setting the message for other beings
-								userMessage.setMessageKey(BeingHelper.BEING_DROP_ANOTHER_MSG);
-								userMessage.setArgs(new String[] {
-										actingBeing.getName(),
-										notification.getArgs()[0]
-								});
-								
-	
 								// Send a message to all other beings in the same place
-								messageService.putMessage(curBeing.getCode(), userMessage);
+								messageService.putMessage(curBeing.getCode(), otherMessage);
 								
 								log.info("world: {}, entityId: {}, message: {}",
-										curBeing.getCurWorld(), curBeing.getCode(), userMessage.getMessageKey());
+										curBeing.getCurWorld(), curBeing.getCode(), otherMessage.getMessageKey());
 								});
 						});
 				

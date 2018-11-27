@@ -17,8 +17,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import com.jpinfo.mudengine.common.player.Session;
+import com.jpinfo.mudengine.common.security.MudUserDetails;
+import com.jpinfo.mudengine.common.utils.CommonConstants;
 import com.jpinfo.mudengine.common.utils.NotificationMessage;
 import com.jpinfo.mudengine.common.utils.NotificationMessage.EnumEntity;
 import com.jpinfo.mudengine.common.utils.NotificationMessage.EnumNotificationEvent;
@@ -98,7 +102,12 @@ public class NotificationAspect {
 			notifications.stream()
 				.forEach(placeNotification -> {
 					// Send the notification
-					rabbit.convertAndSend(placeExchange, "", placeNotification);
+					rabbit.convertAndSend(placeExchange, "", placeNotification, m -> {
+						m.getMessageProperties().getHeaders()
+							.put(CommonConstants.AUTH_TOKEN_HEADER, 
+									SecurityContextHolder.getContext().getAuthentication().getCredentials());
+						return m;
+					});
 					
 					log.info("world: {}, entityId: {}, event: {}",
 							placeNotification.getWorldName(),
@@ -156,10 +165,16 @@ public class NotificationAspect {
 				// The guys in the place will take interest on that  :D
 				.targetEntity(EnumEntity.PLACE)
 				.targetEntityId(destroyedPlace.getCode().longValue())
+				.worldName(getWorldName())
 			.build();
 		
 		// Send the notification
-		rabbit.convertAndSend(placeExchange, "", placeNotification);
+		rabbit.convertAndSend(placeExchange, "", placeNotification, m -> {
+			m.getMessageProperties().getHeaders()
+			.put(CommonConstants.AUTH_TOKEN_HEADER, 
+					SecurityContextHolder.getContext().getAuthentication().getCredentials());
+			return m;
+		});
 
 		log.info("world: {}, entityId: {}, event: {}",
 				placeNotification.getWorldName(),
@@ -194,6 +209,7 @@ public class NotificationAspect {
 					// The guys in the place will take interest on that
 					.targetEntity(EnumEntity.PLACE)
 					.targetEntityId(afterPlace.getCode().longValue())
+					.worldName(getWorldName())
 				.build();
 			
 			// Enqueue the notification
@@ -228,6 +244,7 @@ public class NotificationAspect {
 						// The guys in the place will take interest on that
 						.targetEntity(EnumEntity.PLACE)
 						.targetEntityId(afterPlace.getCode().longValue())
+						.worldName(getWorldName())
 					.build();
 
 				// Enqueue the notification
@@ -331,10 +348,24 @@ public class NotificationAspect {
 				.messageKey(messageKey)
 				.args(new String[] {direction})
 				// The guys in the place will take interest on that
+				.worldName(getWorldName())
 			.build();
 		
 		// Enqueue the notification
 		notifications.add(placeNotification);
+	}
+	
+	private String getWorldName() {
+		
+		MudUserDetails uDetails = (MudUserDetails)
+				SecurityContextHolder.getContext().getAuthentication().getDetails();
+		
+		Optional<Session> optSession = uDetails.getSessionData(); 
+		
+		if (optSession.isPresent())
+			return optSession.get().getCurWorldName();
+		else
+			return null;
 	}
 
 }

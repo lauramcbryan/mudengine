@@ -29,6 +29,7 @@ import com.jpinfo.mudengine.being.repository.BeingRepository;
 import com.jpinfo.mudengine.being.utils.BeingHelper;
 import com.jpinfo.mudengine.common.message.MessageRequest;
 import com.jpinfo.mudengine.common.message.MessageEntity.EnumEntityType;
+import com.jpinfo.mudengine.common.security.TokenService;
 import com.jpinfo.mudengine.common.utils.NotificationMessage;
 
 import br.com.six2six.fixturefactory.Fixture;
@@ -55,6 +56,9 @@ public class ItemListenerTests {
 	
 	@Autowired
 	private NotificationListener mockListener;
+	
+	@Autowired
+	private TokenService tokenService;
 
 	@PostConstruct
 	private void setup() {
@@ -91,7 +95,7 @@ public class ItemListenerTests {
 			.willReturn(otherMudBeings);
 		
 		// Launch the notification!
-		mockListener.receiveNotification(msg);
+		mockListener.receiveNotification(tokenService.buildInternalToken(), msg);
 		
 		// Preparing the message request to compare against
 		MessageRequest yoursMsgRequest = new MessageRequest();
@@ -137,7 +141,7 @@ public class ItemListenerTests {
 			.willReturn(Optional.of(owningMudBeing));
 		
 		// Launch the notification!
-		mockListener.receiveNotification(msg);
+		mockListener.receiveNotification(tokenService.buildInternalToken(), msg);
 		
 		// Preparing the message request to compare against
 		MessageRequest yoursMsgRequest = new MessageRequest();
@@ -229,7 +233,7 @@ public class ItemListenerTests {
 			.willReturn(Optional.of(owningMudBeing));
 
 		// Launch the notification!
-		mockListener.receiveNotification(msg);
+		mockListener.receiveNotification(tokenService.buildInternalToken(), msg);
 		
 		MessageRequest yoursMsgRequest = new MessageRequest();
 		yoursMsgRequest.setMessageKey(msg.getMessageKey());
@@ -257,7 +261,7 @@ public class ItemListenerTests {
 			.willReturn(otherMudBeings);
 		
 		// Launch the notification!
-		mockListener.receiveNotification(msg);
+		mockListener.receiveNotification(tokenService.buildInternalToken(), msg);
 		
 		MessageRequest placeMsgRequest = new MessageRequest();
 		placeMsgRequest.setMessageKey(msg.getMessageKey());

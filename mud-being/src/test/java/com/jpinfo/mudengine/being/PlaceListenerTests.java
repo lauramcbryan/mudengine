@@ -24,6 +24,7 @@ import com.jpinfo.mudengine.being.notification.NotificationListener;
 import com.jpinfo.mudengine.being.repository.BeingRepository;
 import com.jpinfo.mudengine.common.message.MessageRequest;
 import com.jpinfo.mudengine.common.message.MessageEntity.EnumEntityType;
+import com.jpinfo.mudengine.common.security.TokenService;
 import com.jpinfo.mudengine.common.utils.NotificationMessage;
 
 import br.com.six2six.fixturefactory.Fixture;
@@ -50,6 +51,9 @@ public class PlaceListenerTests {
 	
 	@Autowired
 	private NotificationListener mockListener;
+	
+	@Autowired
+	private TokenService tokenService;
 
 	@PostConstruct
 	private void setup() {
@@ -74,7 +78,7 @@ public class PlaceListenerTests {
 			.willReturn(otherMudBeings);
 		
 		// Launch the notification!
-		mockListener.receiveNotification(msg);
+		mockListener.receiveNotification(tokenService.buildInternalToken(), msg);
 		
 		// Check if all beings are being destroyed
 		otherMudBeings.stream()
@@ -139,7 +143,7 @@ public class PlaceListenerTests {
 			.willReturn(otherMudBeings);
 		
 		// Launch the notification!
-		mockListener.receiveNotification(msg);
+		mockListener.receiveNotification(tokenService.buildInternalToken(), msg);
 		
 		// Check if proper message was sent to other beings
 		otherMudBeings.stream()
