@@ -1,15 +1,18 @@
 version: '3.6'
 services:
-  rabbitmq:
-    image: rabbitmq:3-management
-    hostname: rabbitmq
+  activemq:
+    image: webcenter/activemq:latest
     ports:
-      - 15672:15672
       - 5672:5672
+      - 8161:8161
+    environment:
+      - ACTIVEMQ_ADMIN_LOGIN=mudengine_qa
+      - ACTIVEMQ_ADMIN_PASSWORD=mudengine_qa
+      - ACTIVEMQ_CONFIG_NAME=mudengine
     volumes:
-      - ./rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
+      - ./activemq/activemq.xml:/opt/activemq/conf/activemq.xml:ro
     networks:
-      - net  
+      - net      
   consul:
     image: consul:latest
     ports:
