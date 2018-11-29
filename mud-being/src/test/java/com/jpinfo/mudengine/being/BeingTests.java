@@ -49,10 +49,15 @@ import static org.mockito.Mockito.verify;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment=WebEnvironment.RANDOM_PORT,
 	properties= {"token.secret=a7ac498c7bba59e0eb7c647d2f0197f8",
-			"being.exchange=" + BeingTests.BEING_EXCHANGE})
+			"being.topic=" + BeingTests.BEING_EXCHANGE,
+			"place.topic=" + BeingTests.PLACE_EXCHANGE,
+			"item.topic=" + BeingTests.ITEM_EXCHANGE
+			})
 public class BeingTests {
 	
 	public static final String BEING_EXCHANGE = "being.exchange";
+	public static final String PLACE_EXCHANGE = "place.exchange";
+	public static final String ITEM_EXCHANGE = "item.exchange";
 	
 	private static final Integer MAX_HP=100;
 	private static final Integer HP=200;

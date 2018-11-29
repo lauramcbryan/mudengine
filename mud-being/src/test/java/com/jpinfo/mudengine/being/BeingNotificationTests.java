@@ -1,6 +1,7 @@
 package com.jpinfo.mudengine.being;
 
 import static org.mockito.BDDMockito.given;
+
 import static org.mockito.Mockito.verify;
 
 import java.util.List;
@@ -8,15 +9,17 @@ import java.util.Optional;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.activemq.command.ActiveMQTopic;
 import org.apache.commons.lang.SerializationUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.jpinfo.mudengine.being.client.ItemServiceClient;
@@ -42,11 +45,12 @@ import br.com.six2six.fixturefactory.loader.FixtureFactoryLoader;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment=WebEnvironment.RANDOM_PORT,
 	properties= {"token.secret=a7ac498c7bba59e0eb7c647d2f0197f8",
-			"being.exchange=" + BeingNotificationTests.BEING_EXCHANGE})
+		"being.topic=" + BeingTests.BEING_EXCHANGE,
+		"place.topic=" + BeingTests.PLACE_EXCHANGE,
+		"item.topic=" + BeingTests.ITEM_EXCHANGE
+		})
 public class BeingNotificationTests {
 	
-	public static final String BEING_EXCHANGE = "being.exchange";
-
 	private static final String SKILL="TEST_SKILL";
 	private static final String ATTR="TEST_ATTR";
 	
@@ -68,7 +72,7 @@ public class BeingNotificationTests {
 	private MessageServiceClient messageService;
 
 	@MockBean
-	private RabbitTemplate rabbit;
+	private JmsTemplate jmsMockTemplate;
 	
 	@MockBean
 	private ProceedingJoinPoint pjp;
@@ -477,7 +481,8 @@ public class BeingNotificationTests {
 				.build();
 		
 		// Check if correct notification was sent		
-		verify(rabbit).convertAndSend(BEING_EXCHANGE, "", beingNotification);
+		verify(jmsMockTemplate).convertAndSend(ArgumentMatchers.eq(new ActiveMQTopic(BeingTests.BEING_EXCHANGE)), 
+				ArgumentMatchers.eq(beingNotification), ArgumentMatchers.any());
 		
 		
 		// Preparing the expected message result for the destroyed being

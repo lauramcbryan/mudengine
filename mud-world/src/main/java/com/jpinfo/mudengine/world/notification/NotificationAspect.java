@@ -2,21 +2,23 @@ package com.jpinfo.mudengine.world.notification;
 
 import java.util.ArrayList;
 
+
 import java.util.List;
 import java.util.Optional;
 
-
+import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+import org.apache.activemq.command.ActiveMQTopic;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
@@ -38,16 +40,23 @@ public class NotificationAspect {
 	private static final Logger log = LoggerFactory.getLogger(NotificationAspect.class);
 	
 	@Autowired
-	private RabbitTemplate rabbit;
+	private JmsTemplate jmsTemplate;
 	
-	@Value("${place.exchange}")
-	private String placeExchange;
+	@Value("${place.topic}")
+	private String placeTopicName;
 
 	@Autowired
 	private PlaceRepository repository;
 	
 	@PersistenceContext
 	private EntityManager em;
+	
+	private ActiveMQTopic placeTopic;
+	
+	@PostConstruct
+	public void setup() {
+		placeTopic = new ActiveMQTopic(placeTopicName);
+	}
 	
 	/**
 	 * This join point intercepts all place saves performed by the service. 
@@ -102,10 +111,10 @@ public class NotificationAspect {
 			notifications.stream()
 				.forEach(placeNotification -> {
 					// Send the notification
-					rabbit.convertAndSend(placeExchange, "", placeNotification, m -> {
-						m.getMessageProperties().getHeaders()
-							.put(CommonConstants.AUTH_TOKEN_HEADER, 
-									SecurityContextHolder.getContext().getAuthentication().getCredentials());
+					jmsTemplate.convertAndSend(placeTopic, placeNotification, m -> {
+						
+						m.setStringProperty(CommonConstants.AUTH_TOKEN_HEADER, (String)SecurityContextHolder.getContext().getAuthentication().getCredentials());
+						
 						return m;
 					});
 					
@@ -169,10 +178,10 @@ public class NotificationAspect {
 			.build();
 		
 		// Send the notification
-		rabbit.convertAndSend(placeExchange, "", placeNotification, m -> {
-			m.getMessageProperties().getHeaders()
-			.put(CommonConstants.AUTH_TOKEN_HEADER, 
-					SecurityContextHolder.getContext().getAuthentication().getCredentials());
+		jmsTemplate.convertAndSend(placeTopic, placeNotification, m -> {
+			
+			m.setStringProperty(CommonConstants.AUTH_TOKEN_HEADER, (String)SecurityContextHolder.getContext().getAuthentication().getCredentials());
+			
 			return m;
 		});
 

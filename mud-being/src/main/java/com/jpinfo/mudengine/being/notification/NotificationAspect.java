@@ -5,19 +5,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 
 import javax.persistence.PersistenceContext;
 
+import org.apache.activemq.command.ActiveMQTopic;
 import org.apache.commons.lang.SerializationUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jms.core.JmsTemplate;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import com.jpinfo.mudengine.being.client.ItemServiceClient;
@@ -31,6 +34,7 @@ import com.jpinfo.mudengine.being.utils.BeingHelper;
 import com.jpinfo.mudengine.common.item.Item;
 import com.jpinfo.mudengine.common.message.MessageRequest;
 import com.jpinfo.mudengine.common.message.MessageEntity.EnumEntityType;
+import com.jpinfo.mudengine.common.utils.CommonConstants;
 import com.jpinfo.mudengine.common.utils.NotificationMessage;
 import com.jpinfo.mudengine.common.utils.NotificationMessage.EnumNotificationEvent;
 
@@ -41,10 +45,12 @@ public class NotificationAspect {
 	private static final Logger log = LoggerFactory.getLogger(NotificationAspect.class);
 
 	@Autowired
-	private RabbitTemplate rabbit;
+	private JmsTemplate jmsTemplate;
 	
-	@Value("${being.exchange}")
-	private String beingExchange;
+	@Value("${being.topic}")
+	private String beingTopicName;
+	
+	private ActiveMQTopic beingTopic;
 	
 	@Autowired
 	private BeingRepository repository;
@@ -57,6 +63,11 @@ public class NotificationAspect {
 	
 	@Autowired
 	private ItemServiceClient itemService;
+	
+	@PostConstruct
+	public void setup() {
+		beingTopic = new ActiveMQTopic(beingTopicName);
+	}
 	
 	@Around(value = "execution(public * org.springframework.data.repository.Repository+.save(..)) && args(afterBeing)")
 	public Object compareBeing(ProceedingJoinPoint pjp, MudBeing afterBeing) throws Throwable {
@@ -152,7 +163,14 @@ public class NotificationAspect {
 			.build();
 		
 		// Send Notification
-		rabbit.convertAndSend(beingExchange, "", beingNotification);
+		jmsTemplate.convertAndSend(beingTopic, beingNotification, m-> {
+			
+			m.setObjectProperty(CommonConstants.AUTH_TOKEN_HEADER, 
+					SecurityContextHolder.getContext().getAuthentication().getCredentials()
+					);
+			
+			return m;
+		});
 		
 		// Preparing message request
 		MessageRequest yoursDestroyedMessage = new MessageRequest();

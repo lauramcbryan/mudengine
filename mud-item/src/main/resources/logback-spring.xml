@@ -3,8 +3,8 @@
 
 	<include resource="org/springframework/boot/logging/logback/default.xml"/>
 	
-    <property name="APP_NAME" value="mud-world"/>
-    <property name="APP_BASE_PACKAGE" value="com.jpinfo.mudengine.world"/>
+    <property name="APP_NAME" value="mud-item"/>
+    <property name="APP_BASE_PACKAGE" value="com.jpinfo.mudengine.item"/>
 
     <springProfile name="dev">
         <property name="GRAYLOG_HOST" value="localhost"/>

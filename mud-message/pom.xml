@@ -117,6 +117,24 @@
 			<artifactId>fixture-factory</artifactId>
 			<version>3.1.0</version>
 		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>de.siegmar</groupId>
+			<artifactId>logback-gelf</artifactId>
+			<version>1.1.0</version>
+		</dependency>
+		<dependency>
+		    <groupId>io.github.dibog</groupId>
+		    <artifactId>cloudwatch-logback-appender</artifactId>
+		    <version>1.0.0</version>
+		</dependency>
 	</dependencies>
 
 	<repositories>

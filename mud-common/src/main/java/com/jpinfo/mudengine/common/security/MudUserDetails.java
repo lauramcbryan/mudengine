@@ -1,5 +1,6 @@
 package com.jpinfo.mudengine.common.security;
 
+import java.io.Serializable;
 import java.util.Optional;
 
 import com.jpinfo.mudengine.common.player.Player;
@@ -10,7 +11,9 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class MudUserDetails {
+public class MudUserDetails implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	private Optional<Session> sessionData;
 	

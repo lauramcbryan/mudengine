@@ -6,8 +6,8 @@ import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jms.annotation.JmsListener;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -38,7 +38,8 @@ public class NotificationListener {
 	private TokenService tokenService;
 	
 	
-	@RabbitListener(queues = {"being.queue"})
+	@JmsListener(destination="${place.topic}")
+	@JmsListener(destination="${item.topic}")
 	public void receiveNotification(
 			@Header(name=CommonConstants.AUTH_TOKEN_HEADER) String authToken, 
 			@Payload NotificationMessage msg) {

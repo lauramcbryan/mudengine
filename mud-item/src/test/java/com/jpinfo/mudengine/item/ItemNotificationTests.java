@@ -7,15 +7,17 @@ import java.util.Optional;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.activemq.command.ActiveMQTopic;
 import org.apache.commons.lang.SerializationUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.jpinfo.mudengine.common.utils.NotificationMessage;
@@ -32,10 +34,16 @@ import br.com.six2six.fixturefactory.loader.FixtureFactoryLoader;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment=WebEnvironment.RANDOM_PORT,
 	properties= {"token.secret=a7ac498c7bba59e0eb7c647d2f0197f8",
-			"item.exchange=" + ItemNotificationTests.ITEM_EXCHANGE})
+			"item.topic=" + ItemNotificationTests.ITEM_EXCHANGE,
+			"place.topic=" + ItemNotificationTests.PLACE_EXCHANGE,
+			"being.topic=" + ItemNotificationTests.BEING_EXCHANGE})
 public class ItemNotificationTests {
 	
-	public static final String ITEM_EXCHANGE = "item.exchange";
+	public static final String ITEM_EXCHANGE = "item.topic";
+	
+	public static final String PLACE_EXCHANGE = "place.topic";
+	
+	public static final String BEING_EXCHANGE = "being.topic";
 	
 	private static final String  WORLD_NAME = "test";
 	private static final Integer PLACE_CODE = (int)System.currentTimeMillis();
@@ -45,7 +53,7 @@ public class ItemNotificationTests {
 	private static final Integer BIG_QUANTITY_VALUE = 1000;
 
 	@MockBean
-	private RabbitTemplate rabbit;
+	private JmsTemplate jmsTemplate;
 	
 	@MockBean
 	private ItemRepository repository;
@@ -55,7 +63,8 @@ public class ItemNotificationTests {
 	
 	@MockBean
 	private ProceedingJoinPoint pjp;
-	
+
+	private ActiveMQTopic itemTopic = new ActiveMQTopic(ITEM_EXCHANGE);
 
 	@PostConstruct
 	private void setup() {
@@ -85,7 +94,8 @@ public class ItemNotificationTests {
 				.event(EnumNotificationEvent.ITEM_CLASS_CHANGE)
 			.build();
 		
-		verify(rabbit).convertAndSend(ITEM_EXCHANGE, "", itemNotification);
+		verify(jmsTemplate).convertAndSend(ArgumentMatchers.eq(itemTopic), 
+				ArgumentMatchers.eq(itemNotification), ArgumentMatchers.any());
 	}
 
 	@Test
@@ -110,7 +120,8 @@ public class ItemNotificationTests {
 				.event(EnumNotificationEvent.ITEM_TAKEN)
 			.build();
 		
-		verify(rabbit).convertAndSend(ITEM_EXCHANGE, "", itemNotification);
+		verify(jmsTemplate).convertAndSend(ArgumentMatchers.eq(itemTopic), 
+				ArgumentMatchers.eq(itemNotification), ArgumentMatchers.any());
 	}
 	
 
@@ -136,7 +147,8 @@ public class ItemNotificationTests {
 				.event(EnumNotificationEvent.ITEM_DROP)
 			.build();
 		
-		verify(rabbit).convertAndSend(ITEM_EXCHANGE, "", itemNotification);
+		verify(jmsTemplate).convertAndSend(ArgumentMatchers.eq(itemTopic), 
+				ArgumentMatchers.eq(itemNotification), ArgumentMatchers.any());		
 	}
 	
 	@Test
@@ -160,7 +172,8 @@ public class ItemNotificationTests {
 				.event(EnumNotificationEvent.ITEM_QTTY_INCREASE)
 			.build();
 		
-		verify(rabbit).convertAndSend(ITEM_EXCHANGE, "", itemNotification);
+		verify(jmsTemplate).convertAndSend(ArgumentMatchers.eq(itemTopic), 
+				ArgumentMatchers.eq(itemNotification), ArgumentMatchers.any());		
 	}
 
 	@Test
@@ -184,7 +197,8 @@ public class ItemNotificationTests {
 				.event(EnumNotificationEvent.ITEM_QTTY_DECREASE)
 			.build();
 		
-		verify(rabbit).convertAndSend(ITEM_EXCHANGE, "", itemNotification);
+		verify(jmsTemplate).convertAndSend(ArgumentMatchers.eq(itemTopic), 
+				ArgumentMatchers.eq(itemNotification), ArgumentMatchers.any());		
 	}
 	
 	@Test
@@ -200,6 +214,7 @@ public class ItemNotificationTests {
 				.event(EnumNotificationEvent.ITEM_DESTROY)
 			.build();
 		
-		verify(rabbit).convertAndSend(ITEM_EXCHANGE, "", itemNotification);
+		verify(jmsTemplate).convertAndSend(ArgumentMatchers.eq(itemTopic), 
+				ArgumentMatchers.eq(itemNotification), ArgumentMatchers.any());		
 	}
 }

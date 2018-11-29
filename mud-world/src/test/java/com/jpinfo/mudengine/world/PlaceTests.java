@@ -7,9 +7,10 @@ import java.util.*;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.activemq.command.ActiveMQTopic;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -20,6 +21,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.jpinfo.mudengine.common.place.Place;
@@ -34,7 +36,7 @@ import com.jpinfo.mudengine.world.repository.PlaceRepository;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment=WebEnvironment.RANDOM_PORT, 
 	properties= {"token.secret=a7ac498c7bba59e0eb7c647d2f0197f8",
-			"place.exchange=" + PlaceTests.PLACE_EXCHANGE})
+			"place.topic=" + PlaceTests.PLACE_EXCHANGE})
 public class PlaceTests {
 	
 	
@@ -79,7 +81,7 @@ public class PlaceTests {
 	private static final Integer DELETE_PLACE_ID = 7;
 
 	@MockBean
-	private RabbitTemplate rabbit;
+	private JmsTemplate jmsTemplate;
 	
 	@Autowired
 	private TestRestTemplate restTemplate;
@@ -93,6 +95,8 @@ public class PlaceTests {
 	private HttpEntity<Object> authEntity;
 	
 	private HttpHeaders authHeaders;
+	
+	private ActiveMQTopic placeTopic = new ActiveMQTopic(PLACE_EXCHANGE);
 	
 	@PostConstruct
 	public void setup() {
@@ -172,8 +176,13 @@ public class PlaceTests {
 				.event(EnumNotificationEvent.PLACE_EXIT_CREATE)
 			.build();
 		
-		verify(rabbit).convertAndSend(PLACE_EXCHANGE, "", placeExitNotification);
-		verify(rabbit).convertAndSend(PLACE_EXCHANGE, "", placeExit2Notification);
+		verify(jmsTemplate).convertAndSend(ArgumentMatchers.eq(placeTopic), 
+				ArgumentMatchers.eq(placeExitNotification), 
+				ArgumentMatchers.any());
+		
+		verify(jmsTemplate).convertAndSend(ArgumentMatchers.eq(placeTopic), 
+				ArgumentMatchers.eq(placeExit2Notification), 
+				ArgumentMatchers.any());
 		
 	}
 	
@@ -269,7 +278,10 @@ public class PlaceTests {
 				.event(EnumNotificationEvent.PLACE_CLASS_CHANGE)
 			.build();
 		
-		verify(rabbit).convertAndSend(PLACE_EXCHANGE, "", placeClassNotification);
+		verify(jmsTemplate).convertAndSend(ArgumentMatchers.eq(placeTopic), 
+				ArgumentMatchers.eq(placeClassNotification), 
+				ArgumentMatchers.any());
+
 		
 	}
 
@@ -348,7 +360,9 @@ public class PlaceTests {
 				.event(EnumNotificationEvent.PLACE_DESTROY)
 			.build();
 		
-		verify(rabbit).convertAndSend(PLACE_EXCHANGE, "", placeNotification);
+		verify(jmsTemplate).convertAndSend(ArgumentMatchers.eq(placeTopic), 
+				ArgumentMatchers.eq(placeNotification), 
+				ArgumentMatchers.any());
 
 	}
 
@@ -418,7 +432,10 @@ public class PlaceTests {
 				.event(EnumNotificationEvent.PLACE_CLASS_CHANGE)
 			.build();
 		
-		verify(rabbit).convertAndSend(PLACE_EXCHANGE, "", placeClassNotification);
+		verify(jmsTemplate).convertAndSend(ArgumentMatchers.eq(placeTopic), 
+				ArgumentMatchers.eq(placeClassNotification), 
+				ArgumentMatchers.any());
+
 		
 		MudPlace dbPlace = repository.findById(DELETE_DEMISED_PLACE_ID)
 				.orElseThrow(() -> new RuntimeException("Demised place not found in database"));
@@ -448,7 +465,10 @@ public class PlaceTests {
 				.event(EnumNotificationEvent.PLACE_DESTROY)
 			.build();
 		
-		verify(rabbit).convertAndSend(PLACE_EXCHANGE, "", placeNotification);
+		verify(jmsTemplate).convertAndSend(ArgumentMatchers.eq(placeTopic), 
+				ArgumentMatchers.eq(placeNotification), 
+				ArgumentMatchers.any());
+
 	}
 	
 }

@@ -2,20 +2,23 @@ package com.jpinfo.mudengine.item.notification;
 
 import java.util.ArrayList;
 
+
 import java.util.List;
 import java.util.Optional;
 
+import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+import org.apache.activemq.command.ActiveMQTopic;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
@@ -34,16 +37,23 @@ public class NotificationAspect {
 	private static final Logger log = LoggerFactory.getLogger(NotificationAspect.class);
 	
 	@Autowired
-	private RabbitTemplate rabbit;
+	private JmsTemplate jmsTemplate;
 	
-	@Value("${item.exchange}")
-	private String itemExchange;
+	@Value("${item.topic}")
+	private String itemTopicName;
+	
+	private ActiveMQTopic itemTopic;
 	
 	@Autowired
 	private ItemRepository repository;
 
 	@PersistenceContext
 	private EntityManager em;
+	
+	@PostConstruct
+	public void setup() {
+		itemTopic = new ActiveMQTopic(itemTopicName);
+	}
 	
 	@Around(value = "execution(public * com.jpinfo.mudengine.item.repository.ItemRepository+.save(..)) && args(afterItem)")
 	public Object compareItems(ProceedingJoinPoint pjp, MudItem afterItem) throws Throwable {
@@ -89,10 +99,11 @@ public class NotificationAspect {
 			notifications.stream()
 				.forEach(itemNotification -> { 
 					// Send the notification
-					rabbit.convertAndSend(itemExchange, "", itemNotification, m -> {
-						m.getMessageProperties().getHeaders()
-						.put(CommonConstants.AUTH_TOKEN_HEADER, 
+					jmsTemplate.convertAndSend(itemTopic, itemNotification, m -> {
+						
+						m.setObjectProperty(CommonConstants.AUTH_TOKEN_HEADER, 
 								SecurityContextHolder.getContext().getAuthentication().getCredentials());
+						
 						return m;
 					});
 					
@@ -139,9 +150,9 @@ public class NotificationAspect {
 			.build();
 		
 		// Send Notification
-		rabbit.convertAndSend(itemExchange, "", itemNotification, m -> {
-			m.getMessageProperties().getHeaders()
-			.put(CommonConstants.AUTH_TOKEN_HEADER, 
+		jmsTemplate.convertAndSend(itemTopic, itemNotification, m -> {
+			
+			m.setObjectProperty(CommonConstants.AUTH_TOKEN_HEADER, 
 					SecurityContextHolder.getContext().getAuthentication().getCredentials());
 			return m;
 		});

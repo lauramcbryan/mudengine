@@ -3,8 +3,8 @@ package com.jpinfo.mudengine.item.notification;
 import org.slf4j.Logger;
 
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jms.annotation.JmsListener;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,7 +26,8 @@ public class NotificationListener {
 	@Autowired
 	private TokenService tokenService;
 
-	@RabbitListener(queues = {"item.queue"})
+	@JmsListener(destination="${place.topic}")
+	@JmsListener(destination="${being.topic}")
 	public void receiveNotification(
 			@Header(name=CommonConstants.AUTH_TOKEN_HEADER) String authToken, 
 			@Payload NotificationMessage msg) {
@@ -67,8 +68,12 @@ public class NotificationListener {
 				.forEach(curItem -> { 
 					repository.delete(curItem);
 					
-					log.info("Item {} deleted", curItem.getCode());
+					log.info("world: {}, entityId: {}, itemId: {} deleted",
+							msg.getWorldName(), msg.getEntityId(), curItem.getCode());
 				});
+		} else {
+			log.trace("world: {}, entityId: {}, event: {} ignored",
+					msg.getWorldName(), msg.getEntityId(), msg.getEvent());
 		}
 	}
 	
@@ -89,9 +94,13 @@ public class NotificationListener {
 					
 					repository.save(curItem);
 					
-					log.info("Item {} dropped", curItem.getCode());
+					log.info("world: {}, entityId: {}, itemId: {} dropped",
+							msg.getWorldName(), msg.getEntityId(), curItem.getCode());
 				});
 			
+		} else {
+			log.trace("world: {}, entityId: {}, event: {} ignored",
+					msg.getWorldName(), msg.getEntityId(), msg.getEvent());
 		}
 	}
 

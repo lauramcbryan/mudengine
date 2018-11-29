@@ -5,6 +5,7 @@ services:
     ports:
       - 5672:5672
       - 8161:8161
+      - 61616:61616
     environment:
       - ACTIVEMQ_ADMIN_LOGIN=mudengine_qa
       - ACTIVEMQ_ADMIN_PASSWORD=mudengine_qa

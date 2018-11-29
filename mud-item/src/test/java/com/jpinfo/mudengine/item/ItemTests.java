@@ -49,10 +49,17 @@ import br.com.six2six.fixturefactory.loader.FixtureFactoryLoader;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment=WebEnvironment.RANDOM_PORT,
 	properties= {"token.secret=a7ac498c7bba59e0eb7c647d2f0197f8",
-			"item.exchange=" + ItemTests.ITEM_EXCHANGE})
+			"item.topic=" + ItemTests.ITEM_EXCHANGE,
+			"place.topic=" + ItemTests.PLACE_EXCHANGE,
+			"being.topic=" + ItemTests.BEING_EXCHANGE
+			})
 public class ItemTests {
 	
-	public static final String ITEM_EXCHANGE = "item.exchange";
+	public static final String ITEM_EXCHANGE = "item.topic";
+	
+	public static final String PLACE_EXCHANGE = "place.topic";
+	
+	public static final String BEING_EXCHANGE = "being.topic";
 	
 	private static final Integer MAX_DURATION_VALUE = 100;
 	private static final Integer DURATION_VALUE = 500;
@@ -70,7 +77,6 @@ public class ItemTests {
 	private ItemClassRepository classRepository;
 	
 	private HttpEntity<Object> emptyHttpEntity;
-	
 
 	@PostConstruct
 	private void setup() {

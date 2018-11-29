@@ -38,10 +38,11 @@ import br.com.six2six.fixturefactory.loader.FixtureFactoryLoader;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment=WebEnvironment.RANDOM_PORT,
 	properties= {"token.secret=a7ac498c7bba59e0eb7c647d2f0197f8",
-			"being.exchange=" + ItemListenerTests.BEING_EXCHANGE})
+		"being.topic=" + BeingTests.BEING_EXCHANGE,
+		"place.topic=" + BeingTests.PLACE_EXCHANGE,
+		"item.topic=" + BeingTests.ITEM_EXCHANGE
+		})
 public class ItemListenerTests {
-	
-	public static final String BEING_EXCHANGE = "being.exchange";
 	
 	// This mock bean isn't used during validation.
 	// It's mocked just to avoid having it trying to call outside world
