@@ -18,11 +18,6 @@
 		"key": "config/application/spring.jpa.properties.hibernate.temp.use_jdbc_metadata_defaults",
 		"flags": 0,
 		"value": "ZmFsc2U="
-	},
-	{
-		"key": "config/application/spring.jms.pub-sub-domain",
-		"flags": 0,
-		"value": "dHJ1ZQ=="
 	},	
 	{
 		"key": "config/application/spring.activemq.broker-url",

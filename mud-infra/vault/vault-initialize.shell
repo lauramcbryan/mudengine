@@ -4,5 +4,4 @@ vault kv put /secret/mud-item spring.datasource.username=mudengine_item_app spri
 vault kv put /secret/mud-message spring.datasource.username=mudengine_message_app spring.datasource.password=mudengine_message_app
 vault kv put /secret/mud-player spring.datasource.username=mudengine_player_app spring.datasource.password=mudengine_player_app
 vault kv put /secret/mud-world spring.datasource.username=mudengine_world_app spring.datasource.password=mudengine_world_app
-vault kv put /secret/application spring.activemq.user=mudengine_qa spring.activemq.password=mudengine_qa
-vault kv put /secret/application token.secret=a7ac498c7bba59e0eb7c647d2f0197f8
+vault kv put /secret/application spring.activemq.user=mudengine_qa spring.activemq.password=mudengine_qa token.secret=a7ac498c7bba59e0eb7c647d2f0197f8
