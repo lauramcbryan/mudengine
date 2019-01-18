@@ -1,2 +1,0 @@
-#!/bin/bash
-./vault kv put /secret/mud-being spring.datasource.username=mudengine_being_app spring.datasource.password=mudengine_being_app
