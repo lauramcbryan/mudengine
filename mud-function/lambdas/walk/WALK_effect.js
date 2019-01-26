@@ -2,11 +2,16 @@
 
 exports = function (router) {
     router.post('/', function (req, res) {
-        handler(req.body, null, res);
 
-        console.log(res);
+        var callback = function(status, event) {
 
-        res.send(res);
+        }
+
+        handler(req.body, {}, callback);
+
+        console.log(callback.event);
+
+        res.send(callback.event);
 
     });
 };
