@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = function (router) {
+exports = function (router) {
     router.post('/', function (req, res) {
         handler(req.body, null, res);
 
