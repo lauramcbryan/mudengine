@@ -1,22 +1,5 @@
 'use strict';
 
-module.exports = function (router) {
-    router.post('/', function (req, res) {
-
-        var callback = function(status, event) {
-
-        }
-
-
-        handler(req.body, {}, callback);
-
-        console.log(callback.event);
-
-        res.send(callback.event);
-
-    });
-};
-
 exports.handler = (event, context, callback) => {
 
 	event.messages = []
