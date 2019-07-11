@@ -1,7 +1,21 @@
 spring:
   application:
     name: mud-message
+    
+---
+spring:
+  profiles: default
+    
   datasource:
     platform: h2
-
     
+---
+spring:
+  profiles: dev
+
+server:
+  port: 8088
+  
+being:
+  endpoint: http://localhost:8084
+  

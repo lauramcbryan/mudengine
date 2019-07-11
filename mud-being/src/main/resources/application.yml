@@ -1,5 +1,26 @@
 spring:
   application:
     name: mud-being
+    
+---
+spring:
+  profiles: default
+    
   datasource:
     platform: h2
+
+---
+spring:
+  profiles: dev
+
+  activemq:
+    broker-url: ssl://b-89f2515b-5e00-4f47-a3e1-af19d7ad82d8-1.mq.us-east-2.amazonaws.com:61617
+
+server:
+  port: 8084
+  
+item:
+  endpoint: http://localhost:8082
+
+message:
+  endpoint: http://localhost:8088

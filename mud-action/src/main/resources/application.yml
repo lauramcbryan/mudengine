@@ -1,6 +1,30 @@
 spring:
   application:
     name: mud-action
+    
+---
+spring:
+  profiles: default
+    
   datasource:
     platform: h2
 
+---
+spring:
+  profiles: dev
+
+server:
+  port: 8086
+  
+being:
+  endpoint: http://localhost:8084
+      
+message:
+  endpoint: http://localhost:8088
+      
+item:
+  endpoint: http://localhost:8082
+      
+place:
+  endpoint: http://localhost:8080
+  
