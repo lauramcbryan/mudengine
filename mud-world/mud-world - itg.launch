@@ -9,6 +9,8 @@
 <mapAttribute key="org.eclipse.debug.core.environmentVariables">
 <mapEntry key="CONSUL_HOST" value="http://localhost"/>
 <mapEntry key="CONSUL_PORT" value="8500"/>
+<mapEntry key="LOGGING_HOST" value="http://localhost"/>
+<mapEntry key="LOGGING_PORT" value="12201"/>
 <mapEntry key="SPRING_PROFILES_ACTIVE" value="itg"/>
 <mapEntry key="VAULT_ADDR" value="http://localhost:8200"/>
 <mapEntry key="VAULT_TOKEN" value="myroot"/>
