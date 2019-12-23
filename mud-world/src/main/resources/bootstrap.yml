@@ -37,6 +37,8 @@ spring:
       config:
         enabled: true
         fail-fast: true
+        prefix: ''
+        default-context: common
       retry:
         max-attempts: 6
         initial-interval: 10000   

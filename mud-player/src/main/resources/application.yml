@@ -1,5 +1,21 @@
 spring:
   application:
     name: mud-player
+    
+---
+spring:
+  profiles: default
+    
   datasource:
     platform: h2
+
+---
+spring:
+  profiles: dev
+
+server:
+  port: 8090
+  
+being:
+  endpoint: http://localhost:8084
+  

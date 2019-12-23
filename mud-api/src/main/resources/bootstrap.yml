@@ -20,9 +20,11 @@ spring:
       port: ${CONSUL_PORT}
       config:
         enabled: true
+        prefix: ''
+        default-context: common
 
 server:
-  port: 8080
+  port: 80
   
 zuul:
   ignored-services: "*"

@@ -9,7 +9,7 @@
     <mapAttribute key="org.eclipse.debug.core.environmentVariables">
         <mapEntry key="CONSUL_HOST" value="http://ec2-52-14-59-146.us-east-2.compute.amazonaws.com"/>
         <mapEntry key="CONSUL_PORT" value="8500"/>
-        <mapEntry key="SPRING_PROFILES_ACTIVE" value="dev"/>
+        <mapEntry key="SPRING_PROFILES_ACTIVE" value="itg"/>
         <mapEntry key="VAULT_ADDR" value="http://ec2-52-14-59-146.us-east-2.compute.amazonaws.com:8200"/>
         <mapEntry key="VAULT_TOKEN" value="495070a6-413d-57ad-4a92-4b96d977b336"/>
     </mapAttribute>
