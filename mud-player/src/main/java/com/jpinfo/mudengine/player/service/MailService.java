@@ -61,8 +61,8 @@ public class MailService {
 			while (reader.ready()) {
 				
 				mailBody.append(reader.readLine()
-						.replaceAll(USERNAME_TAG, playerData.getUsername())
-						.replaceAll(ACODE_TAG, activationCode)
+						.replace(USERNAME_TAG, playerData.getUsername())
+						.replace(ACODE_TAG, activationCode)
 						).append("<br/>");				
 			}
 			

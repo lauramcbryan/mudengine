@@ -7,7 +7,7 @@ import org.springframework.integration.transformer.ObjectToStringTransformer;
 public class TelnetTransformer extends ObjectToStringTransformer {
 
 	@Override
-	protected String transformPayload(Object payload) throws Exception {
+	protected String transformPayload(Object payload) {
 		
 		if (payload instanceof byte[]) {
 			

@@ -11,7 +11,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.jpinfo.mudengine.common.player.Player;
 import com.jpinfo.mudengine.common.security.MudUserDetails;
-import com.jpinfo.mudengine.common.utils.CommonConstants;
 
 public class LocalizedMessages {
 	

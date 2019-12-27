@@ -149,7 +149,7 @@ public class MessageController implements MessageService {
 			
 			Page<MudMessage> lstMessage = null;
 			
-			if (allMessages) {
+			if (allMessages.booleanValue()) {
 				lstMessage = repository.findByBeingCode(beingCode, page);
 			} else {
 				lstMessage = repository.findUnreadByBeingCode(beingCode, page);
