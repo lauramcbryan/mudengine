@@ -1,23 +1,15 @@
 package com.jpinfo.mudengine.item.service;
 
-import java.util.*;
-
-
-
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Service;
 
 import com.jpinfo.mudengine.common.exception.EntityNotFoundException;
 import com.jpinfo.mudengine.common.exception.IllegalParameterException;
 import com.jpinfo.mudengine.common.item.Item;
-import com.jpinfo.mudengine.common.service.ItemService;
 import com.jpinfo.mudengine.common.utils.LocalizedMessages;
 import com.jpinfo.mudengine.item.model.MudItem;
 import com.jpinfo.mudengine.item.model.MudItemAttr;
@@ -28,17 +20,16 @@ import com.jpinfo.mudengine.item.repository.ItemClassRepository;
 import com.jpinfo.mudengine.item.repository.ItemRepository;
 import com.jpinfo.mudengine.item.utils.ItemHelper;
 
-@RestController
-public class ItemController implements ItemService {
+@Service
+public class ItemServiceImpl {
 	
 	@Autowired
-	ItemRepository itemRepository;
+	private ItemRepository itemRepository;
 	
 	@Autowired
-	ItemClassRepository itemClassRepository;
+	private ItemClassRepository itemClassRepository;
 
-	@Override
-	public Item getItem(@PathVariable Long itemId) {
+	public Item getItem(Long itemId) {
 		
 		Item response = null;
 		
@@ -51,8 +42,7 @@ public class ItemController implements ItemService {
 		return response;
 	}
 	
-	@Override
-	public Item updateItem(@PathVariable Long itemId, @RequestBody Item requestItem) {
+	public Item updateItem(Long itemId, Item requestItem) {
 		
 		Item response = null;
 		
@@ -151,8 +141,8 @@ public class ItemController implements ItemService {
 		
 	}
 	
-	@Override
-	public ResponseEntity<Item> createItem(@RequestParam String itemClassCode, @RequestParam Optional<String> worldName, @RequestParam Optional<Integer> placeCode, @RequestParam Optional<Integer> quantity, @RequestParam Optional<Long> owner) {
+	public Item createItem(String itemClassCode, Optional<String> worldName, Optional<Integer> placeCode, 
+			Optional<Integer> quantity, Optional<Long> owner) {
 		
 		Item response = null;
 		
@@ -202,7 +192,7 @@ public class ItemController implements ItemService {
 		// Building the response
 		response = ItemConverter.convert(newDbItem);
 		
-		return new ResponseEntity<>(response, HttpStatus.CREATED);
+		return response;
 	}
 
 	/**
@@ -292,8 +282,7 @@ public class ItemController implements ItemService {
 		return dbItem;
 	}
 	
-	@Override
-	public Item destroyItem(@PathVariable Long itemId) {
+	public Item destroyItem(Long itemId) {
 		
 		Item response;
 
@@ -317,8 +306,7 @@ public class ItemController implements ItemService {
 		return response;
 	}
 
-	@Override
-	public List<Item> getAllFromPlace(@PathVariable String worldName, @PathVariable Integer placeCode) {
+	public List<Item> getAllFromPlace(String worldName, Integer placeCode) {
 		
 		List<Item> responseList;
 		
@@ -333,8 +321,7 @@ public class ItemController implements ItemService {
 		return responseList;
 	}
 
-	@Override
-	public List<Item> getAllFromBeing(@PathVariable Long owner) {
+	public List<Item> getAllFromBeing(Long owner) {
 		
 		List<Item> responseList;
 		

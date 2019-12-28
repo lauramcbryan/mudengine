@@ -1,31 +1,25 @@
 package com.jpinfo.mudengine.being.service;
 
 import java.util.ArrayList;
-
-
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Service;
 
 import com.jpinfo.mudengine.being.model.MudBeingClass;
 import com.jpinfo.mudengine.being.model.converter.BeingClassConverter;
 import com.jpinfo.mudengine.being.repository.BeingClassRepository;
 import com.jpinfo.mudengine.common.being.BeingClass;
 import com.jpinfo.mudengine.common.exception.EntityNotFoundException;
-import com.jpinfo.mudengine.common.service.BeingClassService;
 import com.jpinfo.mudengine.common.utils.LocalizedMessages;
 
-@RestController
-public class BeingClassController implements BeingClassService {
+@Service
+public class BeingClassServiceImpl {
 
 	@Autowired
 	private BeingClassRepository repository;
 	
-	@Override
-	public BeingClass getClass(@PathVariable String id) {
+	public BeingClass getClass(String id) {
 		
 		MudBeingClass found = repository
 				.findById(id)
@@ -35,7 +29,6 @@ public class BeingClassController implements BeingClassService {
 		return BeingClassConverter.convert(found);
 	}
 
-	@Override
 	public List<BeingClass> listAllAvailable() {
 		
 		List<BeingClass> resultList = new ArrayList<>();

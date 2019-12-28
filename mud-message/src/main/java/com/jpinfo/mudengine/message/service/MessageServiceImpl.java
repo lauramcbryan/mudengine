@@ -9,13 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Service;
 
 import com.jpinfo.mudengine.common.being.Being;
 import com.jpinfo.mudengine.common.exception.IllegalParameterException;
@@ -24,7 +19,6 @@ import com.jpinfo.mudengine.common.message.MessageRequest;
 import com.jpinfo.mudengine.common.player.Player;
 import com.jpinfo.mudengine.common.player.Session;
 import com.jpinfo.mudengine.common.security.MudUserDetails;
-import com.jpinfo.mudengine.common.service.MessageService;
 import com.jpinfo.mudengine.common.utils.CommonConstants;
 import com.jpinfo.mudengine.common.utils.LocalizedMessages;
 import com.jpinfo.mudengine.message.client.BeingServiceClient;
@@ -34,9 +28,9 @@ import com.jpinfo.mudengine.message.model.converter.MudMessageEntityConverter;
 import com.jpinfo.mudengine.message.model.converter.MudMessageParmConverter;
 import com.jpinfo.mudengine.message.repository.MudMessageRepository;
 
-@RestController
-public class MessageController implements MessageService {
-	
+@Service
+public class MessageServiceImpl {
+
 	@Autowired
 	private BeingServiceClient beingService;
 	
@@ -46,10 +40,7 @@ public class MessageController implements MessageService {
 	@Autowired
 	private MessageConverter messageConverter;
 	
-	@Override
-	public ResponseEntity<Long> putMessage( 
-			@PathVariable("targetCode") Long targetCode,
-			@RequestBody MessageRequest request) {
+	public Long putMessage(Long targetCode,MessageRequest request) {
 		
 		MudMessage dbMessage = new MudMessage();
 		
@@ -87,13 +78,10 @@ public class MessageController implements MessageService {
 		// Update the record in database, now fully formed
 		repository.save(dbMessage);
 		
-		return new ResponseEntity<>(dbMessage.getMessageId(), HttpStatus.CREATED);
+		return dbMessage.getMessageId();
 	}
 
-	@Override
-	public ResponseEntity<List<Long>> broadcastMessage( 
-			@PathVariable("placeCode") Integer placeCode, 
-			@RequestBody MessageRequest request) {
+	public List<Long> broadcastMessage(Integer placeCode, MessageRequest request) {
 		
 		List<Long> resultList = new ArrayList<>();
 		
@@ -109,21 +97,16 @@ public class MessageController implements MessageService {
 				.filter(e -> e.getPlayerId()!=null)
 				.forEach(e ->
 					resultList.add(
-							putMessage(e.getCode(), request).getBody()
+							putMessage(e.getCode(), request)
 							)
 				);
 		});
 		
-		
-		return new ResponseEntity<>(resultList, HttpStatus.CREATED);
+		return resultList;
 	}
 	
 	
-	@Override
-	public List<Message> getMessage(
-			@RequestParam(name="allMessages", defaultValue="false", required=false) Boolean allMessages,
-			@RequestParam(name="pageCount", defaultValue="0", required=false) Integer pageCount,
-			@RequestParam(name="pageSize", defaultValue="10", required=false) Integer pageSize) {
+	public List<Message> getMessage(Boolean allMessages, Integer pageCount, Integer pageSize) {
 		
 		List<Message> result;
 		
@@ -176,6 +159,5 @@ public class MessageController implements MessageService {
 		
 		return result;
 	}
-
 
 }

@@ -1,24 +1,17 @@
 package com.jpinfo.mudengine.world.service;
 
 import java.util.HashSet;
-
 import java.util.Optional;
-
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Service;
 
 import com.jpinfo.mudengine.common.exception.EntityNotFoundException;
 import com.jpinfo.mudengine.common.exception.IllegalParameterException;
 import com.jpinfo.mudengine.common.place.Place;
 import com.jpinfo.mudengine.common.place.PlaceExit;
-import com.jpinfo.mudengine.common.service.PlaceService;
 import com.jpinfo.mudengine.common.utils.LocalizedMessages;
 import com.jpinfo.mudengine.world.model.MudPlace;
 import com.jpinfo.mudengine.world.model.MudPlaceAttr;
@@ -31,11 +24,9 @@ import com.jpinfo.mudengine.world.repository.PlaceClassRepository;
 import com.jpinfo.mudengine.world.repository.PlaceRepository;
 import com.jpinfo.mudengine.world.util.WorldHelper;
 
-import io.swagger.annotations.*;
+@Service
+public class PlaceServiceImpl {
 
-@RestController
-public class PlaceController implements PlaceService {
-	
 	@Autowired
 	private PlaceRepository placeRepository;
 
@@ -44,18 +35,14 @@ public class PlaceController implements PlaceService {
 
 	@Autowired
 	private PlaceConverter placeConverter;
-	
-	@Override
-	@ApiOperation(value="Returns information about a place")
-	public Place getPlace(
-			@PathVariable Integer placeId) {
+
+	public Place getPlace(Integer placeId) {
 		
 		Place response = null;
 		
 		MudPlace dbPlace = placeRepository
 				.findById(placeId)
 				.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.PLACE_NOT_FOUND));
-
 		
 		response = placeConverter.convert(dbPlace);
 		
@@ -63,8 +50,7 @@ public class PlaceController implements PlaceService {
 	}
 
 	
-	@Override
-	public Place updatePlace(@PathVariable Integer placeId, @RequestBody Place requestPlace) {
+	public Place updatePlace(Integer placeId, Place requestPlace) {
 		
 		Place response = null;
 		
@@ -347,8 +333,7 @@ public class PlaceController implements PlaceService {
 	}
 
 
-	@Override
-	public void destroyPlace(@PathVariable Integer placeId) {
+	public void destroyPlace(Integer placeId) {
 		
 		MudPlace dbPlace = placeRepository
 				.findById(placeId)
@@ -370,8 +355,7 @@ public class PlaceController implements PlaceService {
 	}
 
 
-	@Override
-	public ResponseEntity<Place> createPlace(String placeClassCode, String direction, Integer targetPlaceCode) {
+	public Place createPlace(String placeClassCode, String direction, Integer targetPlaceCode) {
 		
 		Place response = null;
 		
@@ -427,6 +411,6 @@ public class PlaceController implements PlaceService {
 		// Converting the response to service-like response
 		response = placeConverter.convert(dbPlace);
 		
-		return new ResponseEntity<>(response, HttpStatus.CREATED);
-	}
+		return response;
+	}	
 }

@@ -30,11 +30,11 @@ public class MailService {
 	@Value("${SMTP_FROM:disabled}")
 	private String sender;
 	
-	@Autowired
+	@Autowired(required = false)
 	private JavaMailSender mail;
 	
 	public boolean isEnabled() {
-		return !sender.equals(NON_SET_FROM);
+		return !sender.equals(NON_SET_FROM) && (mail!=null);
 	}
 
 	public void sendActivationEmail(String activationCode) {

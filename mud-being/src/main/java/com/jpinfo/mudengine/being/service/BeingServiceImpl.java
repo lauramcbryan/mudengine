@@ -1,18 +1,12 @@
 package com.jpinfo.mudengine.being.service;
 
 import java.util.List;
-
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Service;
 
 import com.jpinfo.mudengine.being.client.ItemServiceClient;
 import com.jpinfo.mudengine.being.model.MudBeing;
@@ -36,11 +30,10 @@ import com.jpinfo.mudengine.common.item.Item;
 import com.jpinfo.mudengine.common.player.Player;
 import com.jpinfo.mudengine.common.security.MudUserDetails;
 import com.jpinfo.mudengine.common.security.TokenService;
-import com.jpinfo.mudengine.common.service.BeingService;
 import com.jpinfo.mudengine.common.utils.LocalizedMessages;
 
-@RestController
-public class BeingController implements BeingService {
+@Service
+public class BeingServiceImpl {
 	
 	@Autowired
 	private ItemServiceClient itemService;
@@ -51,8 +44,7 @@ public class BeingController implements BeingService {
 	@Autowired
 	private BeingClassRepository classRepository;
 
-	@Override
-	public Being getBeing(@PathVariable Long beingCode) {
+	public Being getBeing(Long beingCode) {
 		
 		Being response = null;
 		
@@ -65,8 +57,7 @@ public class BeingController implements BeingService {
 		return expandBeingEquipment(response, dbBeing);
 	}
 	
-	@Override
-	public Being updateBeing(@PathVariable Long beingCode, @RequestBody Being requestBeing) {
+	public Being updateBeing(Long beingCode, Being requestBeing) {
 		
 		Being response = null;
 		
@@ -133,14 +124,11 @@ public class BeingController implements BeingService {
 	}
 	
 	
-	@Override
-	public ResponseEntity<Being> createBeing( 
-			@RequestParam Being.enumBeingType beingType, @RequestParam String beingClass, @RequestParam String worldName, 
-			@RequestParam Integer placeCode, @RequestParam Integer quantity,
-			@RequestParam String beingName) {
+	public Being createBeing( 
+			Being.enumBeingType beingType, String beingClass, String worldName, 
+			Integer placeCode, Integer quantity,
+			String beingName) {
 		
-		ResponseEntity<Being> entityResponse = null; 
-
 		MudBeing dbBeing = new MudBeing();
 		
 		MudBeingClass dbBeingClass = classRepository
@@ -173,17 +161,12 @@ public class BeingController implements BeingService {
 		// Convert to the response
 		Being response = BeingConverter.convert(dbBeing, true);
 		
-		entityResponse = new ResponseEntity<>(response, HttpStatus.CREATED);
-		
-		return entityResponse;
+		return response;
 	}
 
-	@Override
-	public ResponseEntity<Being> createPlayerBeing(
-			@PathVariable Long playerId, @RequestParam String beingClass, 
-			@RequestParam String worldName, @RequestParam Integer placeCode, @RequestParam String beingName) {
-		
-		ResponseEntity<Being> entityResponse = null;
+	public Being createPlayerBeing(
+			Long playerId, String beingClass, 
+			String worldName, Integer placeCode, String beingName) {
 
 		// Checking the name's availability
 		if ((beingName!=null) && (repository.findByName(beingName).isPresent())) {
@@ -217,21 +200,16 @@ public class BeingController implements BeingService {
 		// Convert to the response
 		Being response = BeingConverter.convert(dbBeing, true);
 		
-		entityResponse = new ResponseEntity<>(response, HttpStatus.CREATED);
-		
-		return entityResponse;
+		return response;
 	}
 	
-	@Override
-	public List<Being> getAllFromPlayer(@PathVariable Long playerId) {
-		
-		List<Being> response;
+	public List<Being> getAllFromPlayer(Long playerId) {
 		
 		if (canAccess(playerId)) {
 		
 			List<MudBeing> lstFound = repository.findByPlayerId(playerId);
 			
-			response =
+			return
 				lstFound.stream()
 					.map(BeingConverter::convert)
 					.collect(Collectors.toList());
@@ -239,12 +217,9 @@ public class BeingController implements BeingService {
 		} else {
 			throw new AccessDeniedException(LocalizedMessages.BEING_ACCESS_DENIED);
 		}
-		
-		return response;
 	}
 
-	@Override
-	public List<Being> getAllFromPlace(@PathVariable String worldName, @PathVariable Integer placeCode) {
+	public List<Being> getAllFromPlace(String worldName, Integer placeCode) {
 
 		List<MudBeing> lstFound = repository.findByCurWorldAndCurPlaceCode(worldName, placeCode);
 		
@@ -253,8 +228,7 @@ public class BeingController implements BeingService {
 				.collect(Collectors.toList());
 	}
 
-	@Override
-	public void destroyBeing(@PathVariable Long beingCode) {
+	public void destroyBeing(Long beingCode) {
 		
 		MudBeing dbBeing = repository.findById(beingCode)
 				.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.BEING_NOT_FOUND));

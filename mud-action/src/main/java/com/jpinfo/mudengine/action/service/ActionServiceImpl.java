@@ -2,16 +2,12 @@ package com.jpinfo.mudengine.action.service;
 
 import java.time.LocalDate;
 import java.util.List;
-
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Service;
 
 import com.jpinfo.mudengine.action.model.MudAction;
 import com.jpinfo.mudengine.action.model.MudActionClassCommand;
@@ -25,12 +21,10 @@ import com.jpinfo.mudengine.common.action.Action;
 import com.jpinfo.mudengine.common.exception.EntityNotFoundException;
 import com.jpinfo.mudengine.common.player.Session;
 import com.jpinfo.mudengine.common.security.MudUserDetails;
-import com.jpinfo.mudengine.common.service.ActionService;
 import com.jpinfo.mudengine.common.utils.LocalizedMessages;
 
-@RestController
-@RequestMapping("/action")
-public class ActionController implements ActionService {
+@Service
+public class ActionServiceImpl {
 
 	@Autowired
 	private MudActionRepository repository;
@@ -44,8 +38,7 @@ public class ActionController implements ActionService {
 	@Autowired
 	private ActionHandler handler;
 
-	@Override
-	public Iterable<Action> getActiveActions(@PathVariable Long actorCode) {
+	public Iterable<Action> getActiveActions(Long actorCode) {
 		
 		List<MudAction> stateList = repository.findByIssuerCode(actorCode);
 
@@ -54,8 +47,7 @@ public class ActionController implements ActionService {
 			.collect(Collectors.toList());
 	}
 
-	@Override
-	public Action getAction(@PathVariable Long actionCode) {
+	public Action getAction(Long actionCode) {
 		
 		MudAction state = repository.findById(actionCode)
 				.orElseThrow(() -> new EntityNotFoundException("Action not found"));
@@ -63,11 +55,7 @@ public class ActionController implements ActionService {
 		return ActionConverter.convert(state);
 	}	
 	
-	@Override
-	public Action insertCommand( 
-			@PathVariable("commandId") Integer commandId,
-			@RequestParam("mediatorCode") Optional<String> mediatorCode, 
-			@RequestParam("targetCode") String targetCode)
+	public Action insertCommand(Integer commandId,Optional<String> mediatorCode, String targetCode)
 	{
 		
 		MudActionClassCommand command = commandRepository.findById(commandId)
@@ -87,8 +75,7 @@ public class ActionController implements ActionService {
 		return ActionConverter.convert(dbAction);
 	}
 	
-	@Override
-	public void cancelAction(@PathVariable Long actionCode) {
+	public void cancelAction(Long actionCode) {
 		
 		MudAction dbAction = repository.findActiveOne(actionCode);
 		
@@ -100,8 +87,7 @@ public class ActionController implements ActionService {
 		}
 	}
 
-	@Override
-	public void cancelAllActionFromBeing(@PathVariable Long actorCode) {
+	public void cancelAllActionFromBeing(Long actorCode) {
 		
 		List<MudAction> dbActionList = repository.findActiveByActorCode(actorCode);
 		
@@ -113,7 +99,6 @@ public class ActionController implements ActionService {
 		}
 	}
 	
-	@Override
 	public void updateActions() {
 
 		// Prepare the new turn

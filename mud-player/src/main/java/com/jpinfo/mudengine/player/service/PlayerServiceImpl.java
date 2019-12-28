@@ -1,8 +1,6 @@
 package com.jpinfo.mudengine.player.service;
 
 import java.util.Date;
-
-
 import java.util.List;
 import java.util.Optional;
 
@@ -10,13 +8,8 @@ import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Service;
 
 import com.jpinfo.mudengine.common.being.Being;
 import com.jpinfo.mudengine.common.exception.AccessDeniedException;
@@ -26,7 +19,6 @@ import com.jpinfo.mudengine.common.player.Player;
 import com.jpinfo.mudengine.common.player.Session;
 import com.jpinfo.mudengine.common.security.MudUserDetails;
 import com.jpinfo.mudengine.common.security.TokenService;
-import com.jpinfo.mudengine.common.service.PlayerService;
 import com.jpinfo.mudengine.common.utils.CommonConstants;
 import com.jpinfo.mudengine.common.utils.LocalizedMessages;
 import com.jpinfo.mudengine.player.client.BeingServiceClient;
@@ -40,9 +32,9 @@ import com.jpinfo.mudengine.player.repository.PlayerRepository;
 import com.jpinfo.mudengine.player.repository.SessionRepository;
 import com.jpinfo.mudengine.player.util.PlayerHelper;
 
-@RestController
-public class PlayerController implements PlayerService {
-	
+@Service
+public class PlayerServiceImpl {
+
 	@Autowired
 	private PlayerRepository repository;
 	
@@ -58,8 +50,7 @@ public class PlayerController implements PlayerService {
 	@Autowired
 	private MailService mailService;
 	
-	@Override
-	public Player getPlayerDetails(@PathVariable String username) {
+	public Player getPlayerDetails(String username) {
 		
 		Player response = null;
 		
@@ -77,10 +68,9 @@ public class PlayerController implements PlayerService {
 		return response;
 	}
 
-	@Override
-	public ResponseEntity<Player> registerPlayer(@PathVariable String username, @RequestParam String email, @RequestParam String locale) {
+	public Player registerPlayer(String username, String email, String locale) {
 		
-		ResponseEntity<Player> response = null;
+		Player response = null;
 
 		try {
 			
@@ -118,7 +108,7 @@ public class PlayerController implements PlayerService {
 					tokenService.getAuthenticationFromToken(token)
 					);
 			
-			response = new ResponseEntity<>(PlayerConverter.convert(createdPlayer), HttpStatus.CREATED);
+			response = PlayerConverter.convert(createdPlayer);
 			
 			if (mailService.isEnabled()) {
 				
@@ -144,10 +134,9 @@ public class PlayerController implements PlayerService {
 		return response;
 	}
 
-	@Override
-	public ResponseEntity<Player> updatePlayerDetails(@PathVariable String username, @RequestBody Player playerData) {
+	public Player updatePlayerDetails(String username, Player playerData) {
 		
-		ResponseEntity<Player> response = null;
+		Player response = null;
 		
 		if (canAccess(username)) {
 		
@@ -172,7 +161,7 @@ public class PlayerController implements PlayerService {
 			
 			// Update the authToken
 			HttpHeaders header = updateAuthHeaders(authToken, changedPlayer, null);
-			response = new ResponseEntity<>(changedPlayer, header, HttpStatus.ACCEPTED);
+			response = changedPlayer;
 				
 		} else {
 			throw new AccessDeniedException(LocalizedMessages.PLAYER_ACCESS_DENIED);
@@ -181,8 +170,7 @@ public class PlayerController implements PlayerService {
 		return response;
 	}
 
-	@Override
-	public void setPlayerPassword(@PathVariable String username, @RequestParam String activationCode, @RequestParam String newPassword) {
+	public void setPlayerPassword(String username, String activationCode, String newPassword) {
 		
 		MudPlayer dbPlayer = repository.findByUsername(username)
 				.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.PLAYER_NOT_FOUND));
@@ -199,8 +187,7 @@ public class PlayerController implements PlayerService {
 		}
 	}
 
-	@Override
-	public Session getActiveSession(@PathVariable String username) {
+	public Session getActiveSession(String username) {
 		
 		Session session = null;
 		
@@ -221,10 +208,9 @@ public class PlayerController implements PlayerService {
 		return session;
 	}
 
-	@Override
-	public ResponseEntity<Session> createSession(@PathVariable String username, @RequestParam String password, @RequestParam String clientType, @RequestParam String ipAddress) {
+	public Session createSession(String username, String password, String clientType, String ipAddress) {
 		
-		ResponseEntity<Session> response = null;
+		Session response = null;
 		
 		MudPlayer dbPlayer = repository.findByUsernameAndPassword(username, password)
 				.orElseThrow(() -> new IllegalParameterException(LocalizedMessages.PLAYER_LOGIN_ERROR));
@@ -265,7 +251,7 @@ public class PlayerController implements PlayerService {
 				HttpHeaders header = new HttpHeaders();
 				header.add(CommonConstants.AUTH_TOKEN_HEADER, token);
 				
-				response = new ResponseEntity<>(sessionData, header, HttpStatus.CREATED);
+				response = sessionData;
 				break;
 			
 			case Player.STATUS_PENDING: 
@@ -286,16 +272,15 @@ public class PlayerController implements PlayerService {
 		
 	}
 
-	@Override
-	public ResponseEntity<Session> setActiveBeing(@PathVariable String username, @PathVariable Long beingCode) {
+	public Session setActiveBeing(String username, Long beingCode) {
 		
 		return updateBeingSession(username, Optional.of(beingCode));
 	}
 		
 	
-	private ResponseEntity<Session> updateBeingSession(String username, Optional<Long> beingCode) {
+	private Session updateBeingSession(String username, Optional<Long> beingCode) {
 		
-		ResponseEntity<Session> response = null;
+		Session response = null;
 		
 		if (canAccess(username)) {
 		
@@ -346,7 +331,7 @@ public class PlayerController implements PlayerService {
 			
 			// Update the authToken
 			HttpHeaders header = updateAuthHeaders(authToken, playerData, sessionData);
-			response = new ResponseEntity<>(sessionData, header, HttpStatus.ACCEPTED);
+			response = sessionData;
 			
 		} else {
 			throw new AccessDeniedException(LocalizedMessages.PLAYER_ACCESS_DENIED);
@@ -355,11 +340,10 @@ public class PlayerController implements PlayerService {
 		return response;
 	}
 	
-	@Override
-	public ResponseEntity<Player> createBeing(@PathVariable String username, @RequestParam String beingClass, @RequestParam String beingName,
-			@RequestParam String worldName, @RequestParam Integer placeCode) {
+	public Player createBeing(String username, String beingClass, String beingName,
+			String worldName, Integer placeCode) {
 		
-		ResponseEntity<Player> response = null;
+		Player response = null;
 		
 		if (canAccess(username)) {
 			
@@ -396,7 +380,7 @@ public class PlayerController implements PlayerService {
 
 			// Assembling the response
 			HttpHeaders header = updateAuthHeaders(authToken, playerData, null);
-			response = new ResponseEntity<>(playerData, header, HttpStatus.ACCEPTED);
+			response = playerData;
 			
 		} else {
 			throw new AccessDeniedException(LocalizedMessages.PLAYER_ACCESS_DENIED);
@@ -405,10 +389,9 @@ public class PlayerController implements PlayerService {
 		return response;
 	}
 
-	@Override
-	public ResponseEntity<Player> destroyBeing(@PathVariable String username, @PathVariable Long beingCode) {
+	public Player destroyBeing(String username, Long beingCode) {
 		
-		ResponseEntity<Player> response = null;
+		Player response = null;
 		
 		if (canAccess(username)) {
 			
@@ -465,9 +448,7 @@ public class PlayerController implements PlayerService {
 			HttpHeaders header = new HttpHeaders();
 			header.add(CommonConstants.AUTH_TOKEN_HEADER, token);
 			
-			response = new ResponseEntity<>(
-					playerData, 
-					header, HttpStatus.ACCEPTED);
+			response = playerData;
 			
 		} else {
 			throw new AccessDeniedException(LocalizedMessages.PLAYER_ACCESS_DENIED);
