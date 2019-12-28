@@ -12,35 +12,6 @@ spring:
 ---
 spring:
   profiles: dev
-  
-  datasource:
-    platform: postgres
-    url: jdbc:postgresql://mudengine.c2v9hbjh7mbw.us-east-2.rds.amazonaws.com:5432/mudenginedb
-    username: mudengine_being_app
-    password: mudengine_being_app
-    
-    tomcat:
-      max-active: 5
-      max-wait: 15000   
-
-  activemq:
-    broker-url: ssl://b-89f2515b-5e00-4f47-a3e1-af19d7ad82d8-1.mq.us-east-2.amazonaws.com:61617
 
 server:
   port: 8084
-  
-being:
-  topic: VirtualTopic.being
-  
-item:
-  endpoint: http://localhost:8082
-  topic: Consumer.being.VirtualTopic.item
-
-place:
-  topic: Consumer.being.VirtualTopic.place
-
-message:
-  endpoint: http://localhost:8088
-
-token:
-  secret: a7ac498c7bba59e0eb7c647d2f0197f8

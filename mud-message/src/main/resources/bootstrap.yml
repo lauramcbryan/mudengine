@@ -4,10 +4,14 @@ spring:
   cloud:
     vault:
       enabled: false
+      fail-fast: true      
     consul:
       enabled: false
       config:
         enabled: false
+        fail-fast: true
+        prefix: ''
+        default-context: common
 
 management:
   info:
@@ -21,6 +25,24 @@ management:
       enabled: true
 
 ---
+spring:
+  profiles: dev
+ 
+  cloud:
+    vault:
+      token: myroot
+      scheme: http
+      enabled: true      
+    consul:
+      enabled: true
+      config:
+        enabled: true
+      retry:
+        max-attempts: 6
+        initial-interval: 10000   
+        max-interval: 10000        
+        
+---
 
 spring:
   profiles: itg, qa, prod 
@@ -29,17 +51,9 @@ spring:
       uri: ${VAULT_ADDR}
       token: ${VAULT_TOKEN}
       enabled: true      
-      fail-fast: true
     consul:
       enabled: true
       host: ${CONSUL_HOST}
       port: ${CONSUL_PORT}
       config:
         enabled: true
-        fail-fast: true
-        prefix: ''
-        default-context: common
-      retry:
-        max-attempts: 6
-        initial-interval: 10000   
-        max-interval: 10000 

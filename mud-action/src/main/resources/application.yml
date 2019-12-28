@@ -13,32 +13,5 @@ spring:
 spring:
   profiles: dev
 
-  datasource:
-    platform: postgres
-    url: jdbc:postgresql://mudengine.c2v9hbjh7mbw.us-east-2.rds.amazonaws.com:5432/mudenginedb
-    username: mudengine_action_app
-    password: mudengine_action_app
-    
-    tomcat:
-      max-active: 5
-      max-wait: 15000
 server:
   port: 8086
-  
-being:
-  endpoint: http://localhost:8084
-      
-message:
-  endpoint: http://localhost:8088
-      
-item:
-  endpoint: http://localhost:8082
-      
-place:
-  endpoint: http://localhost:8080
-
-rule:
-  endpoint: https://2arfb3lhp3.execute-api.us-east-2.amazonaws.com/test
-  
-token:
-  secret: a7ac498c7bba59e0eb7c647d2f0197f8
