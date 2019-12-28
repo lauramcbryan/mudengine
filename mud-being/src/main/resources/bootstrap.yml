@@ -23,7 +23,7 @@ management:
 ---
 
 spring:
-  profiles: dev, itg, qa, prod 
+  profiles: itg, qa, prod 
   cloud:
     vault:
       uri: ${VAULT_ADDR}

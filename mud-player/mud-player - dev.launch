@@ -7,12 +7,9 @@
         <listEntry value="1"/>
     </listAttribute>
     <mapAttribute key="org.eclipse.debug.core.environmentVariables">
-        <mapEntry key="CONSUL_HOST" value="http://ec2-52-14-59-146.us-east-2.compute.amazonaws.com"/>
-        <mapEntry key="CONSUL_PORT" value="8500"/>
         <mapEntry key="SPRING_PROFILES_ACTIVE" value="dev"/>
-        <mapEntry key="VAULT_ADDR" value="http://ec2-52-14-59-146.us-east-2.compute.amazonaws.com:8200"/>
-        <mapEntry key="VAULT_TOKEN" value="495070a6-413d-57ad-4a92-4b96d977b336"/>
     </mapAttribute>
+    <booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_CLASSPATH_ONLY_JAR" value="false"/>
     <stringAttribute key="org.eclipse.jdt.launching.CLASSPATH_PROVIDER" value="org.springframework.ide.eclipse.boot.launch.BootMavenClassPathProvider"/>
     <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="com.jpinfo.mudengine.player.MudPlayerApplication"/>
     <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="mud-player"/>

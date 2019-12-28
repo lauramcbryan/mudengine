@@ -22,7 +22,7 @@ management:
 
 ---
 spring:
-  profiles: dev, itg, qa, prod
+  profiles: itg, qa, prod
  
   cloud:
     vault:
