@@ -2,3 +2,17 @@ mud-player/.mvn/
 /.metadata/
 /.recommenders/
 .sonarlint/
+
+mud-common/.project
+
+mud-common-client/.classpath
+
+mud-common-client/.project
+
+mud-common-client/.factorypath
+
+mud-common/.classpath
+
+mud-common/.factorypath
+
+mud-common/.settings/
