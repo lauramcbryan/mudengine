@@ -188,6 +188,7 @@
 				<version>0.8.4</version>
 				<configuration>
 					<excludes>
+						<exclude>com/jpinfo/mudengine/world/model/**</exclude>
 					</excludes>
 				</configuration>
 				<executions>

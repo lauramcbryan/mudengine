@@ -6,8 +6,8 @@ import static org.mockito.Mockito.verify;
 import java.util.*;
 
 import javax.annotation.PostConstruct;
+import javax.jms.Destination;
 
-import org.apache.activemq.command.ActiveMQTopic;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
@@ -35,8 +35,7 @@ import com.jpinfo.mudengine.world.repository.PlaceRepository;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment=WebEnvironment.RANDOM_PORT, 
-	properties= {"token.secret=a7ac498c7bba59e0eb7c647d2f0197f8",
-			"place.topic=" + PlaceTests.PLACE_EXCHANGE})
+	properties= {"token.secret=a7ac498c7bba59e0eb7c647d2f0197f8"})
 public class PlaceTests {
 	
 	
@@ -95,8 +94,6 @@ public class PlaceTests {
 	private HttpEntity<Object> authEntity;
 	
 	private HttpHeaders authHeaders;
-	
-	private ActiveMQTopic placeTopic = new ActiveMQTopic(PLACE_EXCHANGE);
 	
 	@PostConstruct
 	public void setup() {
@@ -176,11 +173,11 @@ public class PlaceTests {
 				.event(EnumNotificationEvent.PLACE_EXIT_CREATE)
 			.build();
 		
-		verify(jmsTemplate).convertAndSend(ArgumentMatchers.eq(placeTopic), 
+		verify(jmsTemplate).convertAndSend((Destination)ArgumentMatchers.any(), 
 				ArgumentMatchers.eq(placeExitNotification), 
 				ArgumentMatchers.any());
 		
-		verify(jmsTemplate).convertAndSend(ArgumentMatchers.eq(placeTopic), 
+		verify(jmsTemplate).convertAndSend((Destination)ArgumentMatchers.any(), 
 				ArgumentMatchers.eq(placeExit2Notification), 
 				ArgumentMatchers.any());
 		
@@ -278,7 +275,7 @@ public class PlaceTests {
 				.event(EnumNotificationEvent.PLACE_CLASS_CHANGE)
 			.build();
 		
-		verify(jmsTemplate).convertAndSend(ArgumentMatchers.eq(placeTopic), 
+		verify(jmsTemplate).convertAndSend((Destination)ArgumentMatchers.any(), 
 				ArgumentMatchers.eq(placeClassNotification), 
 				ArgumentMatchers.any());
 
@@ -360,7 +357,7 @@ public class PlaceTests {
 				.event(EnumNotificationEvent.PLACE_DESTROY)
 			.build();
 		
-		verify(jmsTemplate).convertAndSend(ArgumentMatchers.eq(placeTopic), 
+		verify(jmsTemplate).convertAndSend((Destination)ArgumentMatchers.any(), 
 				ArgumentMatchers.eq(placeNotification), 
 				ArgumentMatchers.any());
 
@@ -432,7 +429,7 @@ public class PlaceTests {
 				.event(EnumNotificationEvent.PLACE_CLASS_CHANGE)
 			.build();
 		
-		verify(jmsTemplate).convertAndSend(ArgumentMatchers.eq(placeTopic), 
+		verify(jmsTemplate).convertAndSend((Destination)ArgumentMatchers.any(), 
 				ArgumentMatchers.eq(placeClassNotification), 
 				ArgumentMatchers.any());
 
@@ -465,7 +462,7 @@ public class PlaceTests {
 				.event(EnumNotificationEvent.PLACE_DESTROY)
 			.build();
 		
-		verify(jmsTemplate).convertAndSend(ArgumentMatchers.eq(placeTopic), 
+		verify(jmsTemplate).convertAndSend((Destination)ArgumentMatchers.any(), 
 				ArgumentMatchers.eq(placeNotification), 
 				ArgumentMatchers.any());
 
