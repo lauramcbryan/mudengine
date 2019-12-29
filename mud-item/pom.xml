@@ -80,14 +80,6 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-devtools</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.h2database</groupId>
-			<artifactId>h2</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
         <dependency>
@@ -182,6 +174,8 @@
 				<version>0.8.4</version>
 				<configuration>
 					<excludes>
+						<exclude>com/jpinfo/mudengine/item/model/**</exclude>
+						<exclude>com/jpinfo/mudengine/item/notification/**</exclude>
 					</excludes>
 				</configuration>
 				<executions>

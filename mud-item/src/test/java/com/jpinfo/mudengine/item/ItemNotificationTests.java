@@ -1,49 +1,37 @@
 package com.jpinfo.mudengine.item;
 
-import static org.mockito.BDDMockito.given;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 
-import java.util.Optional;
+import java.util.List;
 
 import javax.annotation.PostConstruct;
+import javax.jms.Destination;
 
-import org.apache.activemq.command.ActiveMQTopic;
 import org.apache.commons.lang.SerializationUtils;
-import org.aspectj.lang.ProceedingJoinPoint;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import com.jpinfo.mudengine.common.security.TokenService;
 import com.jpinfo.mudengine.common.utils.NotificationMessage;
 import com.jpinfo.mudengine.common.utils.NotificationMessage.EnumNotificationEvent;
 import com.jpinfo.mudengine.item.fixture.ItemTemplates;
 import com.jpinfo.mudengine.item.model.MudItem;
 import com.jpinfo.mudengine.item.model.MudItemClass;
-import com.jpinfo.mudengine.item.notification.NotificationAspect;
-import com.jpinfo.mudengine.item.repository.ItemRepository;
+import com.jpinfo.mudengine.item.service.NotificationService;
 
 import br.com.six2six.fixturefactory.Fixture;
 import br.com.six2six.fixturefactory.loader.FixtureFactoryLoader;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment=WebEnvironment.RANDOM_PORT,
-	properties= {"token.secret=a7ac498c7bba59e0eb7c647d2f0197f8",
-			"item.topic=" + ItemNotificationTests.ITEM_EXCHANGE,
-			"place.topic=" + ItemNotificationTests.PLACE_EXCHANGE,
-			"being.topic=" + ItemNotificationTests.BEING_EXCHANGE})
+@SpringBootTest
 public class ItemNotificationTests {
-	
-	public static final String ITEM_EXCHANGE = "item.topic";
-	
-	public static final String PLACE_EXCHANGE = "place.topic";
-	
-	public static final String BEING_EXCHANGE = "being.topic";
 	
 	private static final String  WORLD_NAME = "test";
 	private static final Integer PLACE_CODE = (int)System.currentTimeMillis();
@@ -56,16 +44,11 @@ public class ItemNotificationTests {
 	private JmsTemplate jmsTemplate;
 	
 	@MockBean
-	private ItemRepository repository;
+	private TokenService mockTokenService;
 	
 	@Autowired
-	private NotificationAspect aspect;
+	private NotificationService service;
 	
-	@MockBean
-	private ProceedingJoinPoint pjp;
-
-	private ActiveMQTopic itemTopic = new ActiveMQTopic(ITEM_EXCHANGE);
-
 	@PostConstruct
 	private void setup() {
 		FixtureFactoryLoader.loadTemplates("com.jpinfo.mudengine.item.fixture");
@@ -83,19 +66,20 @@ public class ItemNotificationTests {
 		// Changing the item class
 		mockAfterItem.setItemClass(newClass);
 		
-		given(repository.findById(mockBeforeItem.getCode())).willReturn(Optional.of(mockBeforeItem));
+		List<NotificationMessage> notifications = service.handleItemChange(mockBeforeItem, mockAfterItem);
 		
-		
-		aspect.compareItems(pjp, mockAfterItem);
-		
-		NotificationMessage itemNotification = NotificationMessage.builder()
+		NotificationMessage expectedItemNotification = NotificationMessage.builder()
 				.entity(NotificationMessage.EnumEntity.ITEM)
 				.entityId(mockBeforeItem.getCode())
 				.event(EnumNotificationEvent.ITEM_CLASS_CHANGE)
 			.build();
+
+		assertThat(notifications.contains(expectedItemNotification));
 		
-		verify(jmsTemplate).convertAndSend(ArgumentMatchers.eq(itemTopic), 
-				ArgumentMatchers.eq(itemNotification), ArgumentMatchers.any());
+		service.dispatchNotifications(notifications);
+		
+		verify(jmsTemplate).convertAndSend((Destination)ArgumentMatchers.any(), 
+				ArgumentMatchers.eq(expectedItemNotification), ArgumentMatchers.any());
 	}
 
 	@Test
@@ -108,20 +92,23 @@ public class ItemNotificationTests {
 		mockAfterItem.setCurPlaceCode(null);
 		mockAfterItem.setCurWorld(null);
 		mockAfterItem.setCurOwner(ItemNotificationTests.CUR_OWNER);
-		
-		given(repository.findById(mockBeforeItem.getCode())).willReturn(Optional.of(mockBeforeItem));
-		
-		
-		aspect.compareItems(pjp, mockAfterItem);
-		
-		NotificationMessage itemNotification = NotificationMessage.builder()
+
+		// That's the notification that we expect to see being triggered
+		NotificationMessage expectedItemNotification = NotificationMessage.builder()
 				.entity(NotificationMessage.EnumEntity.ITEM)
 				.entityId(mockBeforeItem.getCode())
 				.event(EnumNotificationEvent.ITEM_TAKEN)
 			.build();
+
 		
-		verify(jmsTemplate).convertAndSend(ArgumentMatchers.eq(itemTopic), 
-				ArgumentMatchers.eq(itemNotification), ArgumentMatchers.any());
+		List<NotificationMessage> notifications = service.handleItemChange(mockBeforeItem, mockAfterItem);
+		
+		assertThat(notifications.contains(expectedItemNotification));
+		
+		service.dispatchNotifications(notifications);
+		
+		verify(jmsTemplate).convertAndSend((Destination)ArgumentMatchers.any(), 
+				ArgumentMatchers.eq(expectedItemNotification), ArgumentMatchers.any());
 	}
 	
 
@@ -136,19 +123,21 @@ public class ItemNotificationTests {
 		mockAfterItem.setCurWorld(ItemNotificationTests.WORLD_NAME);
 		mockAfterItem.setCurOwner(null);
 		
-		given(repository.findById(mockBeforeItem.getCode())).willReturn(Optional.of(mockBeforeItem));
-		
-		
-		aspect.compareItems(pjp, mockAfterItem);
-		
-		NotificationMessage itemNotification = NotificationMessage.builder()
+		NotificationMessage expectedItemNotification = NotificationMessage.builder()
 				.entity(NotificationMessage.EnumEntity.ITEM)
 				.entityId(mockBeforeItem.getCode())
 				.event(EnumNotificationEvent.ITEM_DROP)
 			.build();
 		
-		verify(jmsTemplate).convertAndSend(ArgumentMatchers.eq(itemTopic), 
-				ArgumentMatchers.eq(itemNotification), ArgumentMatchers.any());		
+		List<NotificationMessage> notifications = service.handleItemChange(mockBeforeItem, mockAfterItem);
+		
+		assertThat(notifications.contains(expectedItemNotification));
+		
+		service.dispatchNotifications(notifications);
+		
+		verify(jmsTemplate).convertAndSend((Destination)ArgumentMatchers.any(), 
+				ArgumentMatchers.eq(expectedItemNotification), ArgumentMatchers.any());
+		
 	}
 	
 	@Test
@@ -161,19 +150,20 @@ public class ItemNotificationTests {
 		mockBeforeItem.setQuantity(ItemNotificationTests.SMALL_QUANTITY_VALUE);
 		mockAfterItem.setQuantity(ItemNotificationTests.BIG_QUANTITY_VALUE);
 		
-		given(repository.findById(mockBeforeItem.getCode())).willReturn(Optional.of(mockBeforeItem));
-		
-		
-		aspect.compareItems(pjp, mockAfterItem);
-		
-		NotificationMessage itemNotification = NotificationMessage.builder()
+		NotificationMessage expectedItemNotification = NotificationMessage.builder()
 				.entity(NotificationMessage.EnumEntity.ITEM)
 				.entityId(mockBeforeItem.getCode())
 				.event(EnumNotificationEvent.ITEM_QTTY_INCREASE)
 			.build();
 		
-		verify(jmsTemplate).convertAndSend(ArgumentMatchers.eq(itemTopic), 
-				ArgumentMatchers.eq(itemNotification), ArgumentMatchers.any());		
+		List<NotificationMessage> notifications = service.handleItemChange(mockBeforeItem, mockAfterItem);
+		
+		assertThat(notifications.contains(expectedItemNotification));
+		
+		service.dispatchNotifications(notifications);
+		
+		verify(jmsTemplate).convertAndSend((Destination)ArgumentMatchers.any(), 
+				ArgumentMatchers.eq(expectedItemNotification), ArgumentMatchers.any());		
 	}
 
 	@Test
@@ -186,19 +176,21 @@ public class ItemNotificationTests {
 		mockBeforeItem.setQuantity(ItemNotificationTests.BIG_QUANTITY_VALUE);
 		mockAfterItem.setQuantity(ItemNotificationTests.SMALL_QUANTITY_VALUE);
 		
-		given(repository.findById(mockBeforeItem.getCode())).willReturn(Optional.of(mockBeforeItem));
-		
-		
-		aspect.compareItems(pjp, mockAfterItem);
-		
-		NotificationMessage itemNotification = NotificationMessage.builder()
+		NotificationMessage expectedItemNotification = NotificationMessage.builder()
 				.entity(NotificationMessage.EnumEntity.ITEM)
 				.entityId(mockBeforeItem.getCode())
 				.event(EnumNotificationEvent.ITEM_QTTY_DECREASE)
 			.build();
 		
-		verify(jmsTemplate).convertAndSend(ArgumentMatchers.eq(itemTopic), 
-				ArgumentMatchers.eq(itemNotification), ArgumentMatchers.any());		
+		List<NotificationMessage> notifications = service.handleItemChange(mockBeforeItem, mockAfterItem);
+		
+		assertThat(notifications.contains(expectedItemNotification));
+		
+		service.dispatchNotifications(notifications);
+		
+		verify(jmsTemplate).convertAndSend((Destination)ArgumentMatchers.any(), 
+				ArgumentMatchers.eq(expectedItemNotification), ArgumentMatchers.any());
+		
 	}
 	
 	@Test
@@ -206,15 +198,21 @@ public class ItemNotificationTests {
 
 		MudItem mockDestroyedItem = Fixture.from(MudItem.class).gimme(ItemTemplates.RESPONSE_FULL);
 		
-		aspect.sendDestroyNotification(pjp, mockDestroyedItem);
-		
-		NotificationMessage itemNotification = NotificationMessage.builder()
+		NotificationMessage expectedItemNotification = NotificationMessage.builder()
 				.entity(NotificationMessage.EnumEntity.ITEM)
 				.entityId(mockDestroyedItem.getCode())
 				.event(EnumNotificationEvent.ITEM_DESTROY)
 			.build();
 		
-		verify(jmsTemplate).convertAndSend(ArgumentMatchers.eq(itemTopic), 
-				ArgumentMatchers.eq(itemNotification), ArgumentMatchers.any());		
+		List<NotificationMessage> notifications = service.handleItemDestroy(mockDestroyedItem);
+		
+		assertThat(notifications.contains(expectedItemNotification));
+		
+		service.dispatchNotifications(notifications);
+		
+		verify(jmsTemplate).convertAndSend((Destination)ArgumentMatchers.any(), 
+				ArgumentMatchers.eq(expectedItemNotification), ArgumentMatchers.any());
+		
 	}
+
 }

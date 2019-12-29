@@ -9,9 +9,9 @@ import javax.annotation.PostConstruct;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -20,34 +20,24 @@ import com.jpinfo.mudengine.common.utils.NotificationMessage;
 import com.jpinfo.mudengine.item.fixture.ItemNotificationTemplates;
 import com.jpinfo.mudengine.item.fixture.ItemTemplates;
 import com.jpinfo.mudengine.item.model.MudItem;
-import com.jpinfo.mudengine.item.notification.NotificationListener;
 import com.jpinfo.mudengine.item.repository.ItemRepository;
+import com.jpinfo.mudengine.item.service.NotificationService;
 
 import br.com.six2six.fixturefactory.Fixture;
 import br.com.six2six.fixturefactory.loader.FixtureFactoryLoader;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment=WebEnvironment.RANDOM_PORT,
-	properties= {"token.secret=a7ac498c7bba59e0eb7c647d2f0197f8",
-			"item.topic=" + ItemListenerTests.ITEM_EXCHANGE,
-			"place.topic=" + ItemListenerTests.PLACE_EXCHANGE,
-			"being.topic=" + ItemListenerTests.BEING_EXCHANGE})
+@SpringBootTest
 public class ItemListenerTests {
-	
-	public static final String ITEM_EXCHANGE = "item.topic";
-	
-	public static final String PLACE_EXCHANGE = "place.topic";
-	
-	public static final String BEING_EXCHANGE = "being.topic";
 	
 	@MockBean
 	private ItemRepository repository;
 	
-	@Autowired
-	private NotificationListener mockListener;
+	@MockBean
+	private TokenService mockTokenService;
 	
 	@Autowired
-	private TokenService tokenService;
+	private NotificationService notificationService;
 
 	@PostConstruct
 	private void setup() {
@@ -69,7 +59,7 @@ public class ItemListenerTests {
 			.willReturn(itemsInPlace);
 		
 		// Launch the notification!
-		mockListener.receiveNotification(tokenService.buildInternalToken(), msg);
+		notificationService.handlePlaceNotification(msg);
 		
 		// Check if all items was deleted
 		itemsInPlace.stream()
@@ -92,7 +82,7 @@ public class ItemListenerTests {
 			.willReturn(itemsOwned);
 
 		// Launch the notification!
-		mockListener.receiveNotification(tokenService.buildInternalToken(), msg);
+		notificationService.handleBeingNotification(msg);
 
 		// Check if all items was deleted
 		itemsOwned.stream()
@@ -105,5 +95,31 @@ public class ItemListenerTests {
 				verify(repository).save(d);
 			});
 		
+	}
+	
+	@Test
+	public void testPlaceChangeNotificationReceived() {
+		
+		// Create the notification event object
+		NotificationMessage msg = Fixture.from(NotificationMessage.class)
+				.gimme(ItemNotificationTemplates.PLACE_CLASS_CHANGE_EVENT);
+		
+		// Launch the notification!
+		notificationService.handlePlaceNotification(msg);
+		
+		verify(repository, never()).save(ArgumentMatchers.any());
+	}
+	
+	@Test
+	public void testBeingChangeNotificationReceived() {
+		
+		// Create the notification event object
+		NotificationMessage msg = Fixture.from(NotificationMessage.class)
+				.gimme(ItemNotificationTemplates.BEING_CLASS_CHANGE_EVENT);
+		
+		// Launch the notification!
+		notificationService.handleBeingNotification(msg);
+		
+		verify(repository, never()).save(ArgumentMatchers.any());
 	}
 }

@@ -106,7 +106,7 @@ public class ItemTests {
 		urlVariables.put("placeCode", mockRequest.getCurPlaceCode());
 		
 		ResponseEntity<Item> createResponse = restTemplate.exchange(
-				"/item/?itemClassCode={itemClassCode}&worldName={worldName}&placeCode={placeCode}", 
+				"/item/place/{worldName}/{placeCode}?itemClassCode={itemClassCode}", 
 				HttpMethod.PUT, emptyHttpEntity, Item.class, urlVariables);
 		
 		assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
@@ -141,7 +141,7 @@ public class ItemTests {
 		urlVariables.put("owner", mockRequest.getCurOwner());
 		
 		ResponseEntity<Item> createResponse = restTemplate.exchange(
-				"/item/?itemClassCode={itemClassCode}&owner={owner}", 
+				"/item/being/{owner}?itemClassCode={itemClassCode}", 
 				HttpMethod.PUT, emptyHttpEntity, Item.class, urlVariables);
 		
 		assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
@@ -157,41 +157,6 @@ public class ItemTests {
 		assertThat(createdItem.getCode()).isNotNull();
 		
 		assertItemClass(mockResponse.getItemClass(), createdItem.getItemClass());
-		
-	}
-	
-	@Test
-	public void testCreateWithBoth() {
-
-		MudItem mockRequest = Fixture.from(MudItem.class).gimme(ItemTemplates.REQUEST_WITH_BOTH);
-		
-		Map<String, Object> urlVariables = new HashMap<>();
-		urlVariables.put("itemClassCode", mockRequest.getItemClass().getCode());
-		urlVariables.put("worldName", mockRequest.getCurWorld());
-		urlVariables.put("placeCode", mockRequest.getCurPlaceCode());		
-		urlVariables.put("owner", mockRequest.getCurOwner());
-		
-		ResponseEntity<Item> createResponse = restTemplate.exchange(
-				"/item/?itemClassCode={itemClassCode}&worldName={worldName}&placeCode={placeCode}&owner={owner}", 
-				HttpMethod.PUT, emptyHttpEntity, Item.class, urlVariables);
-		
-		assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-		
-	}
-
-	@Test
-	public void testCreateWithNone() {
-
-		MudItem mockRequest = Fixture.from(MudItem.class).gimme(ItemTemplates.REQUEST);
-		
-		Map<String, Object> urlVariables = new HashMap<>();
-		urlVariables.put("itemClassCode", mockRequest.getItemClass().getCode());
-		
-		ResponseEntity<Item> createResponse = restTemplate.exchange(
-				"/item/?itemClassCode={itemClassCode}", 
-				HttpMethod.PUT, emptyHttpEntity, Item.class, urlVariables);
-		
-		assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
 		
 	}
 
@@ -220,6 +185,67 @@ public class ItemTests {
 		assertThat(serviceItem.getName()).isEqualTo(mockResponse.getItemClass().getName());
 		assertThat(serviceItem.getQuantity()).isEqualTo(1);
 		assertThat(serviceItem.getCode()).isNotNull();
+		
+		assertAttrMap(mockResponse, serviceItem);
+		
+	}
+	
+	@Test
+	public void testReadAllFromPlace() {
+		
+		MudItem mockResponse = Fixture.from(MudItem.class).gimme(ItemTemplates.REQUEST_WITH_PLACE);
+		
+		given(repository.findByCurWorldAndCurPlaceCode(mockResponse.getCurWorld(), mockResponse.getCurPlaceCode()))
+			.willReturn(List.of(mockResponse));
+		
+		Map<String, Object> urlVariables = new HashMap<>();
+		urlVariables.put("worldName", mockResponse.getCurWorld());
+		urlVariables.put("placeCode", mockResponse.getCurPlaceCode());
+		
+		ResponseEntity<Item[]> serviceResponse = restTemplate.exchange(
+				"/item/place/{worldName}/{placeCode}", 
+				HttpMethod.GET, emptyHttpEntity, Item[].class, urlVariables);
+		
+		assertThat(serviceResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(serviceResponse.getBody()).isNotNull();
+		
+		Item serviceItem = serviceResponse.getBody()[0];
+		
+		assertThat(serviceItem.getCurOwner()).isNull();
+		assertThat(serviceItem.getCurPlaceCode()).isEqualTo(mockResponse.getCurPlaceCode());
+		assertThat(serviceItem.getCurWorld()).isEqualTo(mockResponse.getCurWorld());
+		assertThat(serviceItem.getName()).isEqualTo(mockResponse.getItemClass().getName());
+		assertThat(serviceItem.getCode()).isEqualTo(mockResponse.getCode());
+		
+		assertAttrMap(mockResponse, serviceItem);
+		
+	}
+	
+	@Test
+	public void testReadAllFromOwner() {
+		
+		MudItem mockResponse = Fixture.from(MudItem.class).gimme(ItemTemplates.REQUEST_WITH_OWNER);
+		
+		given(repository.findByCurOwner(mockResponse.getCurOwner()))
+			.willReturn(List.of(mockResponse));
+		
+		Map<String, Object> urlVariables = new HashMap<>();
+		urlVariables.put("owner", mockResponse.getCurOwner());
+		
+		ResponseEntity<Item[]> serviceResponse = restTemplate.exchange(
+				"/item/being/{owner}", 
+				HttpMethod.GET, emptyHttpEntity, Item[].class, urlVariables);
+		
+		assertThat(serviceResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(serviceResponse.getBody()).isNotNull();
+		
+		Item serviceItem = serviceResponse.getBody()[0];
+		
+		assertThat(serviceItem.getCurOwner()).isEqualTo(mockResponse.getCurOwner());
+		assertThat(serviceItem.getCurPlaceCode()).isNull();
+		assertThat(serviceItem.getCurWorld()).isNull();
+		assertThat(serviceItem.getName()).isEqualTo(mockResponse.getItemClass().getName());
+		assertThat(serviceItem.getCode()).isEqualTo(mockResponse.getCode());
 		
 		assertAttrMap(mockResponse, serviceItem);
 		

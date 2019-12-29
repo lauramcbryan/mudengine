@@ -23,11 +23,15 @@ public interface ItemService {
 	@PostMapping(value="{itemId}")
 	Item updateItem(@PathVariable("itemId") Long itemId, @RequestBody Item item);
 
-	@PutMapping()
-	ResponseEntity<Item> createItem(@RequestParam("itemClassCode") String itemClassCode, @RequestParam("worldName") Optional<String> worldName, @RequestParam("placeCode") Optional<Integer> placeCode, @RequestParam("quantity") Optional<Integer> quantity, @RequestParam("owner") Optional<Long> owner);
-	
 	@DeleteMapping(value="{itemId}")
 	Item destroyItem(@PathVariable("itemId") Long itemId);
+
+	
+	@PutMapping(value="/being/{owner}")
+	ResponseEntity<Item> createOwnedItem(@PathVariable("owner") Long owner, @RequestParam("itemClassCode") String itemClassCode, @RequestParam(name="quantity", required=false) Integer quantity);
+	
+	@PutMapping(value="/place/{worldName}/{placeCode}")
+	ResponseEntity<Item> createNoOwnerItem(@PathVariable("worldName") String worldName, @PathVariable("placeCode") Integer placeCode, @RequestParam("itemClassCode") String itemClassCode, @RequestParam(name="quantity", required=false) Integer quantity);
 
 	@GetMapping(value="/place/{worldName}/{placeCode}")
 	List<Item> getAllFromPlace(@PathVariable("worldName") String worldName, @PathVariable("placeCode") Integer placeCode);

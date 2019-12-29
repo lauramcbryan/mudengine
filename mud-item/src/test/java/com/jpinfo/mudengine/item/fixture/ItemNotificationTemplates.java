@@ -13,7 +13,9 @@ public class ItemNotificationTemplates implements TemplateLoader {
 
 	private static final String BASIC = "BASIC";
 	public static final String PLACE_DESTROY_EVENT = "PLACE_DESTROY_EVENT";
+	public static final String PLACE_CLASS_CHANGE_EVENT = "PLACE_CLASS_CHANGE_EVENT";
 	public static final String BEING_DESTROY_EVENT = "BEING_DESTROY_EVENT";
+	public static final String BEING_CLASS_CHANGE_EVENT = "BEING_CLASS_CHANGE_EVENT";
 	
 	@Override
 	public void load() {
@@ -40,6 +42,16 @@ public class ItemNotificationTemplates implements TemplateLoader {
 			add("targetEntityId", random(Long.class));
 		}});
 		
+		Fixture.of(NotificationMessage.class).addTemplate(PLACE_CLASS_CHANGE_EVENT).inherits(BASIC, new Rule() {{
+			add("entity", EnumEntity.PLACE);
+			add("event", EnumNotificationEvent.PLACE_CLASS_CHANGE);
+		}});
+		
+		
+		Fixture.of(NotificationMessage.class).addTemplate(BEING_CLASS_CHANGE_EVENT).inherits(BASIC, new Rule() {{
+			add("entity", EnumEntity.PLACE);
+			add("event", EnumNotificationEvent.BEING_CLASS_CHANGE);
+		}});
 
 	}
 

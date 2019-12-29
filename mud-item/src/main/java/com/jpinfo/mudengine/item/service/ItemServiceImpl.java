@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jpinfo.mudengine.common.exception.EntityNotFoundException;
-import com.jpinfo.mudengine.common.exception.IllegalParameterException;
 import com.jpinfo.mudengine.common.item.Item;
 import com.jpinfo.mudengine.common.utils.LocalizedMessages;
 import com.jpinfo.mudengine.item.model.MudItem;
@@ -31,69 +30,62 @@ public class ItemServiceImpl {
 
 	public Item getItem(Long itemId) {
 		
-		Item response = null;
-		
-		MudItem dbItem = itemRepository
+		return itemRepository
 				.findById(itemId)
+				.map(ItemConverter::convert)
 				.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.ITEM_NOT_FOUND));
-		
-		response = ItemConverter.convert(dbItem);
-		
-		return response;
 	}
 	
 	public Item updateItem(Long itemId, Item requestItem) {
 		
-		Item response = null;
-		
 		// Retrieving the item record
-		MudItem dbItem = itemRepository.findById(itemId)
-				.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.ITEM_NOT_FOUND));
-		
-		// 1. Updating basic fields
-		dbItem.setCurWorld(requestItem.getCurWorld());
-		dbItem.setCurPlaceCode(requestItem.getCurPlaceCode());
-		dbItem.setQuantity(requestItem.getQuantity());
-		dbItem.setCurOwner(requestItem.getCurOwner());
-		
-		// 2. Checking item attributes
-		// ============================================
-		internalSyncAttr(dbItem, requestItem);
-		
-		// 3. Check item duration
-		// ============================================
-		boolean itemToBeDestroyed = internalSyncItemDuration(dbItem, requestItem);
-		
-		if (itemToBeDestroyed) {
-			
-			// destroy the item
-			destroyItem(itemId);
-			
-			// Retrieve it again from database
-			dbItem = itemRepository.findById(itemId)
-					.orElse(null);
-			
-			response = ItemConverter.convert(dbItem);
-			
-		} else {
-			
-			// 4. Check item class
-			// ============================================
-			
-			// if itemClass has changed, resync the attributes of changed item
-			if (!dbItem.getItemClass().getCode().equals(requestItem.getItemClass().getCode())) {
-				internalUpdateClass(dbItem, requestItem.getItemClass().getCode());
-			}
+		return itemRepository.findById(itemId)
+				.map(dbItem -> {
+					
+					// 1. Updating basic fields
+					dbItem.setCurWorld(requestItem.getCurWorld());
+					dbItem.setCurPlaceCode(requestItem.getCurPlaceCode());
+					dbItem.setQuantity(requestItem.getQuantity());
+					dbItem.setCurOwner(requestItem.getCurOwner());
+					
+					// 2. Checking item attributes
+					// ============================================
+					internalSyncAttr(dbItem, requestItem);
+					
+					// 3. Check item duration
+					// ============================================
+					boolean itemToBeDestroyed = internalSyncItemDuration(dbItem, requestItem);
+					
+					if (itemToBeDestroyed) {
+						
+						// destroy the item
+						destroyItem(itemId);
+						
+						// Retrieve it again from database
+						dbItem = itemRepository.findById(itemId)
+								.orElse(null);
+						
+						return dbItem;
+						
+					} else {
+						
+						// 4. Check item class
+						// ============================================
+						
+						// if itemClass has changed, resync the attributes of changed item
+						if (!dbItem.getItemClass().getCode().equals(requestItem.getItemClass().getCode())) {
+							internalUpdateClass(dbItem, requestItem.getItemClass().getCode());
+						}
 
-			// Save the changes in database
-			MudItem changedDbItem = itemRepository.save(dbItem);
-			
-			// Build the response
-			response = ItemConverter.convert(changedDbItem);
-		}
-		
-		
-		return response;
+						// Save the changes in database
+						MudItem changedDbItem = itemRepository.save(dbItem);
+						
+						// Build the response
+						return changedDbItem;
+					}
+				})
+				.map(ItemConverter::convert)
+				.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.ITEM_NOT_FOUND));
 	}
 	
 	private boolean internalSyncItemDuration(MudItem dbItem, Item requestItem) {
@@ -141,23 +133,10 @@ public class ItemServiceImpl {
 		
 	}
 	
-	public Item createItem(String itemClassCode, Optional<String> worldName, Optional<Integer> placeCode, 
-			Optional<Integer> quantity, Optional<Long> owner) {
+	public Item createItem(String itemClassCode, String worldName, Integer placeCode, 
+			Integer quantity, Long owner) {
 		
 		Item response = null;
-		
-		boolean ownerPresent = owner.isPresent();
-		boolean placePresent = (worldName.isPresent() && placeCode.isPresent());
-		
-		// Check if a minimum parameters are present
-		if (!ownerPresent && !placePresent) {
-			throw new IllegalParameterException(LocalizedMessages.ITEM_NO_OWNER);
-		}
-		
-		// Check if there's only one set of
-		if (ownerPresent && placePresent) {
-			throw new IllegalParameterException(LocalizedMessages.ITEM_BOTH_OWNER);			
-		}
 		
 		MudItemClass dbClassItem = itemClassRepository
 				.findById(itemClassCode)
@@ -166,19 +145,10 @@ public class ItemServiceImpl {
 		MudItem newDbItem = new MudItem();
 		newDbItem.setItemClass(dbClassItem);
 		
-		if (worldName.isPresent())
-			newDbItem.setCurWorld(worldName.get());
-		
-		if (placeCode.isPresent())
-			newDbItem.setCurPlaceCode(placeCode.get());
-		
-		if (owner.isPresent())
-			newDbItem.setCurOwner(owner.get());
-
-		if (quantity.isPresent())
-			newDbItem.setQuantity(quantity.get());
-		else
-			newDbItem.setQuantity(ItemHelper.CREATE_DEFAULT_QUANTITY);
+		newDbItem.setCurWorld(worldName);
+		newDbItem.setCurPlaceCode(placeCode);
+		newDbItem.setCurOwner(owner);
+		newDbItem.setQuantity(quantity!=null ? quantity: ItemHelper.CREATE_DEFAULT_QUANTITY);
 	
 		// Saving the entity (to get the itemCode)
 		newDbItem = itemRepository.save(newDbItem);

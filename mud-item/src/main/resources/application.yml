@@ -4,13 +4,6 @@ spring:
     
 ---
 spring:
-  profiles: default
-    
-  datasource:
-    platform: h2
-    
----
-spring:
   profiles: dev
   
 server:
