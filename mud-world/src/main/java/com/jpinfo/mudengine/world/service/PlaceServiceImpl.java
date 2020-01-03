@@ -33,20 +33,31 @@ public class PlaceServiceImpl {
 	@Autowired
 	private PlaceClassRepository placeClassRepository;
 
-	@Autowired
-	private PlaceConverter placeConverter;
-
 	public Place getPlace(Integer placeId) {
 		
-		Place response = null;
-		
-		MudPlace dbPlace = placeRepository
+		return placeRepository
 				.findById(placeId)
+				.map(PlaceConverter::convert)
+				.map(this::updateExitNames)
 				.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.PLACE_NOT_FOUND));
+	}
+	
+	private Place updateExitNames(Place originalPlace) {
 		
-		response = placeConverter.convert(dbPlace);
+		originalPlace.getExits().keySet().stream()
+			.forEach(curDirection -> {
+				
+				PlaceExit curExit = originalPlace.getExits().get(curDirection);
+				
+				curExit.setName(
+						placeRepository.findById(curExit.getTargetPlaceCode())
+						.map(d -> d.getPlaceClass().getName())
+						.orElse(null)
+						);
+				
+			});
 		
-		return response;
+		return originalPlace;
 	}
 
 	
@@ -74,11 +85,7 @@ public class PlaceServiceImpl {
 			destroyPlace(dbPlace.getCode());
 
 			// Retrieve it again from the database.
-			dbPlace = placeRepository
-					.findById(placeId)
-					.orElse(null);
-			
-			response = placeConverter.convert(dbPlace);
+			response = getPlace(placeId);
 			
 		} else {
 
@@ -99,10 +106,10 @@ public class PlaceServiceImpl {
 			internalSyncExits(dbPlace, requestPlace);
 	
 			// updating the place in database
-			MudPlace updatedPlace = placeRepository.save(dbPlace);
-			
 			// Mounting the response
-			response = placeConverter.convert(updatedPlace);
+			response = PlaceConverter.convert(
+					placeRepository.save(dbPlace)
+					);
 		}
 		
 		return response;
@@ -409,7 +416,7 @@ public class PlaceServiceImpl {
 		placeRepository.save(targetDbPlace);
 		
 		// Converting the response to service-like response
-		response = placeConverter.convert(dbPlace);
+		response = PlaceConverter.convert(dbPlace);
 		
 		return response;
 	}	

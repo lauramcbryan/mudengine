@@ -2,22 +2,18 @@ package com.jpinfo.mudengine.world.model.converter;
 
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.jpinfo.mudengine.common.place.Place;
 import com.jpinfo.mudengine.world.model.MudPlace;
 import com.jpinfo.mudengine.world.model.MudPlaceAttr;
 import com.jpinfo.mudengine.world.model.MudPlaceExit;
 
-@Component
 public class PlaceConverter {
 	
+	private PlaceConverter() {
+		
+	}
 	
-	@Autowired
-	private PlaceExitConverter exitConverter;
-	
-	public Place convert(MudPlace originalDbPlace) {
+	public static Place convert(MudPlace originalDbPlace) {
 		
 		Place result = new Place();
 		
@@ -43,8 +39,9 @@ public class PlaceConverter {
 			result.setExits(
 				originalDbPlace.getExits().stream()
 					.collect(Collectors.toMap(
-							MudPlaceExit::getDirection, 
-							exitConverter::convert))
+							MudPlaceExit::getDirection,
+							PlaceExitConverter::convert
+							))
 					);
 	
 			// Map the database attributes

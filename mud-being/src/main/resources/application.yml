@@ -1,13 +1,10 @@
 spring:
   application:
     name: mud-being
-    
----
-spring:
-  profiles: default
-    
-  datasource:
-    platform: h2
+ 
+  jpa: 
+    hibernate:
+      ddl-auto: none  
 
 ---
 spring:
