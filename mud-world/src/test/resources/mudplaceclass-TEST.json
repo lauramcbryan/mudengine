@@ -1,0 +1,19 @@
+{
+	"code": "TEST",
+	"name": "Test",
+	"description": "Test PlaceClass",
+	"attrs": [
+		{
+			"id": {
+				"code": "HP"
+			},
+			"value": 50
+		},
+		{
+			"id": {
+				"code": "MAXHP"
+			},
+			"value": 500
+		}
+	]
+}

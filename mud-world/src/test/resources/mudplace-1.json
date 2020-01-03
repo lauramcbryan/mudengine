@@ -1,0 +1,47 @@
+{
+	"code": 1,
+	"description": "teste",
+	"placeClass": {
+		"code": "TEST",
+		"name": "Test",
+		"description": "Test PlaceClass",
+		"attrs": [
+			{
+				"id": {
+					"code": "HP"
+				},
+				"value": 50
+			},
+			{
+				"id": {
+					"code": "MAXHP"
+				},
+				"value": 500
+			}
+		]
+	},
+	"exits": [
+		{
+			"pk": {
+				"direction": "OUT"
+			},
+			"opened": true,
+			"visible": true,
+			"targetPlaceCode": 2
+		}
+	],
+	"attrs": [
+		{
+			"id": {
+				"code": "HP"
+			},
+			"value": 50
+		},
+		{
+			"id": {
+				"code": "MAXHP"
+			},
+			"value": 100
+		}
+	]
+}

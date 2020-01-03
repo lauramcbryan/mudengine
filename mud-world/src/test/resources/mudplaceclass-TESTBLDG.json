@@ -1,0 +1,19 @@
+{
+	"code": "TESTBLDG",
+	"name": "Test Building",
+	"description": "Test Building PlaceClass",
+	"attrs": [
+		{
+			"id": {
+				"code": "HP2"
+			},
+			"value": 3
+		},
+		{
+			"id": {
+				"code": "MAXHP2"
+			},
+			"value": 8
+		}
+	]
+}

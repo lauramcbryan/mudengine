@@ -1,0 +1,20 @@
+{
+	"code": "DEMISETEST",
+	"name": "Test",
+	"description": "Demisable PlaceClass",
+	"demisedPlaceClassCode": "RUIN",
+	"attrs": [
+		{
+			"id": {
+				"code": "HP"
+			},
+			"value": 50
+		},
+		{
+			"id": {
+				"code": "MAXHP"
+			},
+			"value": 500
+		}
+	]
+}	

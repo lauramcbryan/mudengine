@@ -1,8 +1,12 @@
 package com.jpinfo.mudengine.world;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
 
+import static org.mockito.Mockito.*;
+import static org.mockito.BDDMockito.*;
+
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 import javax.annotation.PostConstruct;
@@ -11,6 +15,8 @@ import javax.jms.Destination;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
+
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -24,23 +30,39 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jpinfo.mudengine.common.place.Place;
 import com.jpinfo.mudengine.common.security.TokenService;
 import com.jpinfo.mudengine.common.utils.CommonConstants;
 import com.jpinfo.mudengine.common.utils.NotificationMessage;
 import com.jpinfo.mudengine.common.utils.NotificationMessage.EnumNotificationEvent;
 import com.jpinfo.mudengine.world.model.MudPlace;
+import com.jpinfo.mudengine.world.model.MudPlaceClass;
+import com.jpinfo.mudengine.world.model.MudPlaceClassAttr;
 import com.jpinfo.mudengine.world.model.MudPlaceExit;
+import com.jpinfo.mudengine.world.model.pk.MudPlaceClassAttrPK;
+import com.jpinfo.mudengine.world.repository.PlaceClassRepository;
+import com.jpinfo.mudengine.world.repository.PlaceExitRepository;
 import com.jpinfo.mudengine.world.repository.PlaceRepository;
+import com.jpinfo.mudengine.world.service.PlaceServiceImpl;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment=WebEnvironment.RANDOM_PORT, 
-	properties= {"token.secret=a7ac498c7bba59e0eb7c647d2f0197f8"})
+@SpringBootTest
 public class PlaceTests {
+	
+	private static final String MUD_PLACE_PREFIX = "src/test/resources/mudplace-";
+	private static final String MUD_PLACE_SUFFIX = ".json";
+	
+	private static final String MUD_PLACE_CLASS_PREFIX = "src/test/resources/mudplaceclass-";
+	private static final String MUD_PLACE_CLASS_SUFFIX = ".json";
 	
 	
 	public static final String PLACE_EXCHANGE = "place.exchange";
 
+	private static final Integer CREATE_PLACE_ID = 99;
 	private static final String CREATE_PLACE_CLASS = "TEST";
 	private static final String CREATE_PLACE_EXIT_DIRECTION = "UP";
 	private static final Integer CREATE_PLACE_EXIT_TARGET = 1;
@@ -51,6 +73,7 @@ public class PlaceTests {
 	private static final String READ_PLACE_CLASS = "TEST";
 	private static final String READ_PLACE_EXIT_DIRECTION = "OUT";
 	private static final Integer READ_PLACE_EXIT_TARGET = 2;
+	
 	private static final String[] READ_PLACE_CLASS_ATTRS= {"HP", "MAXHP"};
 	private static final Integer[] READ_PLACE_CLASS_ATTR_VALUES= {50, 100};
 	
@@ -82,84 +105,107 @@ public class PlaceTests {
 	@MockBean
 	private JmsTemplate jmsTemplate;
 	
-	@Autowired
-	private TestRestTemplate restTemplate;
+	@MockBean
+	private PlaceRepository mockRepository;
 	
-	@Autowired
-	private PlaceRepository repository;
+	@MockBean
+	private PlaceExitRepository mockExitRepository;
 	
-	@Autowired
+	@MockBean
+	private PlaceClassRepository mockClassRepository;
+	
+	@MockBean
 	private TokenService tokenUtils;
 	
-	private HttpEntity<Object> authEntity;
+	@Autowired
+	private PlaceServiceImpl service;
 	
-	private HttpHeaders authHeaders;
+	private ObjectMapper jsonMapper = new ObjectMapper();
 	
-	@PostConstruct
-	public void setup() {
-
-		// Creating the authentication token		
-		authHeaders = new HttpHeaders();
-		authHeaders.add(CommonConstants.AUTH_TOKEN_HEADER, tokenUtils.buildInternalToken());
+	private MudPlaceClass loadMudPlaceClass(String className) throws IOException{
 		
-		authEntity = new HttpEntity<>(authHeaders);
+		return jsonMapper.readValue(new File(
+				PlaceTests.MUD_PLACE_CLASS_PREFIX +
+				className + 
+				PlaceTests.MUD_PLACE_CLASS_SUFFIX
+				), MudPlaceClass.class);
 	}
 	
-	@Test
-	public void contextLoads() {
+	private MudPlace loadMudPlace(Integer placeId) throws IOException{
 		
+		return jsonMapper.readValue(new File(
+				PlaceTests.MUD_PLACE_PREFIX +
+				placeId + 
+				PlaceTests.MUD_PLACE_SUFFIX
+				), MudPlace.class);
+	}
+	
+	
+	@PostConstruct
+	public void setup() throws IOException {
+		
+		given(mockClassRepository.findById(ArgumentMatchers.anyString()))
+			.willAnswer(i -> {
+				
+				return Optional.of(
+						loadMudPlaceClass(i.getArgument(0, String.class))
+						);
+			});
+		
+		given(mockRepository.findById(ArgumentMatchers.anyInt()))
+			.willAnswer(i -> {
+				
+				return Optional.of(
+						loadMudPlace(i.getArgument(0, Integer.class))
+						);
+			});
+		
+		given(mockRepository.save(ArgumentMatchers.any(MudPlace.class)))
+		.willAnswer(i -> {
+			
+			MudPlace placeBeingSaved = i.getArgument(0, MudPlace.class);
+			
+			// Is it being created?
+			if (placeBeingSaved.getCode()==null) {
+				
+				// Assign a random code
+				placeBeingSaved.setCode(PlaceTests.CREATE_PLACE_ID);
+				
+			} 
+			
+			return placeBeingSaved;
+		});
 	}
 	
 	@Test
 	public void testCreatePlace() {
 		
-		// *********** CREATE **********
-		// =============================
-		
-		Map<String, Object>  urlVariables = new HashMap<String, Object>();
-		
-		urlVariables.put("placeClassCode", PlaceTests.CREATE_PLACE_CLASS);
-		urlVariables.put("direction", PlaceTests.CREATE_PLACE_EXIT_DIRECTION);
-		urlVariables.put("targetPlaceCode", PlaceTests.CREATE_PLACE_EXIT_TARGET);
-			
-		ResponseEntity<Place> responseCreate= restTemplate.exchange(
-				"/place/?placeClassCode={placeClassCode}&direction={direction}&targetPlaceCode={targetPlaceCode}", 
-				HttpMethod.PUT, authEntity, Place.class, urlVariables);
-		
-		assertThat(responseCreate.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-		
-		MudPlace dbPlace = repository.findById(responseCreate.getBody().getCode())
-				.orElseThrow(() -> new RuntimeException("Created place not found in database"));
-		
-		
-		assertThat(dbPlace.getPlaceClass().getCode()).isEqualTo(PlaceTests.CREATE_PLACE_CLASS);
-		
-		// Retrieving the exit
-		MudPlaceExit exit =
-			dbPlace.getExits().stream()
-				.filter(d -> d.getPk().getDirection().equals(PlaceTests.CREATE_PLACE_EXIT_DIRECTION))
-				.findFirst()
-				.orElseGet(() -> null);
-		
-		// Checking if the exit exists		
-		assertThat(exit).isNotNull();
-		
-		// Check if the exit points to the right direction
-		assertThat(exit.getTargetPlaceCode()).isEqualTo(PlaceTests.CREATE_PLACE_EXIT_TARGET);
-		
+		Place createdPlace = 
+				service.createPlace(
+						PlaceTests.CREATE_PLACE_CLASS, 
+						PlaceTests.CREATE_PLACE_EXIT_DIRECTION,
+						PlaceTests.CREATE_PLACE_EXIT_TARGET);
+
+		// Checking the placeClass
+		assertThat(createdPlace.getPlaceClass().getPlaceClassCode())
+			.isEqualTo(PlaceTests.CREATE_PLACE_CLASS);
+
+		//Check if exit was created and if it points to the right direction
+		assertThat(createdPlace.getExits().get(PlaceTests.CREATE_PLACE_EXIT_DIRECTION)).isNotNull();
+		assertThat(createdPlace.getExits().get(PlaceTests.CREATE_PLACE_EXIT_DIRECTION).getTargetPlaceCode())
+			.isEqualTo(PlaceTests.CREATE_PLACE_EXIT_TARGET);
+
 		// Checking the attributes
 		for (int index=0;index<PlaceTests.CREATE_PLACE_CLASS_ATTRS.length;index++) {
 			
 			String curAttr = PlaceTests.CREATE_PLACE_CLASS_ATTRS[index];
 			Integer curAttrValue = PlaceTests.CREATE_PLACE_CLASS_ATTR_VALUES[index];
-
-			// Checking if the attribute exists in database
-			assertThat(dbPlace.getAttrs().stream()
-						.anyMatch(d -> d.getId().getCode().equals(curAttr) && 
-										d.getValue().equals(curAttrValue)))
-					.isTrue();
+			
+			assertThat(createdPlace.getAttrs().get(curAttr)).isNotNull();
+			assertThat(createdPlace.getAttrs().get(curAttr)).isEqualTo(curAttrValue);
 		}
 		
+		/*
 		//  Check if correct notification was sent
 		NotificationMessage placeExitNotification = NotificationMessage.builder()
 				.entity(NotificationMessage.EnumEntity.PLACE)
@@ -180,28 +226,21 @@ public class PlaceTests {
 		verify(jmsTemplate).convertAndSend((Destination)ArgumentMatchers.any(), 
 				ArgumentMatchers.eq(placeExit2Notification), 
 				ArgumentMatchers.any());
+				
+				*/
 		
 	}
 	
 	@Test
 	public void testReadPlace() {
-
-		Map<String, Object>  urlVariables = new HashMap<String, Object>(); 
-		urlVariables.put("placeId", PlaceTests.READ_PLACE_ID);
-
-		ResponseEntity<Place> responseGet = restTemplate.exchange("/place/{placeId}", 
-				HttpMethod.GET, authEntity, Place.class, urlVariables);
 		
-		assertThat(responseGet.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(responseGet.getBody()).isNotNull();
-		
-		Place responsePlace = responseGet.getBody();
+		Place responsePlace = service.getPlace(PlaceTests.READ_PLACE_ID);
 
 		// Checking basic fields		
 		assertThat(responsePlace.getPlaceClass().getPlaceClassCode()).isEqualTo(PlaceTests.READ_PLACE_CLASS);
 		
 		// Checking if the exit exists		
-		assertThat(responsePlace.getExits().get(PlaceTests.READ_PLACE_EXIT_DIRECTION)).isNotNull();
+		assertThat(responsePlace.getExits().containsKey(PlaceTests.READ_PLACE_EXIT_DIRECTION)).isTrue();
 		
 		// Check if the exit points to the right place
 		assertThat(responsePlace.getExits().get(PlaceTests.READ_PLACE_EXIT_DIRECTION).getTargetPlaceCode())
@@ -215,59 +254,38 @@ public class PlaceTests {
 			Integer curAttrValue = PlaceTests.READ_PLACE_CLASS_ATTR_VALUES[index];
 
 			// Check if attribute exists
-			assertThat(responsePlace.getAttrs().get(curAttr)).isNotNull();
+			assertThat(responsePlace.getAttrs().containsKey(curAttr)).isTrue();
 			
 			// Check if it has the correct value			
 			assertThat(responsePlace.getAttrs().get(curAttr)).isEqualTo(curAttrValue);
 		}
 	}
-		
+	
 	@Test
-	public void testUpdateClass() {
+	public void testUpdateClass() throws IOException {
 		
-		Map<String, Object>  urlVariables = new HashMap<String, Object>(); 
-		urlVariables.put("placeId", PlaceTests.UPDATE_CLASS_PLACE_ID);
-		
-		ResponseEntity<Place> responseGet = restTemplate.exchange("/place/{placeId}", 
-				HttpMethod.GET, authEntity, Place.class, urlVariables);
-		
-		assertThat(responseGet.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(responseGet.getBody()).isNotNull();
-		
-		Place originalPlace = responseGet.getBody();
+		Place originalPlace = service.getPlace(PlaceTests.READ_PLACE_ID);
 		
 		// Change the placeClass
 		originalPlace.setClassCode(PlaceTests.UPDATE_CLASS_PLACE_CLASS);
 		
-		//dummyPlace.getAttrs().put(PlaceTests.extraPlaceAttr, new Integer(1));
+		Place changedPlace = service.updatePlace(PlaceTests.READ_PLACE_ID, originalPlace);
 		
-		HttpEntity<Place> request = new HttpEntity<Place>(originalPlace, authHeaders);
-			
-		ResponseEntity<Place> responseUpdate = restTemplate.exchange(
-				"/place/{placeId}", HttpMethod.POST, request, Place.class, urlVariables);
-		
-		assertThat(responseUpdate.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(responseUpdate.getBody()).isNotNull();
-		
-		// Creating a Place variable to shorten further validations
-		Place responsePlace = responseUpdate.getBody();
+		// Load the placeClass from file to check changes
+		MudPlaceClass changedPlaceClass = loadMudPlaceClass(PlaceTests.UPDATE_CLASS_PLACE_CLASS);
 		
 		// Check if the placeClass has changed accordingly
-		assertThat(responsePlace.getClassCode()).isEqualTo(PlaceTests.UPDATE_CLASS_PLACE_CLASS);
+		assertThat(changedPlace.getClassCode()).isEqualTo(changedPlaceClass.getCode());
 
-		// Checking the attributes
-		for (int index=0;index<PlaceTests.UPDATE_CLASS_PLACE_ATTRS.length;index++) {
-			
-			String curAttr = PlaceTests.UPDATE_CLASS_PLACE_ATTRS[index];
-			Integer curAttrValue = PlaceTests.UPDATE_CLASS_PLACE_ATTR_VALUES[index];
+		// Checking if all attributes exist in updated place
+		assertThat(changedPlaceClass.getAttrs().stream()
+				.allMatch(curClassAttr -> 
+					changedPlace.getAttrs().containsKey(curClassAttr.getCode()) &&
+					changedPlace.getAttrs().get(curClassAttr.getCode()).equals(curClassAttr.getValue())
+				)
+				).isTrue();
 
-			// Check if attribute exists
-			assertThat(responsePlace.getAttrs().get(curAttr)).isNotNull();
-			
-			// Check if it has the correct value			
-			assertThat(responsePlace.getAttrs().get(curAttr)).isEqualTo(curAttrValue);
-		}
-		
+		/*
 		//  Check if correct notification was sent
 		NotificationMessage placeClassNotification = NotificationMessage.builder()
 				.entity(NotificationMessage.EnumEntity.PLACE)
@@ -278,9 +296,12 @@ public class PlaceTests {
 		verify(jmsTemplate).convertAndSend((Destination)ArgumentMatchers.any(), 
 				ArgumentMatchers.eq(placeClassNotification), 
 				ArgumentMatchers.any());
-
+				
+				*/
 		
 	}
+	
+	/*
 
 	@Test
 	public void testUpdateHP() {
@@ -467,5 +488,6 @@ public class PlaceTests {
 				ArgumentMatchers.any());
 
 	}
+	*/
 	
 }

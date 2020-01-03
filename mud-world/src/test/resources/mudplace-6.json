@@ -1,0 +1,29 @@
+{
+	"code": 6,
+	"description": "To be demised test place",
+	"placeClass": {
+		"code": "DEMISETEST"
+	},
+	"exits": [
+		{
+			"pk": {
+				"direction": "OUT"
+			},
+			"targetPlaceCode": 2
+		}
+	],
+	"attrs": [
+		{
+			"id": {
+				"code": "HP"
+			},
+			"value": 50
+		},
+		{
+			"id": {
+				"code": "MAXHP"
+			},
+			"value": 100
+		}
+	]
+}
