@@ -2,7 +2,6 @@ package com.jpinfo.mudengine.world.service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import javax.annotation.PostConstruct;
 
@@ -15,6 +14,7 @@ import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import com.jpinfo.mudengine.common.place.PlaceExit;
 import com.jpinfo.mudengine.common.player.Session;
 import com.jpinfo.mudengine.common.security.MudUserDetails;
 import com.jpinfo.mudengine.common.utils.CommonConstants;
@@ -168,7 +168,7 @@ public class NotificationService {
 						// Spread the news!
 						.messageKey(WorldHelper.PLACE_EXIT_CREATE_MSG)
 						.args(new String[] {
-								d.getPk().getDirection()
+								PlaceExit.getOpposedDirection(d.getPk().getDirection())
 								})
 						// The guys in the place will take interest on that
 						.targetEntity(EnumEntity.PLACE)
@@ -178,6 +178,27 @@ public class NotificationService {
 
 				// Enqueue the notification
 				notifications.add(placeNotification);
+				
+				// Create exit notification for the other side
+				NotificationMessage otherPlaceNotification = NotificationMessage.builder()
+						// Who?
+						.entity(NotificationMessage.EnumEntity.PLACE)
+						.entityId(d.getTargetPlaceCode().longValue())
+						// What happened?
+						.event(EnumNotificationEvent.PLACE_EXIT_CREATE)
+						// Spread the news!
+						.messageKey(WorldHelper.PLACE_EXIT_CREATE_MSG)
+						.args(new String[] {
+								d.getPk().getDirection()
+								})
+						// The guys in the place will take interest on that
+						.targetEntity(EnumEntity.PLACE)
+						.targetEntityId(d.getTargetPlaceCode().longValue())
+						.worldName(getWorldName())
+					.build();
+
+				// Enqueue the notification too
+				notifications.add(otherPlaceNotification);
 				
 			});
 		
@@ -288,14 +309,16 @@ public class NotificationService {
 
 	private String getWorldName() {
 		
-		MudUserDetails uDetails = (MudUserDetails)
-				SecurityContextHolder.getContext().getAuthentication().getDetails();
+		if (SecurityContextHolder.getContext().getAuthentication()!=null) {
 		
-		Optional<Session> optSession = uDetails.getSessionData(); 
+			MudUserDetails uDetails = (MudUserDetails)
+					SecurityContextHolder.getContext().getAuthentication().getDetails();
 		
-		if (optSession.isPresent())
-			return optSession.get().getCurWorldName();
-		else
-			return null;
+			return uDetails.getSessionData()
+					.map(Session::getCurWorldName)
+					.orElse(null);
+		}
+		
+		return null;
 	}
 }

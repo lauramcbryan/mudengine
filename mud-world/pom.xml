@@ -173,6 +173,8 @@
 				<configuration>
 					<excludes>
 						<exclude>com/jpinfo/mudengine/world/model/**</exclude>
+						<exclude>com/jpinfo/mudengine/world/web/**</exclude>
+						<exclude>com/jpinfo/mudengine/world/notification/**</exclude>
 					</excludes>
 				</configuration>
 				<executions>

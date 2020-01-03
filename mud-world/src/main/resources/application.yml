@@ -1,6 +1,10 @@
 spring:
   application:
     name: mud-world
+    
+  jpa: 
+    hibernate:
+      ddl-auto: none
 
 ---
 spring:

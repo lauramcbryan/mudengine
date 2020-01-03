@@ -27,6 +27,7 @@
 			},
 			"opened": true,
 			"visible": true,
+			"locked": false,
 			"targetPlaceCode": 2
 		}
 	],
