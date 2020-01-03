@@ -350,7 +350,7 @@ public class PlaceServiceImpl {
 		} else {
 			
 			// Destroy the place
-			placeRepository.delete(dbPlace);
+			placeRepository.deleteById(dbPlace.getCode());
 		}
 	}
 

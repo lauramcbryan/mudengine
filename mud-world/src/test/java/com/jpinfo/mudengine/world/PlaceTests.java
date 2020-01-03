@@ -10,40 +10,22 @@ import java.io.IOException;
 import java.util.*;
 
 import javax.annotation.PostConstruct;
-import javax.jms.Destination;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
 
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jpinfo.mudengine.common.place.Place;
 import com.jpinfo.mudengine.common.security.TokenService;
-import com.jpinfo.mudengine.common.utils.CommonConstants;
-import com.jpinfo.mudengine.common.utils.NotificationMessage;
-import com.jpinfo.mudengine.common.utils.NotificationMessage.EnumNotificationEvent;
 import com.jpinfo.mudengine.world.model.MudPlace;
 import com.jpinfo.mudengine.world.model.MudPlaceClass;
-import com.jpinfo.mudengine.world.model.MudPlaceClassAttr;
-import com.jpinfo.mudengine.world.model.MudPlaceExit;
-import com.jpinfo.mudengine.world.model.pk.MudPlaceClassAttrPK;
 import com.jpinfo.mudengine.world.repository.PlaceClassRepository;
 import com.jpinfo.mudengine.world.repository.PlaceExitRepository;
 import com.jpinfo.mudengine.world.repository.PlaceRepository;
@@ -59,48 +41,30 @@ public class PlaceTests {
 	private static final String MUD_PLACE_CLASS_PREFIX = "src/test/resources/mudplaceclass-";
 	private static final String MUD_PLACE_CLASS_SUFFIX = ".json";
 	
+	private static final String HP_ATTR = "HP";
+	private static final Integer HP_ATTR_CHANGED_VALUE = 5;
+	private static final Integer HP_ATTR_ZEROES_VALUE = 0;
+	private static final Integer HP_ATTR_ABOVE_VALUE = 5000;
 	
-	public static final String PLACE_EXCHANGE = "place.exchange";
+	private static final String MAXHP_ATTR = "MAXHP";
+	private static final Integer MAXHP_ATTR_CHANGED_VALUE = 530;
+	private static final Integer MAXHP_ATTR_VALUE = 500;
+	
+	private static final String OTHER_ATTR = "OTH";
+	private static final Integer OTHER_ATTR_CHANGED_VALUE = 8;
 
 	private static final Integer CREATE_PLACE_ID = 99;
 	private static final String CREATE_PLACE_CLASS = "TEST";
 	private static final String CREATE_PLACE_EXIT_DIRECTION = "UP";
 	private static final Integer CREATE_PLACE_EXIT_TARGET = 1;
-	private static final String[] CREATE_PLACE_CLASS_ATTRS= {"HP", "MAXHP"};
-	private static final Integer[] CREATE_PLACE_CLASS_ATTR_VALUES= {50, 500};
 	
 	private static final Integer READ_PLACE_ID = 1;
-	private static final String READ_PLACE_CLASS = "TEST";
-	private static final String READ_PLACE_EXIT_DIRECTION = "OUT";
-	private static final Integer READ_PLACE_EXIT_TARGET = 2;
 	
-	private static final String[] READ_PLACE_CLASS_ATTRS= {"HP", "MAXHP"};
-	private static final Integer[] READ_PLACE_CLASS_ATTR_VALUES= {50, 100};
-	
-	
-	private static final Integer UPDATE_CLASS_PLACE_ID = 2;
 	private static final String UPDATE_CLASS_PLACE_CLASS = "TESTBLDG";
-	private static final String[] UPDATE_CLASS_PLACE_ATTRS= {"HP2", "MAXH2"};
-	private static final Integer[] UPDATE_CLASS_PLACE_ATTR_VALUES= {3, 8};
-
-	private static final Integer UPDATE_HP_PLACE_ID = 3;
-	private static final String UPDATE_HP_PLACE_CLASS = "TEST";
-	private static final String[] UPDATE_HP_PLACE_ATTRS= {"HP", "MAXHP"};
-	private static final Integer[] UPDATE_HP_PLACE_ATTR_VALUES= {150, 100};
-
-	private static final Integer UPDATE_DESTROYED_PLACE_ID = 4;
-	private static final String[] UPDATE_DESTROYED_PLACE_ATTRS= {"HP", "MAXHP"};
-
-	private static final Integer UPDATE_ATTR_PLACE_ID = 5;
-	private static final String[] UPDATE_ATTR_PLACE_ATTRS= {"HP", "MAXHP", "HP3"};
-	private static final Integer[] UPDATE_ATTR_PLACE_ATTR_VALUES= {1, 8, 3};
-	
 	
 	private static final Integer DELETE_DEMISED_PLACE_ID = 6;
 	private static final String DELETE_DEMISED_PLACE_CLASS = "RUIN";
 	
-	
-	private static final Integer DELETE_PLACE_ID = 7;
 
 	@MockBean
 	private JmsTemplate jmsTemplate;
@@ -178,7 +142,7 @@ public class PlaceTests {
 	}
 	
 	@Test
-	public void testCreatePlace() {
+	public void testCreatePlace() throws IOException {
 		
 		Place createdPlace = 
 				service.createPlace(
@@ -195,16 +159,15 @@ public class PlaceTests {
 		assertThat(createdPlace.getExits().get(PlaceTests.CREATE_PLACE_EXIT_DIRECTION).getTargetPlaceCode())
 			.isEqualTo(PlaceTests.CREATE_PLACE_EXIT_TARGET);
 
-		// Checking the attributes
-		for (int index=0;index<PlaceTests.CREATE_PLACE_CLASS_ATTRS.length;index++) {
-			
-			String curAttr = PlaceTests.CREATE_PLACE_CLASS_ATTRS[index];
-			Integer curAttrValue = PlaceTests.CREATE_PLACE_CLASS_ATTR_VALUES[index];
-			
-			assertThat(createdPlace.getAttrs().get(curAttr)).isNotNull();
-			assertThat(createdPlace.getAttrs().get(curAttr)).isEqualTo(curAttrValue);
-		}
+		MudPlaceClass mudPlaceClass = loadMudPlaceClass(PlaceTests.CREATE_PLACE_CLASS);
 		
+		// Checking if all attrs from mudclass are present
+		assertThat(mudPlaceClass.getAttrs().stream()
+				.allMatch(curClassAttr -> 
+					createdPlace.getAttrs().containsKey(curClassAttr.getCode()) &&
+					createdPlace.getAttrs().get(curClassAttr.getCode()).equals(curClassAttr.getValue())
+				)
+				).isTrue();
 		/*
 		//  Check if correct notification was sent
 		NotificationMessage placeExitNotification = NotificationMessage.builder()
@@ -232,33 +195,35 @@ public class PlaceTests {
 	}
 	
 	@Test
-	public void testReadPlace() {
+	public void testReadPlace() throws IOException {
 		
 		Place responsePlace = service.getPlace(PlaceTests.READ_PLACE_ID);
+		
+		MudPlace dbPlace = loadMudPlace(PlaceTests.READ_PLACE_ID);
 
 		// Checking basic fields		
-		assertThat(responsePlace.getPlaceClass().getPlaceClassCode()).isEqualTo(PlaceTests.READ_PLACE_CLASS);
+		assertThat(responsePlace.getPlaceClass().getPlaceClassCode())
+			.isEqualTo(dbPlace.getPlaceClass().getCode());
 		
-		// Checking if the exit exists		
-		assertThat(responsePlace.getExits().containsKey(PlaceTests.READ_PLACE_EXIT_DIRECTION)).isTrue();
-		
-		// Check if the exit points to the right place
-		assertThat(responsePlace.getExits().get(PlaceTests.READ_PLACE_EXIT_DIRECTION).getTargetPlaceCode())
-			.isEqualTo(PlaceTests.READ_PLACE_EXIT_TARGET);
-		
+		// Checking the exits
+		assertThat(dbPlace.getExits().stream()
+				.allMatch(curExit -> 
+					responsePlace.getExits().containsKey(curExit.getDirection())
+					&&
+					responsePlace.getExits().get(curExit.getDirection()).getTargetPlaceCode().equals(curExit.getTargetPlaceCode())
+					)
+				).isTrue();
 		
 		// Checking the attributes
-		for (int index=0;index<PlaceTests.READ_PLACE_CLASS_ATTRS.length;index++) {
-			
-			String curAttr = PlaceTests.READ_PLACE_CLASS_ATTRS[index];
-			Integer curAttrValue = PlaceTests.READ_PLACE_CLASS_ATTR_VALUES[index];
-
-			// Check if attribute exists
-			assertThat(responsePlace.getAttrs().containsKey(curAttr)).isTrue();
-			
-			// Check if it has the correct value			
-			assertThat(responsePlace.getAttrs().get(curAttr)).isEqualTo(curAttrValue);
-		}
+		MudPlaceClass mudPlaceClass = loadMudPlaceClass(responsePlace.getPlaceClass().getPlaceClassCode());
+		
+		// Checking if all attrs from mudclass are present
+		assertThat(mudPlaceClass.getAttrs().stream()
+				.allMatch(curClassAttr -> 
+					responsePlace.getAttrs().containsKey(curClassAttr.getCode()) &&
+					responsePlace.getAttrs().get(curClassAttr.getCode()).equals(curClassAttr.getValue())
+					)
+				).isTrue();
 	}
 	
 	@Test
@@ -301,76 +266,34 @@ public class PlaceTests {
 		
 	}
 	
-	/*
-
 	@Test
-	public void testUpdateHP() {
+	public void testUpdateHPAboveMAXHP() {
 		
-		Map<String, Object>  urlVariables = new HashMap<String, Object>(); 
-		urlVariables.put("placeId", PlaceTests.UPDATE_HP_PLACE_ID);
-		
-		ResponseEntity<Place> responseGet = restTemplate.exchange("/place/{placeId}", 
-				HttpMethod.GET, authEntity, Place.class, urlVariables);
-		
-		assertThat(responseGet.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(responseGet.getBody()).isNotNull();
-		
-		Place originalPlace = responseGet.getBody();
+		Place originalPlace = service.getPlace(PlaceTests.READ_PLACE_ID);
 		
 		// Update the HP
-		originalPlace.getAttrs().put(PlaceTests.UPDATE_HP_PLACE_ATTRS[0], PlaceTests.UPDATE_HP_PLACE_ATTR_VALUES[0]);
+		originalPlace.getAttrs().put(PlaceTests.HP_ATTR, PlaceTests.HP_ATTR_ABOVE_VALUE);
 		
-		HttpEntity<Place> request = new HttpEntity<Place>(originalPlace, authHeaders);
-			
-		ResponseEntity<Place> responseUpdate = restTemplate.exchange(
-				"/place/{placeId}", HttpMethod.POST, request, Place.class, urlVariables);
+		Place responsePlace = service.updatePlace(PlaceTests.READ_PLACE_ID, originalPlace);
 		
-		assertThat(responseUpdate.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(responseUpdate.getBody()).isNotNull();
-		
-		// Creating a Place variable to shorten further validations
-		Place responsePlace = responseUpdate.getBody();
-		
-		// Check if the placeClass has changed accordingly
-		assertThat(responsePlace.getClassCode()).isEqualTo(PlaceTests.UPDATE_HP_PLACE_CLASS);
-
 		// Checking the attributes
 		// In this case, the first attribute (HP) need to have this value set to MAXHP
-		assertThat(responsePlace.getAttrs().get(UPDATE_HP_PLACE_ATTRS[0])).isNotNull();
-		assertThat(responsePlace.getAttrs().get(UPDATE_HP_PLACE_ATTRS[0])).isEqualTo(UPDATE_HP_PLACE_ATTR_VALUES[1]);
-
-		// Checking the second attribute as well
-		assertThat(responsePlace.getAttrs().get(UPDATE_HP_PLACE_ATTRS[1])).isNotNull();
-		assertThat(responsePlace.getAttrs().get(UPDATE_HP_PLACE_ATTRS[1])).isEqualTo(UPDATE_HP_PLACE_ATTR_VALUES[1]);
+		assertThat(responsePlace.getAttrs().get(PlaceTests.HP_ATTR)).isEqualTo(MAXHP_ATTR_VALUE);
 	}
 
 	@Test
-	public void testUpdateDestroyed() {
-
-		Map<String, Object>  urlVariables = new HashMap<String, Object>(); 
-		urlVariables.put("placeId", PlaceTests.UPDATE_DESTROYED_PLACE_ID);
+	public void testUpdateHPBelowZero() {
 		
-		ResponseEntity<Place> responseGet = restTemplate.exchange("/place/{placeId}", 
-				HttpMethod.GET, authEntity, Place.class, urlVariables);
+		Place originalPlace = service.getPlace(PlaceTests.READ_PLACE_ID);
 		
-		assertThat(responseGet.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(responseGet.getBody()).isNotNull();
+		// Update the HP
+		originalPlace.getAttrs().put(PlaceTests.HP_ATTR, PlaceTests.HP_ATTR_ZEROES_VALUE);
 		
-		Place originalPlace = responseGet.getBody();
+		service.updatePlace(PlaceTests.READ_PLACE_ID, originalPlace);
 		
-		// Update the HP to zero
-		originalPlace.getAttrs().put(PlaceTests.UPDATE_DESTROYED_PLACE_ATTRS[0], 0);
+		verify(mockRepository).deleteById(PlaceTests.READ_PLACE_ID);
 		
-		HttpEntity<Place> request = new HttpEntity<Place>(originalPlace, authHeaders);
-			
-		ResponseEntity<Place> responseUpdate = restTemplate.exchange(
-				"/place/{placeId}", HttpMethod.POST, request, Place.class, urlVariables);
-		
-		assertThat(responseUpdate.getStatusCode()).isEqualTo(HttpStatus.OK);
-		
-		// Checking in the database if the place was destroyed
-		assertThat(repository.findById(PlaceTests.UPDATE_DESTROYED_PLACE_ID).isPresent()).isFalse();
-		
+		/*
 		//  Check if correct notification was sent
 		NotificationMessage placeNotification = NotificationMessage.builder()
 				.entity(NotificationMessage.EnumEntity.PLACE)
@@ -382,66 +305,41 @@ public class PlaceTests {
 				ArgumentMatchers.eq(placeNotification), 
 				ArgumentMatchers.any());
 
+		*/
 	}
 
 	@Test
 	public void testUpdateAttributes() {
 		
-		Map<String, Object>  urlVariables = new HashMap<String, Object>(); 
-		urlVariables.put("placeId", PlaceTests.UPDATE_ATTR_PLACE_ID);
-		
-		ResponseEntity<Place> responseGet = restTemplate.exchange("/place/{placeId}", 
-				HttpMethod.GET, authEntity, Place.class, urlVariables);
-		
-		assertThat(responseGet.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(responseGet.getBody()).isNotNull();
-		
-		Place originalPlace = responseGet.getBody();
+		Place originalPlace = service.getPlace(PlaceTests.READ_PLACE_ID);
 		
 		// Updating the attributes
-		originalPlace.getAttrs().put(UPDATE_ATTR_PLACE_ATTRS[0], UPDATE_ATTR_PLACE_ATTR_VALUES[0]);
-		originalPlace.getAttrs().put(UPDATE_ATTR_PLACE_ATTRS[1], UPDATE_ATTR_PLACE_ATTR_VALUES[1]);
-		originalPlace.getAttrs().put(UPDATE_ATTR_PLACE_ATTRS[2], UPDATE_ATTR_PLACE_ATTR_VALUES[2]);
+		originalPlace.getAttrs().put(PlaceTests.HP_ATTR, PlaceTests.HP_ATTR_CHANGED_VALUE);
+		originalPlace.getAttrs().put(PlaceTests.MAXHP_ATTR, PlaceTests.MAXHP_ATTR_CHANGED_VALUE);
+		originalPlace.getAttrs().put(PlaceTests.OTHER_ATTR, PlaceTests.OTHER_ATTR_CHANGED_VALUE);
 		
-		
-		HttpEntity<Place> request = new HttpEntity<Place>(originalPlace, authHeaders);
-			
-		ResponseEntity<Place> responseUpdate = restTemplate.exchange(
-				"/place/{placeId}", HttpMethod.POST, request, Place.class, urlVariables);
-		
-		assertThat(responseUpdate.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(responseUpdate.getBody()).isNotNull();
-		
-		// Creating a Place variable to shorten further validations
-		Place responsePlace = responseUpdate.getBody();
+		Place responsePlace = service.updatePlace(PlaceTests.READ_PLACE_ID, originalPlace);
 		
 		// Checking the attributes
-		for (int index=0;index<PlaceTests.UPDATE_ATTR_PLACE_ATTRS.length;index++) {
-			
-			String curAttr = PlaceTests.UPDATE_ATTR_PLACE_ATTRS[index];
-			Integer curAttrValue = PlaceTests.UPDATE_ATTR_PLACE_ATTR_VALUES[index];
-
-			// Check if attribute exists
-			assertThat(responsePlace.getAttrs().get(curAttr)).isNotNull();
-			
-			// Check if it has the correct value			
-			assertThat(responsePlace.getAttrs().get(curAttr)).isEqualTo(curAttrValue);
-		}
-		
+		assertThat(responsePlace.getAttrs().get(PlaceTests.HP_ATTR)).isEqualTo(PlaceTests.HP_ATTR_CHANGED_VALUE);
+		assertThat(responsePlace.getAttrs().get(PlaceTests.MAXHP_ATTR)).isEqualTo(PlaceTests.MAXHP_ATTR_CHANGED_VALUE);
+		assertThat(responsePlace.getAttrs().get(PlaceTests.OTHER_ATTR)).isEqualTo(PlaceTests.OTHER_ATTR_CHANGED_VALUE);
 	}
 
 	@Test
-	public void testDeleteDemised() {
+	public void testDeleteDemised() throws IOException {
 		
+		// Prepare the expected entity to be persisted
+		MudPlace expectedDemisedPlace = loadMudPlace(PlaceTests.DELETE_DEMISED_PLACE_ID);
+		expectedDemisedPlace.setPlaceClass(loadMudPlaceClass(DELETE_DEMISED_PLACE_CLASS));
+		expectedDemisedPlace.setAttrs(new HashSet<>());
 		
-		Map<String, Object>  urlVariables = new HashMap<String, Object>(); 
-		urlVariables.put("placeId", PlaceTests.DELETE_DEMISED_PLACE_ID);
+		service.destroyPlace(PlaceTests.DELETE_DEMISED_PLACE_ID);
 		
-		ResponseEntity<Place> responseFirstDelete = restTemplate.exchange(
-				"/place/{placeId}", HttpMethod.DELETE, authEntity, Place.class, urlVariables);
-		
-		assertThat(responseFirstDelete.getStatusCode()).isEqualTo(HttpStatus.OK);
-
+		verify(mockRepository).save(expectedDemisedPlace);
+	}
+	
+/*
 		
 		//  Check if correct notification was sent
 		NotificationMessage placeClassNotification = NotificationMessage.builder()
@@ -459,22 +357,16 @@ public class PlaceTests {
 				.orElseThrow(() -> new RuntimeException("Demised place not found in database"));
 		
 		assertThat(dbPlace.getPlaceClass().getCode()).isEqualTo(PlaceTests.DELETE_DEMISED_PLACE_CLASS);
-		
-	}
+	*/
 	
 	@Test
 	public void testDelete() {
 		
-		Map<String, Object>  urlVariables = new HashMap<String, Object>(); 
-		urlVariables.put("placeId", PlaceTests.DELETE_PLACE_ID);
+		service.destroyPlace(PlaceTests.READ_PLACE_ID);
 		
-		// Deleting it again must remove the entity
-		ResponseEntity<Place> responseSecondDelete = restTemplate.exchange(
-				"/place/{placeId}", HttpMethod.DELETE, authEntity, Place.class, urlVariables);
-		
-		assertThat(responseSecondDelete.getStatusCode()).isEqualTo(HttpStatus.OK);
-		
-		assertThat(repository.findById(DELETE_PLACE_ID).isPresent()).isFalse();
+		verify(mockRepository).deleteById(PlaceTests.READ_PLACE_ID);
+
+		/*
 		
 		//  Check if correct notification was sent
 		NotificationMessage placeNotification = NotificationMessage.builder()
@@ -486,8 +378,9 @@ public class PlaceTests {
 		verify(jmsTemplate).convertAndSend((Destination)ArgumentMatchers.any(), 
 				ArgumentMatchers.eq(placeNotification), 
 				ArgumentMatchers.any());
+				
+		*/
 
 	}
-	*/
 	
 }

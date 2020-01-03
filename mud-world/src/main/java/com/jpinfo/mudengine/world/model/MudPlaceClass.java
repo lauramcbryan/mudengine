@@ -1,5 +1,6 @@
 package com.jpinfo.mudengine.world.model;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.*;
@@ -28,7 +29,7 @@ public class MudPlaceClass {
 	private Integer weightCapacity;
 
 	@OneToMany(mappedBy="id.classCode", fetch=FetchType.EAGER, cascade=CascadeType.ALL, orphanRemoval=true)
-	private Set<MudPlaceClassAttr> attrs;
+	private Set<MudPlaceClassAttr> attrs = new HashSet<>();
 	
 	@Column(name="PARENT_CLASS_CODE", length = 20)
 	private String parentClassCode;
