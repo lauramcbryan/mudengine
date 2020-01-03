@@ -1,6 +1,5 @@
 package com.jpinfo.mudengine.item;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 
 import java.util.List;
@@ -74,8 +73,6 @@ public class ItemNotificationTests {
 				.event(EnumNotificationEvent.ITEM_CLASS_CHANGE)
 			.build();
 
-		assertThat(notifications.contains(expectedItemNotification));
-		
 		service.dispatchNotifications(notifications);
 		
 		verify(jmsTemplate).convertAndSend((Destination)ArgumentMatchers.any(), 
@@ -103,8 +100,6 @@ public class ItemNotificationTests {
 		
 		List<NotificationMessage> notifications = service.handleItemChange(mockBeforeItem, mockAfterItem);
 		
-		assertThat(notifications.contains(expectedItemNotification));
-		
 		service.dispatchNotifications(notifications);
 		
 		verify(jmsTemplate).convertAndSend((Destination)ArgumentMatchers.any(), 
@@ -131,8 +126,6 @@ public class ItemNotificationTests {
 		
 		List<NotificationMessage> notifications = service.handleItemChange(mockBeforeItem, mockAfterItem);
 		
-		assertThat(notifications.contains(expectedItemNotification));
-		
 		service.dispatchNotifications(notifications);
 		
 		verify(jmsTemplate).convertAndSend((Destination)ArgumentMatchers.any(), 
@@ -158,8 +151,6 @@ public class ItemNotificationTests {
 		
 		List<NotificationMessage> notifications = service.handleItemChange(mockBeforeItem, mockAfterItem);
 		
-		assertThat(notifications.contains(expectedItemNotification));
-		
 		service.dispatchNotifications(notifications);
 		
 		verify(jmsTemplate).convertAndSend((Destination)ArgumentMatchers.any(), 
@@ -184,8 +175,6 @@ public class ItemNotificationTests {
 		
 		List<NotificationMessage> notifications = service.handleItemChange(mockBeforeItem, mockAfterItem);
 		
-		assertThat(notifications.contains(expectedItemNotification));
-		
 		service.dispatchNotifications(notifications);
 		
 		verify(jmsTemplate).convertAndSend((Destination)ArgumentMatchers.any(), 
@@ -205,8 +194,6 @@ public class ItemNotificationTests {
 			.build();
 		
 		List<NotificationMessage> notifications = service.handleItemDestroy(mockDestroyedItem);
-		
-		assertThat(notifications.contains(expectedItemNotification));
 		
 		service.dispatchNotifications(notifications);
 		
