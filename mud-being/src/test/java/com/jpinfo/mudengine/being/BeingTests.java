@@ -1,27 +1,24 @@
 package com.jpinfo.mudengine.being;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
-import java.util.*;
+import java.io.IOException;
+import java.util.Optional;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.commons.lang.SerializationUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import com.jpinfo.mudengine.being.client.ItemServiceClient;
 import com.jpinfo.mudengine.being.client.MessageServiceClient;
 import com.jpinfo.mudengine.being.fixture.BeingTemplates;
 import com.jpinfo.mudengine.being.fixture.MudBeingProcessor;
@@ -30,114 +27,99 @@ import com.jpinfo.mudengine.being.model.MudBeingClass;
 import com.jpinfo.mudengine.being.model.MudBeingClassAttr;
 import com.jpinfo.mudengine.being.model.MudBeingClassSkill;
 import com.jpinfo.mudengine.being.model.converter.BeingConverter;
-import com.jpinfo.mudengine.being.model.converter.MudBeingAttrConverter;
 import com.jpinfo.mudengine.being.repository.BeingClassRepository;
 import com.jpinfo.mudengine.being.repository.BeingRepository;
+import com.jpinfo.mudengine.being.service.BeingServiceImpl;
 import com.jpinfo.mudengine.being.utils.BeingHelper;
 import com.jpinfo.mudengine.common.being.Being;
 import com.jpinfo.mudengine.common.being.BeingClass;
 import com.jpinfo.mudengine.common.security.TokenService;
-import com.jpinfo.mudengine.common.utils.CommonConstants;
 
 import br.com.six2six.fixturefactory.Fixture;
 import br.com.six2six.fixturefactory.loader.FixtureFactoryLoader;
 
-import static org.mockito.BDDMockito.*;
-import static org.mockito.Mockito.verify;
-
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment=WebEnvironment.RANDOM_PORT,
-	properties= {"token.secret=a7ac498c7bba59e0eb7c647d2f0197f8",
-			"being.topic=" + BeingTests.BEING_EXCHANGE,
-			"place.topic=" + BeingTests.PLACE_EXCHANGE,
-			"item.topic=" + BeingTests.ITEM_EXCHANGE
-			})
+@SpringBootTest
 public class BeingTests {
 	
-	public static final String BEING_EXCHANGE = "being.exchange";
-	public static final String PLACE_EXCHANGE = "place.exchange";
-	public static final String ITEM_EXCHANGE = "item.exchange";
+	private static final Integer HP_ATTR_CHANGE_VALUE=500;
+	private static final Integer HP_ATTR_ZEROES_VALUE=0;
 	
-	private static final Integer MAX_HP=100;
-	private static final Integer HP=200;
+	private static final Integer MAXHP_ATTR_VALUE=100;
+	
+	private static final Long CREATE_BEING_ID = 99L;
 	
 	// This mock bean isn't used during validation.
 	// It's mocked just to avoid having it trying to call outside world
 	@MockBean
-	private ItemServiceClient mockItem;
-
-	// Same here
-	@MockBean
 	private MessageServiceClient mockMessage;
 	
-	@Autowired
-	private TestRestTemplate restTemplate;
-	
-	@Autowired
+	@MockBean
 	private TokenService tokenService;
 	
 	@MockBean
-	private BeingRepository repository;
+	private BeingRepository mockRepository;
 	
 	@MockBean
-	private BeingClassRepository classRepository;
+	private BeingClassRepository mockClassRepository;
 	
-	
-	private HttpEntity<Object> emptyHttpEntity;
-	
+	@Autowired
+	private BeingServiceImpl service;
 
 	@PostConstruct
 	private void setup() {
-		HttpHeaders authHeaders = new HttpHeaders();
-		authHeaders.add(CommonConstants.AUTH_TOKEN_HEADER, tokenService.buildInternalToken());
-		
-		emptyHttpEntity = new HttpEntity<Object>(authHeaders);
-		
 		FixtureFactoryLoader.loadTemplates("com.jpinfo.mudengine.being.fixture");
+		
+		given(mockClassRepository.findById(ArgumentMatchers.anyString()))
+		.willAnswer(i -> {
+			
+			return Optional.of(
+					BeingTestData.loadMudBeingClass(i.getArgument(0, String.class))
+					);
+		});
+
+		given(mockRepository.findById(ArgumentMatchers.anyLong()))
+		.willAnswer(i -> {
+			
+			return Optional.of(
+					BeingTestData.loadMudBeing(i.getArgument(0, Long.class))
+					);
+		});
+		
+		given(mockRepository.save(ArgumentMatchers.any(MudBeing.class)))
+		.willAnswer(i -> {
+			
+			MudBeing beingSaved = i.getArgument(0, MudBeing.class);
+			
+			// Is it being created?
+			if (beingSaved.getCode()==null) {
+				
+				// Assign a random code
+				beingSaved.setCode(BeingTests.CREATE_BEING_ID);
+				
+			} 
+			return beingSaved;
+		});
+
 	}
 	
 	@Test
-	public void contextLoads() {
-	}
-	
-	@Test
-	public void testCreateSimple() {
+	public void testCreateSimple() throws IOException {
 		
 		MudBeing originalMudBeing = Fixture.from(MudBeing.class)
 				.uses(new MudBeingProcessor())
 				.gimme(BeingTemplates.SIMPLE);
-
-		MudBeing cleanWithIdMudBeing = (MudBeing)SerializationUtils.clone(originalMudBeing);
-		cleanWithIdMudBeing.getAttrs().clear();
-		cleanWithIdMudBeing.getSkills().clear();
-		cleanWithIdMudBeing.getSlots().clear();
 		
-		MudBeing cleanMudBeing = (MudBeing)SerializationUtils.clone(cleanWithIdMudBeing);
-		cleanMudBeing.setCode(null);
+		MudBeingClass originalMudBeingClass = BeingTestData.loadMudBeingClass(BeingTestData.MUD_ORIGINAL_BEING_CLASS);
 		
-		given(repository.save(cleanMudBeing)).willReturn(cleanWithIdMudBeing);
-		given(repository.save(originalMudBeing)).willReturn(originalMudBeing);
-		
-		given(classRepository.findById(originalMudBeing.getBeingClass().getCode())).willReturn(Optional.of(originalMudBeing.getBeingClass()));
-		
-		Map<String, Object> urlVariables = new HashMap<String, Object>();
-		
-		urlVariables.put("beingType", Being.enumBeingType.REGULAR_NON_SENTIENT);
-		urlVariables.put("beingClass", originalMudBeing.getBeingClass().getCode());
-		urlVariables.put("worldName", originalMudBeing.getCurWorld());
-		urlVariables.put("placeCode", originalMudBeing.getCurPlaceCode());
-		urlVariables.put("beingName", originalMudBeing.getName());
-		urlVariables.put("quantity", originalMudBeing.getQuantity());
-
-		ResponseEntity<Being> responseService= restTemplate.exchange(
-				"/being?beingType={beingType}&beingClass={beingClass}&worldName={worldName}&placeCode={placeCode}&beingName={beingName}&quantity={quantity}", 
-				HttpMethod.PUT, emptyHttpEntity, Being.class, urlVariables);
-		
-		assertThat(responseService.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-		assertThat(responseService.getBody()).isNotNull();
-		
-		Being serviceBeing = responseService.getBody();
+		Being serviceBeing =
+				service.createBeing(Being.enumBeingType.REGULAR_NON_SENTIENT, 
+						BeingTestData.MUD_ORIGINAL_BEING_CLASS,
+						originalMudBeing.getCurWorld(),
+						originalMudBeing.getCurPlaceCode(),
+						originalMudBeing.getQuantity(), 
+						originalMudBeing.getName());
 		
 		assertThat(serviceBeing.getType()).isEqualTo(Being.enumBeingType.values()[originalMudBeing.getType()]);
 		assertThat(serviceBeing.getCurWorld()).isEqualTo(originalMudBeing.getCurWorld());
@@ -145,51 +127,29 @@ public class BeingTests {
 		assertThat(serviceBeing.getQuantity()).isEqualTo(BeingHelper.CREATE_DEFAULT_QUANTITY);
 	
 		// Check being class (including attr maps between database and service)
-		assertBeingClass(originalMudBeing.getBeingClass(), serviceBeing.getBeingClass());
+		assertBeingClass(originalMudBeingClass, serviceBeing.getBeingClass());
 		
 		// Check consistency between class attributes and being attributes
 		assertAttrMap(serviceBeing, serviceBeing.getBeingClass());
 		assertSkillMap(serviceBeing, serviceBeing.getBeingClass());
-		
-		
 	}
 	
 	@Test
-	public void testCreatePlayable() {
+	public void testCreatePlayable() throws IOException {
 		MudBeing originalMudBeing = Fixture.from(MudBeing.class)
 				.uses(new MudBeingProcessor())
 				.gimme(BeingTemplates.PLAYABLE);
+		
+		MudBeingClass originalMudBeingClass = BeingTestData.loadMudBeingClass(BeingTestData.MUD_ORIGINAL_BEING_CLASS);
+		
+		Being serviceBeing =
+				service.createPlayerBeing(originalMudBeing.getPlayerId(),
+						BeingTestData.MUD_ORIGINAL_BEING_CLASS,
+						originalMudBeing.getCurWorld(), 
+						originalMudBeing.getCurPlaceCode(), 
+						originalMudBeing.getName()
+						);
 
-		MudBeing cleanWithIdMudBeing = (MudBeing)SerializationUtils.clone(originalMudBeing);
-		cleanWithIdMudBeing.getAttrs().clear();
-		cleanWithIdMudBeing.getSkills().clear();
-		cleanWithIdMudBeing.getSlots().clear();
-		
-		MudBeing cleanMudBeing = (MudBeing)SerializationUtils.clone(cleanWithIdMudBeing);
-		cleanMudBeing.setCode(null);
-		
-		given(repository.save(cleanMudBeing)).willReturn(cleanWithIdMudBeing);
-		given(repository.save(originalMudBeing)).willReturn(originalMudBeing);
-		
-		given(classRepository.findById(originalMudBeing.getBeingClass().getCode())).willReturn(Optional.of(originalMudBeing.getBeingClass()));
-		
-		Map<String, Object> urlVariables = new HashMap<String, Object>();
-		
-		urlVariables.put("playerId", originalMudBeing.getPlayerId());
-		urlVariables.put("beingClass", originalMudBeing.getBeingClass().getCode());
-		urlVariables.put("worldName", originalMudBeing.getCurWorld());
-		urlVariables.put("placeCode", originalMudBeing.getCurPlaceCode());
-		urlVariables.put("beingName", originalMudBeing.getName());
-
-		ResponseEntity<Being> responseService= restTemplate.exchange(
-				"/being/player/{playerId}?beingClass={beingClass}&worldName={worldName}&placeCode={placeCode}&beingName={beingName}", 
-				HttpMethod.PUT, emptyHttpEntity, Being.class, urlVariables);
-		
-		assertThat(responseService.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-		assertThat(responseService.getBody()).isNotNull();
-		
-		Being serviceBeing = responseService.getBody();
-		
 		assertThat(serviceBeing.getType()).isEqualTo(Being.enumBeingType.values()[originalMudBeing.getType()]);
 		assertThat(serviceBeing.getCurWorld()).isEqualTo(originalMudBeing.getCurWorld());
 		assertThat(serviceBeing.getCurPlaceCode()).isEqualTo(originalMudBeing.getCurPlaceCode());
@@ -197,136 +157,88 @@ public class BeingTests {
 		assertThat(serviceBeing.getName()).isEqualTo(originalMudBeing.getName());
 	
 		// Check being class (including attr maps between database and service)
-		assertBeingClass(originalMudBeing.getBeingClass(), serviceBeing.getBeingClass());
+		assertBeingClass(originalMudBeingClass, serviceBeing.getBeingClass());
 		
 		// Check consistence between class attributes and being attributes
 		assertAttrMap(serviceBeing, serviceBeing.getBeingClass());
 		assertSkillMap(serviceBeing, serviceBeing.getBeingClass());
 
 	}
+	
+	@Test
+	public void testUpdateClass() throws IOException {
+		
+		Being toChangeBeing = BeingConverter.convert(
+				BeingTestData.loadMudBeing(BeingTestData.READ_BEING_ID)
+				);
+		
+		toChangeBeing.setClassCode(BeingTestData.MUD_CHANGED_BEING_CLASS);
+		
+		MudBeingClass newMudBeingClass = BeingTestData.loadMudBeingClass(BeingTestData.MUD_CHANGED_BEING_CLASS);
+		
+		
+		Being changedBeing = 
+				service.updateBeing(BeingTestData.READ_BEING_ID, toChangeBeing);
+		
+		// Check being class (including attr maps between database and service)
+		assertBeingClass(newMudBeingClass, changedBeing.getBeingClass());
+
+		// Check consistence between class attributes and being attributes
+		assertAttrMap(newMudBeingClass, changedBeing.getBeingClass());
+		assertSkillMap(changedBeing, changedBeing.getBeingClass());
+	}
 
 	@Test
-	public void testUpdateHP() {
-
-		MudBeing originalMudBeing = Fixture.from(MudBeing.class)
-				.uses(new MudBeingProcessor())
-				.gimme(BeingTemplates.SIMPLE);
+	public void testUpdateHPBeyondMax() throws IOException {
 		
-		originalMudBeing.getAttrs().add(
-				MudBeingAttrConverter.build(
-						originalMudBeing.getCode(), 
-						BeingHelper.BEING_HP_ATTR, 
-						BeingTests.MAX_HP));
+		Being toChangeBeing = BeingConverter.convert(
+				BeingTestData.loadMudBeing(BeingTestData.READ_BEING_ID)
+				);
 		
-		originalMudBeing.getAttrs().add(
-				MudBeingAttrConverter.build(
-						originalMudBeing.getCode(), 
-						BeingHelper.BEING_MAX_HP_ATTR, 
-						BeingTests.MAX_HP));
+		toChangeBeing.getBaseAttrs().put(
+				BeingHelper.BEING_HP_ATTR, 
+				BeingTests.HP_ATTR_CHANGE_VALUE);
 		
+		Being changedBeing = 
+				service.updateBeing(BeingTestData.READ_BEING_ID, toChangeBeing);
 		
-		Being originalBeing = BeingConverter.convert(originalMudBeing);
-		
-		
-		given(repository.findById(originalMudBeing.getCode())).willReturn(Optional.of(originalMudBeing));
-		given(repository.save(originalMudBeing)).willReturn(originalMudBeing);
-		
-		originalBeing.getBaseAttrs().put(BeingHelper.BEING_HP_ATTR, BeingTests.HP);
-		HttpEntity<Being> beingHttpEntity = new HttpEntity<Being>(originalBeing, emptyHttpEntity.getHeaders());
-		
-		Map<String, Object> urlVariables = new HashMap<>();
-		
-		urlVariables.put("beingCode", originalMudBeing.getCode());
-
-		ResponseEntity<Being> responseService= restTemplate.exchange(
-				"/being/{beingCode}", 
-				HttpMethod.POST, beingHttpEntity, Being.class, urlVariables);
-		
-		assertThat(responseService.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(responseService.getBody().getAttrs().get(BeingHelper.BEING_HP_ATTR)).isEqualTo(BeingTests.MAX_HP);
+		assertThat(changedBeing.getAttrs().get(BeingHelper.BEING_HP_ATTR)).isEqualTo(BeingTests.MAXHP_ATTR_VALUE);
 	}
 	
 	@Test
-	public void testUpdateDestroyed() {
-		MudBeing originalMudBeing = Fixture.from(MudBeing.class)
-				.uses(new MudBeingProcessor())
-				.gimme(BeingTemplates.SIMPLE);
+	public void testUpdateHPToZero() throws IOException {
 		
-		originalMudBeing.getAttrs().add(
-				MudBeingAttrConverter.build(
-						originalMudBeing.getCode(), 
-						BeingHelper.BEING_HP_ATTR, 
-						BeingTests.MAX_HP));
+		SecurityContextHolder.getContext().setAuthentication(
+				tokenService.getAuthenticationFromToken(tokenService.buildInternalToken())
+				);
 		
-		originalMudBeing.getAttrs().add(
-				MudBeingAttrConverter.build(
-						originalMudBeing.getCode(), 
-						BeingHelper.BEING_MAX_HP_ATTR, 
-						BeingTests.MAX_HP));
+		Being toChangeBeing = BeingConverter.convert(
+				BeingTestData.loadMudBeing(BeingTestData.READ_BEING_ID)
+				);
 		
-		Being originalBeing = BeingConverter.convert(originalMudBeing);
+		toChangeBeing.getBaseAttrs().put(
+				BeingHelper.BEING_HP_ATTR, 
+				BeingTests.HP_ATTR_ZEROES_VALUE);
 		
-		given(repository.findById(originalMudBeing.getCode())).willReturn(Optional.of(originalMudBeing));
+		service.updateBeing(BeingTestData.READ_BEING_ID, toChangeBeing);
 		
-		originalBeing.getBaseAttrs().put(BeingHelper.BEING_HP_ATTR, 0);
-		HttpEntity<Being> beingHttpEntity = new HttpEntity<Being>(originalBeing, emptyHttpEntity.getHeaders());
-		
-		Map<String, Object> urlVariables = new HashMap<String, Object>();
-		
-		urlVariables.put("beingCode", originalMudBeing.getCode());
-
-		ResponseEntity<Being> responseService= restTemplate.exchange(
-				"/being/{beingCode}", 
-				HttpMethod.POST, beingHttpEntity, Being.class, urlVariables);
-		
-		assertThat(responseService.getStatusCode()).isEqualTo(HttpStatus.OK);
-
-		verify(repository, times(1)).delete(originalMudBeing);
+		verify(mockRepository, times(1)).deleteById(BeingTestData.READ_BEING_ID);
 	}
 
 	@Test
 	public void testDestroy() {
+		
+		service.destroyBeing(BeingTestData.READ_BEING_ID);
 
-		MudBeing originalMudBeing = Fixture.from(MudBeing.class)
-				.uses(new MudBeingProcessor())
-				.gimme(BeingTemplates.SIMPLE);
-		
-		given(repository.findById(originalMudBeing.getCode())).willReturn(Optional.of(originalMudBeing));
-		
-		Map<String, Object> urlVariables = new HashMap<String, Object>();
-		
-		urlVariables.put("beingCode", originalMudBeing.getCode());
-
-		ResponseEntity<Void> responseService= restTemplate.exchange(
-				"/being/{beingCode}", 
-				HttpMethod.DELETE, emptyHttpEntity, Void.class, urlVariables);
-		
-		assertThat(responseService.getStatusCode()).isEqualTo(HttpStatus.OK);
-
-		verify(repository, times(1)).delete(originalMudBeing);
+		verify(mockRepository, times(1)).deleteById(BeingTestData.READ_BEING_ID);
 	}
 	
 	@Test
-	public void testRead() {
+	public void testRead() throws IOException {
 		
-		MudBeing originalMudBeing = Fixture.from(MudBeing.class)
-				.uses(new MudBeingProcessor())
-				.gimme(BeingTemplates.SIMPLE);
-		
-		given(repository.findById(originalMudBeing.getCode())).willReturn(Optional.of(originalMudBeing));
-		
-		Map<String, Object> urlVariables = new HashMap<String, Object>();
-		
-		urlVariables.put("beingCode", originalMudBeing.getCode());
+		MudBeing originalMudBeing = BeingTestData.loadMudBeing(BeingTestData.READ_BEING_ID);
 
-		ResponseEntity<Being> responseService= restTemplate.exchange(
-				"/being/{beingCode}", 
-				HttpMethod.GET, emptyHttpEntity, Being.class, urlVariables);
-		
-		assertThat(responseService.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(responseService.getBody()).isNotNull();
-		
-		Being serviceBeing = responseService.getBody();
+		Being serviceBeing = service.getBeing(BeingTestData.READ_BEING_ID);
 		
 		assertThat(serviceBeing.getType()).isEqualTo(Being.enumBeingType.values()[originalMudBeing.getType()]);
 		assertThat(serviceBeing.getCurWorld()).isEqualTo(originalMudBeing.getCurWorld());
@@ -339,54 +251,6 @@ public class BeingTests {
 		// Check consistency between class attributes and being attributes
 		assertAttrMap(serviceBeing, serviceBeing.getBeingClass());
 		assertSkillMap(serviceBeing, serviceBeing.getBeingClass());
-
-
-		
-	}
-	
-	@Test
-	public void testReadFromAnotherPlayer() {
-		
-		HttpHeaders authHeaders = new HttpHeaders();
-		authHeaders.add(CommonConstants.AUTH_TOKEN_HEADER, tokenService.buildInternalToken(2L));
-		
-		HttpEntity<Object> anotherHttpEntity = new HttpEntity<Object>(authHeaders);
-
-		
-		MudBeing originalMudBeing = Fixture.from(MudBeing.class)
-				.uses(new MudBeingProcessor())
-				.gimme(BeingTemplates.SIMPLE);
-		
-		given(repository.findById(originalMudBeing.getCode())).willReturn(Optional.of(originalMudBeing));
-		
-		Map<String, Object> urlVariables = new HashMap<String, Object>();
-		
-		urlVariables.put("beingCode", originalMudBeing.getCode());
-
-		ResponseEntity<Being> responseService= restTemplate.exchange(
-				"/being/{beingCode}", 
-				HttpMethod.GET, anotherHttpEntity, Being.class, urlVariables);
-		
-		assertThat(responseService.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(responseService.getBody()).isNotNull();
-		
-		Being serviceBeing = responseService.getBody();
-		
-		assertThat(serviceBeing.getType()).isEqualTo(Being.enumBeingType.values()[originalMudBeing.getType()]);
-		assertThat(serviceBeing.getCurWorld()).isEqualTo(originalMudBeing.getCurWorld());
-		assertThat(serviceBeing.getCurPlaceCode()).isEqualTo(originalMudBeing.getCurPlaceCode());
-		assertThat(serviceBeing.getQuantity()).isEqualTo(originalMudBeing.getQuantity());
-	
-		// Check being class (including attr maps between database and service)
-		assertBeingClass(originalMudBeing.getBeingClass(), serviceBeing.getBeingClass());
-		
-		// Check consistency between class attributes and being attributes
-		assertAttrMap(serviceBeing, serviceBeing.getBeingClass());
-		assertSkillMap(serviceBeing, serviceBeing.getBeingClass());
-		
-		assertThat(serviceBeing.getAttrModifiers()).isEmpty();
-		assertThat(serviceBeing.getSkillModifiers()).isEmpty();
-		
 	}
 	
 	private void assertAttrMap(MudBeingClass mudBeingClass, BeingClass beingClass) {

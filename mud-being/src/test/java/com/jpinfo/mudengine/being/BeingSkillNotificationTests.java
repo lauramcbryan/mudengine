@@ -1,72 +1,37 @@
 package com.jpinfo.mudengine.being;
 
-import static org.mockito.BDDMockito.given;
-
 import static org.mockito.Mockito.verify;
 
+import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 
-import javax.annotation.PostConstruct;
-
-import org.apache.activemq.command.ActiveMQTopic;
 import org.apache.commons.lang.SerializationUtils;
-import org.aspectj.lang.ProceedingJoinPoint;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import com.jpinfo.mudengine.being.client.ItemServiceClient;
 import com.jpinfo.mudengine.being.client.MessageServiceClient;
-import com.jpinfo.mudengine.being.fixture.BeingTemplates;
-import com.jpinfo.mudengine.being.fixture.MudBeingProcessor;
 import com.jpinfo.mudengine.being.model.MudBeing;
-import com.jpinfo.mudengine.being.model.MudBeingAttrModifier;
 import com.jpinfo.mudengine.being.model.MudBeingSkillModifier;
-import com.jpinfo.mudengine.being.model.pk.MudBeingAttrModifierPK;
 import com.jpinfo.mudengine.being.model.pk.MudBeingSkillModifierPK;
-import com.jpinfo.mudengine.being.notification.NotificationAspect;
-import com.jpinfo.mudengine.being.repository.BeingRepository;
+import com.jpinfo.mudengine.being.service.NotificationBeingService;
 import com.jpinfo.mudengine.being.utils.BeingHelper;
-import com.jpinfo.mudengine.common.message.MessageRequest;
 import com.jpinfo.mudengine.common.message.MessageEntity.EnumEntityType;
-import com.jpinfo.mudengine.common.utils.NotificationMessage;
-import com.jpinfo.mudengine.common.utils.NotificationMessage.EnumNotificationEvent;
-
-import br.com.six2six.fixturefactory.Fixture;
-import br.com.six2six.fixturefactory.loader.FixtureFactoryLoader;
+import com.jpinfo.mudengine.common.message.MessageRequest;
+import com.jpinfo.mudengine.common.security.TokenService;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment=WebEnvironment.RANDOM_PORT,
-	properties= {"token.secret=a7ac498c7bba59e0eb7c647d2f0197f8",
-		"being.topic=" + BeingTests.BEING_EXCHANGE,
-		"place.topic=" + BeingTests.PLACE_EXCHANGE,
-		"item.topic=" + BeingTests.ITEM_EXCHANGE
-		})
-public class BeingNotificationTests {
+@SpringBootTest
+public class BeingSkillNotificationTests {
 	
-	private static final String SKILL="TEST_SKILL";
-	private static final String ATTR="TEST_ATTR";
+	private static final String NEW_SKILLMOD = "SKILLMOD";
+	private static final float NEW_SKILLMOD_VALUE = 5;
 	
-	private static final float BIG_OFFSET_VALUE = 100.0f;
-	private static final float SMALL_OFFSET_VALUE = 10.0f;
-
-	// This mock bean isn't used during validation.
-	// It's mocked just to avoid having it trying to call outside world
-	@MockBean
-	private ItemServiceClient mockItem;
-	
-	@MockBean
-	private BeingRepository repository;
-	
-	@Autowired
-	private NotificationAspect aspect;
+	private static final float CHANGED_OFFSET_VALUE = 10.0f;
 	
 	@MockBean
 	private MessageServiceClient messageService;
@@ -74,200 +39,231 @@ public class BeingNotificationTests {
 	@MockBean
 	private JmsTemplate jmsMockTemplate;
 	
+	@Autowired
+	private NotificationBeingService service;
+	
 	@MockBean
-	private ProceedingJoinPoint pjp;
-	
-	
-	@PostConstruct
-	private void setup() {
-		FixtureFactoryLoader.loadTemplates("com.jpinfo.mudengine.being.fixture");
-	}	
+	private TokenService tokenUtils;
 	
 	@Test
-	public void testSkillIncreaseNotification() throws Throwable {
-		
+	public void testSkillIncreaseNotification() throws IOException {
+
 		// Get a mudBeing with modifiers
-		MudBeing originalMudBeing = Fixture.from(MudBeing.class)
-				.uses(new MudBeingProcessor())
-				.gimme(BeingTemplates.PLAYABLE_WITH_MODIFIERS);
-		
-		// Get some random modifier (the first one, in fact) and set it's value
-		MudBeingSkillModifier originalSkillMod = originalMudBeing.getSkillModifiers().iterator().next();
-		originalSkillMod.setOffset(SMALL_OFFSET_VALUE);
-		
-		// Instruct the repository to return this being (the original)
-		given(repository.findById(originalMudBeing.getCode())).willReturn(Optional.of(originalMudBeing));
+		MudBeing beforeBeing = 
+				BeingTestData.loadMudBeing(BeingTestData.READ_BEING_ID);
 		
 		// Clone it to have a second, unattached instance
-		MudBeing changedMudBeing = (MudBeing)SerializationUtils.clone(originalMudBeing);
+		MudBeing afterBeing = (MudBeing)SerializationUtils.clone(beforeBeing);
 		
-		// find the modifier and changed it's value
-		changedMudBeing.getSkillModifiers().stream()
-			.filter(d -> d.getId().getCode().equals(originalSkillMod.getId().getCode()))
-			.findFirst()
-			.ifPresent(d -> d.setOffset(BIG_OFFSET_VALUE));
-		
+		MudBeingSkillModifier newSkillModifier = afterBeing.getSkillModifiers().iterator().next();
+		newSkillModifier.setOffset(newSkillModifier.getOffset() + CHANGED_OFFSET_VALUE);
+
 		// Launch and check
-		testNotification(changedMudBeing, originalSkillMod.getId().getCode(), 
-				(BIG_OFFSET_VALUE - SMALL_OFFSET_VALUE), 
-				BeingHelper.BEING_SKILLMOD_INCREASE_MSG);
+		List<MessageRequest> messages = 
+				service.handleBeingChange(beforeBeing, afterBeing);
+		
+		service.dispatchMessages(messages, afterBeing);
+		
+		// Preparing the expected message result
+		MessageRequest yoursMsgRequest = new MessageRequest();
+		yoursMsgRequest.addChangedEntity(EnumEntityType.BEING, afterBeing.getCode());
+		yoursMsgRequest.setMessageKey(BeingHelper.BEING_SKILLMOD_INCREASE_MSG);
+		yoursMsgRequest.setArgs(new String[] {
+				newSkillModifier.getId().getCode(),
+				String.valueOf(CHANGED_OFFSET_VALUE)
+		});
+		
+
+		// Check if correct message was sent
+		verify(messageService).putMessage(afterBeing.getCode(), yoursMsgRequest);
 	}
+	
+	
 	
 	@Test
 	public void testSkillDecreaseNotification() throws Throwable {
 		
-		// Get a MudBeing with modifiers
-		MudBeing originalMudBeing = Fixture.from(MudBeing.class)
-				.uses(new MudBeingProcessor())
-				.gimme(BeingTemplates.PLAYABLE_WITH_MODIFIERS);
+		// Get a mudBeing with modifiers
+		MudBeing beforeBeing = 
+				BeingTestData.loadMudBeing(BeingTestData.READ_BEING_ID);
 		
-		// Pick a random modifier and set it's value
-		MudBeingSkillModifier originalSkillMod = originalMudBeing.getSkillModifiers().iterator().next();
-		originalSkillMod.setOffset(BIG_OFFSET_VALUE);
+		// Clone it to have a second, unattached instance
+		MudBeing afterBeing = (MudBeing)SerializationUtils.clone(beforeBeing);
 		
-		// Instruct the repository to return this original being
-		given(repository.findById(originalMudBeing.getCode())).willReturn(Optional.of(originalMudBeing));
-		
-		// Clone it
-		MudBeing changedMudBeing = (MudBeing)SerializationUtils.clone(originalMudBeing);
-		
-		// change modifier
-		changedMudBeing.getSkillModifiers().stream()
-			.filter(d -> d.getId().getCode().equals(originalSkillMod.getId().getCode()))
-			.findFirst()
-			.ifPresent(d -> d.setOffset(SMALL_OFFSET_VALUE));
+		MudBeingSkillModifier newSkillModifier = afterBeing.getSkillModifiers().iterator().next();
+		newSkillModifier.setOffset(newSkillModifier.getOffset() - CHANGED_OFFSET_VALUE);
 
 		// Launch and check
-		testNotification(changedMudBeing, originalSkillMod.getId().getCode(), 
-				(BIG_OFFSET_VALUE - SMALL_OFFSET_VALUE), 
-				BeingHelper.BEING_SKILLMOD_DECREASE_MSG);
+		List<MessageRequest> messages = 
+				service.handleBeingChange(beforeBeing, afterBeing);
+		
+		service.dispatchMessages(messages, afterBeing);
+		
+		// Preparing the expected message result
+		MessageRequest yoursMsgRequest = new MessageRequest();
+		yoursMsgRequest.addChangedEntity(EnumEntityType.BEING, afterBeing.getCode());
+		yoursMsgRequest.setMessageKey(BeingHelper.BEING_SKILLMOD_DECREASE_MSG);
+		yoursMsgRequest.setArgs(new String[] {
+				newSkillModifier.getId().getCode(),
+				String.valueOf(CHANGED_OFFSET_VALUE)
+		});
+		
+
+		// Check if correct message was sent
+		verify(messageService).putMessage(afterBeing.getCode(), yoursMsgRequest);
 	}
-	
+
 	@Test
 	public void testSkillRemovedNotification() throws Throwable {
+
+		// Get a mudBeing with modifiers
+		MudBeing beforeBeing = 
+				BeingTestData.loadMudBeing(BeingTestData.READ_BEING_ID);
 		
-		// Creates a test being
-		MudBeing originalMudBeing = Fixture.from(MudBeing.class)
-				.uses(new MudBeingProcessor())
-				.gimme(BeingTemplates.PLAYABLE_WITH_MODIFIERS);
+		// Clone it to have a second, unattached instance
+		MudBeing afterBeing = (MudBeing)SerializationUtils.clone(beforeBeing);
 		
-		// Set the value for the first modifier
-		MudBeingSkillModifier originalSkillMod = originalMudBeing.getSkillModifiers().iterator().next();
-		originalSkillMod.setOffset(SMALL_OFFSET_VALUE);
+		// Adding skill modifier on the first one
+		MudBeingSkillModifier newModifier = new MudBeingSkillModifier();
+		newModifier.setId(new MudBeingSkillModifierPK());
+		newModifier.getId().setCode(BeingSkillNotificationTests.NEW_SKILLMOD);
+		newModifier.setOffset(BeingSkillNotificationTests.NEW_SKILLMOD_VALUE);
 		
-		// Instruct the database to return this original being
-		given(repository.findById(originalMudBeing.getCode())).willReturn(Optional.of(originalMudBeing));
-		
-		// Clones the first being into another being
-		MudBeing changedMudBeing = (MudBeing)SerializationUtils.clone(originalMudBeing);
-		
-		// removes the skill modifier
-		changedMudBeing.getSkillModifiers()
-			.removeIf(d -> d.getId().getCode().equals(originalSkillMod.getId().getCode()));
-		
-		
+		beforeBeing.getSkillModifiers().add(newModifier);
+
 		// Launch and check
-		testNotification(changedMudBeing, originalSkillMod.getId().getCode(), 
-				SMALL_OFFSET_VALUE, 
-				BeingHelper.BEING_SKILLMOD_DECREASE_MSG);
+		List<MessageRequest> messages = 
+				service.handleBeingChange(beforeBeing, afterBeing);
+		
+		service.dispatchMessages(messages, afterBeing);
+		
+		// Preparing the expected message result
+		MessageRequest yoursMsgRequest = new MessageRequest();
+		yoursMsgRequest.addChangedEntity(EnumEntityType.BEING, afterBeing.getCode());
+		yoursMsgRequest.setMessageKey(BeingHelper.BEING_SKILLMOD_DECREASE_MSG);
+		yoursMsgRequest.setArgs(new String[] {
+				BeingSkillNotificationTests.NEW_SKILLMOD,
+				String.valueOf(BeingSkillNotificationTests.NEW_SKILLMOD_VALUE)
+		});
+		
+		// Check if correct message was sent
+		verify(messageService).putMessage(afterBeing.getCode(), yoursMsgRequest);
 	}
 	
 
-	
 	@Test
 	public void testSkillAddedNotification() throws Throwable {
 		
-		// Creates a test being
-		MudBeing originalMudBeing = Fixture.from(MudBeing.class)
-				.uses(new MudBeingProcessor())
-				.gimme(BeingTemplates.PLAYABLE_WITH_MODIFIERS);
+		// Get a mudBeing with modifiers
+		MudBeing beforeBeing = 
+				BeingTestData.loadMudBeing(BeingTestData.READ_BEING_ID);
 		
-		// Instruct the database to return this original being
-		given(repository.findById(originalMudBeing.getCode())).willReturn(Optional.of(originalMudBeing));
+		// Clone it to have a second, unattached instance
+		MudBeing afterBeing = (MudBeing)SerializationUtils.clone(beforeBeing);
 		
-		// Clones the first being into another being
-		MudBeing changedMudBeing = (MudBeing)SerializationUtils.clone(originalMudBeing);
-		
+		// Adding skill modifier on the second one
 		MudBeingSkillModifier newModifier = new MudBeingSkillModifier();
-		MudBeingSkillModifierPK newModifierPK = new MudBeingSkillModifierPK();
+		newModifier.setId(new MudBeingSkillModifierPK());
+		newModifier.getId().setCode(BeingSkillNotificationTests.NEW_SKILLMOD);
+		newModifier.setOffset(BeingSkillNotificationTests.NEW_SKILLMOD_VALUE);
 		
-		newModifierPK.setBeingCode(originalMudBeing.getCode());
-		newModifierPK.setCode(BeingNotificationTests.SKILL);
-		
-		newModifier.setId(newModifierPK);
-		newModifier.setOffset(BIG_OFFSET_VALUE);
-		
-		// adds the skill modifier
-		changedMudBeing.getSkillModifiers().add(newModifier);
-		
+		afterBeing.getSkillModifiers().add(newModifier);
+
 		// Launch and check
-		testNotification(changedMudBeing, newModifier.getId().getCode(), 
-				BIG_OFFSET_VALUE, 
-				BeingHelper.BEING_SKILLMOD_INCREASE_MSG);
+		List<MessageRequest> messages = 
+				service.handleBeingChange(beforeBeing, afterBeing);
+		
+		service.dispatchMessages(messages, afterBeing);
+		
+		// Preparing the expected message result
+		MessageRequest yoursMsgRequest = new MessageRequest();
+		yoursMsgRequest.addChangedEntity(EnumEntityType.BEING, afterBeing.getCode());
+		yoursMsgRequest.setMessageKey(BeingHelper.BEING_SKILLMOD_INCREASE_MSG);
+		yoursMsgRequest.setArgs(new String[] {
+				BeingSkillNotificationTests.NEW_SKILLMOD,
+				String.valueOf(BeingSkillNotificationTests.NEW_SKILLMOD_VALUE)
+		});
+		
+		// Check if correct message was sent
+		verify(messageService).putMessage(afterBeing.getCode(), yoursMsgRequest);
 	}
 
 	@Test
 	public void testNegativeSkillRemovedNotification() throws Throwable {
 		
-		// Creates a test being
-		MudBeing originalMudBeing = Fixture.from(MudBeing.class)
-				.uses(new MudBeingProcessor())
-				.gimme(BeingTemplates.PLAYABLE_WITH_MODIFIERS);
+		// Get a mudBeing with modifiers
+		MudBeing beforeBeing = 
+				BeingTestData.loadMudBeing(BeingTestData.READ_BEING_ID);
 		
-		// Set the value for the first modifier
-		MudBeingSkillModifier originalSkillMod = originalMudBeing.getSkillModifiers().iterator().next();
-		originalSkillMod.setOffset(-SMALL_OFFSET_VALUE);
+		// Clone it to have a second, unattached instance
+		MudBeing afterBeing = (MudBeing)SerializationUtils.clone(beforeBeing);
 		
-		// Instruct the database to return this original being
-		given(repository.findById(originalMudBeing.getCode())).willReturn(Optional.of(originalMudBeing));
+		// Adding negative skill modifier on the first one
+		MudBeingSkillModifier newModifier = new MudBeingSkillModifier();
+		newModifier.setId(new MudBeingSkillModifierPK());
+		newModifier.getId().setCode(BeingSkillNotificationTests.NEW_SKILLMOD);
+		newModifier.setOffset(-BeingSkillNotificationTests.NEW_SKILLMOD_VALUE);
 		
-		// Clones the first being into another being
-		MudBeing changedMudBeing = (MudBeing)SerializationUtils.clone(originalMudBeing);
-		
-		// removes the skill modifier
-		changedMudBeing.getSkillModifiers()
-			.removeIf(d -> d.getId().getCode().equals(originalSkillMod.getId().getCode()));
-		
-		
+		beforeBeing.getSkillModifiers().add(newModifier);
+
 		// Launch and check
-		testNotification(changedMudBeing, originalSkillMod.getId().getCode(), 
-				SMALL_OFFSET_VALUE, 
-				BeingHelper.BEING_SKILLMOD_INCREASE_MSG);
+		List<MessageRequest> messages = 
+				service.handleBeingChange(beforeBeing, afterBeing);
+		
+		service.dispatchMessages(messages, afterBeing);
+		
+		// Preparing the expected message result
+		MessageRequest yoursMsgRequest = new MessageRequest();
+		yoursMsgRequest.addChangedEntity(EnumEntityType.BEING, afterBeing.getCode());
+		yoursMsgRequest.setMessageKey(BeingHelper.BEING_SKILLMOD_INCREASE_MSG);
+		yoursMsgRequest.setArgs(new String[] {
+				BeingSkillNotificationTests.NEW_SKILLMOD,
+				String.valueOf(BeingSkillNotificationTests.NEW_SKILLMOD_VALUE)
+		});
+		
+		// Check if correct message was sent
+		verify(messageService).putMessage(afterBeing.getCode(), yoursMsgRequest);
 	}
 
 	@Test
 	public void testNegativeSkillAddedNotification() throws Throwable {
 		
-		// Creates a test being
-		MudBeing originalMudBeing = Fixture.from(MudBeing.class)
-				.uses(new MudBeingProcessor())
-				.gimme(BeingTemplates.PLAYABLE_WITH_MODIFIERS);
+		// Get a mudBeing with modifiers
+		MudBeing beforeBeing = 
+				BeingTestData.loadMudBeing(BeingTestData.READ_BEING_ID);
 		
-		// Instruct the database to return this original being
-		given(repository.findById(originalMudBeing.getCode())).willReturn(Optional.of(originalMudBeing));
+		// Clone it to have a second, unattached instance
+		MudBeing afterBeing = (MudBeing)SerializationUtils.clone(beforeBeing);
 		
-		// Clones the first being into another being
-		MudBeing changedMudBeing = (MudBeing)SerializationUtils.clone(originalMudBeing);
-		
+		// Adding negative skill modifier on the second one
 		MudBeingSkillModifier newModifier = new MudBeingSkillModifier();
-		MudBeingSkillModifierPK newModifierPK = new MudBeingSkillModifierPK();
+		newModifier.setId(new MudBeingSkillModifierPK());
+		newModifier.getId().setCode(BeingSkillNotificationTests.NEW_SKILLMOD);
+		newModifier.setOffset(-BeingSkillNotificationTests.NEW_SKILLMOD_VALUE);
 		
-		newModifierPK.setBeingCode(originalMudBeing.getCode());
-		newModifierPK.setCode(BeingNotificationTests.SKILL);
-		
-		newModifier.setId(newModifierPK);
-		newModifier.setOffset(-BIG_OFFSET_VALUE);
-		
-		// adds the skill modifier
-		changedMudBeing.getSkillModifiers().add(newModifier);
-		
+		afterBeing.getSkillModifiers().add(newModifier);
+
 		// Launch and check
-		testNotification(changedMudBeing, newModifier.getId().getCode(), 
-				BIG_OFFSET_VALUE, 
-				BeingHelper.BEING_SKILLMOD_DECREASE_MSG);
+		List<MessageRequest> messages = 
+				service.handleBeingChange(beforeBeing, afterBeing);
+		
+		service.dispatchMessages(messages, afterBeing);
+		
+		// Preparing the expected message result
+		MessageRequest yoursMsgRequest = new MessageRequest();
+		yoursMsgRequest.addChangedEntity(EnumEntityType.BEING, afterBeing.getCode());
+		yoursMsgRequest.setMessageKey(BeingHelper.BEING_SKILLMOD_DECREASE_MSG);
+		yoursMsgRequest.setArgs(new String[] {
+				BeingSkillNotificationTests.NEW_SKILLMOD,
+				String.valueOf(BeingSkillNotificationTests.NEW_SKILLMOD_VALUE)
+		});
+		
+		// Check if correct message was sent
+		verify(messageService).putMessage(afterBeing.getCode(), yoursMsgRequest);
 	}
 	
-	
+
+	/*
 	@Test
 	public void testAttrIncreaseNotification() throws Throwable {
 		
@@ -467,7 +463,7 @@ public class BeingNotificationTests {
 				.gimme(3, BeingTemplates.PLAYABLE, BeingTemplates.SIMPLE, BeingTemplates.PLAYABLE);
 		
 		// Instruct the repository to return the other beings in place
-		given(repository.findByCurWorldAndCurPlaceCode(destroyedMudBeing.getCurWorld(), destroyedMudBeing.getCurPlaceCode()))
+		given(repository.findPlayableInThisPlace(destroyedMudBeing.getCurWorld(), destroyedMudBeing.getCurPlaceCode()))
 			.willReturn(anotherMudBeings);
 		
 		// Launch the notification
@@ -481,8 +477,10 @@ public class BeingNotificationTests {
 				.build();
 		
 		// Check if correct notification was sent		
-		verify(jmsMockTemplate).convertAndSend(ArgumentMatchers.eq(new ActiveMQTopic(BeingTests.BEING_EXCHANGE)), 
-				ArgumentMatchers.eq(beingNotification), ArgumentMatchers.any());
+		verify(jmsMockTemplate).convertAndSend(
+				ArgumentMatchers.eq(new ActiveMQTopic(BeingTests.BEING_EXCHANGE)), 
+				ArgumentMatchers.eq(beingNotification), 
+				ArgumentMatchers.any());
 		
 		
 		// Preparing the expected message result for the destroyed being
@@ -527,5 +525,6 @@ public class BeingNotificationTests {
 		verify(messageService).putMessage(changedMudBeing.getCode(), yoursMsgRequest);
 
 	}
+	*/
 
 }

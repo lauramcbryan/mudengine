@@ -55,18 +55,20 @@ public class MudBeingSlotConverter {
 		}
 		
 		// Looking for attributes to add/update
-		nextClass.getSlots().stream()
-			.forEach(d -> {
-
-				MudBeingSlot slot = 
-					dbBeing.getSlots().stream()
-						.filter(e -> e.getId().getCode().equals(d.getId().getCode()))
-						.findFirst()
-						.orElse(MudBeingSlotConverter.convert(dbBeing.getCode(), d));
-
-				dbBeing.getSlots().add(slot);
-				
-			});
+		if (nextClass.getSlots()!=null) {
+			nextClass.getSlots().stream()
+				.forEach(d -> {
+	
+					MudBeingSlot slot = 
+						dbBeing.getSlots().stream()
+							.filter(e -> e.getId().getCode().equals(d.getId().getCode()))
+							.findFirst()
+							.orElse(MudBeingSlotConverter.convert(dbBeing.getCode(), d));
+	
+					dbBeing.getSlots().add(slot);
+					
+				});
+		}
 		
 		return dbBeing;
 		

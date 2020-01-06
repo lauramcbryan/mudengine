@@ -9,19 +9,18 @@ import javax.annotation.PostConstruct;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import com.jpinfo.mudengine.being.client.ItemServiceClient;
 import com.jpinfo.mudengine.being.client.MessageServiceClient;
 import com.jpinfo.mudengine.being.fixture.BeingTemplates;
 import com.jpinfo.mudengine.being.fixture.PlaceNotificationTemplates;
 import com.jpinfo.mudengine.being.model.MudBeing;
-import com.jpinfo.mudengine.being.notification.NotificationListener;
 import com.jpinfo.mudengine.being.repository.BeingRepository;
+import com.jpinfo.mudengine.being.service.NotificationPlaceService;
 import com.jpinfo.mudengine.common.message.MessageRequest;
 import com.jpinfo.mudengine.common.message.MessageEntity.EnumEntityType;
 import com.jpinfo.mudengine.common.security.TokenService;
@@ -31,19 +30,9 @@ import br.com.six2six.fixturefactory.Fixture;
 import br.com.six2six.fixturefactory.loader.FixtureFactoryLoader;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment=WebEnvironment.RANDOM_PORT,
-	properties= {"token.secret=a7ac498c7bba59e0eb7c647d2f0197f8",
-		"being.topic=" + BeingTests.BEING_EXCHANGE,
-		"place.topic=" + BeingTests.PLACE_EXCHANGE,
-		"item.topic=" + BeingTests.ITEM_EXCHANGE
-		})
+@SpringBootTest
 public class PlaceListenerTests {
 	
-	// This mock bean isn't used during validation.
-	// It's mocked just to avoid having it trying to call outside world
-	@MockBean
-	private ItemServiceClient mockItem;
-
 	@MockBean
 	private BeingRepository repository;
 	
@@ -51,14 +40,32 @@ public class PlaceListenerTests {
 	private MessageServiceClient messageService;
 	
 	@Autowired
-	private NotificationListener mockListener;
+	private NotificationPlaceService service;
 	
-	@Autowired
+	@MockBean
 	private TokenService tokenService;
+	
+	
+	private List<MudBeing> otherMudBeings;
 
 	@PostConstruct
 	private void setup() {
 		FixtureFactoryLoader.loadTemplates("com.jpinfo.mudengine.being.fixture");
+		
+		// Beings in the same place
+		otherMudBeings = 
+				Fixture.from(MudBeing.class).gimme(3, 
+						BeingTemplates.SIMPLE, 
+						BeingTemplates.PLAYABLE, 
+						BeingTemplates.PLAYABLE_WITH_MODIFIERS);
+		
+		// Instruct being repository to return other beings in the place when requested
+		given(repository.findPlayableInThisPlace(
+				ArgumentMatchers.any(),
+				ArgumentMatchers.any()
+				))
+			.willReturn(otherMudBeings);
+		
 	}
 	
 	@Test
@@ -67,19 +74,8 @@ public class PlaceListenerTests {
 		NotificationMessage msg = Fixture.from(NotificationMessage.class)
 				.gimme(PlaceNotificationTemplates.PLACE_DESTROY);
 
-		// Beings in the same place
-		List<MudBeing> otherMudBeings = 
-				Fixture.from(MudBeing.class).gimme(3, 
-						BeingTemplates.SIMPLE, 
-						BeingTemplates.PLAYABLE, 
-						BeingTemplates.PLAYABLE_WITH_MODIFIERS);
-		
-		// Instruct being repository to return other beings in the place when requested
-		given(repository.findByCurWorldAndCurPlaceCode(msg.getWorldName(), msg.getEntityId().intValue()))
-			.willReturn(otherMudBeings);
-		
 		// Launch the notification!
-		mockListener.receiveNotification(tokenService.buildInternalToken(), msg);
+		service.handlePlaceNotification(msg);
 		
 		// Check if all beings are being destroyed
 		otherMudBeings.stream()
@@ -132,19 +128,8 @@ public class PlaceListenerTests {
 		NotificationMessage msg = Fixture.from(NotificationMessage.class)
 				.gimme(label);
 
-		// Beings in the same place
-		List<MudBeing> otherMudBeings = 
-				Fixture.from(MudBeing.class).gimme(3, 
-						BeingTemplates.SIMPLE, 
-						BeingTemplates.PLAYABLE, 
-						BeingTemplates.PLAYABLE_WITH_MODIFIERS);
-		
-		// Instruct being repository to return other beings in the place when requested
-		given(repository.findByCurWorldAndCurPlaceCode(msg.getWorldName(), msg.getEntityId().intValue()))
-			.willReturn(otherMudBeings);
-		
 		// Launch the notification!
-		mockListener.receiveNotification(tokenService.buildInternalToken(), msg);
+		service.handlePlaceNotification(msg);
 		
 		// Check if proper message was sent to other beings
 		otherMudBeings.stream()

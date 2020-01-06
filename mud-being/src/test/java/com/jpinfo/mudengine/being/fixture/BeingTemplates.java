@@ -1,5 +1,6 @@
 package com.jpinfo.mudengine.being.fixture;
 
+import com.jpinfo.mudengine.being.BeingTestData;
 import com.jpinfo.mudengine.being.model.MudBeing;
 import com.jpinfo.mudengine.being.model.MudBeingAttr;
 import com.jpinfo.mudengine.being.model.MudBeingAttrModifier;
@@ -63,7 +64,7 @@ public class BeingTemplates implements TemplateLoader {
 		}});
 		
 		Fixture.of(MudBeingClass.class).addTemplate(VALID, new Rule() {{
-			add("code", regex("code-(\\d{4})"));
+			add("code", BeingTestData.MUD_ORIGINAL_BEING_CLASS);
 			add("name", regex("name-(\\d{4})"));
 			add("description", regex("desc-(\\d{4})"));
 			add("size", random(Integer.class));

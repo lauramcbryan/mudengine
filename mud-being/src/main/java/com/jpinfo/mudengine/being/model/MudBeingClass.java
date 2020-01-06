@@ -6,6 +6,7 @@ import javax.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -43,4 +44,9 @@ public class MudBeingClass implements Serializable {
 	
 	@OneToMany(mappedBy="id.classCode", cascade=CascadeType.ALL, orphanRemoval=true)
 	private List<MudBeingClassSlot> slots;
+	
+	public MudBeingClass() {
+		attrs = new ArrayList<>();
+		skills = new ArrayList<>();
+	}
 }

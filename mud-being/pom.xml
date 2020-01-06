@@ -182,6 +182,10 @@
 				<version>0.8.4</version>
 				<configuration>
 					<excludes>
+						<exclude>com/jpinfo/mudengine/being/model/**</exclude>
+						<exclude>com/jpinfo/mudengine/being/notification/**</exclude>
+						<exclude>com/jpinfo/mudengine/being/web/**</exclude>
+						<exclude>com/jpinfo/mudengine/being/client/**</exclude>
 					</excludes>
 				</configuration>
 				<executions>

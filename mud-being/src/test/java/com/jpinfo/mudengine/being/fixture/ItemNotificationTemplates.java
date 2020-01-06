@@ -10,7 +10,7 @@ import br.com.six2six.fixturefactory.function.impl.RegexFunction;
 import br.com.six2six.fixturefactory.loader.TemplateLoader;
 
 public class ItemNotificationTemplates implements TemplateLoader {
-
+	
 	private static final String BASIC = "BASIC";
 	
 	private static final String ITEM_EVENT = "ITEM_EVENT";
@@ -36,6 +36,8 @@ public class ItemNotificationTemplates implements TemplateLoader {
 	public static final String ITEM_OWNED_CLASS_CHANGE = "ITEM_OWNED_CLASS_CHANGE";
 	public static final String ITEM_UNOWNED_CLASS_CHANGE = "ITEM_UNOWNED_CLASS_CHANGE";
 	
+
+	public static final Long OWNING_BEING_CODE = 1L;
 	
 	
 	@Override
@@ -58,7 +60,7 @@ public class ItemNotificationTemplates implements TemplateLoader {
 		
 		Fixture.of(NotificationMessage.class).addTemplate(ITEM_OWNED_EVENT).inherits(ITEM_EVENT, new Rule() {{
 			add("targetEntity", EnumEntity.BEING);
-			add("targetEntityId", random(Long.class));
+			add("targetEntityId", OWNING_BEING_CODE);
 		}});
 		
 		Fixture.of(NotificationMessage.class).addTemplate(ITEM_UNOWNED_EVENT).inherits(ITEM_EVENT, new Rule() {{

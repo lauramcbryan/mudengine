@@ -12,20 +12,19 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.lang.SerializationUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import com.jpinfo.mudengine.being.client.ItemServiceClient;
 import com.jpinfo.mudengine.being.client.MessageServiceClient;
 import com.jpinfo.mudengine.being.fixture.BeingTemplates;
 import com.jpinfo.mudengine.being.fixture.ItemNotificationTemplates;
 import com.jpinfo.mudengine.being.fixture.MudBeingProcessor;
 import com.jpinfo.mudengine.being.model.MudBeing;
-import com.jpinfo.mudengine.being.notification.NotificationListener;
 import com.jpinfo.mudengine.being.repository.BeingRepository;
+import com.jpinfo.mudengine.being.service.NotificationItemService;
 import com.jpinfo.mudengine.being.utils.BeingHelper;
 import com.jpinfo.mudengine.common.message.MessageRequest;
 import com.jpinfo.mudengine.common.message.MessageEntity.EnumEntityType;
@@ -36,18 +35,8 @@ import br.com.six2six.fixturefactory.Fixture;
 import br.com.six2six.fixturefactory.loader.FixtureFactoryLoader;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment=WebEnvironment.RANDOM_PORT,
-	properties= {"token.secret=a7ac498c7bba59e0eb7c647d2f0197f8",
-		"being.topic=" + BeingTests.BEING_EXCHANGE,
-		"place.topic=" + BeingTests.PLACE_EXCHANGE,
-		"item.topic=" + BeingTests.ITEM_EXCHANGE
-		})
+@SpringBootTest
 public class ItemListenerTests {
-	
-	// This mock bean isn't used during validation.
-	// It's mocked just to avoid having it trying to call outside world
-	@MockBean
-	private ItemServiceClient mockItem;
 
 	@MockBean
 	private BeingRepository repository;
@@ -56,14 +45,47 @@ public class ItemListenerTests {
 	private MessageServiceClient messageService;
 	
 	@Autowired
-	private NotificationListener mockListener;
+	private NotificationItemService service;
 	
-	@Autowired
+	@MockBean
 	private TokenService tokenService;
+	
+	private MudBeing owningMudBeing;
+	
+	List<MudBeing> otherMudBeings;
 
 	@PostConstruct
 	private void setup() {
 		FixtureFactoryLoader.loadTemplates("com.jpinfo.mudengine.being.fixture");
+		
+		// Being owning the item
+		owningMudBeing = Fixture.from(MudBeing.class)
+				.uses(new MudBeingProcessor())
+				.gimme(BeingTemplates.PLAYABLE);
+		
+		// Adjusting the being code
+		owningMudBeing.setCode(ItemNotificationTemplates.OWNING_BEING_CODE);
+		
+		// Instruct being repository to return the acting being when requested
+		given(repository.findById(ItemNotificationTemplates.OWNING_BEING_CODE))
+			.willReturn(Optional.of(owningMudBeing));
+		
+		// Beings in the same place
+		otherMudBeings = 
+				Fixture.from(MudBeing.class).gimme(3, 
+						BeingTemplates.SIMPLE, 
+						BeingTemplates.PLAYABLE, 
+						BeingTemplates.PLAYABLE_WITH_MODIFIERS);
+		
+		otherMudBeings.add(owningMudBeing);
+		
+		// Instruct being repository to return other beings in the place when requested
+		given(repository.findPlayableInThisPlace(
+				ArgumentMatchers.any(),
+				ArgumentMatchers.any()
+				))
+			.willReturn(otherMudBeings);
+		
 	}
 	
 	@Test
@@ -72,31 +94,8 @@ public class ItemListenerTests {
 		NotificationMessage msg = Fixture.from(NotificationMessage.class)
 				.gimme(ItemNotificationTemplates.ITEM_DROP);
 		
-		// Being owning the item
-		MudBeing owningMudBeing = Fixture.from(MudBeing.class)
-				.uses(new MudBeingProcessor())
-				.gimme(BeingTemplates.PLAYABLE);
-		
-		// Adjusting the being code to reflect the item.owner
-		owningMudBeing.setCode(msg.getTargetEntityId());
-		
-		// Beings in the same place
-		List<MudBeing> otherMudBeings = 
-				Fixture.from(MudBeing.class).gimme(3, 
-						BeingTemplates.SIMPLE, 
-						BeingTemplates.PLAYABLE, 
-						BeingTemplates.PLAYABLE_WITH_MODIFIERS);
-
-		// Instruct being repository to return the acting being when requested
-		given(repository.findById(owningMudBeing.getCode()))
-			.willReturn(Optional.of(owningMudBeing));
-		
-		// Instruct being repository to return other beings in the place when requested
-		given(repository.findByCurWorldAndCurPlaceCode(owningMudBeing.getCurWorld(), owningMudBeing.getCurPlaceCode()))
-			.willReturn(otherMudBeings);
-		
-		// Launch the notification!
-		mockListener.receiveNotification(tokenService.buildInternalToken(), msg);
+		// Launch the notification!		
+		service.handleItemNotification(msg);
 		
 		// Preparing the message request to compare against
 		MessageRequest yoursMsgRequest = new MessageRequest();
@@ -116,7 +115,7 @@ public class ItemListenerTests {
 		
 		// Check if proper message was sent to other beings as well
 		otherMudBeings.stream()
-			.filter(d -> d.getPlayerId()!=null)
+			.filter(d -> !d.getCode().equals(owningMudBeing.getCode()))
 			.forEach(d -> 
 				verify(messageService).putMessage(d.getCode(), anotherMsgRequest)
 					);
@@ -129,20 +128,8 @@ public class ItemListenerTests {
 		NotificationMessage msg = Fixture.from(NotificationMessage.class)
 				.gimme(ItemNotificationTemplates.ITEM_TAKEN);
 		
-		// Being owning the item
-		MudBeing owningMudBeing = Fixture.from(MudBeing.class)
-				.uses(new MudBeingProcessor())
-				.gimme(BeingTemplates.PLAYABLE);
-		
-		// Adjusting the being code to reflect the item.owner
-		owningMudBeing.setCode(msg.getTargetEntityId());
-		
-		// Instruct being repository to return the acting being when requested
-		given(repository.findById(owningMudBeing.getCode()))
-			.willReturn(Optional.of(owningMudBeing));
-		
-		// Launch the notification!
-		mockListener.receiveNotification(tokenService.buildInternalToken(), msg);
+		// Launch the notification!		
+		service.handleItemNotification(msg);
 		
 		// Preparing the message request to compare against
 		MessageRequest yoursMsgRequest = new MessageRequest();
@@ -152,7 +139,7 @@ public class ItemListenerTests {
 		
 		
 		// Check if proper message was sent to item's owner
-		verify(messageService).putMessage(msg.getTargetEntityId(), yoursMsgRequest);
+		verify(messageService).putMessage(ItemNotificationTemplates.OWNING_BEING_CODE, yoursMsgRequest);
 	}
 	
 	@Test
@@ -221,20 +208,8 @@ public class ItemListenerTests {
 		NotificationMessage msg = Fixture.from(NotificationMessage.class)
 				.gimme(label);
 		
-		// Being owning the item
-		MudBeing owningMudBeing = Fixture.from(MudBeing.class)
-				.uses(new MudBeingProcessor())
-				.gimme(BeingTemplates.PLAYABLE);
-		
-		// Adjusting the being code to reflect the item.owner
-		owningMudBeing.setCode(msg.getTargetEntityId());
-		
-		// Instruct being repository to return the acting being when requested
-		given(repository.findById(owningMudBeing.getCode()))
-			.willReturn(Optional.of(owningMudBeing));
-
 		// Launch the notification!
-		mockListener.receiveNotification(tokenService.buildInternalToken(), msg);
+		service.handleItemNotification(msg);
 		
 		MessageRequest yoursMsgRequest = new MessageRequest();
 		yoursMsgRequest.setMessageKey(msg.getMessageKey());
@@ -250,19 +225,8 @@ public class ItemListenerTests {
 		NotificationMessage msg = Fixture.from(NotificationMessage.class)
 				.gimme(label);
 		
-		// Beings in the same place
-		List<MudBeing> otherMudBeings = 
-				Fixture.from(MudBeing.class).gimme(3, 
-						BeingTemplates.SIMPLE, 
-						BeingTemplates.PLAYABLE, 
-						BeingTemplates.PLAYABLE_WITH_MODIFIERS);
-		
-		// Instruct being repository to return other beings in the place when requested
-		given(repository.findByCurWorldAndCurPlaceCode(msg.getWorldName(), msg.getTargetEntityId().intValue()))
-			.willReturn(otherMudBeings);
-		
 		// Launch the notification!
-		mockListener.receiveNotification(tokenService.buildInternalToken(), msg);
+		service.handleItemNotification(msg);
 		
 		MessageRequest placeMsgRequest = new MessageRequest();
 		placeMsgRequest.setMessageKey(msg.getMessageKey());

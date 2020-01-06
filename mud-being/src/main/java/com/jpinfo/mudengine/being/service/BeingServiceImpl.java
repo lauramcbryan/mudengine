@@ -1,18 +1,14 @@
 package com.jpinfo.mudengine.being.service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import com.jpinfo.mudengine.being.client.ItemServiceClient;
 import com.jpinfo.mudengine.being.model.MudBeing;
 import com.jpinfo.mudengine.being.model.MudBeingAttr;
 import com.jpinfo.mudengine.being.model.MudBeingClass;
-import com.jpinfo.mudengine.being.model.MudBeingSlot;
 import com.jpinfo.mudengine.being.model.converter.BeingConverter;
 import com.jpinfo.mudengine.being.model.converter.MudBeingAttrConverter;
 import com.jpinfo.mudengine.being.model.converter.MudBeingAttrModifierConverter;
@@ -23,20 +19,12 @@ import com.jpinfo.mudengine.being.repository.BeingClassRepository;
 import com.jpinfo.mudengine.being.repository.BeingRepository;
 import com.jpinfo.mudengine.being.utils.BeingHelper;
 import com.jpinfo.mudengine.common.being.Being;
-import com.jpinfo.mudengine.common.exception.AccessDeniedException;
 import com.jpinfo.mudengine.common.exception.EntityNotFoundException;
 import com.jpinfo.mudengine.common.exception.IllegalParameterException;
-import com.jpinfo.mudengine.common.item.Item;
-import com.jpinfo.mudengine.common.player.Player;
-import com.jpinfo.mudengine.common.security.MudUserDetails;
-import com.jpinfo.mudengine.common.security.TokenService;
 import com.jpinfo.mudengine.common.utils.LocalizedMessages;
 
 @Service
 public class BeingServiceImpl {
-	
-	@Autowired
-	private ItemServiceClient itemService;
 	
 	@Autowired
 	private BeingRepository repository;
@@ -46,15 +34,10 @@ public class BeingServiceImpl {
 
 	public Being getBeing(Long beingCode) {
 		
-		Being response = null;
-		
-		MudBeing dbBeing = repository
+		return repository
 				.findById(beingCode)
+				.map(BeingConverter::convert)
 				.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.BEING_NOT_FOUND));
-		
-		response = BeingConverter.convert(dbBeing, canAccess(dbBeing.getPlayerId()));
-		
-		return expandBeingEquipment(response, dbBeing);
 	}
 	
 	public Being updateBeing(Long beingCode, Being requestBeing) {
@@ -65,59 +48,53 @@ public class BeingServiceImpl {
 				.findById(beingCode)
 				.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.BEING_NOT_FOUND));
 		
-		if (canAccess(dbBeing.getPlayerId())) {
-	
-			// Updating basic fields
-			dbBeing.setCurPlaceCode(requestBeing.getCurPlaceCode());
-			dbBeing.setCurWorld(requestBeing.getCurWorld());
-			
-			// We only update quantity for regular beings (non NPC and not player beings)
-			if (requestBeing.getType().equals(Being.enumBeingType.REGULAR_NON_SENTIENT) ||
-					(requestBeing.getType().equals(Being.enumBeingType.REGULAR_SENTIENT))) {
-			
-				dbBeing.setQuantity(requestBeing.getQuantity());
-			}
+		// Updating basic fields
+		dbBeing.setCurPlaceCode(requestBeing.getCurPlaceCode());
+		dbBeing.setCurWorld(requestBeing.getCurWorld());
+		
+		// We only update quantity for regular beings (non NPC and not player beings)
+		if (requestBeing.getType().equals(Being.enumBeingType.REGULAR_NON_SENTIENT) ||
+				(requestBeing.getType().equals(Being.enumBeingType.REGULAR_SENTIENT))) {
+		
+			dbBeing.setQuantity(requestBeing.getQuantity());
+		}
 
-			// 2. attributes
-			MudBeingAttrConverter.sync(dbBeing, requestBeing);
-			
-			// Checking HP attributes
-			boolean beingToBeDestroyed = internalSyncBeingHP(dbBeing, requestBeing);
-			
-			MudBeing changedBeing = null;
-			
-			if (beingToBeDestroyed) {
-				destroyBeing(dbBeing.getCode());
-			} else {
-				
-				// 3. skills
-				MudBeingSkillConverter.sync(dbBeing, requestBeing);
-				
-				// 4. attrModifiers
-				MudBeingAttrModifierConverter.sync(dbBeing, requestBeing);
-				
-				// 5. skillModifiers
-				MudBeingSkillModifierConverter.sync(dbBeing, requestBeing);
-	
-			
-				// if the beingClass is changing, reset the attributes
-				if (!dbBeing.getBeingClass().getCode().equals(requestBeing.getClassCode())) {
-					
-					MudBeingClass dbClassBeing = classRepository
-							.findById(requestBeing.getClassCode())
-							.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.BEING_CLASS_NOT_FOUND));
-					
-					updateBeingClass(dbBeing, dbBeing.getBeingClass(), dbClassBeing);
-				}
-							
-				// Updating the entity
-				changedBeing = repository.save(dbBeing);
-				
-				response = BeingConverter.convert(changedBeing, true);
-			}
-			
+		// 2. attributes
+		MudBeingAttrConverter.sync(dbBeing, requestBeing);
+		
+		// Checking HP attributes
+		boolean beingToBeDestroyed = internalSyncBeingHP(dbBeing, requestBeing);
+		
+		MudBeing changedBeing = null;
+		
+		if (beingToBeDestroyed) {
+			destroyBeing(dbBeing.getCode());
 		} else {
-			throw new AccessDeniedException(LocalizedMessages.BEING_ACCESS_DENIED);
+			
+			// 3. skills
+			MudBeingSkillConverter.sync(dbBeing, requestBeing);
+			
+			// 4. attrModifiers
+			MudBeingAttrModifierConverter.sync(dbBeing, requestBeing);
+			
+			// 5. skillModifiers
+			MudBeingSkillModifierConverter.sync(dbBeing, requestBeing);
+
+		
+			// if the beingClass is changing, reset the attributes
+			if (!dbBeing.getBeingClass().getCode().equals(requestBeing.getClassCode())) {
+				
+				MudBeingClass dbClassBeing = classRepository
+						.findById(requestBeing.getClassCode())
+						.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.BEING_CLASS_NOT_FOUND));
+				
+				updateBeingClass(dbBeing, dbBeing.getBeingClass(), dbClassBeing);
+			}
+						
+			// Updating the entity
+			changedBeing = repository.save(dbBeing);
+			
+			response = BeingConverter.convert(changedBeing);
 		}
 		
 		return response;
@@ -159,9 +136,7 @@ public class BeingServiceImpl {
 		dbBeing = repository.save(dbBeing);
 		
 		// Convert to the response
-		Being response = BeingConverter.convert(dbBeing, true);
-		
-		return response;
+		return BeingConverter.convert(dbBeing);
 	}
 
 	public Being createPlayerBeing(
@@ -198,50 +173,26 @@ public class BeingServiceImpl {
 		dbBeing = repository.save(dbBeing);
 		
 		// Convert to the response
-		Being response = BeingConverter.convert(dbBeing, true);
-		
-		return response;
+		return BeingConverter.convert(dbBeing);
 	}
 	
 	public List<Being> getAllFromPlayer(Long playerId) {
 		
-		if (canAccess(playerId)) {
-		
-			List<MudBeing> lstFound = repository.findByPlayerId(playerId);
-			
-			return
-				lstFound.stream()
-					.map(BeingConverter::convert)
-					.collect(Collectors.toList());
-			
-		} else {
-			throw new AccessDeniedException(LocalizedMessages.BEING_ACCESS_DENIED);
-		}
+		return repository.findByPlayerId(playerId).stream()
+				.map(BeingConverter::convert)
+				.collect(Collectors.toList());
 	}
 
 	public List<Being> getAllFromPlace(String worldName, Integer placeCode) {
 
-		List<MudBeing> lstFound = repository.findByCurWorldAndCurPlaceCode(worldName, placeCode);
-		
-		return lstFound.stream()
+		return repository.findByCurWorldAndCurPlaceCode(worldName, placeCode).stream()
 				.map(BeingConverter::convert)
 				.collect(Collectors.toList());
 	}
 
 	public void destroyBeing(Long beingCode) {
 		
-		MudBeing dbBeing = repository.findById(beingCode)
-				.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.BEING_NOT_FOUND));
-		
-		if (canAccess(dbBeing.getPlayerId())) {
-
-			// Initially we had a call to itemService here to drop all being items.
-			// Currently this is done asynchronously through AOP pointcut
-			repository.delete(dbBeing);
-			
-		} else {
-			throw new AccessDeniedException(LocalizedMessages.BEING_ACCESS_DENIED);
-		}
+		repository.deleteById(beingCode);
 	}
 	
 	private boolean internalSyncBeingHP(MudBeing dbBeing, Being requestBeing) {
@@ -299,43 +250,5 @@ public class BeingServiceImpl {
 		dbBeing.setBeingClass(nextClass);
 		
 		return dbBeing;
-	}
-
-
-	private Being expandBeingEquipment(Being responseBeing, MudBeing dbBeing) {
-		
-		for(MudBeingSlot curSlot: dbBeing.getSlots()) {
-			
-			Item responseItem = null;
-			
-			if (curSlot.getItemCode()!=null) {
-				responseItem = itemService.getItem(curSlot.getItemCode());
-			}
-			
-			responseBeing.getEquipment().put(curSlot.getId().getCode(), responseItem);
-		}
-		
-		return responseBeing;
-	}
-
-	
-	private boolean canAccess(Long playerId) {
-		
-		MudUserDetails uDetails = (MudUserDetails)SecurityContextHolder.getContext().getAuthentication().getDetails();
-		
-		boolean allowed = false;
-		
-		Optional<Player> playerData = uDetails.getPlayerData();
-		
-		if (playerData.isPresent()) {
-			
-			Long authPlayerId = playerData.get().getPlayerId();
-			
-			allowed = authPlayerId.equals(playerId) || authPlayerId.equals(TokenService.INTERNAL_PLAYER_ID); 
-			
-		}
-		
-		return allowed;
-		
 	}
 }

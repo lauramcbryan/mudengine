@@ -1,0 +1,77 @@
+{
+	"code": 1,
+	"name": "Being Test One",
+	"curWorld": "aforgotten",
+	"curPlaceCode": 1,
+	"playerId": 99,
+	"type": 3,
+	"quantity": 1,
+	"beingClass": {
+		"code": "TEST",
+		"name": "Test beingClass",
+		"description": "Test being class created just for test",
+		"size": 10,
+		"weightCapacity": 2,
+		"attrs": [
+			{ 
+				"id": {
+					"code": "HP"
+				},
+				"value": 10
+			},
+			{ 
+				"id": {
+					"code": "MAXHP"
+				},
+				"value": 100
+			}
+		],
+		"skills": [
+			{
+				"id": {
+					"code": "TEST_SKILL"
+				},
+				"value": 3
+			}
+		]	
+	},
+	"attrs": [
+		{ 
+			"id": {
+				"code": "HP"
+			},
+			"value": 10
+		},
+		{ 
+			"id": {
+				"code": "MAXHP"
+			},
+			"value": 100
+		}
+	],
+	"skills": [
+		{
+			"id": {
+				"code": "TEST_SKILL"
+			},
+			"value": 3
+		}
+	],
+	"attrModifiers": [
+		{
+			"id": {
+				"code": "SNEEZE"
+			},
+			"offset": -2
+		}
+			
+	],
+	"skillModifiers": [
+		{
+			"id": {
+				"code": "EDUCATED"
+			},
+			"offset": 3
+		}
+	]	
+}

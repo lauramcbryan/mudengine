@@ -1,0 +1,21 @@
+{
+	"code": "CHANGED",
+	"name": "Changed Test beingClass",
+	"description": "Test being class created just for test",
+	"size": 100,
+	"weightCapacity": 2,
+	"attrs": [
+		{ 
+			"id": {
+				"code": "HP"
+			},
+			"value": 5
+		},
+		{ 
+			"id": {
+				"code": "MAXHP"
+			},
+			"value": 18
+		}
+	]
+}

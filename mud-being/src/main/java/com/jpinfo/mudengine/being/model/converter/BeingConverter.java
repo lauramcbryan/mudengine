@@ -12,10 +12,6 @@ public class BeingConverter {
 	private BeingConverter() {	}
 	
 	public static Being convert(MudBeing dbBeing) {
-		return convert(dbBeing, false);
-	}
-
-	public static Being convert(MudBeing dbBeing, boolean fullResponse) {
 
 		Being response = new Being();
 
@@ -46,20 +42,17 @@ public class BeingConverter {
 				.collect(Collectors.toMap(MudBeingSkill::getCode, MudBeingSkill::getValue))
 				);
 
-		if (fullResponse) {
-			
-			response.setSkillModifiers( 
-				dbBeing.getSkillModifiers().stream()
-					.map(BeingSkillModifierConverter::convert)
-					.collect(Collectors.toList())
-					);
-			
-			response.setAttrModifiers(
-					dbBeing.getAttrModifiers().stream()
-					.map(BeingAttrModifierConverter::convert)
-					.collect(Collectors.toList())
-					);
-		}
+		response.setSkillModifiers( 
+			dbBeing.getSkillModifiers().stream()
+				.map(BeingSkillModifierConverter::convert)
+				.collect(Collectors.toList())
+				);
+		
+		response.setAttrModifiers(
+				dbBeing.getAttrModifiers().stream()
+				.map(BeingAttrModifierConverter::convert)
+				.collect(Collectors.toList())
+				);
 
 		return response;
 	}
