@@ -199,6 +199,8 @@
 				<version>0.8.4</version>
 				<configuration>
 					<excludes>
+						<exclude>com/jpinfo/mudengine/message/model/**</exclude>
+						<exclude>com/jpinfo/mudengine/message/client/**</exclude>
 					</excludes>
 				</configuration>
 				<executions>
