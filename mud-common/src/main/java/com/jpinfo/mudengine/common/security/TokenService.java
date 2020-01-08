@@ -119,6 +119,7 @@ public class TokenService {
 		
 		Player playerData = new Player();
 		playerData.setPlayerId(playerId);
+		playerData.setUsername(TokenService.INTERNAL_ACCOUNT);
 		playerData.setLocale(TokenService.INTERNAL_LOCALE);
 		
 		Session sessionData = new Session();
