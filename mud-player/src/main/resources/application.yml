@@ -1,34 +1,13 @@
 spring:
   application:
     name: mud-player
-    
----
-spring:
-  profiles: default
-    
-  datasource:
-    platform: h2
-
+   
+  jpa: 
+    hibernate:
+      ddl-auto: none    
 ---
 spring:
   profiles: dev
   
-  datasource:
-    platform: postgres
-    url: jdbc:postgresql://mudengine.c2v9hbjh7mbw.us-east-2.rds.amazonaws.com:5432/mudenginedb
-    username: mudengine_player_app
-    password: mudengine_player_app
-    
-    tomcat:
-      max-active: 5
-      max-wait: 15000 
-  
-
 server:
   port: 8090
-  
-being:
-  endpoint: http://localhost:8084
-  
-token:
-  secret: a7ac498c7bba59e0eb7c647d2f0197f8  

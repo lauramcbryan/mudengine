@@ -1,13 +1,10 @@
 package com.jpinfo.mudengine.player.service;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Optional;
 
-import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -19,17 +16,13 @@ import com.jpinfo.mudengine.common.player.Player;
 import com.jpinfo.mudengine.common.player.Session;
 import com.jpinfo.mudengine.common.security.MudUserDetails;
 import com.jpinfo.mudengine.common.security.TokenService;
-import com.jpinfo.mudengine.common.utils.CommonConstants;
 import com.jpinfo.mudengine.common.utils.LocalizedMessages;
 import com.jpinfo.mudengine.player.client.BeingServiceClient;
 import com.jpinfo.mudengine.player.model.MudPlayer;
 import com.jpinfo.mudengine.player.model.MudPlayerBeing;
-import com.jpinfo.mudengine.player.model.MudSession;
 import com.jpinfo.mudengine.player.model.converter.PlayerConverter;
-import com.jpinfo.mudengine.player.model.converter.SessionConverter;
 import com.jpinfo.mudengine.player.model.pk.MudPlayerBeingPK;
 import com.jpinfo.mudengine.player.repository.PlayerRepository;
-import com.jpinfo.mudengine.player.repository.SessionRepository;
 import com.jpinfo.mudengine.player.util.PlayerHelper;
 
 @Service
@@ -37,9 +30,6 @@ public class PlayerServiceImpl {
 
 	@Autowired
 	private PlayerRepository repository;
-	
-	@Autowired
-	private SessionRepository sessionRepository;
 	
 	@Autowired
 	private BeingServiceClient beingClient;
@@ -50,22 +40,21 @@ public class PlayerServiceImpl {
 	@Autowired
 	private MailService mailService;
 	
-	public Player getPlayerDetails(String username) {
+	@Autowired
+	private SessionServiceImpl sessionService;
+	
+	public Player login(String username, String password) {
 		
-		Player response = null;
+		return repository.findByUsernameAndPassword(username, password)
+				.map(PlayerConverter::convert)
+				.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.PLAYER_NOT_FOUND));
+	}
+	
+	public Player getPlayerDetails() {
 		
-		if (canAccess(username)) {
-		
-			MudPlayer dbPlayer = repository.findByUsername(username)
-					.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.PLAYER_NOT_FOUND));
-		
-			response = PlayerConverter.convert(dbPlayer);
-			
-		} else {
-			throw new AccessDeniedException(LocalizedMessages.PLAYER_ACCESS_DENIED);
-		}
-		
-		return response;
+		return repository.findById(getActivePlayerId())
+				.map(PlayerConverter::convert)
+				.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.PLAYER_NOT_FOUND));
 	}
 
 	public Player registerPlayer(String username, String email, String locale) {
@@ -98,74 +87,47 @@ public class PlayerServiceImpl {
 			}
 			
 			// Persist to have the playerId
-			MudPlayer createdPlayer = repository.save(newPlayer);
-			
-			String token = tokenService.buildToken(username, 
-					Optional.of(PlayerConverter.convert(newPlayer)), 
-					Optional.empty());
-			
-			SecurityContextHolder.getContext().setAuthentication(
-					tokenService.getAuthenticationFromToken(token)
+			response = PlayerConverter.convert(
+					repository.save(newPlayer)
 					);
-			
-			response = PlayerConverter.convert(createdPlayer);
 			
 			if (mailService.isEnabled()) {
 				
 				// Send the password by email
-				mailService.sendActivationEmail(newPlayer.getPassword());
+				mailService.sendActivationEmail(response, newPlayer.getPassword());
 			}
 			
 		} catch(DataIntegrityViolationException e) {
 			
-			if (e.getCause() instanceof ConstraintViolationException) {
-				
-				ConstraintViolationException constraintException = (ConstraintViolationException)e.getCause();
-				
-				if (constraintException.getConstraintName().equals("mud_player_username_key")) {
-					throw new IllegalParameterException(LocalizedMessages.PLAYER_NAME_IN_USE);
-				}
-			}
-			
-			throw e;
+			throw new IllegalParameterException(LocalizedMessages.PLAYER_NAME_IN_USE);
 		}
 		
 		
 		return response;
 	}
 
-	public Player updatePlayerDetails(String username, Player playerData) {
+	public Player updatePlayerDetails(Player playerData) {
 		
 		Player response = null;
 		
-		if (canAccess(username)) {
+		MudPlayer dbPlayer = repository.findById(getActivePlayerId())
+				.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.PLAYER_NOT_FOUND));
 		
-			MudPlayer dbPlayer = repository.findByUsername(username)
-					.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.PLAYER_NOT_FOUND));
-			
-			dbPlayer.setLocale(playerData.getLocale());
-			dbPlayer.setUsername(playerData.getUsername());
-			
-			// If the user is changing the email, the account status goes to PENDING
-			if (!dbPlayer.getEmail().equals(playerData.getEmail())) {
-				dbPlayer.setEmail(playerData.getEmail());
-				dbPlayer.setStatus(Player.STATUS_PENDING);
-			}
-			
-			MudPlayer changedDbPlayer = repository.save(dbPlayer);
-			
-			Player changedPlayer = PlayerConverter.convert(changedDbPlayer);
-			
-			String authToken = (String)SecurityContextHolder.getContext().getAuthentication().getCredentials();
-			
-			
-			// Update the authToken
-			HttpHeaders header = updateAuthHeaders(authToken, changedPlayer, null);
-			response = changedPlayer;
-				
-		} else {
-			throw new AccessDeniedException(LocalizedMessages.PLAYER_ACCESS_DENIED);
+		dbPlayer.setLocale(playerData.getLocale());
+		dbPlayer.setUsername(playerData.getUsername());
+		
+		// If the user is changing the email, the account status goes to PENDING
+		if (!dbPlayer.getEmail().equals(playerData.getEmail())) {
+			dbPlayer.setEmail(playerData.getEmail());
+			dbPlayer.setStatus(Player.STATUS_PENDING);
 		}
+			
+		response = PlayerConverter.convert(
+				repository.save(dbPlayer)
+				);
+		
+		// Update the authToken
+		updateAuthContext(response);
 		
 		return response;
 	}
@@ -186,290 +148,122 @@ public class PlayerServiceImpl {
 			throw new IllegalParameterException(LocalizedMessages.PLAYER_ACTIVATION_MISMATCH);
 		}
 	}
-
-	public Session getActiveSession(String username) {
-		
-		Session session = null;
-		
-		if (canAccess(username)) {
-		
-			Optional<MudSession> dbSession = sessionRepository.findActiveSession(username);
-			
-			if (dbSession.isPresent()) {
-				
-				session = SessionConverter.convert(dbSession.get());
-			} else {
-				throw new EntityNotFoundException(LocalizedMessages.SESSION_NOT_FOUND);
-			}
-		} else {
-			throw new AccessDeniedException(LocalizedMessages.PLAYER_ACCESS_DENIED);
-		}
-		
-		return session;
-	}
-
-	public Session createSession(String username, String password, String clientType, String ipAddress) {
-		
-		Session response = null;
-		
-		MudPlayer dbPlayer = repository.findByUsernameAndPassword(username, password)
-				.orElseThrow(() -> new IllegalParameterException(LocalizedMessages.PLAYER_LOGIN_ERROR));
-		
-		switch(dbPlayer.getStatus()) {
-		
-			case Player.STATUS_ACTIVE:
-				
-				// Find all the active sessions and terminate them
-				List<MudSession> lstSessions = sessionRepository.findAllActiveSession(username);
-				
-				lstSessions.forEach(d -> {
-					
-					d.setSessionEnd(new Date());
-					sessionRepository.save(d);
-				});
-			
-				// Creates a new session
-				MudSession dbSession = new MudSession();
-				
-				dbSession.setPlayer(dbPlayer);
-				dbSession.setSessionStart(new Date());
-				dbSession.setClientType(clientType);
-				dbSession.setIpAddress(ipAddress);
-				
-				MudSession createdDbSession = sessionRepository.save(dbSession);
-				
-				Session sessionData = SessionConverter.convert(createdDbSession);
-				
-				Player playerData = PlayerConverter.convert(dbPlayer);
-				
-				
-				// Build the jwts token
-				String token = tokenService.buildToken(username, 
-						Optional.of(playerData), 
-						Optional.of(sessionData));
-				
-				HttpHeaders header = new HttpHeaders();
-				header.add(CommonConstants.AUTH_TOKEN_HEADER, token);
-				
-				response = sessionData;
-				break;
-			
-			case Player.STATUS_PENDING: 
-				throw new IllegalParameterException(LocalizedMessages.PLAYER_CHANGE_PASSWORD);
-			
-			default: 
-				throw new IllegalParameterException(LocalizedMessages.PLAYER_NO_LOGIN);
-		}
-		
-		return response;
-	}
 	
-	private boolean canAccess(String username) {
-		
-		String authUserName = (String)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		
-		return ((username.equals(authUserName)) || (TokenService.INTERNAL_ACCOUNT.equals(authUserName)));
-		
-	}
-
-	public Session setActiveBeing(String username, Long beingCode) {
-		
-		return updateBeingSession(username, Optional.of(beingCode));
-	}
-		
-	
-	private Session updateBeingSession(String username, Optional<Long> beingCode) {
-		
-		Session response = null;
-		
-		if (canAccess(username)) {
-		
-			MudSession dbSession = 
-					sessionRepository.findActiveSession(username)
-					.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.SESSION_NOT_FOUND));
-			
-			Being selectedBeing= null;
-			
-			if (beingCode.isPresent()) {
-				
-				Long activeBeingCode = beingCode.get();
-
-				// Set the beingCode in the session object					
-				dbSession.setBeingCode(activeBeingCode);
-				
-				// Find the being record for this player					
-				dbSession.getPlayer().getBeingList().stream()
-					.filter(e -> e.getId().getBeingCode().equals(activeBeingCode))
-					.findFirst()
-					.ifPresent(f -> 
-						// Update the last time played
-						f.setLastPlayed(new Date(System.currentTimeMillis()))
-					);
-				
-				selectedBeing = beingClient.getBeing(activeBeingCode);
-				
-			} else {
-				
-				// Erases the beingCode
-				dbSession.setBeingCode(null);
-			}
-			
-			// Update in database				
-			sessionRepository.save(dbSession);
-			
-			// Converts the dbSession object to Session
-			Session sessionData = SessionConverter.convert(dbSession);
-			
-			if (selectedBeing!=null)
-				sessionData.setCurWorldName(selectedBeing.getCurWorld());
-			
-			
-			// Retrieves the player object
-			Player playerData = PlayerConverter.convert(dbSession.getPlayer());
-			
-			String authToken = (String)SecurityContextHolder.getContext().getAuthentication().getCredentials();
-			
-			// Update the authToken
-			HttpHeaders header = updateAuthHeaders(authToken, playerData, sessionData);
-			response = sessionData;
-			
-		} else {
-			throw new AccessDeniedException(LocalizedMessages.PLAYER_ACCESS_DENIED);
-		}
-		
-		return response;
-	}
-	
-	public Player createBeing(String username, String beingClass, String beingName,
+	public Player createBeing(String beingClass, String beingName,
 			String worldName, Integer placeCode) {
 		
 		Player response = null;
 		
-		if (canAccess(username)) {
-			
-			MudPlayer dbPlayer = repository.findByUsername(username)
-					.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.PLAYER_NOT_FOUND));
-			
-			// Create the being
-			Being being = 
-				this.beingClient.createPlayerBeing(
-						dbPlayer.getPlayerId(), beingClass, 
-						worldName, placeCode, beingName);
-			
-			// Update the dbPlayer entity
-			MudPlayerBeing dbBeing = new MudPlayerBeing();
-			MudPlayerBeingPK pk = new MudPlayerBeingPK();
-			dbBeing.setId(pk);
-			
-			pk.setPlayerId(dbPlayer.getPlayerId());
-			pk.setBeingCode(being.getCode());
-			
-			dbBeing.setBeingName(beingName);
-			dbBeing.setBeingClass(being.getBeingClass().getName());
-			dbBeing.setLastPlayed(new Date(System.currentTimeMillis()));
-			
-			// Update the dbPlayer being list
-			dbPlayer.getBeingList().add(dbBeing);
-			
-			// Save the dbPlayer
-			MudPlayer updatedPlayerData = repository.save(dbPlayer);
-			
-			Player playerData = PlayerConverter.convert(updatedPlayerData);
-			
-			String authToken = (String)SecurityContextHolder.getContext().getAuthentication().getCredentials();
-
-			// Assembling the response
-			HttpHeaders header = updateAuthHeaders(authToken, playerData, null);
-			response = playerData;
-			
-		} else {
-			throw new AccessDeniedException(LocalizedMessages.PLAYER_ACCESS_DENIED);
-		}
+		MudPlayer dbPlayer = repository.findById(getActivePlayerId())
+				.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.PLAYER_NOT_FOUND));
 		
-		return response;
-	}
-
-	public Player destroyBeing(String username, Long beingCode) {
+		// Create the being
+		Being being = 
+			this.beingClient.createPlayerBeing(
+					dbPlayer.getPlayerId(), beingClass, 
+					worldName, placeCode, beingName);
 		
-		Player response = null;
+		// Update the dbPlayer entity
+		MudPlayerBeing dbBeing = new MudPlayerBeing();
+		dbBeing.setId(new MudPlayerBeingPK());
+			
+		dbBeing.getId().setPlayerId(dbPlayer.getPlayerId());
+		dbBeing.getId().setBeingCode(being.getCode());
 		
-		if (canAccess(username)) {
+		dbBeing.setBeingName(being.getName());
+		dbBeing.setBeingClass(being.getBeingClass().getCode());
+		
+		// Update the dbPlayer being list
+		dbPlayer.getBeingList().add(dbBeing);
 			
-			// Find the player data
-			Optional<MudPlayer> dbPlayer = repository.findByUsername(username);
-			
-			dbPlayer.ifPresent(d -> {
-				
-				// Check if the selected being exists and it's associated to the player
-				if (d.getBeingList().stream()
-						.noneMatch(e -> 
-							e.getId().getBeingCode().equals(beingCode))) {
-					
-					throw new IllegalParameterException(LocalizedMessages.BEING_NOT_FOUND);
-				}
-				
-				// Remove selected being from the list
-				d.getBeingList().removeIf(e -> e.getId().getBeingCode().equals(beingCode));
-
-				// Destroy the selected being at being service
-				beingClient.destroyBeing(beingCode);
-				
-				// Update the playerData
-				repository.save(d);
-				
-				// If the being is the currenly selected
-				MudUserDetails uDetails = (MudUserDetails)SecurityContextHolder.getContext().getAuthentication().getDetails();
-				
-				
-				uDetails.getSessionData().ifPresent(e -> {
-					
-					if (beingCode.equals(e.getBeingCode())) {
-						// Clear the beingCode from the token
-						updateBeingSession(username, Optional.empty());						
-					}
-				});
-			});
-			
-			// Get the session data
-			Session sessionData = getActiveSession(username);
-
-			// Get the player info again
-			Player playerData = getPlayerDetails(username);
-			
-			String authToken = (String)SecurityContextHolder.getContext().getAuthentication().getCredentials();
-
-			// Update the authToken
-			String token = tokenService.updateToken(authToken, 
-					Optional.of(playerData), 
-					Optional.of(sessionData));
-			
-
-			// Assembling the response
-			HttpHeaders header = new HttpHeaders();
-			header.add(CommonConstants.AUTH_TOKEN_HEADER, token);
-			
-			response = playerData;
-			
-		} else {
-			throw new AccessDeniedException(LocalizedMessages.PLAYER_ACCESS_DENIED);
-		}
+		// Save the dbPlayer
+		response = PlayerConverter.convert(repository.save(dbPlayer));
+		
+		updateAuthContext(response);
 		
 		return response;
 	}
 	
-	private HttpHeaders updateAuthHeaders(String originalToken, Player playerData, Session sessionData ) {
+	public Session setActiveBeing(Long beingCode) {
+		
+		
+		MudPlayer dbPlayer = repository.findById(getActivePlayerId())
+				.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.PLAYER_NOT_FOUND));
+		
+		return dbPlayer.getBeingList().stream()
+				.filter(e -> e.getId().getBeingCode().equals(beingCode))
+				.map(f -> {
+					
+					// Update the last time played
+					// TODO: Persist it in the database
+					f.setLastPlayed(new Date(System.currentTimeMillis()));
+			
+					// Update the session
+					return sessionService.setActiveBeing(beingCode);
+				})
+				.findFirst()
+				.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.BEING_NOT_FOUND));
+	}
+	
+	public Player destroyBeing(Long destroyedBeingCode) {
+		
+		return repository.findById(getActivePlayerId())
+				.map(dbPlayer -> {
+
+					// Check if the selected being exists and it's associated to the player
+					if (dbPlayer.getBeingList().stream()
+							.noneMatch(e -> 
+								e.getId().getBeingCode().equals(destroyedBeingCode))) {
+						
+						throw new IllegalParameterException(LocalizedMessages.BEING_NOT_FOUND);
+					}
+
+					// Remove selected being from the list
+					dbPlayer.getBeingList().removeIf(e -> e.getId().getBeingCode().equals(destroyedBeingCode));
+
+					// Destroy the selected being at being service
+					beingClient.destroyBeing(destroyedBeingCode);
+				
+					Player response = PlayerConverter.convert(
+							repository.save(dbPlayer)
+							);
+				
+					updateAuthContext(response);
+
+				
+				return response;
+			})
+			.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.PLAYER_NOT_FOUND));
+	}
+	
+	private void updateAuthContext(Player playerData) {
+		
+		String originalToken = String.valueOf(
+				SecurityContextHolder.getContext().getAuthentication().getCredentials()
+				);
+		
+		MudUserDetails uDetails = (MudUserDetails)
+				SecurityContextHolder.getContext().getAuthentication().getDetails();
+		
 		
 		// Update the authToken
 		String token = tokenService.updateToken(originalToken, 
-				Optional.ofNullable(playerData), 
-				Optional.ofNullable(sessionData));
+				Optional.ofNullable(playerData),
+				uDetails.getSessionData()
+				);
 		
-
-		// Assembling the response
-		HttpHeaders header = new HttpHeaders();
-		header.add(CommonConstants.AUTH_TOKEN_HEADER, token);
-
+		SecurityContextHolder.getContext().setAuthentication(
+				tokenService.getAuthenticationFromToken(token)
+				);
+	}
+	
+	private Long getActivePlayerId() {
 		
-		return header;
+		MudUserDetails uDetails = (MudUserDetails)
+				SecurityContextHolder.getContext().getAuthentication().getDetails();
+		
+		return uDetails.getPlayerData()
+				.map(Player::getPlayerId)
+				.orElseThrow(() -> new AccessDeniedException(LocalizedMessages.PLAYER_ACCESS_DENIED));
 	}
 }

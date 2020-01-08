@@ -3,6 +3,7 @@ package com.jpinfo.mudengine.player.web;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -11,7 +12,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.jpinfo.mudengine.common.player.Player;
 import com.jpinfo.mudengine.common.player.Session;
 import com.jpinfo.mudengine.common.service.PlayerService;
+import com.jpinfo.mudengine.common.utils.CommonConstants;
+import org.springframework.http.HttpHeaders;
 import com.jpinfo.mudengine.player.service.PlayerServiceImpl;
+import com.jpinfo.mudengine.player.service.SessionServiceImpl;
 
 @RestController
 public class PlayerController implements PlayerService {
@@ -19,11 +23,14 @@ public class PlayerController implements PlayerService {
 	@Autowired
 	private PlayerServiceImpl service;
 	
+	@Autowired
+	private SessionServiceImpl sessionService;
+	
 	
 	@Override
-	public Player getPlayerDetails(@PathVariable String username) {
+	public Player getPlayerDetails() {
 		
-		return service.getPlayerDetails(username);
+		return service.getPlayerDetails();
 	}
 
 	@Override
@@ -35,11 +42,11 @@ public class PlayerController implements PlayerService {
 	}
 
 	@Override
-	public ResponseEntity<Player> updatePlayerDetails(@PathVariable String username, @RequestBody Player playerData) {
+	public ResponseEntity<Player> updatePlayerDetails(@RequestBody Player playerData) {
 		
-		Player response = service.updatePlayerDetails(username, playerData);
+		Player response = service.updatePlayerDetails(playerData);
 			
-		return new ResponseEntity<>(response, HttpStatus.ACCEPTED);
+		return new ResponseEntity<>(response, updateHttpHeaders(), HttpStatus.ACCEPTED);
 	}
 
 	@Override
@@ -49,40 +56,55 @@ public class PlayerController implements PlayerService {
 	}
 
 	@Override
-	public Session getActiveSession(@PathVariable String username) {
+	public Session getActiveSession() {
 		
-		return service.getActiveSession(username);
+		return sessionService.getActiveSession();
 	}
 
 	@Override
 	public ResponseEntity<Session> createSession(@PathVariable String username, @RequestParam String password, @RequestParam String clientType, @RequestParam String ipAddress) {
 		
-		Session response = service.createSession(username, password, clientType, ipAddress);
+		Player loggedUser = service.login(username, password);
 		
-		return new ResponseEntity<>(response, HttpStatus.CREATED);
+		Session response = sessionService.createSession(loggedUser, clientType, ipAddress);
+		
+		return new ResponseEntity<>(response, updateHttpHeaders(), HttpStatus.CREATED);
 	}
 	
 	@Override
-	public ResponseEntity<Session> setActiveBeing(@PathVariable String username, @PathVariable Long beingCode) {
+	public ResponseEntity<Session> setActiveBeing(@PathVariable Long beingCode) {
 
-		return new ResponseEntity<>(service.setActiveBeing(username, beingCode), HttpStatus.ACCEPTED);
+		Session session = service.setActiveBeing(beingCode);
+		
+		return new ResponseEntity<>(session, updateHttpHeaders(), HttpStatus.ACCEPTED);
 	}
 		
 	
 	@Override
-	public ResponseEntity<Player> createBeing(@PathVariable String username, @RequestParam String beingClass, @RequestParam String beingName,
+	public ResponseEntity<Player> createBeing(@RequestParam String beingClass, @RequestParam String beingName,
 			@RequestParam String worldName, @RequestParam Integer placeCode) {
 		
-		Player response = service.createBeing(username, beingClass, beingName, worldName, placeCode);
+		Player response = service.createBeing(beingClass, beingName, worldName, placeCode);
 		
-		return new ResponseEntity<>(response, HttpStatus.ACCEPTED);
+		return new ResponseEntity<>(response, updateHttpHeaders(), HttpStatus.ACCEPTED);
 	}
 
 	@Override
-	public ResponseEntity<Player> destroyBeing(@PathVariable String username, @PathVariable Long beingCode) {
+	public ResponseEntity<Player> destroyBeing(@PathVariable Long beingCode) {
 		
-		Player response = service.destroyBeing(username, beingCode);
+		Player response = service.destroyBeing(beingCode);
 		
-		return new ResponseEntity<>(response, HttpStatus.ACCEPTED);
+		return new ResponseEntity<>(response, updateHttpHeaders(), HttpStatus.ACCEPTED);
+	}
+	
+	private HttpHeaders updateHttpHeaders() {
+		
+		HttpHeaders header = new HttpHeaders();
+		header.add(CommonConstants.AUTH_TOKEN_HEADER,
+				String.valueOf(
+						SecurityContextHolder.getContext().getAuthentication().getCredentials()
+				));
+		
+		return header;
 	}
 }

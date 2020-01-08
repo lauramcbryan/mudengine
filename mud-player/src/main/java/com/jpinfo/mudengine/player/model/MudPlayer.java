@@ -1,5 +1,6 @@
 package com.jpinfo.mudengine.player.model;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -42,5 +43,5 @@ public class MudPlayer implements java.io.Serializable {
 	private Integer status;
 	
 	@OneToMany(mappedBy="id.playerId", cascade=CascadeType.ALL, orphanRemoval=true)
-	private List<MudPlayerBeing> beingList;		
+	private List<MudPlayerBeing> beingList = new ArrayList<>();
 }

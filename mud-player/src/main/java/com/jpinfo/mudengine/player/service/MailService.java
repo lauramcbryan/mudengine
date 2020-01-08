@@ -9,12 +9,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import com.jpinfo.mudengine.common.exception.GeneralException;
 import com.jpinfo.mudengine.common.player.Player;
-import com.jpinfo.mudengine.common.security.MudUserDetails;
 import com.jpinfo.mudengine.common.utils.LocalizedMessages;
 
 @Component
@@ -37,16 +35,12 @@ public class MailService {
 		return !sender.equals(NON_SET_FROM) && (mail!=null);
 	}
 
-	public void sendActivationEmail(String activationCode) {
+	public void sendActivationEmail(Player playerData, String activationCode) {
 		
-			MudUserDetails uDetails = (MudUserDetails)SecurityContextHolder.getContext().getAuthentication().getDetails();
+			String fileName = String.format(ACTIVATION_PREFIX, 
+					Locale.forLanguageTag(playerData.getLocale()).toString());
 			
-			uDetails.getPlayerData().ifPresent(d -> {
-				
-				String fileName = String.format(ACTIVATION_PREFIX, Locale.forLanguageTag(d.getLocale()).toString()); 
-				
-				internalSendMail(fileName, activationCode, d);
-			});
+			internalSendMail(fileName, activationCode, playerData);
 	}
 	
 
