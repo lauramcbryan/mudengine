@@ -118,7 +118,7 @@ public class TokenService {
 	public String buildInternalToken(Long playerId) {
 		
 		Player playerData = new Player();
-		playerData.setPlayerId(TokenService.INTERNAL_PLAYER_ID);
+		playerData.setPlayerId(playerId);
 		playerData.setLocale(TokenService.INTERNAL_LOCALE);
 		
 		Session sessionData = new Session();
