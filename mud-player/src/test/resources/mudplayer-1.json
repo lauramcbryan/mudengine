@@ -1,0 +1,18 @@
+{
+	"playerId": 1,
+	"username": "testuser",
+	"password": "pass-testuser",
+	"email": "josiel.silva.oliveira@gmail.com",
+	"locale": "pt-BR",
+	"status": 3,
+	"beingList": [
+		{
+			"id": {
+				"beingCode": 1,
+				"playerId": 1
+			},
+			"beingClass": "beingClass",
+			"beingName": "beingName"
+		}
+	]
+}

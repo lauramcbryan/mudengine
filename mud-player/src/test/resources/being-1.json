@@ -1,0 +1,9 @@
+{
+	"code": 1,
+	"type": "PLAYABLE",
+	"beingClass": {
+		"code": "beingClass",
+		"name": "beingClassName"
+	},
+	"name": "beingName"
+}

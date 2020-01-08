@@ -1,77 +1,69 @@
 package com.jpinfo.mudengine.player;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 
-import java.util.*;
+import java.io.IOException;
+import java.util.Date;
+import java.util.Optional;
+
+import javax.annotation.PostConstruct;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.jpinfo.mudengine.common.being.Being;
-import com.jpinfo.mudengine.common.being.BeingClass;
+import com.jpinfo.mudengine.common.exception.IllegalParameterException;
 import com.jpinfo.mudengine.common.player.Player;
 import com.jpinfo.mudengine.common.player.Session;
-import com.jpinfo.mudengine.common.security.MudUserDetails;
 import com.jpinfo.mudengine.common.security.TokenService;
-import com.jpinfo.mudengine.common.utils.CommonConstants;
 import com.jpinfo.mudengine.player.client.BeingServiceClient;
 import com.jpinfo.mudengine.player.model.MudPlayer;
 import com.jpinfo.mudengine.player.model.MudPlayerBeing;
 import com.jpinfo.mudengine.player.model.pk.MudPlayerBeingPK;
 import com.jpinfo.mudengine.player.repository.PlayerRepository;
-
-import static org.mockito.BDDMockito.*;
+import com.jpinfo.mudengine.player.service.MailService;
+import com.jpinfo.mudengine.player.service.PlayerServiceImpl;
+import com.jpinfo.mudengine.player.service.SessionServiceImpl;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment=WebEnvironment.RANDOM_PORT,
-	properties= {"token.secret=a7ac498c7bba59e0eb7c647d2f0197f8"})
+@SpringBootTest(properties= {"token.secret=a7ac498c7bba59e0eb7c647d2f0197f8"})
 public class PlayerTests {
+	
+	private static final Date REFERENCE_DATE = new Date();
 	
 	private static final Long TEST_PLAYER_ID = 1L;
 	private static final Long TEST_PENDING_PLAYER_ID = 2L;
 
 	private static final String TEST_USERNAME = "testuser";
-	private static final String TEST_PASSWORD = "pass";
+	private static final String TEST_PASSWORD = "pass-testuser";
+	private static final String TEST_PASSWORD_CHANGED = "pass-changed";
 	private static final String TEST_LOCALE = "pt-BR";
 	private static final String TEST_EMAIL = "josiel.silva.oliveira@gmail.com";
 
-	private static final String TEST_PENDING_USERNAME = "pendinguser";
-	
 	private static final String TEST_USERNAME_2 = "josiel2";
 	private static final String TEST_LOCALE_2 = "en-US";
 	private static final String TEST_EMAIL_2 = "changed@test.com";
 
-	private static final String TEST_CLIENT_TYPE = "text/plain";
-	private static final String TEST_IP_ADDRESS = "127.0.0.1";
-
 	private static final Long TEST_BEING_CODE = 1L;
 	private static final String TEST_BEING_CLASS = "beingClass";
-	private static final String TEST_BEING_CLASS_NAME = "beingClassName";
 	private static final String TEST_BEING_NAME = "beingName";
 
 	private static final String TEST_WORLD_NAME = "worldName";
 	private static final Integer TEST_PLACE_CODE = 2;
 
 	
-	private static final String TEST_USERNAME_3 = "sessionuser";
-
-	
-	@Autowired
-	private TestRestTemplate restTemplate;
-	
-	@Autowired
+	@MockBean
 	private PlayerRepository repository;
 	
 	@MockBean
@@ -80,388 +72,262 @@ public class PlayerTests {
 	@Autowired
 	private TokenService tokenService;
 	
+	@Autowired
+	private PlayerServiceImpl service;
+	
 	@MockBean
-	private JavaMailSender mailService;
+	private SessionServiceImpl sessionService;
+	
+	@MockBean
+	private MailService mailService;
 
-	private void setupMocks() {
+	@PostConstruct
+	public void setup() throws IOException {
 		
-		Being createdBeing = new Being();
+		SecurityContextHolder.getContext().setAuthentication(
+				tokenService.getAuthenticationFromToken(
+						tokenService.buildInternalToken(PlayerTests.TEST_PLAYER_ID)
+						)
+				);
 		
-		createdBeing.setBeingClass(new BeingClass());
-		createdBeing.getBeingClass().setName(TEST_BEING_CLASS_NAME);
-		createdBeing.setName(TEST_BEING_NAME);
-		createdBeing.setPlayerId(PlayerTests.TEST_PLAYER_ID);
-		createdBeing.setCode(PlayerTests.TEST_BEING_CODE);
 		
-		given(this.beingClient.createPlayerBeing( 
+		
+		given(sessionService.setActiveBeing(TEST_BEING_CODE))
+			.willReturn(new Session());
+		
+		
+		Being createdBeing = PlayerTestData.loadBeing(PlayerTests.TEST_BEING_CODE);
+		
+		given(beingClient.createPlayerBeing( 
 				eq(PlayerTests.TEST_PLAYER_ID),
 				eq(PlayerTests.TEST_BEING_CLASS),
 				eq(PlayerTests.TEST_WORLD_NAME),
 				eq(PlayerTests.TEST_PLACE_CODE),
 				eq(PlayerTests.TEST_BEING_NAME))).willReturn(createdBeing);
-	}
-	
-	/**
-	 * Create the internal authentication token
-	 * and put it in a HttpHeader
-	 * @return
-	 */
-	private HttpHeaders getInternalAuthHeaders() {
-		HttpHeaders authHeaders = new HttpHeaders();
-		authHeaders.add(CommonConstants.AUTH_TOKEN_HEADER, tokenService.buildInternalToken());
 		
-		return authHeaders;
-	}
-	
-	private HttpHeaders getAuthHeaders(String userName) {
-		HttpHeaders authHeaders = new HttpHeaders();
+		given(beingClient.getBeing(TEST_BEING_CODE))
+			.willReturn(createdBeing);
 		
-		Player playerData = new Player();
-		playerData.setUsername(TokenService.INTERNAL_ACCOUNT);
-		playerData.setPlayerId(TokenService.INTERNAL_PLAYER_ID);
-		playerData.setLocale(TokenService.INTERNAL_LOCALE);
-		
-		Session sessionData = new Session();
-		sessionData.setSessionId(Long.MAX_VALUE);
-		sessionData.setPlayerId(TokenService.INTERNAL_PLAYER_ID);
-		//sessionData.setBeingCode(beingCode);
+		given(repository.save(ArgumentMatchers.any(MudPlayer.class)))
+			.willAnswer(i -> {
 
+				MudPlayer playerBeingSaved = i.getArgument(0, MudPlayer.class);
+				
+				// Is this player being created?
+				if (playerBeingSaved.getPlayerId()==null) {
+					
+					// Assign a code
+					playerBeingSaved.setPlayerId(TEST_PENDING_PLAYER_ID);
+					
+					// In order to be able to VERIFY this call later, 
+					// we populate the auto-generated date field with a well-known value
+					playerBeingSaved.setCreateDate(REFERENCE_DATE);
+				}
+				
+				
+				
+				return playerBeingSaved;
+			});
 		
-		String usToken = tokenService.buildToken(userName, 
-				Optional.of(playerData), 
-				Optional.of(sessionData));		
+		given(repository.findById(ArgumentMatchers.anyLong()))
+			.willAnswer(i -> {
+				
+				return Optional.of(
+						PlayerTestData.loadMudPlayer(i.getArgument(0, Long.class))
+						);
+			});
 		
-		authHeaders.add(CommonConstants.AUTH_TOKEN_HEADER, usToken);
+		given(repository.findByUsername(ArgumentMatchers.anyString()))
+			.willAnswer(i -> {
+				
+				return Optional.of(
+						PlayerTestData.loadMudPlayer(TEST_PLAYER_ID)
+						);
+				
+			});
 		
-		return authHeaders;
-	}
-	
-	
-	@Test
-	public void contextLoads() {
-	}
-
-	@Test
-	public void testSession() {
-		
-		Map<String, Object> urlVariables = new HashMap<String, Object>();
-		
-		// Create Session
-		urlVariables.put("username", PlayerTests.TEST_USERNAME);
-		urlVariables.put("password", PlayerTests.TEST_PASSWORD);
-		urlVariables.put("clientType", PlayerTests.TEST_CLIENT_TYPE);
-		urlVariables.put("ipAddress", PlayerTests.TEST_IP_ADDRESS);
-		
-		ResponseEntity<Session> createResponse = restTemplate.exchange(
-				"/player/{username}/session?password={password}&clientType={clientType}&ipAddress={ipAddress}", 
-				HttpMethod.PUT, null, Session.class, urlVariables);
-		
-		assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-		
-		Session sessionData = createResponse.getBody();
-		
-		assertThat(sessionData.getSessionId()).isNotNull();
-		assertThat(sessionData.getSessionStart()).isNotNull();
-		assertThat(sessionData.getPlayerId()).isNotNull();
-		assertThat(sessionData.getClientType()).isEqualTo(PlayerTests.TEST_CLIENT_TYPE);
-		assertThat(sessionData.getIpAddress()).isEqualTo(PlayerTests.TEST_IP_ADDRESS);
-		
-		assertThat(createResponse.getHeaders().containsKey(CommonConstants.AUTH_TOKEN_HEADER)).isTrue();
-		
-		
-		// Get Session (anonymous)
-		urlVariables.clear();
-		urlVariables.put("username", PlayerTests.TEST_USERNAME);
-		
-		ResponseEntity<Session> anonymousResponse = restTemplate.exchange(
-				"/player/{username}/session", HttpMethod.GET, null, Session.class, urlVariables);
-		
-		assertThat(anonymousResponse.getStatusCode()).isNotEqualTo(HttpStatus.OK);
-		
-		
-		// Get Session (authenticated)
-		HttpHeaders requestHeaders = new HttpHeaders();
-		requestHeaders.add(CommonConstants.AUTH_TOKEN_HEADER, createResponse.getHeaders().getFirst(CommonConstants.AUTH_TOKEN_HEADER));
-		HttpEntity<Object> requestEntity = new HttpEntity<Object>(requestHeaders);
-		
-		ResponseEntity<Session> getResponse = restTemplate.exchange(
-				"/player/{username}/session", HttpMethod.GET, requestEntity, Session.class, urlVariables);
-		
-		assertThat(getResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(getResponse.getBody().getPlayerId()).isEqualTo(PlayerTests.TEST_PLAYER_ID);
-		assertThat(getResponse.getBody().getSessionId()).isEqualTo(createResponse.getBody().getSessionId());
-		
+		given(repository.findByUsernameAndPassword(ArgumentMatchers.anyString(), ArgumentMatchers.anyString()))
+		.willAnswer(i -> {
+			
+			return Optional.of(
+					PlayerTestData.loadMudPlayer(TEST_PLAYER_ID)
+					);
+			
+		});
 	}
 	
 	@Test
-	public void testPlayer() {
+	public void testCreatePlayer() {
 		
-		setupMocks();
-	
-		HttpEntity<Object> internalAuthEntity = new HttpEntity<Object>(getInternalAuthHeaders());
+		Player createdPlayer =
+				service.registerPlayer(PlayerTests.TEST_USERNAME, 
+						PlayerTests.TEST_EMAIL, 
+						PlayerTests.TEST_LOCALE);
 		
-		Map<String, Object> urlVariables = new HashMap<String, Object>();
-		
-		// *********** CREATE PLAYER ******************
-		// ============================================
-		
-		urlVariables.put("username", PlayerTests.TEST_USERNAME_2);
-		urlVariables.put("email", PlayerTests.TEST_EMAIL);
-		urlVariables.put("locale" , PlayerTests.TEST_LOCALE);
-		
-		ResponseEntity<Player> createResponse = restTemplate.exchange(
-				"/player/{username}?email={email}&locale={locale}", HttpMethod.PUT, null, Player.class, urlVariables);
-		
-		assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 		
 		//verify(mailService, times(1)).send(anyObject());
 		
-		Player playerData = createResponse.getBody();
+		MudPlayer expectedEntity = new MudPlayer();
+		expectedEntity.setPlayerId(TEST_PENDING_PLAYER_ID);
+		expectedEntity.setUsername(PlayerTests.TEST_USERNAME);
+		expectedEntity.setPassword(PlayerTests.TEST_PASSWORD);
+		expectedEntity.setEmail(PlayerTests.TEST_EMAIL);
+		expectedEntity.setLocale(PlayerTests.TEST_LOCALE);
+		expectedEntity.setStatus(Player.STATUS_PENDING);
+		expectedEntity.setCreateDate(PlayerTests.REFERENCE_DATE);
 		
-		assertThat(playerData.getUsername()).isEqualTo(PlayerTests.TEST_USERNAME_2);
-		assertThat(playerData.getEmail()).isEqualTo(PlayerTests.TEST_EMAIL);
-		assertThat(playerData.getLocale()).isEqualTo(PlayerTests.TEST_LOCALE);
+		verify(repository).save(expectedEntity);
 		
+		assertThat(createdPlayer.getUsername()).isEqualTo(PlayerTests.TEST_USERNAME);
+		assertThat(createdPlayer.getEmail()).isEqualTo(PlayerTests.TEST_EMAIL);
+		assertThat(createdPlayer.getLocale()).isEqualTo(PlayerTests.TEST_LOCALE);
 		
+	}
+	
+	@Test
+	public void testCreatePlayerWithMailEnabled() {
 		
-		// *********** GET PLAYER ********************
-		// ===========================================
-		urlVariables.clear();
-		urlVariables.put("username", PlayerTests.TEST_USERNAME_2);
+		given(mailService.isEnabled()).willReturn(true);
 		
-		ResponseEntity<Player> getResponse = restTemplate.exchange(
-				"/player/{username}", HttpMethod.GET, internalAuthEntity, Player.class, urlVariables);
-
-		assertThat(getResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(getResponse.getBody().getPlayerId()).isNotNull();
-		assertThat(getResponse.getBody().getLocale()).isEqualTo(PlayerTests.TEST_LOCALE);
-		assertThat(getResponse.getBody().getUsername()).isEqualTo(PlayerTests.TEST_USERNAME_2);
-		assertThat(getResponse.getBody().getEmail()).isEqualTo(PlayerTests.TEST_EMAIL);
+		Player playerData = 
+			service.registerPlayer(TEST_USERNAME, 
+					TEST_EMAIL, 
+					TEST_LOCALE);
 		
-		// *********** UPDATE PLAYER ******************
-		// ============================================
-		urlVariables.clear();
-		urlVariables.put("username", PlayerTests.TEST_USERNAME);
+		verify(mailService).sendActivationEmail(
+				ArgumentMatchers.eq(playerData), 
+				ArgumentMatchers.anyString());
+	}
+	
+	
+	@Test(expected = IllegalParameterException.class)
+	public void testCreatePlayerDuplicateName() {
 		
-		Player updatePlayer = new Player();
+		given(repository.save(ArgumentMatchers.any(MudPlayer.class)))
+			.willThrow(DataIntegrityViolationException.class);
+		
+		service.registerPlayer(PlayerTests.TEST_USERNAME, 
+				PlayerTests.TEST_EMAIL, 
+				PlayerTests.TEST_LOCALE);
+	}
+	
+	@Test
+	public void testLogin() {
+		
+		Player player = service.login(TEST_USERNAME, TEST_PASSWORD);
+		
+		assertThat(player.getPlayerId()).isEqualTo(TEST_PLAYER_ID);
+		
+	}
+	
+	@Test
+	public void testGetPlayerDetails() {
+		
+		Player player = service.getPlayerDetails();
+		
+		assertThat(player.getPlayerId()).isNotNull();
+		assertThat(player.getLocale()).isEqualTo(PlayerTests.TEST_LOCALE);
+		assertThat(player.getUsername()).isEqualTo(PlayerTests.TEST_USERNAME);
+		assertThat(player.getEmail()).isEqualTo(PlayerTests.TEST_EMAIL);
+	}
+	
+	@Test
+	public void testUpdatePlayerDetails() {
+		
+		Player updatePlayer = service.getPlayerDetails();
 		
 		updatePlayer.setUsername(PlayerTests.TEST_USERNAME_2);
 		updatePlayer.setLocale(PlayerTests.TEST_LOCALE_2);
 		updatePlayer.setEmail(PlayerTests.TEST_EMAIL_2);
 		
-		HttpEntity<Player> changePlayerHttpEntity = new HttpEntity<Player>(updatePlayer, getInternalAuthHeaders());
+		Player changedPlayer = service.updatePlayerDetails(updatePlayer);
 		
-		ResponseEntity<Player> updateResponse = restTemplate.exchange(
-				"/player/{username}", HttpMethod.POST, changePlayerHttpEntity, Player.class, urlVariables);
-		
-		assertThat(updateResponse.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
-		assertThat(updateResponse.getBody().getUsername()).isEqualTo(PlayerTests.TEST_USERNAME_2);
-		assertThat(updateResponse.getBody().getLocale()).isEqualTo(PlayerTests.TEST_LOCALE_2);
-		assertThat(updateResponse.getBody().getEmail()).isEqualTo(PlayerTests.TEST_EMAIL_2);
-		assertThat(updateResponse.getBody().getStatus()).isEqualTo(Player.STATUS_PENDING);
+		assertThat(changedPlayer.getUsername()).isEqualTo(PlayerTests.TEST_USERNAME_2);
+		assertThat(changedPlayer.getLocale()).isEqualTo(PlayerTests.TEST_LOCALE_2);
+		assertThat(changedPlayer.getEmail()).isEqualTo(PlayerTests.TEST_EMAIL_2);
+		assertThat(changedPlayer.getStatus()).isEqualTo(Player.STATUS_PENDING);
 	}
 	
 	@Test
-	public void testPendingAccount() throws Exception {
+	public void testChangePassword() throws IOException {
 		
-		Map<String, Object> urlVariables = new HashMap<String, Object>();
+		Player updatePlayer = service.getPlayerDetails();
 		
-		// *********** CREATE SESSION FOR A PENDING ACCOUNT ******************
-		// ============== (it should return error) ===========================
+		service.setPlayerPassword(updatePlayer.getUsername(), 
+				PlayerTests.TEST_PASSWORD, 
+				PlayerTests.TEST_PASSWORD_CHANGED);
 		
-		// First I need to get the password generated in database
-		MudPlayer dbPlayer = repository.findById(PlayerTests.TEST_PENDING_PLAYER_ID)
-				.orElseThrow(() -> new Exception("Test player not found in database"));
+		MudPlayer expectedEntity = PlayerTestData.loadMudPlayer(TEST_PLAYER_ID);
+		expectedEntity.setPassword(TEST_PASSWORD_CHANGED);
+		expectedEntity.setStatus(Player.STATUS_ACTIVE);
 		
-		// Create Session
-		urlVariables.put("username", PlayerTests.TEST_PENDING_USERNAME);
-		urlVariables.put("password", dbPlayer.getPassword());
-		urlVariables.put("clientType", PlayerTests.TEST_CLIENT_TYPE);
-		urlVariables.put("ipAddress", PlayerTests.TEST_IP_ADDRESS);
-
-		
-		ResponseEntity<Session> loginResponse = restTemplate.exchange(
-				"/player/{username}/session?password={password}&clientType={clientType}&ipAddress={ipAddress}", 
-				HttpMethod.PUT, null, Session.class, urlVariables);
-
-		// "You must change your password" message
-		assertThat(loginResponse.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-		
-		
-		// **************** CHANGING PASSWORD  ************************
-		// ============================================================
-		urlVariables.clear();
-		urlVariables.put("username", PlayerTests.TEST_PENDING_USERNAME);
-		urlVariables.put("activationCode", dbPlayer.getPassword());
-		urlVariables.put("newPassword", PlayerTests.TEST_PASSWORD);
-		
-		ResponseEntity<String> changePasswordResponse = restTemplate.exchange(
-				"/player/{username}/password?activationCode={activationCode}&newPassword={newPassword}", 
-				HttpMethod.POST, null, String.class, urlVariables);
-		
-		assertThat(changePasswordResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-		
-		// *********** CREATE SESSION FOR AN ACTIVATED ACCOUNT *****************
-		// ==================== (it should work now) ===========================
-		
-		urlVariables.clear();
-		urlVariables.put("username", PlayerTests.TEST_PENDING_USERNAME);
-		urlVariables.put("password", PlayerTests.TEST_PASSWORD);
-		urlVariables.put("clientType", PlayerTests.TEST_CLIENT_TYPE);
-		urlVariables.put("ipAddress", PlayerTests.TEST_IP_ADDRESS);
-
-		
-		loginResponse = restTemplate.exchange(
-				"/player/{username}/session?password={password}&clientType={clientType}&ipAddress={ipAddress}", 
-				HttpMethod.PUT, null, Session.class, urlVariables);
-		
-		
-		assertThat(loginResponse.getHeaders().containsKey(CommonConstants.AUTH_TOKEN_HEADER)).isTrue();
+		verify(repository).save(expectedEntity);
 		
 	}
 	
 	@Test
-	public void testAnotherPlayerAccess() {
-
-		Map<String, Object> urlVariables = new HashMap<String, Object>();
-		
-		
-		HttpEntity<Object> authEntity = new HttpEntity<Object>(getAuthHeaders(PlayerTests.TEST_USERNAME));
-	
-		// *********** GET ANOTHER PLAYER (forbidden)********************
-		// ==============================================================
-		urlVariables.clear();
-		urlVariables.put("username", PlayerTests.TEST_USERNAME_2);
-		
-		ResponseEntity<Player> getAnotherResponse = restTemplate.exchange(
-				"/player/{username}", HttpMethod.GET, authEntity, Player.class, urlVariables);
-
-		assertThat(getAnotherResponse.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
-		
-	}
-	
-	@Test
-	public void testInternalAccountAccess() {
-
-		Map<String, Object> urlVariables = new HashMap<String, Object>();
-		
-		HttpHeaders requestHeaders = new HttpHeaders();
-		requestHeaders.add(CommonConstants.AUTH_TOKEN_HEADER, tokenService.buildInternalToken());
-		HttpEntity<Object> authRequestEntity = new HttpEntity<Object>(requestHeaders);
-		
-		// *********** GET PLAYER (internal account) ********************
-		// ==============================================================
-		urlVariables.clear();
-		urlVariables.put("username", PlayerTests.TEST_USERNAME);
-		
-		ResponseEntity<Player> getResponse = restTemplate.exchange(
-				"/player/{username}", HttpMethod.GET, authRequestEntity, Player.class, urlVariables);
-
-		assertThat(getResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-	}
-	
-	//@Test
 	public void testCreateBeing() throws Exception {
 		
-		setupMocks();
+		Player changedPlayer = service.createBeing(
+				PlayerTests.TEST_BEING_CLASS,
+				PlayerTests.TEST_BEING_NAME,
+				PlayerTests.TEST_WORLD_NAME,
+				PlayerTests.TEST_PLACE_CODE);
 		
-		// Create the token
-		HttpEntity<Object> authEntity = new HttpEntity<Object>(getAuthHeaders(PlayerTests.TEST_USERNAME_3));
+		// Check if being service was called to create the being
+		verify(beingClient).createPlayerBeing(anyLong(),
+				eq(PlayerTests.TEST_BEING_CLASS),
+				eq(PlayerTests.TEST_WORLD_NAME),
+				eq(PlayerTests.TEST_PLACE_CODE),
+				eq(PlayerTests.TEST_BEING_NAME));
 		
-		Map<String, Object> urlVariables = new HashMap<String, Object>();
+		// Check if player was updated in database
+		MudPlayer expectedEntity = PlayerTestData.loadMudPlayer(TEST_PLAYER_ID);
+		MudPlayerBeing newPlayerBeing = new MudPlayerBeing();
+		newPlayerBeing.setId(new MudPlayerBeingPK());
+		newPlayerBeing.getId().setBeingCode(PlayerTests.TEST_BEING_CODE);
+		newPlayerBeing.getId().setPlayerId(TEST_PLAYER_ID);
+		newPlayerBeing.setBeingClass(PlayerTests.TEST_BEING_CLASS);
+		newPlayerBeing.setBeingName(PlayerTests.TEST_BEING_NAME);
 		
-		// ********* CREATE THE BEING **************
-		// =========================================
+		expectedEntity.getBeingList().add(newPlayerBeing);
 		
-		urlVariables.put("username", PlayerTests.TEST_USERNAME_3);
-		urlVariables.put("beingClass", PlayerTests.TEST_BEING_CLASS_NAME);
-		urlVariables.put("beingName", PlayerTests.TEST_BEING_NAME);
-		urlVariables.put("worldName", PlayerTests.TEST_WORLD_NAME);
-		urlVariables.put("placeCode", PlayerTests.TEST_PLACE_CODE);
-		
-		ResponseEntity<Session> createResponse = restTemplate.exchange(
-				"/player/{username}/being?beingClass={beingClass}&beingName={beingName}&worldName={worldName}&placeCode={placeCode}", 
-				HttpMethod.PUT, authEntity, Session.class, urlVariables);
+		verify(repository).save(expectedEntity);
 
-		// Check if the return is successful
-		assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+		// Check if beingcode was returned in player
+		assertThat(
+				changedPlayer.getBeingList().stream()
+				.anyMatch(playerBeing -> playerBeing.getBeingCode().equals(PlayerTests.TEST_BEING_CODE))
+				).isTrue();
+		
+	}
+	
+	@Test
+	public void testSetActiveBeing() throws IOException {
+		
+		service.setActiveBeing(TEST_BEING_CODE);
+		
+		verify(sessionService).setActiveBeing(TEST_BEING_CODE);
+		
+	}
+	
+	@Test
+	public void testDestroyActiveBeing() throws IOException {
 
-		// Check if the being is persisted in database
-		MudPlayer dbPlayer = repository.findById(createResponse.getBody().getPlayerId())
-				.orElseThrow(() -> new Exception("Test player not found in database"));
+		Player changedPlayer = service.destroyBeing(TEST_BEING_CODE);
 		
-		MudPlayerBeing dbBeing = new MudPlayerBeing();
-		MudPlayerBeingPK pk = new MudPlayerBeingPK();
-		dbBeing.setId(pk);
-		
-		pk.setPlayerId(createResponse.getBody().getPlayerId());
-		pk.setBeingCode(PlayerTests.TEST_BEING_CODE);
-		
-		assertThat(dbPlayer.getBeingList()).contains(dbBeing);
-		
-		// ********* SELECT THE BEING **************
-		// =========================================
-		urlVariables.clear();
-		urlVariables.put("username", PlayerTests.TEST_USERNAME_3);
-		urlVariables.put("beingCode", PlayerTests.TEST_BEING_CODE);
-
-		
-		ResponseEntity<Session> selectResponse = restTemplate.exchange(
-				"/{username}/session/being/{beingCode}", 
-				HttpMethod.PUT, authEntity, Session.class, urlVariables);
-		
-
-		// Check if the return is successful
-		assertThat(selectResponse.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
-
-		assertThat(selectResponse.getHeaders().get(CommonConstants.AUTH_TOKEN_HEADER)).isNotNull();
-
-		String updatedToken = selectResponse.getHeaders().getFirst(CommonConstants.AUTH_TOKEN_HEADER);
-
-		MudUserDetails uDetails = (MudUserDetails)
-				tokenService.getAuthenticationFromToken(updatedToken).getDetails();
-		
-		// Check if the beingCode is set in header token
-		assertThat(uDetails.getSessionData().get().getBeingCode()).isEqualTo(PlayerTests.TEST_BEING_CODE);
-		
-		// Check if the beingCode is set in session object
-		assertThat(selectResponse.getBody().getBeingCode()).isEqualTo(PlayerTests.TEST_BEING_CODE);
-
-		
-		
-		// ********* DESTROY THE ACTIVE BEING **************
-		// =================================================
-		urlVariables.clear();
-		urlVariables.put("username", PlayerTests.TEST_USERNAME_3);
-		urlVariables.put("beingCode", PlayerTests.TEST_BEING_CODE);
-
-		
-		ResponseEntity<Session> destroyResponse = restTemplate.exchange(
-				"/{username}/session/being/{beingCode}", 
-				HttpMethod.DELETE, authEntity, Session.class, urlVariables);
-		
-
-		// Check if the return is successful
-		assertThat(destroyResponse.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
-
-		assertThat(destroyResponse.getHeaders().get(CommonConstants.AUTH_TOKEN_HEADER)).isNotNull();
-
-		updatedToken = destroyResponse.getHeaders().getFirst(CommonConstants.AUTH_TOKEN_HEADER);
-		
-		MudUserDetails uDetails2 = (MudUserDetails)
-				tokenService.getAuthenticationFromToken(updatedToken).getDetails();
-		
-		
-		// Check if the beingCode isn't set in header token
-		assertThat(uDetails2.getSessionData().get().getBeingCode()).isNull();
-		
-		// Check if the beingCode is set in session object
-		assertThat(destroyResponse.getBody().getBeingCode()).isNull();
+		// Check if external service was called
+		verify(beingClient).destroyBeing(TEST_BEING_CODE);
 		
 		// Check if the being is no longer in beingList
-		assertThat(uDetails2.getPlayerData().get().getBeingList().stream()
+		assertThat(changedPlayer.getBeingList().stream()
 			.noneMatch(d -> d.getBeingCode().equals(PlayerTests.TEST_BEING_CODE))
 		).isTrue();
+		
+		MudPlayer expectedEntity = PlayerTestData.loadMudPlayer(TEST_PLAYER_ID);
+		expectedEntity.getBeingList().removeIf(e -> e.getId().getBeingCode().equals(PlayerTests.TEST_BEING_CODE));
+		
+		verify(repository).save(expectedEntity);
 		
 	}
 }
