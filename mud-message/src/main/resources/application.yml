@@ -8,10 +8,3 @@ spring:
     
   datasource:
     platform: h2
-    
----
-spring:
-  profiles: dev
-
-server:
-  port: 8088

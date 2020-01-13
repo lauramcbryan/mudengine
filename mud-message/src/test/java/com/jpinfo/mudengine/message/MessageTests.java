@@ -2,6 +2,7 @@ package com.jpinfo.mudengine.message;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -88,7 +89,7 @@ public class MessageTests {
 	private MudMessageRepository repository;
 
 	
-	private String getToken(Long beingCode, String locale) {
+	private String getToken(Long beingCode, String locale) throws IOException {
 		Player playerData = new Player();
 		playerData.setUsername(TEST_USERNAME);
 		playerData.setPlayerId(TEST_PLAYER_ID);
@@ -101,8 +102,8 @@ public class MessageTests {
 		sessionData.setCurWorldName(MessageTests.TEST_WORLD);
 		
 		String usToken = tokenService.buildToken(MessageTests.TEST_USERNAME, 
-				Optional.of(playerData), 
-				Optional.of(sessionData));
+				playerData, 
+				sessionData);
 		
 		return usToken;
 	}
@@ -113,7 +114,7 @@ public class MessageTests {
 		FixtureFactoryLoader.loadTemplates("com.jpinfo.mudengine.message.fixture");
 	}
 	
-	private HttpEntity<Object> getRequestEntity(Long beingCode, String locale) {
+	private HttpEntity<Object> getRequestEntity(Long beingCode, String locale) throws IOException {
 		
 		String usToken = getToken(beingCode, locale);		
 		
@@ -123,7 +124,7 @@ public class MessageTests {
 		return new HttpEntity<Object>(usHeaders);
 	}
 	
-	private HttpEntity<MessageRequest> getRequestEntity(Long beingCode, String locale, MessageRequest request) {
+	private HttpEntity<MessageRequest> getRequestEntity(Long beingCode, String locale, MessageRequest request) throws IOException {
 		
 		String usToken = getToken(beingCode, locale);		
 		
@@ -132,14 +133,9 @@ public class MessageTests {
 		
 		return new HttpEntity<MessageRequest>(request, usHeaders);
 	}	
-	
-
+		
 	@Test
-	public void contextLoads() {
-	}
-	
-	@Test
-	public void testPutMessage() {
+	public void testPutMessage() throws IOException {
 
 		// Creating the request object
 		MessageRequest msgRequest = 
@@ -181,7 +177,7 @@ public class MessageTests {
 	}
 	
 	@Test
-	public void testBroadcastMessage() {
+	public void testBroadcastMessage() throws IOException {
 
 		// Creating the request object
 		MessageRequest msgRequest = 
@@ -235,7 +231,7 @@ public class MessageTests {
 	}
 
 	@Test
-	public void testSender() {
+	public void testSender() throws IOException {
 		
 		// Creating the request object
 		MessageRequest msgRequest = 
@@ -269,7 +265,7 @@ public class MessageTests {
 	}
 
 	@Test
-	public void testChangedEntities() {
+	public void testChangedEntities() throws IOException {
 		
 		// Creating the request object
 		MessageRequest msgRequest = 
@@ -312,7 +308,7 @@ public class MessageTests {
 	
 
 	@Test
-	public void testLocalizedMessage() {
+	public void testLocalizedMessage() throws IOException {
 		
 		// Creating the request object
 		MessageRequest msgRequest = 
@@ -362,7 +358,7 @@ public class MessageTests {
 	
 
 	@Test
-	public void testPagination() {
+	public void testPagination() throws IOException {
 
 		Map<String, Object> urlVariables = new HashMap<String, Object>();
 		
@@ -401,7 +397,7 @@ public class MessageTests {
 	}
 	
 	@Test
-	public void testUnreadMessages() {
+	public void testUnreadMessages() throws IOException {
 		
 		// Do not exceed the page size while doing this test, or the pagination
 		// will mess up with your test logic
@@ -444,7 +440,7 @@ public class MessageTests {
 
 
 	@Test
-	public void testIsolation() {
+	public void testIsolation() throws IOException {
 		
 		// Creating the request object
 		MessageRequest msgRequest = 

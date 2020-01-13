@@ -1,8 +1,7 @@
 package com.jpinfo.mudengine.common.utils;
 
 import java.io.IOException;
-import java.util.Date;
-
+import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,7 +11,7 @@ import lombok.Data;
 @Data
 public class ApiErrorMessage {
 	
-	private Date timestamp;
+	private LocalDateTime timestamp;
 	
 	private Integer status;
 	

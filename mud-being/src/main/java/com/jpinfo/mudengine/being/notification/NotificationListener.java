@@ -1,5 +1,9 @@
 package com.jpinfo.mudengine.being.notification;
 
+import java.io.IOException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.jms.annotation.JmsListener;
@@ -17,6 +21,8 @@ import com.jpinfo.mudengine.common.utils.NotificationMessage;
 @Component
 @Profile({"ti", "qa", "prod"})
 public class NotificationListener {
+	
+	private static final Logger log = LoggerFactory.getLogger(NotificationListener.class);	
 
 	@Autowired
 	private NotificationItemService itemService;
@@ -34,9 +40,19 @@ public class NotificationListener {
 			@Header(name=CommonConstants.AUTH_TOKEN_HEADER) String authToken, 
 			@Payload NotificationMessage msg) {
 		
-		SecurityContextHolder.getContext().setAuthentication(
-				tokenService.getAuthenticationFromToken(authToken)
-				);
+		try {
+			// Saving the security context in this thread
+			// (Will be used further below)
+			SecurityContextHolder.getContext().setAuthentication(
+					tokenService.getAuthenticationFromToken(authToken)
+					);
+		} catch(IOException e) {
+			// Exception caught while trying to process the authentication token provided
+			// Just log it and discard.
+			log.warn("Corrupted auth token received in notification.  Discarding the message.");
+			
+			return;
+		}
 
 		switch(msg.getEntity()) {
 		case ITEM:

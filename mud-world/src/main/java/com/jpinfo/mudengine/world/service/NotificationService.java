@@ -15,7 +15,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import com.jpinfo.mudengine.common.place.PlaceExit;
-import com.jpinfo.mudengine.common.player.Session;
 import com.jpinfo.mudengine.common.security.MudUserDetails;
 import com.jpinfo.mudengine.common.utils.CommonConstants;
 import com.jpinfo.mudengine.common.utils.NotificationMessage;
@@ -314,9 +313,7 @@ public class NotificationService {
 			MudUserDetails uDetails = (MudUserDetails)
 					SecurityContextHolder.getContext().getAuthentication().getDetails();
 		
-			return uDetails.getSessionData()
-					.map(Session::getCurWorldName)
-					.orElse(null);
+			return uDetails.getSessionData().getCurWorldName();
 		}
 		
 		return null;

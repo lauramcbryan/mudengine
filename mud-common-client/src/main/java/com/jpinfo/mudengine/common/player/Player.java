@@ -2,7 +2,6 @@ package com.jpinfo.mudengine.common.player;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import lombok.Data;
 
@@ -37,16 +36,5 @@ public class Player implements java.io.Serializable {
 
 	public Player() {
 		this.beingList = new ArrayList<>();
-	}
-	
-	public Player(Map<String, Object> map) {
-		
-		this();
-
-		this.playerId = new Long(String.valueOf(map.get("playerId")));
-		this.username = (String)map.get("username");
-		this.email = (String)map.get("email");
-		this.locale = (String)map.get("locale");
-		this.status = (Integer)map.get("status");
 	}
 }

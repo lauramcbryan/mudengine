@@ -2,7 +2,6 @@ package com.jpinfo.mudengine.message.service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,10 +87,11 @@ public class MessageServiceImpl {
 		MudUserDetails uDetails = (MudUserDetails)
 				SecurityContextHolder.getContext().getAuthentication().getDetails();
 		
-		uDetails.getSessionData().ifPresent(d -> {
+		if (uDetails.getSessionData()!=null) {
 			
 			// Select all beings from a place
-			List<Being> allBeingsFromPlace = beingService.getAllFromPlace(d.getCurWorldName(), placeCode);
+			List<Being> allBeingsFromPlace = beingService.getAllFromPlace(
+					uDetails.getSessionData().getCurWorldName(), placeCode);
 			
 			allBeingsFromPlace.stream()
 				.filter(e -> e.getPlayerId()!=null)
@@ -100,7 +100,7 @@ public class MessageServiceImpl {
 							putMessage(e.getCode(), request)
 							)
 				);
-		});
+		}
 		
 		return resultList;
 	}
@@ -115,17 +115,17 @@ public class MessageServiceImpl {
 		MudUserDetails uDetails = (MudUserDetails)SecurityContextHolder.getContext().getAuthentication().getDetails();
 		
 		// Obtaining the caller locale
-		Optional<Player> playerData = uDetails.getPlayerData();
+		Player playerData = uDetails.getPlayerData();
 		
-		String callerLocale = playerData.isPresent() ? 
-				playerData.get().getLocale(): 
+		String callerLocale = playerData!=null ? 
+				playerData.getLocale(): 
 				CommonConstants.DEFAULT_LOCALE;
 
 		// Obtaining the beingCode
-		Optional<Session> sessionData = uDetails.getSessionData();
+		Session sessionData = uDetails.getSessionData();
 		
-		Long beingCode = sessionData.isPresent() ?
-				sessionData.get().getBeingCode(): null;
+		Long beingCode = sessionData!=null ?
+				sessionData.getBeingCode(): null;
 				
 				
 		if (beingCode!=null) {

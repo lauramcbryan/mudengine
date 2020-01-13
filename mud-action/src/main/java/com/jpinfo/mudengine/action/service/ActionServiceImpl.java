@@ -63,8 +63,10 @@ public class ActionServiceImpl {
 		
 		MudUserDetails uDetails = (MudUserDetails)SecurityContextHolder.getContext().getAuthentication().getDetails();
 		
-		Session sessionData = uDetails.getSessionData()
-				.orElseThrow(() -> new IllegalArgumentException(LocalizedMessages.SESSION_NOT_FOUND));
+		Session sessionData = uDetails.getSessionData();
+		
+		if (sessionData==null)
+				throw new IllegalArgumentException(LocalizedMessages.SESSION_NOT_FOUND);
 		
 		MudAction dbAction = MudActionConverter.build(command, 
 				sessionData.getCurWorldName(), sessionData.getBeingCode(), mediatorCode, targetCode);

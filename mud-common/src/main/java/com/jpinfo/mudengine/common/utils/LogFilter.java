@@ -1,7 +1,6 @@
 package com.jpinfo.mudengine.common.utils;
 
 import java.io.IOException;
-import java.util.Optional;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -42,11 +41,9 @@ public class LogFilter extends GenericFilterBean {
 				
 				MudUserDetails uDetails = (MudUserDetails)auth.getDetails();
 				
-				Optional<Session> optSession = uDetails.getSessionData();
-				
-				if (optSession.isPresent()) {
+				if (uDetails.getSessionData()!=null) {
 					
-					logLine = buildLoggedLine(optSession.get());
+					logLine = buildLoggedLine(uDetails.getSessionData());
 				}
 				else {
 					logLine = buildAnonymousLine();

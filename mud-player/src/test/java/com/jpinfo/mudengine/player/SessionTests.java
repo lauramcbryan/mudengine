@@ -156,7 +156,7 @@ public class SessionTests {
 		MudUserDetails uDetails = (MudUserDetails)SecurityContextHolder.getContext().getAuthentication().getDetails();
 		
 		// Check if the beingCode is set in header token
-		assertThat(uDetails.getSessionData().get().getBeingCode()).isEqualTo(OTHER_BEING_CODE);
+		assertThat(uDetails.getSessionData().getBeingCode()).isEqualTo(OTHER_BEING_CODE);
 		
 		// Check if the beingCode is set in session object
 		assertThat(responseSession.getBeingCode()).isEqualTo(OTHER_BEING_CODE);
@@ -177,7 +177,7 @@ public class SessionTests {
 		MudUserDetails uDetails = (MudUserDetails)SecurityContextHolder.getContext().getAuthentication().getDetails();
 		
 		// Check if the beingCode is NOT set in header token
-		assertThat(uDetails.getSessionData().get().getBeingCode()).isNull();;
+		assertThat(uDetails.getSessionData().getBeingCode()).isNull();;
 		
 		// Check if the beingCode is NOT set in session object
 		assertThat(responseSession.getBeingCode()).isNull();

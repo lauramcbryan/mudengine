@@ -7,6 +7,7 @@ import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.IOException;
 import java.util.*;
 
 import javax.annotation.PostConstruct;
@@ -79,7 +80,7 @@ public class ItemTests {
 	private HttpEntity<Object> emptyHttpEntity;
 
 	@PostConstruct
-	private void setup() {
+	private void setup() throws IOException {
 		HttpHeaders authHeaders = new HttpHeaders();
 		authHeaders.add(CommonConstants.AUTH_TOKEN_HEADER, tokenService.buildInternalToken());
 		

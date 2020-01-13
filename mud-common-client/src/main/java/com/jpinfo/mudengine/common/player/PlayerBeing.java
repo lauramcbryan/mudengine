@@ -1,6 +1,6 @@
 package com.jpinfo.mudengine.common.player;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import lombok.Data;
 
@@ -13,5 +13,5 @@ public class PlayerBeing {
 	
 	private String beingClass;
 	
-	private Date lastPlayed;
+	private LocalDateTime lastPlayed;
 }

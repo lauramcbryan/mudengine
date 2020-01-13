@@ -1,7 +1,7 @@
 package com.jpinfo.mudengine.player.model;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -38,7 +38,7 @@ public class MudPlayer implements java.io.Serializable {
 	
 	private String locale;
 	
-	private Date createDate;
+	private LocalDateTime createDate;
 	
 	private Integer status;
 	

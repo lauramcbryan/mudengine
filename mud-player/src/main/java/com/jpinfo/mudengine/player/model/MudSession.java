@@ -1,6 +1,6 @@
 package com.jpinfo.mudengine.player.model;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import javax.persistence.*;
 
@@ -24,10 +24,10 @@ public class MudSession {
 	private MudPlayer player;
 	
 	@Column(name="session_start")
-	private Date sessionStart;
+	private LocalDateTime sessionStart;
 	
 	@Column(name="session_end")
-	private Date sessionEnd;
+	private LocalDateTime sessionEnd;
 	
 	private String clientType;
 	

@@ -1,7 +1,7 @@
 package com.jpinfo.mudengine.player.service;
 
-import java.util.Date;
-import java.util.Optional;
+import java.io.IOException;
+import java.time.LocalDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -49,7 +49,7 @@ public class SessionServiceImpl {
 			// Find all the active sessions and terminate them
 			sessionRepository.findAllActiveSession(getActiveUsername()).forEach(d -> {
 				
-				d.setSessionEnd(new Date());
+				d.setSessionEnd(LocalDateTime.now());
 				sessionRepository.save(d);
 			});
 					
@@ -57,7 +57,7 @@ public class SessionServiceImpl {
 			MudSession dbSession = new MudSession();
 			
 			dbSession.setPlayerId(player.getPlayerId());
-			dbSession.setSessionStart(new Date());
+			dbSession.setSessionStart(LocalDateTime.now());
 			dbSession.setClientType(clientType);
 			dbSession.setIpAddress(ipAddress);
 						
@@ -83,6 +83,9 @@ public class SessionServiceImpl {
 		MudSession dbSession = 
 				sessionRepository.findActiveSession(getActiveUsername())
 				.orElseThrow(() -> new EntityNotFoundException(LocalizedMessages.SESSION_NOT_FOUND));
+
+		// Obtain the being
+		Being selectedBeing = beingClient.getBeing(beingCode);
 		
 		// Set the beingCode in the session object					
 		dbSession.setBeingCode(beingCode);
@@ -92,9 +95,6 @@ public class SessionServiceImpl {
 		
 		// Converts the dbSession object to Session
 		Session sessionData = SessionConverter.convert(dbSession);
-		
-		// FIXME: Why I have to maintain this field in service object and NOT in database ???
-		Being selectedBeing = beingClient.getBeing(beingCode);
 		sessionData.setCurWorldName(selectedBeing.getCurWorld());
 		
 		updateAuthContext(sessionData);
@@ -127,14 +127,20 @@ public class SessionServiceImpl {
 	
 	private void createAuthContext(Player playerData, Session sessionData) {
 		
-		// Update the authToken
-		String token = tokenService.buildToken(playerData.getUsername(), 
-				Optional.of(playerData), 
-				Optional.ofNullable(sessionData));
+		try {
 		
-		SecurityContextHolder.getContext().setAuthentication(
-				tokenService.getAuthenticationFromToken(token)
-				);
+			// Update the authToken
+			String token = tokenService.buildToken(
+					playerData.getUsername(), 
+					playerData, 
+					sessionData);
+			
+			SecurityContextHolder.getContext().setAuthentication(
+					tokenService.getAuthenticationFromToken(token)
+					);
+		} catch(IOException e) {
+			throw new AccessDeniedException(LocalizedMessages.PLAYER_ACCESS_DENIED);
+		}
 	}
 	
 	private void updateAuthContext(Session sessionData) {
@@ -146,26 +152,25 @@ public class SessionServiceImpl {
 		MudUserDetails uDetails = (MudUserDetails)
 				SecurityContextHolder.getContext().getAuthentication().getDetails();
 		
-		
-		// Update the authToken
-		String token = tokenService.updateToken(originalToken,
-				uDetails.getPlayerData(),
-				Optional.ofNullable(sessionData)
-				);
-		
-		SecurityContextHolder.getContext().setAuthentication(
-				tokenService.getAuthenticationFromToken(token)
-				);
+		try {
+			// Update the authToken
+			String token = tokenService.updateToken(originalToken,
+					uDetails.getPlayerData(),
+					sessionData
+					);
+			
+			SecurityContextHolder.getContext().setAuthentication(
+					tokenService.getAuthenticationFromToken(token)
+					);
+		} catch(IOException e) {
+			
+			throw new AccessDeniedException(LocalizedMessages.PLAYER_ACCESS_DENIED);
+		}
 	}
 	
 	private String getActiveUsername() {
 		
-		MudUserDetails uDetails = (MudUserDetails)
-				SecurityContextHolder.getContext().getAuthentication().getDetails();
-		
-		return uDetails.getPlayerData()
-				.map(Player::getUsername)
-				.orElseThrow(() -> new AccessDeniedException(LocalizedMessages.PLAYER_ACCESS_DENIED));
+		return SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
 	}
 
 }

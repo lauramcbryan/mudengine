@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.MissingResourceException;
-import java.util.Optional;
 import java.util.ResourceBundle;
 
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -97,10 +96,10 @@ public class LocalizedMessages {
 		try {
 			MudUserDetails uDetails =  (MudUserDetails)SecurityContextHolder.getContext().getAuthentication().getDetails();
 			
-			Optional<Player> playerData = uDetails.getPlayerData();
+			Player playerData = uDetails.getPlayerData();
 			
-			if (playerData.isPresent())
-				return Locale.forLanguageTag(playerData.get().getLocale());
+			if (playerData!=null)
+				return Locale.forLanguageTag(playerData.getLocale());
 			else
 				return Locale.forLanguageTag(CommonConstants.DEFAULT_LOCALE);
 			

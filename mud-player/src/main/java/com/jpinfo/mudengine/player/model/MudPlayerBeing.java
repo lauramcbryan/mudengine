@@ -1,7 +1,7 @@
 package com.jpinfo.mudengine.player.model;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import javax.persistence.*;
 
@@ -23,5 +23,5 @@ public class MudPlayerBeing implements Serializable {
 	
 	private String beingClass;
 	
-	private Date lastPlayed;
+	private LocalDateTime lastPlayed;
 }

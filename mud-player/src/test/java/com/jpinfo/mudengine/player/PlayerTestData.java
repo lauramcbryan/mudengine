@@ -2,7 +2,7 @@ package com.jpinfo.mudengine.player;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jpinfo.mudengine.common.being.Being;
@@ -11,7 +11,7 @@ import com.jpinfo.mudengine.player.model.MudSession;
 
 public class PlayerTestData {
 	
-	public static final Date REFERENCE_DATE = new Date();
+	public static final LocalDateTime REFERENCE_DATE = LocalDateTime.now();
 	
 	public static final Long TEST_BEING_CODE = 1L;
 	public static final Long TEST_PLAYER_ID = 1L;

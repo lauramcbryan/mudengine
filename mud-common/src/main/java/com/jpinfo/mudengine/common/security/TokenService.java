@@ -1,25 +1,21 @@
 package com.jpinfo.mudengine.common.security;
 
+import java.io.IOException;
 import java.util.Collections;
-
-
 import java.util.Date;
-import java.util.Map;
-import java.util.Optional;
 
-import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jpinfo.mudengine.common.player.Player;
 import com.jpinfo.mudengine.common.player.Session;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
@@ -27,6 +23,8 @@ import io.jsonwebtoken.SignatureAlgorithm;
 public class TokenService {
 	
 	private static final long TOKEN_TTL = 3600000;  // 1 hour
+	
+	private ObjectMapper jsonMapper = new ObjectMapper();
 	
 	// Information stored in the token
 	private static final String PLAYER_DATA = "playerData";
@@ -42,37 +40,24 @@ public class TokenService {
 	@Value("${token.secret}")
 	private String tokenSecret;
 
-	public String buildToken(String userName, Optional<Player> playerData, Optional<Session> session) {
+	public String buildToken(String userName, Player playerData, Session session) throws IOException {
 
-		String token = null;
-		
-		JwtBuilder builder = Jwts.builder();
-		
-		builder.setSubject(userName);
-		
-		if (playerData.isPresent())
-			builder.claim(TokenService.PLAYER_DATA, playerData.get());
-		
-		if (session.isPresent())
-			builder.claim(TokenService.SESSION_DATA, session.get());
-		
-		builder.setExpiration(new Date(System.currentTimeMillis() + TokenService.TOKEN_TTL));
-		builder.signWith(SignatureAlgorithm.HS256, tokenSecret);
-		
-		token = builder.compact();
-		
-		return Base64.encodeBase64String(token.getBytes());
-		
+		return Jwts.builder()
+				.setSubject(userName)
+				.claim(PLAYER_DATA, jsonMapper.writeValueAsString(playerData))
+				.claim(SESSION_DATA, jsonMapper.writeValueAsString(session))
+				.setExpiration(new Date(System.currentTimeMillis() + TokenService.TOKEN_TTL))
+				.signWith(SignatureAlgorithm.HS256, tokenSecret)
+				.compact();		
 	}
 
-	public String updateToken(String token, Optional<Player> playerData, Optional<Session> sessionData) {
+	public String updateToken(String token, Player playerData, Session sessionData) throws IOException {
 	
 		Authentication auth = getAuthenticationFromToken(token);
 		return buildToken(auth.getPrincipal().toString(), playerData, sessionData);
 	}
 	
-	@SuppressWarnings("unchecked")
-	public Authentication getAuthenticationFromToken(String token) {
+	public Authentication getAuthenticationFromToken(String token) throws IOException {
 		
 		UsernamePasswordAuthenticationToken result = null;
 		
@@ -81,32 +66,18 @@ public class TokenService {
 			// Parse the token
 			Jws<Claims> parsedToken = parseToken(token);
 			
-			// Retrieving the username
-			String username = parsedToken.getBody().getSubject();
-			
-			// Retrieving session information if available
-			Session sessionInfo = null;
-			
-			if (parsedToken.getBody().containsKey(TokenService.SESSION_DATA)) {
-				
-				sessionInfo = new Session((Map<String, Object>)parsedToken.getBody().get(TokenService.SESSION_DATA));
-			}
-			
-			// Retrieving player information if available
-			Player playerData = null;
-			
-			if (parsedToken.getBody().containsKey(TokenService.PLAYER_DATA)) {
-				
-				playerData= new Player((Map<String, Object>)parsedToken.getBody().get(TokenService.PLAYER_DATA));
-			}
-
 			// Creating the authentication object
-			result = new UsernamePasswordAuthenticationToken(username, token, Collections.<GrantedAuthority>emptyList());
+			result = new UsernamePasswordAuthenticationToken(
+					parsedToken.getBody().getSubject(), // username
+					token, Collections.<GrantedAuthority>emptyList());
 
 			// Setting the userDetails
 			result.setDetails(new MudUserDetails(
-					Optional.ofNullable(sessionInfo), 
-					Optional.ofNullable(playerData)
+					jsonMapper.readValue(
+							parsedToken.getBody().get(TokenService.SESSION_DATA, String.class), 
+							Session.class),
+					jsonMapper.readValue(parsedToken.getBody().get(TokenService.PLAYER_DATA, String.class), 
+							Player.class)
 					)
 				);
 
@@ -115,7 +86,7 @@ public class TokenService {
 		return result;
 	}
 	
-	public String buildInternalToken(Long playerId) {
+	public String buildInternalToken(Long playerId) throws IOException {
 		
 		Player playerData = new Player();
 		playerData.setPlayerId(playerId);
@@ -128,20 +99,19 @@ public class TokenService {
 		sessionData.setBeingCode(TokenService.INTERNAL_BEING_CODE);
 		
 		return buildToken(TokenService.INTERNAL_ACCOUNT, 
-				Optional.of(playerData), 
-				Optional.of(sessionData)
+				playerData, 
+				sessionData
 				);
 	}
 	
-	public String buildInternalToken() {
+	public String buildInternalToken() throws IOException  {
 		return buildInternalToken(TokenService.INTERNAL_PLAYER_ID);
 	}
 	
 	private Jws<Claims> parseToken(String token) {
-		
-		String decodedToken = new String(Base64.decodeBase64(token));
-		
-		return Jwts.parser().setSigningKey(tokenSecret).parseClaimsJws(decodedToken);
+		return Jwts.parser()
+				.setSigningKey(tokenSecret)
+				.parseClaimsJws(token);
 		
 	}
 }

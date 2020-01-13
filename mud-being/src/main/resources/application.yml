@@ -5,10 +5,3 @@ spring:
   jpa: 
     hibernate:
       ddl-auto: none  
-
----
-spring:
-  profiles: dev
-
-server:
-  port: 8084

@@ -1,7 +1,7 @@
 package com.jpinfo.mudengine.player.service;
 
-import java.util.Date;
-import java.util.Optional;
+import java.io.IOException;
+import java.time.LocalDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -68,7 +68,7 @@ public class PlayerServiceImpl {
 			newPlayer.setEmail(email);
 			newPlayer.setLocale(locale);
 			newPlayer.setStatus(Player.STATUS_PENDING);
-			newPlayer.setCreateDate(new Date());
+			newPlayer.setCreateDate(LocalDateTime.now());
 			
 			// Check if the email service is configured
 			if (mailService.isEnabled())
@@ -195,9 +195,11 @@ public class PlayerServiceImpl {
 				.map(f -> {
 					
 					// Update the last time played
-					// TODO: Persist it in the database
-					f.setLastPlayed(new Date(System.currentTimeMillis()));
-			
+					f.setLastPlayed(LocalDateTime.now());
+
+					// Persist it in the database					
+					repository.save(dbPlayer);
+								
 					// Update the session
 					return sessionService.setActiveBeing(beingCode);
 				})
@@ -245,16 +247,22 @@ public class PlayerServiceImpl {
 		MudUserDetails uDetails = (MudUserDetails)
 				SecurityContextHolder.getContext().getAuthentication().getDetails();
 		
+		try {
 		
-		// Update the authToken
-		String token = tokenService.updateToken(originalToken, 
-				Optional.ofNullable(playerData),
-				uDetails.getSessionData()
-				);
-		
-		SecurityContextHolder.getContext().setAuthentication(
-				tokenService.getAuthenticationFromToken(token)
-				);
+			// Update the authToken
+			String token = tokenService.updateToken(originalToken, 
+					playerData,
+					uDetails.getSessionData()
+					);
+			
+			SecurityContextHolder.getContext().setAuthentication(
+					tokenService.getAuthenticationFromToken(token)
+					);
+		} catch(IOException e) {
+			
+			throw new AccessDeniedException(LocalizedMessages.PLAYER_ACCESS_DENIED);
+			
+		}
 	}
 	
 	private Long getActivePlayerId() {
@@ -262,8 +270,6 @@ public class PlayerServiceImpl {
 		MudUserDetails uDetails = (MudUserDetails)
 				SecurityContextHolder.getContext().getAuthentication().getDetails();
 		
-		return uDetails.getPlayerData()
-				.map(Player::getPlayerId)
-				.orElseThrow(() -> new AccessDeniedException(LocalizedMessages.PLAYER_ACCESS_DENIED));
+		return uDetails.getPlayerData().getPlayerId();
 	}
 }
