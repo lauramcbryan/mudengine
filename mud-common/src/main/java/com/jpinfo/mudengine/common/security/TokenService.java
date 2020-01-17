@@ -73,11 +73,8 @@ public class TokenService {
 
 			// Setting the userDetails
 			result.setDetails(new MudUserDetails(
-					jsonMapper.readValue(
-							parsedToken.getBody().get(TokenService.SESSION_DATA, String.class), 
-							Session.class),
-					jsonMapper.readValue(parsedToken.getBody().get(TokenService.PLAYER_DATA, String.class), 
-							Player.class)
+					retrieveSession(parsedToken),
+					retrievePlayer(parsedToken)
 					)
 				);
 
@@ -107,6 +104,34 @@ public class TokenService {
 	public String buildInternalToken() throws IOException  {
 		return buildInternalToken(TokenService.INTERNAL_PLAYER_ID);
 	}
+	
+	private Session retrieveSession(Jws<Claims> parsedToken) throws IOException {
+		
+		if (parsedToken.getBody().containsKey(TokenService.SESSION_DATA)) {
+			
+			return jsonMapper.readValue(
+					parsedToken.getBody().get(TokenService.SESSION_DATA, String.class), 
+					Session.class);
+			
+		} else {
+			return null;
+		}
+	}
+	
+	private Player retrievePlayer(Jws<Claims> parsedToken) throws IOException {
+		
+		if (parsedToken.getBody().containsKey(TokenService.PLAYER_DATA)) {
+			
+			return jsonMapper.readValue(
+					parsedToken.getBody().get(TokenService.PLAYER_DATA, String.class), 
+					Player.class);
+			
+		} else {
+			return null;
+		}
+		
+	}
+	
 	
 	private Jws<Claims> parseToken(String token) {
 		return Jwts.parser()
