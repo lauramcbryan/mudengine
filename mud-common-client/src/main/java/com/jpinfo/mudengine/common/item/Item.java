@@ -1,11 +1,11 @@
 package com.jpinfo.mudengine.common.item;
 
 
+import java.beans.Transient;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jpinfo.mudengine.common.itemclass.ItemClass;
 
 import lombok.Data;
@@ -35,12 +35,12 @@ public class Item implements Serializable {
 		this.attrs = new HashMap<>();
 	}
 
-	@JsonIgnore
+	@Transient
 	public String getClassCode() {
 		return itemClass.getCode();
 	}
 
-	@JsonIgnore
+	@Transient
 	public void setClassCode(String classCode) {
 		this.itemClass = new ItemClass();
 		this.itemClass.setCode(classCode);

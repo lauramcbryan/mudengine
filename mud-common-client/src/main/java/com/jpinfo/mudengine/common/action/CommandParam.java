@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import lombok.Data;
 
 @Data
@@ -25,8 +23,7 @@ public class CommandParam implements Serializable {
 	private enumParamTypes type;
 	private boolean required;
 
-	@JsonIgnore
-	private Map<String, Object> staticDomainValues;
+	private transient Map<String, Object> staticDomainValues;
 	
 	private String defaultValue;
 	
