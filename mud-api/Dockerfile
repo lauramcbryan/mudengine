@@ -1,11 +1,5 @@
-FROM openjdk:8-jre-alpine
+FROM mudengine/mud-java:14
 
-VOLUME /tmp
-
-EXPOSE 8080
-
-ADD infra/entry_point.shell entry_point.sh
 ADD target/mud-api-*.jar app.jar
 
-RUN ["chmod", "+x", "entry_point.sh"]
-ENTRYPOINT ["/bin/sh", "entry_point.sh"]
+ENTRYPOINT /opt/jdk/bin/java -jar app.jar
