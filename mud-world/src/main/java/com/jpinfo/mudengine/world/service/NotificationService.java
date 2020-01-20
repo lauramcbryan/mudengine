@@ -86,26 +86,40 @@ public class NotificationService {
 	
 	public void dispatchNotifications(List<NotificationMessage> notifications) {
 		
+		final Object authToken;
+		
+		if (SecurityContextHolder.getContext().getAuthentication()!=null) {
+			
+			authToken =	SecurityContextHolder.getContext().getAuthentication().getCredentials();
+		} else {
+			authToken = null;
+		}
+		
 		notifications.stream()
 		.forEach(placeNotification -> {
 			
-			// Send the notification
-			jmsTemplate.convertAndSend(placeTopic, placeNotification, m -> {
+			try {
+				// Send the notification
+				jmsTemplate.convertAndSend(placeTopic, placeNotification, m -> {
+					m.setObjectProperty(CommonConstants.AUTH_TOKEN_HEADER, authToken);
+					return m;
+				});
 				
-				if (SecurityContextHolder.getContext().getAuthentication()!=null) {
+				log.info("world: {}, entityId: {}, event: {}",
+						placeNotification.getWorldName(),
+						placeNotification.getEntityId(),
+						placeNotification.getEvent()
+						);
 				
-					m.setObjectProperty(CommonConstants.AUTH_TOKEN_HEADER, 
-							SecurityContextHolder.getContext().getAuthentication().getCredentials());
+				} catch(Exception e) {
+					log.error("world: {}, entityId: {}, event: {} -- ERROR SENDING NOTIFICATION: {}",
+							placeNotification.getWorldName(),
+							placeNotification.getEntityId(),
+							placeNotification.getEvent(),
+							e.getMessage()
+							);
+					
 				}
-				
-				return m;
-			});
-			
-			log.info("world: {}, entityId: {}, event: {}",
-					placeNotification.getWorldName(),
-					placeNotification.getEntityId(),
-					placeNotification.getEvent()
-					);
 
 		});
 		
