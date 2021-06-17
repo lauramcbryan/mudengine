@@ -1,3 +1,3 @@
 #!/bin/sh
 
-docker build . -t mudengine/mud-java:14
+docker build . -t mudengine/mud-java:15

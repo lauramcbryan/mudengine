@@ -5,15 +5,16 @@
   <version>1.0.0</version>
   
   <properties>
-   	<maven.compiler.source>13</maven.compiler.source>
-   	<maven.compiler.target>13</maven.compiler.target>
+    <java.version>16</java.version>
+   	<maven.compiler.source>16</maven.compiler.source>
+   	<maven.compiler.target>16</maven.compiler.target>
   </properties>
   
   <dependencies>
   	<dependency>
   		<groupId>org.projectlombok</groupId>
   		<artifactId>lombok</artifactId>
-  		<version>1.16.22</version>
+  		<version>1.18.20</version>
   	</dependency>
   </dependencies>
   

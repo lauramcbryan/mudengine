@@ -1,11 +1,11 @@
 FROM alpine:latest as build
 
-ADD https://download.java.net/java/early_access/alpine/15/binaries/openjdk-14-ea+15_linux-x64-musl_bin.tar.gz /opt/jdk/
-# COPY ./openjdk-14-ea+15_linux-x64-musl_bin.tar.gz /opt/jdk/
-RUN tar -xzvf /opt/jdk/openjdk-14-ea+15_linux-x64-musl_bin.tar.gz -C /opt/jdk/
+ADD https://cdn.azul.com/zulu/bin/zulu16.30.15-ca-jdk16.0.1-linux_musl_x64.tar.gz /opt/jdk/jdk-all.tar.gz
 
-RUN ["/opt/jdk/jdk-14/bin/jlink", "--compress=2", \
-     "--module-path", "/opt/jdk/jdk-14/jmods/", \
+RUN tar -xzvf /opt/jdk/jdk-all.tar.gz -C /opt/jdk/
+
+RUN ["/opt/jdk/zulu16.30.15-ca-jdk16.0.1-linux_musl_x64/bin/jlink", "--compress=2", \
+     "--module-path", "/opt/jdk/zulu16.30.15-ca-jdk16.0.1-linux_musl_x64/jmods/", \
      "--add-modules", "java.base", \
      "--add-modules", "java.instrument", \
      "--add-modules", "java.logging", \
