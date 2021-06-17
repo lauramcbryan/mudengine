@@ -1,4 +1,4 @@
-package com.jpinfo.mudengine.world.notification;
+package com.jpinfo.mudengine.world.service.notification;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 import com.jpinfo.mudengine.common.utils.NotificationMessage;
 import com.jpinfo.mudengine.world.model.MudPlace;
 import com.jpinfo.mudengine.world.repository.PlaceRepository;
-import com.jpinfo.mudengine.world.service.impl.NotificationService;
 
 @Aspect
 @Component

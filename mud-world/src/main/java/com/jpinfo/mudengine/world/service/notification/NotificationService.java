@@ -1,4 +1,4 @@
-package com.jpinfo.mudengine.world.service.impl;
+package com.jpinfo.mudengine.world.service.notification;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +15,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import com.jpinfo.mudengine.common.place.PlaceExit;
-import com.jpinfo.mudengine.common.security.MudUserDetails;
+import com.jpinfo.mudengine.common.security.domain.MudUserDetails;
 import com.jpinfo.mudengine.common.utils.CommonConstants;
 import com.jpinfo.mudengine.common.utils.NotificationMessage;
 import com.jpinfo.mudengine.common.utils.NotificationMessage.EnumEntity;

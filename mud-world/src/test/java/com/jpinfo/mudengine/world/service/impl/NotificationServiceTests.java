@@ -21,6 +21,7 @@ import com.jpinfo.mudengine.world.PlaceTestData;
 import com.jpinfo.mudengine.world.model.MudPlace;
 import com.jpinfo.mudengine.world.model.MudPlaceExit;
 import com.jpinfo.mudengine.world.model.pk.MudPlaceExitPK;
+import com.jpinfo.mudengine.world.service.notification.NotificationService;
 
 @ExtendWith(MockitoExtension.class)
 public class NotificationServiceTests {
