@@ -1,36 +1,30 @@
-package com.jpinfo.mudengine.world;
+package com.jpinfo.mudengine.world.service.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import static org.mockito.Mockito.*;
-import static org.mockito.BDDMockito.*;
 
 import java.io.IOException;
 import java.util.*;
 
-import javax.annotation.PostConstruct;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.jpinfo.mudengine.common.place.Place;
-import com.jpinfo.mudengine.common.security.TokenService;
+import com.jpinfo.mudengine.world.PlaceTestData;
 import com.jpinfo.mudengine.world.model.MudPlace;
 import com.jpinfo.mudengine.world.model.MudPlaceClass;
 import com.jpinfo.mudengine.world.repository.PlaceClassRepository;
-import com.jpinfo.mudengine.world.repository.PlaceExitRepository;
 import com.jpinfo.mudengine.world.repository.PlaceRepository;
-import com.jpinfo.mudengine.world.service.PlaceServiceImpl;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-public class PlaceTests {
+@ExtendWith(MockitoExtension.class)
+public class PlaceServiceImplTests {
 	
 	private static final String HP_ATTR = "HP";
 	private static final Integer HP_ATTR_CHANGED_VALUE = 5;
@@ -52,43 +46,33 @@ public class PlaceTests {
 	private static final Integer DELETE_DEMISED_PLACE_ID = 6;
 	private static final String DELETE_DEMISED_PLACE_CLASS = "RUIN";
 
-	@MockBean
-	private PlaceRepository mockRepository;
+	@Mock
+	private PlaceRepository placeRepository;
 	
-	@MockBean
-	private PlaceExitRepository mockExitRepository;
+	@Mock
+	private PlaceClassRepository placeClassRepository;
 	
-	@MockBean
-	private PlaceClassRepository mockClassRepository;
-	
-	@MockBean
-	private TokenService tokenUtils;
-	
-	@Autowired
+	@InjectMocks
 	private PlaceServiceImpl service;
 	
 	
-	@PostConstruct
+	@BeforeEach
 	public void setup() throws IOException {
 		
-		given(mockClassRepository.findById(ArgumentMatchers.anyString()))
-			.willAnswer(i -> {
-				
-				return Optional.of(
-						PlaceTestData.loadMudPlaceClass(i.getArgument(0, String.class))
-						);
-			});
+		Mockito.lenient().doAnswer(i -> {
+			
+			return Optional.of(
+					PlaceTestData.loadMudPlaceClass(i.getArgument(0, String.class))
+					);
+		}).when(placeClassRepository).findById(ArgumentMatchers.anyString());
 		
-		given(mockRepository.findById(ArgumentMatchers.anyInt()))
-			.willAnswer(i -> {
-				
-				return Optional.of(
-						PlaceTestData.loadMudPlace(i.getArgument(0, Integer.class))
-						);
-			});
+		Mockito.lenient().doAnswer(i -> {
+			return Optional.of(
+					PlaceTestData.loadMudPlace(i.getArgument(0, Integer.class))
+					);
+		}).when(placeRepository).findById(ArgumentMatchers.anyInt());
 		
-		given(mockRepository.save(ArgumentMatchers.any(MudPlace.class)))
-		.willAnswer(i -> {
+		Mockito.lenient().doAnswer(i -> {
 			
 			MudPlace placeBeingSaved = i.getArgument(0, MudPlace.class);
 			
@@ -96,12 +80,12 @@ public class PlaceTests {
 			if (placeBeingSaved.getCode()==null) {
 				
 				// Assign a random code
-				placeBeingSaved.setCode(PlaceTests.CREATE_PLACE_ID);
+				placeBeingSaved.setCode(PlaceServiceImplTests.CREATE_PLACE_ID);
 				
 			} 
 			
 			return placeBeingSaved;
-		});
+		}).when(placeRepository).save(ArgumentMatchers.any(MudPlace.class));
 	}
 	
 	@Test
@@ -109,21 +93,21 @@ public class PlaceTests {
 		
 		Place createdPlace = 
 				service.createPlace(
-						PlaceTests.CREATE_PLACE_CLASS, 
-						PlaceTests.CREATE_PLACE_EXIT_DIRECTION,
-						PlaceTests.CREATE_PLACE_EXIT_TARGET);
+						PlaceServiceImplTests.CREATE_PLACE_CLASS, 
+						PlaceServiceImplTests.CREATE_PLACE_EXIT_DIRECTION,
+						PlaceServiceImplTests.CREATE_PLACE_EXIT_TARGET);
 
 		// Checking the placeClass
 		assertThat(createdPlace.getPlaceClass().getPlaceClassCode())
-			.isEqualTo(PlaceTests.CREATE_PLACE_CLASS);
+			.isEqualTo(PlaceServiceImplTests.CREATE_PLACE_CLASS);
 
 		//Check if exit was created and if it points to the right direction
-		assertThat(createdPlace.getExits().get(PlaceTests.CREATE_PLACE_EXIT_DIRECTION)).isNotNull();
-		assertThat(createdPlace.getExits().get(PlaceTests.CREATE_PLACE_EXIT_DIRECTION).getTargetPlaceCode())
-			.isEqualTo(PlaceTests.CREATE_PLACE_EXIT_TARGET);
+		assertThat(createdPlace.getExits().get(PlaceServiceImplTests.CREATE_PLACE_EXIT_DIRECTION)).isNotNull();
+		assertThat(createdPlace.getExits().get(PlaceServiceImplTests.CREATE_PLACE_EXIT_DIRECTION).getTargetPlaceCode())
+			.isEqualTo(PlaceServiceImplTests.CREATE_PLACE_EXIT_TARGET);
 
 		// Checking if all attrs from mudclass are present
-		checkAttrMap(createdPlace, PlaceTests.CREATE_PLACE_CLASS);
+		checkAttrMap(createdPlace, PlaceServiceImplTests.CREATE_PLACE_CLASS);
 	}
 	
 	@Test
@@ -173,13 +157,13 @@ public class PlaceTests {
 		Place originalPlace = service.getPlace(PlaceTestData.READ_PLACE_ID);
 		
 		// Update the HP
-		originalPlace.getAttrs().put(PlaceTests.HP_ATTR, PlaceTests.HP_ATTR_ABOVE_VALUE);
+		originalPlace.getAttrs().put(PlaceServiceImplTests.HP_ATTR, PlaceServiceImplTests.HP_ATTR_ABOVE_VALUE);
 		
 		Place responsePlace = service.updatePlace(PlaceTestData.READ_PLACE_ID, originalPlace);
 		
 		// Checking the attributes
 		// In this case, the first attribute (HP) need to have this value set to MAXHP
-		assertThat(responsePlace.getAttrs().get(PlaceTests.HP_ATTR)).isEqualTo(MAXHP_ATTR_VALUE);
+		assertThat(responsePlace.getAttrs().get(PlaceServiceImplTests.HP_ATTR)).isEqualTo(MAXHP_ATTR_VALUE);
 	}
 
 	@Test
@@ -188,11 +172,11 @@ public class PlaceTests {
 		Place originalPlace = service.getPlace(PlaceTestData.READ_PLACE_ID);
 		
 		// Update the HP
-		originalPlace.getAttrs().put(PlaceTests.HP_ATTR, PlaceTests.HP_ATTR_ZEROES_VALUE);
+		originalPlace.getAttrs().put(PlaceServiceImplTests.HP_ATTR, PlaceServiceImplTests.HP_ATTR_ZEROES_VALUE);
 		
 		service.updatePlace(PlaceTestData.READ_PLACE_ID, originalPlace);
 		
-		verify(mockRepository).deleteById(PlaceTestData.READ_PLACE_ID);
+		verify(placeRepository).deleteById(PlaceTestData.READ_PLACE_ID);
 	}
 
 	@Test
@@ -201,29 +185,29 @@ public class PlaceTests {
 		Place originalPlace = service.getPlace(PlaceTestData.READ_PLACE_ID);
 		
 		// Updating the attributes
-		originalPlace.getAttrs().put(PlaceTests.HP_ATTR, PlaceTests.HP_ATTR_CHANGED_VALUE);
-		originalPlace.getAttrs().put(PlaceTests.MAXHP_ATTR, PlaceTests.MAXHP_ATTR_CHANGED_VALUE);
-		originalPlace.getAttrs().put(PlaceTests.OTHER_ATTR, PlaceTests.OTHER_ATTR_CHANGED_VALUE);
+		originalPlace.getAttrs().put(PlaceServiceImplTests.HP_ATTR, PlaceServiceImplTests.HP_ATTR_CHANGED_VALUE);
+		originalPlace.getAttrs().put(PlaceServiceImplTests.MAXHP_ATTR, PlaceServiceImplTests.MAXHP_ATTR_CHANGED_VALUE);
+		originalPlace.getAttrs().put(PlaceServiceImplTests.OTHER_ATTR, PlaceServiceImplTests.OTHER_ATTR_CHANGED_VALUE);
 		
 		Place responsePlace = service.updatePlace(PlaceTestData.READ_PLACE_ID, originalPlace);
 		
 		// Checking the attributes
-		assertThat(responsePlace.getAttrs().get(PlaceTests.HP_ATTR)).isEqualTo(PlaceTests.HP_ATTR_CHANGED_VALUE);
-		assertThat(responsePlace.getAttrs().get(PlaceTests.MAXHP_ATTR)).isEqualTo(PlaceTests.MAXHP_ATTR_CHANGED_VALUE);
-		assertThat(responsePlace.getAttrs().get(PlaceTests.OTHER_ATTR)).isEqualTo(PlaceTests.OTHER_ATTR_CHANGED_VALUE);
+		assertThat(responsePlace.getAttrs().get(PlaceServiceImplTests.HP_ATTR)).isEqualTo(PlaceServiceImplTests.HP_ATTR_CHANGED_VALUE);
+		assertThat(responsePlace.getAttrs().get(PlaceServiceImplTests.MAXHP_ATTR)).isEqualTo(PlaceServiceImplTests.MAXHP_ATTR_CHANGED_VALUE);
+		assertThat(responsePlace.getAttrs().get(PlaceServiceImplTests.OTHER_ATTR)).isEqualTo(PlaceServiceImplTests.OTHER_ATTR_CHANGED_VALUE);
 	}
 
 	@Test
 	public void testDeleteDemised() throws IOException {
 		
 		// Prepare the expected entity to be persisted
-		MudPlace expectedDemisedPlace = PlaceTestData.loadMudPlace(PlaceTests.DELETE_DEMISED_PLACE_ID);
+		MudPlace expectedDemisedPlace = PlaceTestData.loadMudPlace(PlaceServiceImplTests.DELETE_DEMISED_PLACE_ID);
 		expectedDemisedPlace.setPlaceClass(PlaceTestData.loadMudPlaceClass(DELETE_DEMISED_PLACE_CLASS));
 		expectedDemisedPlace.setAttrs(new HashSet<>());
 		
-		service.destroyPlace(PlaceTests.DELETE_DEMISED_PLACE_ID);
+		service.destroyPlace(PlaceServiceImplTests.DELETE_DEMISED_PLACE_ID);
 		
-		verify(mockRepository).save(expectedDemisedPlace);
+		verify(placeRepository).save(expectedDemisedPlace);
 	}
 	
 	@Test
@@ -231,7 +215,7 @@ public class PlaceTests {
 		
 		service.destroyPlace(PlaceTestData.READ_PLACE_ID);
 		
-		verify(mockRepository).deleteById(PlaceTestData.READ_PLACE_ID);
+		verify(placeRepository).deleteById(PlaceTestData.READ_PLACE_ID);
 	}
 	
 	

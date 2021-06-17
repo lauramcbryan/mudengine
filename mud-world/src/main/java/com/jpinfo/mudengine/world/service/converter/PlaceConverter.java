@@ -1,4 +1,4 @@
-package com.jpinfo.mudengine.world.model.converter;
+package com.jpinfo.mudengine.world.service.converter;
 
 import java.util.stream.Collectors;
 

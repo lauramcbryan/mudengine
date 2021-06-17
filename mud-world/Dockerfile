@@ -1,4 +1,4 @@
-FROM mudengine/mud-java:14
+FROM mudengine/mud-java:15
 
 ADD target/mud-world-*.jar app.jar
 

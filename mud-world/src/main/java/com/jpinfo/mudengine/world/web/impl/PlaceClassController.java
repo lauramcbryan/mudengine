@@ -1,4 +1,4 @@
-package com.jpinfo.mudengine.world.web;
+package com.jpinfo.mudengine.world.web.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.jpinfo.mudengine.common.placeclass.PlaceClass;
 import com.jpinfo.mudengine.common.service.PlaceClassService;
-import com.jpinfo.mudengine.world.service.PlaceClassServiceImpl;
+import com.jpinfo.mudengine.world.service.impl.PlaceClassServiceImpl;
 
 @RestController
 public class PlaceClassController implements PlaceClassService {

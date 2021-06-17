@@ -1,4 +1,4 @@
-package com.jpinfo.mudengine.world;
+package com.jpinfo.mudengine.world.service.impl;
 
 import static org.mockito.Mockito.verify;
 
@@ -7,38 +7,33 @@ import java.util.List;
 
 import javax.jms.Destination;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.jms.core.JmsTemplate;
-import org.springframework.test.context.junit4.SpringRunner;
 
-import com.jpinfo.mudengine.common.security.TokenService;
 import com.jpinfo.mudengine.common.utils.NotificationMessage;
 import com.jpinfo.mudengine.common.utils.NotificationMessage.EnumNotificationEvent;
+import com.jpinfo.mudengine.world.PlaceTestData;
 import com.jpinfo.mudengine.world.model.MudPlace;
 import com.jpinfo.mudengine.world.model.MudPlaceExit;
 import com.jpinfo.mudengine.world.model.pk.MudPlaceExitPK;
-import com.jpinfo.mudengine.world.service.NotificationService;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-public class PlaceNotificationTests {
+@ExtendWith(MockitoExtension.class)
+public class NotificationServiceTests {
 
 	
 	private static final String NEW_EXIT_DIRECTION = "UP";
 	private static final Integer NEW_EXIT_TARGET = 2;
 	
-	@MockBean
+	@Mock
 	private JmsTemplate jmsTemplate;
 	
-	@MockBean
-	private TokenService tokenUtils;
 	
-	@Autowired
+	@InjectMocks
 	private NotificationService service;
 	
 	@Test
@@ -101,7 +96,7 @@ public class PlaceNotificationTests {
 		// Creating the new exit
 		MudPlaceExit newExit = new MudPlaceExit();
 		newExit.setPk(new MudPlaceExitPK());
-		newExit.getPk().setDirection(PlaceNotificationTests.NEW_EXIT_DIRECTION);
+		newExit.getPk().setDirection(NotificationServiceTests.NEW_EXIT_DIRECTION);
 		newExit.setTargetPlaceCode(NEW_EXIT_TARGET);
 		
 		afterPlace.getExits().add(newExit);

@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 import com.jpinfo.mudengine.common.utils.NotificationMessage;
 import com.jpinfo.mudengine.world.model.MudPlace;
 import com.jpinfo.mudengine.world.repository.PlaceRepository;
-import com.jpinfo.mudengine.world.service.NotificationService;
+import com.jpinfo.mudengine.world.service.impl.NotificationService;
 
 @Aspect
 @Component

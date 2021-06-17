@@ -1,4 +1,4 @@
-package com.jpinfo.mudengine.world.service;
+package com.jpinfo.mudengine.world.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;

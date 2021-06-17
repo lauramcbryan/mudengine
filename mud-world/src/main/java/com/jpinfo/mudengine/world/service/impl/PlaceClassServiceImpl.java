@@ -1,4 +1,4 @@
-package com.jpinfo.mudengine.world.service;
+package com.jpinfo.mudengine.world.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -7,8 +7,8 @@ import com.jpinfo.mudengine.common.exception.EntityNotFoundException;
 import com.jpinfo.mudengine.common.placeclass.PlaceClass;
 import com.jpinfo.mudengine.common.utils.LocalizedMessages;
 import com.jpinfo.mudengine.world.model.MudPlaceClass;
-import com.jpinfo.mudengine.world.model.converter.PlaceClassConverter;
 import com.jpinfo.mudengine.world.repository.PlaceClassRepository;
+import com.jpinfo.mudengine.world.service.converter.PlaceClassConverter;
 
 @Service
 public class PlaceClassServiceImpl {

@@ -1,4 +1,4 @@
-package com.jpinfo.mudengine.world.service;
+package com.jpinfo.mudengine.world.service.impl;
 
 import java.util.HashSet;
 import java.util.Optional;
@@ -17,11 +17,11 @@ import com.jpinfo.mudengine.world.model.MudPlace;
 import com.jpinfo.mudengine.world.model.MudPlaceAttr;
 import com.jpinfo.mudengine.world.model.MudPlaceClass;
 import com.jpinfo.mudengine.world.model.MudPlaceExit;
-import com.jpinfo.mudengine.world.model.converter.MudPlaceAttrConverter;
-import com.jpinfo.mudengine.world.model.converter.MudPlaceExitConverter;
-import com.jpinfo.mudengine.world.model.converter.PlaceConverter;
 import com.jpinfo.mudengine.world.repository.PlaceClassRepository;
 import com.jpinfo.mudengine.world.repository.PlaceRepository;
+import com.jpinfo.mudengine.world.service.converter.MudPlaceAttrConverter;
+import com.jpinfo.mudengine.world.service.converter.MudPlaceExitConverter;
+import com.jpinfo.mudengine.world.service.converter.PlaceConverter;
 import com.jpinfo.mudengine.world.util.WorldHelper;
 
 @Service

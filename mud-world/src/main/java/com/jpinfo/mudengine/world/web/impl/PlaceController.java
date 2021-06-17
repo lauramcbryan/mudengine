@@ -1,4 +1,4 @@
-package com.jpinfo.mudengine.world.web;
+package com.jpinfo.mudengine.world.web.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.jpinfo.mudengine.common.place.Place;
 import com.jpinfo.mudengine.common.service.PlaceService;
-import com.jpinfo.mudengine.world.service.PlaceServiceImpl;
+import com.jpinfo.mudengine.world.service.impl.PlaceServiceImpl;
 
 import io.swagger.annotations.ApiOperation;
 
