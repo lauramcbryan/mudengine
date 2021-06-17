@@ -9,7 +9,7 @@ import java.util.ResourceBundle;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.jpinfo.mudengine.common.player.Player;
-import com.jpinfo.mudengine.common.security.MudUserDetails;
+import com.jpinfo.mudengine.common.security.domain.MudUserDetails;
 
 public class LocalizedMessages {
 	

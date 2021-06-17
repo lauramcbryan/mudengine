@@ -1,4 +1,4 @@
-package com.jpinfo.mudengine.common.security;
+package com.jpinfo.mudengine.common.security.domain;
 
 import java.io.Serializable;
 

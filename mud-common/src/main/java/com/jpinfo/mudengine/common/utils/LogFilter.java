@@ -16,7 +16,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import com.jpinfo.mudengine.common.player.Session;
-import com.jpinfo.mudengine.common.security.MudUserDetails;
+import com.jpinfo.mudengine.common.security.domain.MudUserDetails;
 
 import org.springframework.security.core.Authentication;
 

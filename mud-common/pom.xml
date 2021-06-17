@@ -12,14 +12,23 @@
   <dependencies>
   	<dependency>
   		<groupId>io.jsonwebtoken</groupId>
-  		<artifactId>jjwt</artifactId>
-  		<version>0.9.1</version>
+  		<artifactId>jjwt-api</artifactId>
+  		<version>0.11.2</version>
+  	</dependency>
+  		<dependency>
+  		<groupId>io.jsonwebtoken</groupId>
+  		<artifactId>jjwt-jackson</artifactId>
+  		<version>0.11.2</version>
   	</dependency>
 
   	<dependency>
-  		<groupId>org.springframework.boot</groupId>
-  		<artifactId>spring-boot-starter-security</artifactId>
-  	</dependency>
+        <groupId>org.springframework.security</groupId>
+        <artifactId>spring-security-config</artifactId>
+    </dependency>
+  	<dependency>
+        <groupId>org.springframework.security</groupId>
+        <artifactId>spring-security-web</artifactId>
+    </dependency>    
   	<dependency>
   		<groupId>org.springframework.boot</groupId>
   		<artifactId>spring-boot-starter-tomcat</artifactId>
@@ -28,6 +37,11 @@
   		<groupId>com.jpinfo.mudengine</groupId>
   		<artifactId>mud-common-client</artifactId>
   		<version>1.0.0</version>
+  	</dependency>
+
+  	<dependency>
+  		<groupId>org.slf4j</groupId>
+  		<artifactId>slf4j-api</artifactId>
   	</dependency>
   </dependencies>
 </project>

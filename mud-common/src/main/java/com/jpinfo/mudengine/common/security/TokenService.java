@@ -3,6 +3,8 @@ package com.jpinfo.mudengine.common.security;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -10,26 +12,34 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jpinfo.mudengine.common.player.Player;
 import com.jpinfo.mudengine.common.player.Session;
+import com.jpinfo.mudengine.common.security.domain.MudUserDetails;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.jackson.io.JacksonDeserializer;
+import io.jsonwebtoken.jackson.io.JacksonSerializer;
+import io.jsonwebtoken.security.Keys;
 
 @Component
 public class TokenService {
 	
 	private static final long TOKEN_TTL = 3600000;  // 1 hour
 	
-	private ObjectMapper jsonMapper = new ObjectMapper();
-	
 	// Information stored in the token
 	private static final String PLAYER_DATA = "playerData";
 	private static final String SESSION_DATA = "sessionData";
-
+	
+	private static final Map<String, Class<?>> claimTypeMap;
+	
+	static {
+		claimTypeMap = new HashMap<>();
+		claimTypeMap.put(PLAYER_DATA, Player.class);
+		claimTypeMap.put(SESSION_DATA, Session.class);
+	}
 	
 	public static final String INTERNAL_ACCOUNT = "Internal";
 	public static final Long INTERNAL_PLAYER_ID = Long.MAX_VALUE;
@@ -41,13 +51,14 @@ public class TokenService {
 	private String tokenSecret;
 
 	public String buildToken(String userName, Player playerData, Session session) throws IOException {
-
+		
 		return Jwts.builder()
+				.serializeToJsonWith(new JacksonSerializer<Map<String, ?>>())
 				.setSubject(userName)
-				.claim(PLAYER_DATA, jsonMapper.writeValueAsString(playerData))
-				.claim(SESSION_DATA, jsonMapper.writeValueAsString(session))
+				.claim(PLAYER_DATA, playerData)
+				.claim(SESSION_DATA, session)
 				.setExpiration(new Date(System.currentTimeMillis() + TokenService.TOKEN_TTL))
-				.signWith(SignatureAlgorithm.HS256, tokenSecret)
+				.signWith(Keys.hmacShaKeyFor(tokenSecret.getBytes()))
 				.compact();		
 	}
 
@@ -73,8 +84,8 @@ public class TokenService {
 
 			// Setting the userDetails
 			result.setDetails(new MudUserDetails(
-					retrieveSession(parsedToken),
-					retrievePlayer(parsedToken)
+					parsedToken.getBody().get(TokenService.SESSION_DATA, Session.class),
+					parsedToken.getBody().get(TokenService.PLAYER_DATA, Player.class)
 					)
 				);
 
@@ -105,37 +116,13 @@ public class TokenService {
 		return buildInternalToken(TokenService.INTERNAL_PLAYER_ID);
 	}
 	
-	private Session retrieveSession(Jws<Claims> parsedToken) throws IOException {
-		
-		if (parsedToken.getBody().containsKey(TokenService.SESSION_DATA)) {
-			
-			return jsonMapper.readValue(
-					parsedToken.getBody().get(TokenService.SESSION_DATA, String.class), 
-					Session.class);
-			
-		} else {
-			return null;
-		}
-	}
-	
-	private Player retrievePlayer(Jws<Claims> parsedToken) throws IOException {
-		
-		if (parsedToken.getBody().containsKey(TokenService.PLAYER_DATA)) {
-			
-			return jsonMapper.readValue(
-					parsedToken.getBody().get(TokenService.PLAYER_DATA, String.class), 
-					Player.class);
-			
-		} else {
-			return null;
-		}
-		
-	}
-	
-	
 	private Jws<Claims> parseToken(String token) {
-		return Jwts.parser()
-				.setSigningKey(tokenSecret)
+		return Jwts.parserBuilder()
+				.setSigningKey(Keys.hmacShaKeyFor(tokenSecret.getBytes()))
+				.deserializeJsonWith(
+						new JacksonDeserializer(claimTypeMap)
+						)
+				.build()
 				.parseClaimsJws(token);
 		
 	}
