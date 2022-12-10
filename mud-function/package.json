@@ -9,7 +9,7 @@
   "author": "Josiel S Oliveira",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.16.4",
+    "express": "^4.18.2",
     "express-enrouten": "^1.3.0"
   }
 }
